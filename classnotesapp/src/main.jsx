@@ -10,7 +10,7 @@ import 'prismjs/themes/prism-tomorrow.css';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
-      <BrowserRouter basename="/apps/">
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <App />
       </BrowserRouter>
     </ThemeProvider>

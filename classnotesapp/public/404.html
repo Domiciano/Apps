@@ -4,37 +4,15 @@
     <meta charset="utf-8" />
     <title>Redirigiendo...</title>
     <script type="text/javascript">
-      // Define la base de tu repositorio en GitHub Pages.
-      // ¡Es crucial que sea el nombre EXACTO de tu repositorio!
-      var repoBase = "/apps";
-      var currentPathname = window.location.pathname;
-
-      // Extrae la parte de la ruta que React Router debe manejar.
-      // Esto significa remover el `repoBase` del inicio del `currentPathname`.
-      var reactRouterPath = currentPathname;
-      if (reactRouterPath.startsWith(repoBase)) {
-        reactRouterPath = reactRouterPath.substring(repoBase.length);
-      }
-
-      // Asegurarse de que la ruta final para React Router comience con una barra.
-      if (!reactRouterPath.startsWith('/')) {
-        reactRouterPath = '/' + reactRouterPath;
-      }
-
-      // Construye la URL final para la redirección.
-      // Usamos encodeURIComponent para asegurar que la ruta se pase correctamente.
-      var finalRedirectUrl = repoBase + "/index.html?p=" + encodeURIComponent(reactRouterPath);
-
-      // Comprueba si la URL actual del navegador ya es la URL de redirección final
-      // o si ya contiene el parámetro 'p' para evitar bucles.
-      // Esto es para casos donde el script se ejecuta más de una vez.
-      if (window.location.href.indexOf("?p=") === -1 || // Si no tiene ?p=, redirige.
-          decodeURIComponent(window.location.search.substring(3)) !== reactRouterPath) { // O si el path en ?p= es diferente.
-          
-          window.location.replace(finalRedirectUrl);
-      }
-      // Si ya tiene ?p= y el path coincide, significa que index.html ya se cargó,
-      // y App.jsx se encargará de la navegación interna.
+      var base = '/Apps/';
+      var path = window.location.pathname.replace(base, '');
+      if (!path.startsWith('/')) path = '/' + path;
+      var search = window.location.search;
+      var hash = window.location.hash;
+      window.location.replace(
+        base + '?p=' + encodeURIComponent(path) +
+        (search ? '&' + search.slice(1) : '') + hash
+      );
     </script>
   </head>
   <body></body>
