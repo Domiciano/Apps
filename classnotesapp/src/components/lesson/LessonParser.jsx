@@ -11,6 +11,8 @@ import IconBlock from "@/components/lesson/IconBlock";
 import Link from "@/components/lesson/Link";
 import images from "@/assets";
 import TryCodeButton from './TryCodeButton';
+import MermaidBlock from "@/components/lesson/MermaidBlock";
+import SvgBlock from "@/components/lesson/SvgBlock";
 import Typography from "@mui/material/Typography";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
@@ -33,6 +35,14 @@ const LessonParser = ({ content }) => {
   // --- LISTA ---
   let parsingList = false;
   let listItems = [];
+
+  // --- MERMAID ---
+  let parsingMermaid = false;
+  let mermaidBuffer = "";
+
+  // --- SVG ---
+  let parsingSvg = false;
+  let svgBuffer = "";
 
   // Definir estilos de lista idénticos a LessonParagraph
   const listTextStyle = {
@@ -217,6 +227,56 @@ const LessonParser = ({ content }) => {
 
     // Si estamos dentro de una lista, ignorar cualquier otra línea
     if (parsingList) {
+      continue;
+    }
+
+    // --- INICIO DE BLOQUE MERMAID ---
+    if (trimmedLine === '[mermaid]') {
+      flushParagraph(elements, paragraphBuffer, i);
+      paragraphBuffer = "";
+      parsingMermaid = true;
+      mermaidBuffer = "";
+      continue;
+    }
+
+    // --- FIN DE BLOQUE MERMAID ---
+    if (parsingMermaid && trimmedLine === '[endmermaid]') {
+      elements.push(
+        <MermaidBlock key={`mermaid-${i}`}>{mermaidBuffer.trimEnd()}</MermaidBlock>
+      );
+      parsingMermaid = false;
+      mermaidBuffer = "";
+      continue;
+    }
+
+    // --- Contenido del bloque Mermaid ---
+    if (parsingMermaid) {
+      mermaidBuffer += rawLine + "\n";
+      continue;
+    }
+
+    // --- INICIO DE BLOQUE SVG ---
+    if (trimmedLine === '[svg]') {
+      flushParagraph(elements, paragraphBuffer, i);
+      paragraphBuffer = "";
+      parsingSvg = true;
+      svgBuffer = "";
+      continue;
+    }
+
+    // --- FIN DE BLOQUE SVG ---
+    if (parsingSvg && trimmedLine === '[endsvg]') {
+      elements.push(
+        <SvgBlock key={`svg-${i}`}>{svgBuffer.trimEnd()}</SvgBlock>
+      );
+      parsingSvg = false;
+      svgBuffer = "";
+      continue;
+    }
+
+    // --- Contenido del bloque SVG ---
+    if (parsingSvg) {
+      svgBuffer += rawLine + "\n";
       continue;
     }
 

@@ -15,6 +15,7 @@
     "@mui/icons-material": "^7.1.2",
     "@mui/material": "^7.1.2",
     "dedent": "^1.6.0",
+    "mermaid": "^11.14.0",
     "node-fetch": "^3.3.2",
     "prismjs": "^1.30.0",
     "react": "^19.1.0",

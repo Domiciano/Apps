@@ -1,4 +1,5 @@
 [t] Curso
+[lesson] lessonA1.md
 [lesson] lessonZ1.md
 *[lesson] lessonZ3.md
 [t] Asignaciones
@@ -62,6 +63,7 @@
 [t] BloC y Clean
 [lesson] lessonG3.md
 [lesson] lesson101.md
+[lesson] lesson102.md
 [t] Supabase
 [lesson] lessonX5.md
 [t] Autenticación
