@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  db:
+    image: domi0620/classnotes-db:0.0.1
+    container_name: classnotes-postgres
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    image: domi0620/classnotes-api:0.0.1
+    container_name: classnotes-api
+    environment:
+      PORT: 3001
+      BASE_PATH: /appsprovider
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: db
+      DB_USER: user
+      DB_PASSWORD: password
+    depends_on:
+      - db
+    ports:
+      - "3001:3001"
+

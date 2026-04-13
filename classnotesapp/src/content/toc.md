@@ -58,10 +58,10 @@
 [t] BloC
 [lesson] lessonG1.md
 [lesson] lessonG2.md
-[lesson] lessonG3.md
-[t] Laboratorio 4
-[lesson] lab4concepts.md
 [lesson] lab4.md
+[t] BloC y Clean
+[lesson] lessonG3.md
+[lesson] lesson101.md
 [t] Supabase
 [lesson] lessonX5.md
 [t] Autenticación
