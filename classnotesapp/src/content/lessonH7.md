@@ -95,3 +95,36 @@ El campo posts debe tener una relación declarada en la base de datos (foreign k
 Supabase infiere el join y hace la inserción anidada automáticamente.
 Puedes usar `.select('*, posts(*)')` para recibir todo el árbol creado.
 [endlist]
+
+[st] Post que pertenece al usuario autenticado
+En una app real, los posts deben pertenecer al usuario que los crea. Supabase Auth nos da acceso al usuario activo a través de `supabase.auth.currentUser`, y podemos usar su `id` directamente como `profile_id` al insertar.
+[code:dart]
+Future<void> createPostForCurrentUser({
+  required String title,
+  required String content,
+}) async {
+  final supabase = Supabase.instance.client;
+
+  final user = supabase.auth.currentUser;
+  if (user == null) throw Exception('No hay usuario autenticado');
+
+  final response = await supabase
+    .from('posts')
+    .insert({
+      'title': title,
+      'content': content,
+      'profile_id': user.id,
+    })
+    .select()
+    .single();
+
+  print('Post creado: $response');
+}
+[endcode]
+El `user.id` corresponde al `id` del usuario en Supabase Auth, que debe coincidir con el `id` del perfil en la tabla `profiles`.
+[list]
+`supabase.auth.currentUser` devuelve el usuario de la sesión activa, o `null` si no hay sesión.
+El `profile_id` se asigna con `user.id` — no hay que pedírselo al usuario ni calcularlo.
+`.select().single()` devuelve el registro recién insertado como un `Map`.
+Si usas RLS (Row Level Security), puedes configurar políticas para que solo el dueño pueda crear o ver sus posts.
+[endlist]
