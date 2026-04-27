@@ -37,7 +37,7 @@ jobs:
         run: npm run build
         working-directory: classnotesapp
         env:
-          VITE_APP_BASE: /Apps/
+          VITE_APP_BASE: /FlutterApps/
 
       - uses: actions/upload-pages-artifact@v3
         with:
