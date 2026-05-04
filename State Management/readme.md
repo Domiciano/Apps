@@ -329,3 +329,38 @@ Future<void> close() {
 3. UseCases
 4. BLoC
 5. UI"
+
+```mermaid
+flowchart LR
+
+    subgraph CLIENTES["Clientes"]
+        C1["App Flutter / Web<br/>UI + Estado (BLoC, Redux)"]
+    end
+
+    subgraph TRANSPORTE["Transporte"]
+        WS["WebSocket<br/>(Socket.IO, Phoenix Channels, Supabase Realtime)"]
+    end
+
+    subgraph REALTIME["Servidor Realtime"]
+        RT["Realtime Server<br/>- Filtrado (conversation_id)<br/>- Autenticación<br/>- Multiplexación"]
+    end
+
+    subgraph EVENTOS["Sistema de Eventos (Pub/Sub)"]
+        PS["Pub/Sub Engine<br/>(Postgres LISTEN/NOTIFY,<br/>Kafka, Redis Streams)"]
+    end
+
+    subgraph DATABASE["Base de Datos"]
+        DB["PostgreSQL<br/>- Tablas (messages, conversations)<br/>- WAL (Write Ahead Log)"]
+    end
+
+    C1 <-->|Mensajes en tiempo real| WS
+    WS <-->|Conexión persistente| RT
+    RT <-->|Suscripción / Eventos| PS
+    PS <-->|Cambios de datos| DB
+```
+
+
+
+
+
+
