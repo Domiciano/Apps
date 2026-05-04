@@ -2,7 +2,7 @@
 
 Lo han contratado porque la empresa Not Too Far ha sabido que usted y su equipo saben de aplicaciones móviles. Su tarea es implementar la funcionalidad de chat en una aplicación existente.
 
-Primero, clónese este repositorio: [link] (AppMóvil252) https://github.com/Domiciano/AppMovil261
+Primero, clónese este repositorio: [link] (AppMóvil261) https://github.com/Domiciano/AppMovil261
 [code:ini]
 https://github.com/Domiciano/AppMovil261
 [endcode]
