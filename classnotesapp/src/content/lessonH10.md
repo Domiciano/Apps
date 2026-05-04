@@ -2,7 +2,10 @@
 
 Lo han contratado porque la empresa Not Too Far ha sabido que usted y su equipo saben de aplicaciones móviles. Su tarea es implementar la funcionalidad de chat en una aplicación existente.
 
-Primero, clónese este repositorio: [link] (AppMóvil252) https://github.com/Domiciano/AppMovil252
+Primero, clónese este repositorio: [link] (AppMóvil252) https://github.com/Domiciano/AppMovil261
+[code:ini]
+https://github.com/Domiciano/AppMovil261
+[endcode]
 
 [st] Modelo de Base de Datos
 A continuación se presenta el modelo de base de datos que se utilizará para la funcionalidad de chat. Asegúrese de que estas tablas existan en su base de datos de Supabase.
