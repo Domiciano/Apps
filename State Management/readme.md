@@ -10,134 +10,148 @@ Esta guía está pensada para el profesor. Indica exactamente qué decir, qué m
 
 ## Qué decir
 
-"Hoy vamos a construir un chat en tiempo real. Pero no lo vamos a hacer desde cero... lo vamos a reconstruir.
+"Hoy vamos a construir un chat en tiempo real. Pero no lo vamos a hacer desde cero... lo vamos a reconstruir."
 
-Yo ya lo tenía funcionando, pero eliminé partes clave para que entendamos cómo se arma correctamente usando Clean Architecture."
+"Además, no solo eliminé lógica en BLoCs y UseCases… también rompí el contrato del Repository."
 
-"Vamos a trabajar sobre tres ideas clave:
-1. Separación de responsabilidades
-2. Flujo de datos
-3. Realtime con streams"
+"Vamos a reconstruir TODO el flujo de Clean Architecture desde dominio hacia data."
 
 ---
 
 # FASE 1: Mostrar el estado roto (5 minutos)
 
-## Qué hacer
+## Qué mostrar
 
-Mostrar:
-
-- UsersBloc vacío
-- ChatBloc vacío
+- ChatRepository incompleto
+- ChatRepositoryImpl incompleto
+- No hay métodos de chat
 - No hay usecases
+- BLoCs vacíos
 
 ## Qué decir
 
-"En este momento la app tiene UI, pero no tiene lógica."
+"En este momento la aplicación solo sabe traer usuarios."
 
-"Pregunta: ¿qué falta aquí?"
+"Pregunta: ¿qué piezas faltan para que exista un chat?"
 
-Esperar respuestas: lógica, backend, datos, etc.
-
----
-
-# FASE 2: Cargar usuarios (15 minutos)
-
-## Paso 1: Pregunta guiada
-
-"¿Quién debería encargarse de traer los usuarios?"
-
-Guiar a: BLoC → UseCase → Repository
+Guiar a:
+- conversaciones
+- mensajes
+- realtime
 
 ---
 
-## Paso 2: Crear UseCase
+# FASE 2: Restaurar el contrato del dominio (20 minutos)
 
-## Qué hacer (crear archivo)
+## Paso 1: Abrir ChatRepository
 
-Crear:
-
-lib/features/chat/domain/usecases/get_profiles_usecase.dart
-
-## Qué decir
-
-"Vamos a crear nuestro primer caso de uso. Este representa una acción del sistema."
+Mostrar que SOLO existe:
 
 ```dart
-class GetProfilesUsecase {
-  Future<List<Profile>> execute(String currentUserId) {
-    // delega al repository
-  }
+abstract class ChatRepository {
+  Future<List<Profile>> getProfiles(String currentUserId);
 }
 ```
 
+## Qué decir
+
+"El dominio define qué puede hacer el sistema. Si esto no está aquí, no existe en la aplicación."
+
 ---
 
-## Paso 3: Conectar en UsersBloc
+## Paso 2: Agregar responsabilidades de chat
 
-## Qué hacer
+## Qué hacer (editar archivo)
 
 Agregar:
 
 ```dart
-final GetProfilesUsecase _profilesUsecase = GetProfilesUsecase();
+Future<Conversation> getOrCreateConversation(
+  String currentUserId,
+  String otherUserId,
+);
+
+Future<void> sendMessage(Message message);
+
+Stream<List<Message>> watchMessages(String conversationId);
 ```
 
-Registrar evento:
+## Qué decir
+
+"Estoy definiendo capacidades del sistema, no implementación."
+
+---
+
+## Paso 3: Importar modelos
 
 ```dart
-on<LoadUsersEvent>(_load);
+import 'package:appmovil261/features/chat/domain/models/conversation.dart';
+import 'package:appmovil261/features/chat/domain/models/message.dart';
 ```
 
-Implementar:
+---
+
+# FASE 3: Implementar RepositoryImpl (15 minutos)
+
+## Paso 1: Mostrar implementación rota
+
+Mostrar que ChatRepositoryImpl solo tiene getProfiles.
+
+## Qué decir
+
+"El contrato dice que puedo enviar mensajes… pero la implementación no lo soporta. Esto rompe la arquitectura."
+
+---
+
+## Paso 2: Reagregar métodos
 
 ```dart
-Future<void> _load(LoadUsersEvent event, Emitter<UsersState> emit) async {
-  emit(UsersLoadingState());
-  try {
-    final users = await _profilesUsecase.execute(event.currentUserId);
-    emit(UsersLoadedState(users));
-  } catch (e) {
-    emit(UsersErrorState(e.toString()));
-  }
+@override
+Future<Conversation> getOrCreateConversation(
+  String currentUserId,
+  String otherUserId,
+) {
+  return _dataSource.getOrCreateConversation(currentUserId, otherUserId);
+}
+
+@override
+Future<void> sendMessage(Message message) {
+  return _dataSource.sendMessage(message);
+}
+
+@override
+Stream<List<Message>> watchMessages(String conversationId) {
+  return _dataSource.watchMessages(conversationId);
 }
 ```
 
 ---
 
-## Paso 4: Disparar desde UI
+## Qué decir
 
-## Qué hacer
+"El repository no piensa. Solo delega."
 
-En ConversationsPage:
+---
 
-```dart
-create: (_) => UsersBloc()..add(LoadUsersEvent(currentUserId)),
-```
+# FASE 4: Crear UseCases (20 minutos)
 
 ## Qué decir
 
-"La UI no trae datos. Solo dispara eventos."
+"Ahora sí podemos crear casos de uso. Antes no tenía sentido porque el dominio estaba incompleto."
 
 ---
 
-# FASE 3: Crear o recuperar conversación (20 minutos)
+## Crear archivos
 
-## Paso 1: Pregunta
+Crear:
 
-"Cuando hago click en un usuario, ¿qué debería pasar?"
-
-Guiar a:
-- Buscar conversación
-- Si no existe → crearla
+- get_or_create_conversation_usecase.dart
+- send_message_usecase.dart
+- watch_messages_usecase.dart
 
 ---
 
-## Paso 2: Crear UseCase
-
-## Qué hacer (crear archivo)
-
-lib/features/chat/domain/usecases/get_or_create_conversation_usecase.dart
+## Código
 
 ```dart
 class GetOrCreateConversationUsecase {
@@ -149,9 +163,37 @@ class GetOrCreateConversationUsecase {
 }
 ```
 
+```dart
+class SendMessageUsecase {
+  final ChatRepository _repository = ChatRepositoryImpl();
+
+  Future<void> execute(Message message) {
+    return _repository.sendMessage(message);
+  }
+}
+```
+
+```dart
+class WatchMessagesUsecase {
+  final ChatRepository _repository = ChatRepositoryImpl();
+
+  Stream<List<Message>> execute(String conversationId) {
+    return _repository.watchMessages(conversationId);
+  }
+}
+```
+
 ---
 
-## Paso 3: Implementar en UsersBloc
+# FASE 5: UsersBloc (15 minutos)
+
+## Qué decir
+
+"Ahora que el dominio existe, el BLoC puede usarlo."
+
+---
+
+## Implementar selección de usuario
 
 ```dart
 final GetOrCreateConversationUsecase _conversationUsecase =
@@ -182,75 +224,31 @@ Future<void> _selectUser(
 
 ---
 
-## Qué decir
-
-"Esto es lógica de negocio. No puede vivir en la UI."
-
----
-
-# FASE 4: Navegación (5 minutos)
-
-## Qué hacer
-
-Mostrar BlocListener
-
-```dart
-if (state is NavigateToChatState) {
-  Navigator.push(...);
-}
-```
+# FASE 6: ChatBloc (25 minutos)
 
 ## Qué decir
 
-"La UI reacciona a estados, no toma decisiones."
+"El chat es donde aparece la complejidad real: streams."
 
 ---
 
-# FASE 5: Realtime - escuchar mensajes (25 minutos)
-
-## Paso 1: Pregunta
-
-"¿Cómo hacemos que el chat se actualice solo?"
-
----
-
-## Paso 2: Crear UseCase
-
-Crear archivo:
-
-lib/features/chat/domain/usecases/watch_messages_usecase.dart
-
-```dart
-class WatchMessagesUsecase {
-  final ChatRepository _repository = ChatRepositoryImpl();
-
-  Stream<List<Message>> execute(String conversationId) {
-    return _repository.watchMessages(conversationId);
-  }
-}
-```
-
----
-
-## Paso 3: Implementar en ChatBloc
-
-Agregar:
+## Implementación
 
 ```dart
 final _watchUsecase = WatchMessagesUsecase();
+final _sendUsecase = SendMessageUsecase();
 StreamSubscription<List<Message>>? _subscription;
 ```
-
-Registrar eventos:
 
 ```dart
 on<SubscribeToMessagesEvent>(_subscribe);
 on<_MessagesUpdatedEvent>(_onUpdated);
+on<SendMessageEvent>(_send);
 ```
 
 ---
 
-## Paso 4: Suscripción
+## Suscripción
 
 ```dart
 void _subscribe(
@@ -269,7 +267,7 @@ void _subscribe(
 
 ---
 
-## Paso 5: Actualización
+## Actualización
 
 ```dart
 void _onUpdated(
@@ -282,41 +280,7 @@ void _onUpdated(
 
 ---
 
-## Qué decir
-
-"Supabase emite cambios. Nosotros escuchamos esos cambios con un Stream."
-
----
-
-# FASE 6: Enviar mensajes (15 minutos)
-
-## Paso 1: Crear UseCase
-
-Archivo:
-
-lib/features/chat/domain/usecases/send_message_usecase.dart
-
-```dart
-class SendMessageUsecase {
-  final ChatRepository _repository = ChatRepositoryImpl();
-
-  Future<void> execute(Message message) {
-    return _repository.sendMessage(message);
-  }
-}
-```
-
----
-
-## Paso 2: Implementar en BLoC
-
-```dart
-final _sendUsecase = SendMessageUsecase();
-```
-
-```dart
-on<SendMessageEvent>(_send);
-```
+## Envío
 
 ```dart
 Future<void> _send(
@@ -341,13 +305,7 @@ Future<void> _send(
 
 ---
 
-## Qué decir
-
-"No actualizamos la UI manualmente. El realtime lo hace por nosotros."
-
----
-
-# FASE 7: Limpieza (5 minutos)
+# FASE 7: Limpieza
 
 ```dart
 @override
@@ -357,26 +315,17 @@ Future<void> close() {
 }
 ```
 
-## Qué decir
-
-"Si no cancelamos esto, tenemos memory leaks."
-
 ---
 
-# Cierre (5 minutos)
+# Cierre
 
 ## Qué decir
 
-"El valor de esto no es el chat. Es el flujo."
+"El orden correcto de construcción NO es UI primero."
 
-Repasar:
-
-UI → BLoC → UseCase → Repository → Supabase → Stream → BLoC → UI
-
----
-
-# Ejercicio sugerido
-
-Agregar:
-- indicador de escritura
-- mensajes leídos
+"El orden correcto es:
+1. Dominio (contratos)
+2. Data (implementación)
+3. UseCases
+4. BLoC
+5. UI"
