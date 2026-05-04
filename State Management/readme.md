@@ -1,409 +1,365 @@
-<img width="256" src="https://www.icesi.edu.co/launiversidad/images/La_universidad/logo_icesi.png">
+# Clase: Implementación de Chat en Tiempo Real (Clean Architecture + Supabase)
 
-# Flutter
+## Objetivo de la clase
 
-## App
+Esta guía está pensada para el profesor. Indica exactamente qué decir, qué mostrar y en qué orden reconstruir el sistema de chat.
+
+---
+
+# FASE 0: Contexto inicial (5 minutos)
+
+## Qué decir
+
+"Hoy vamos a construir un chat en tiempo real. Pero no lo vamos a hacer desde cero... lo vamos a reconstruir."
+
+"Además, no solo eliminé lógica en BLoCs y UseCases… también rompí el contrato del Repository."
+
+"Vamos a reconstruir TODO el flujo de Clean Architecture desde dominio hacia data."
+
+---
+
+# FASE 1: Mostrar el estado roto (5 minutos)
+
+## Qué mostrar
+
+- ChatRepository incompleto
+- ChatRepositoryImpl incompleto
+- No hay métodos de chat
+- No hay usecases
+- BLoCs vacíos
+
+## Qué decir
+
+"En este momento la aplicación solo sabe traer usuarios."
+
+"Pregunta: ¿qué piezas faltan para que exista un chat?"
+
+Guiar a:
+- conversaciones
+- mensajes
+- realtime
+
+---
+
+# FASE 2: Restaurar el contrato del dominio (20 minutos)
+
+## Paso 1: Abrir ChatRepository
+
+Mostrar que SOLO existe:
+
+```dart
+abstract class ChatRepository {
+  Future<List<Profile>> getProfiles(String currentUserId);
+}
 ```
-import 'package:flutter/material.dart';
-import 'ui/start_screen.dart';
 
-class App extends StatelessWidget {
-  const App({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+## Qué decir
+
+"El dominio define qué puede hacer el sistema. Si esto no está aquí, no existe en la aplicación."
+
+---
+
+## Paso 2: Agregar responsabilidades de chat
+
+## Qué hacer (editar archivo)
+
+Agregar:
+
+```dart
+Future<Conversation> getOrCreateConversation(
+  String currentUserId,
+  String otherUserId,
+);
+
+Future<void> sendMessage(Message message);
+
+Stream<List<Message>> watchMessages(String conversationId);
+```
+
+## Qué decir
+
+"Estoy definiendo capacidades del sistema, no implementación."
+
+---
+
+## Paso 3: Importar modelos
+
+```dart
+import 'package:appmovil261/features/chat/domain/models/conversation.dart';
+import 'package:appmovil261/features/chat/domain/models/message.dart';
+```
+
+---
+
+# FASE 3: Implementar RepositoryImpl (15 minutos)
+
+## Paso 1: Mostrar implementación rota
+
+Mostrar que ChatRepositoryImpl solo tiene getProfiles.
+
+## Qué decir
+
+"El contrato dice que puedo enviar mensajes… pero la implementación no lo soporta. Esto rompe la arquitectura."
+
+---
+
+## Paso 2: Reagregar métodos
+
+```dart
+@override
+Future<Conversation> getOrCreateConversation(
+  String currentUserId,
+  String otherUserId,
+) {
+  return _dataSource.getOrCreateConversation(currentUserId, otherUserId);
+}
+
+@override
+Future<void> sendMessage(Message message) {
+  return _dataSource.sendMessage(message);
+}
+
+@override
+Stream<List<Message>> watchMessages(String conversationId) {
+  return _dataSource.watchMessages(conversationId);
+}
+```
+
+---
+
+## Qué decir
+
+"El repository no piensa. Solo delega."
+
+---
+
+# FASE 4: Crear UseCases (20 minutos)
+
+## Qué decir
+
+"Ahora sí podemos crear casos de uso. Antes no tenía sentido porque el dominio estaba incompleto."
+
+---
+
+## Crear archivos
+
+Crear:
+
+- get_or_create_conversation_usecase.dart
+- send_message_usecase.dart
+- watch_messages_usecase.dart
+
+---
+
+## Código
+
+```dart
+class GetOrCreateConversationUsecase {
+  final ChatRepository _repository = ChatRepositoryImpl();
+
+  Future<Conversation> execute(String currentUserId, String otherUserId) {
+    return _repository.getOrCreateConversation(currentUserId, otherUserId);
+  }
+}
+```
+
+```dart
+class SendMessageUsecase {
+  final ChatRepository _repository = ChatRepositoryImpl();
+
+  Future<void> execute(Message message) {
+    return _repository.sendMessage(message);
+  }
+}
+```
+
+```dart
+class WatchMessagesUsecase {
+  final ChatRepository _repository = ChatRepositoryImpl();
+
+  Stream<List<Message>> execute(String conversationId) {
+    return _repository.watchMessages(conversationId);
+  }
+}
+```
+
+---
+
+# FASE 5: UsersBloc (15 minutos)
+
+## Qué decir
+
+"Ahora que el dominio existe, el BLoC puede usarlo."
+
+---
+
+## Implementar selección de usuario
+
+```dart
+final GetOrCreateConversationUsecase _conversationUsecase =
+    GetOrCreateConversationUsecase();
+```
+
+```dart
+on<SelectUserEvent>(_selectUser);
+```
+
+```dart
+Future<void> _selectUser(
+  SelectUserEvent event,
+  Emitter<UsersState> emit,
+) async {
+  try {
+    final conversation = await _conversationUsecase.execute(
+      event.currentUserId,
+      event.otherUser.id,
     );
+
+    emit(NavigateToChatState(conversation.id, event.otherUser.name));
+  } catch (e) {
+    emit(UsersErrorState(e.toString()));
   }
 }
-
-
 ```
 
+---
 
-Para poder gestionar el estado use una clase BloC.
+# FASE 6: ChatBloc (25 minutos)
 
-StreamController -> va en BloC
+## Qué decir
 
-StreamBuilder -> es un widget
+"El chat es donde aparece la complejidad real: streams."
 
-Provider -> es un widget
+---
 
+## Implementación
 
-
-Recuerda que si estás utilizando el patrón BloC en conjunto con StreamBuilder, el StreamBuilder se encarga automáticamente de cerrar el StreamController cuando se desconecta del Stream. Sin embargo, es importante cerrar explícitamente el StreamController cuando ya no lo necesites para liberar los recursos adecuadamente.
-
-
-
-
-## Usando StreamController.add() y StreamBuilder
-
-### BloC
-
-```
-import 'dart:async';
-
-class StartScreenBloc{
-
-  int _count = 0;
-  final StreamController<int> _countController = StreamController<int>();
-  Stream<int> get countStream => _countController.stream;
-
-  // Método para actualizar los datos y emitirlos a través del StreamController
-  void increaseCounter() {
-    _count++;
-    _countController.add(_count);
-  }
-
-
-  // Método para cerrar el StreamController al finalizar
-  void dispose() {
-    _countController.close();
-  }
-
-}
-```
-Para agregar datos se puede usar o bien _countController.add(_count); o _countController.sink.add(_count);. Es lo mismo
-Para poner un valor inicial puede usar el constructor del bloc
-
-### Vista
-```
-import 'package:flutter/material.dart';
-import '../blocs/start_screen_bloc.dart';
-
-class MyHomePage extends StatelessWidget {
-  MyHomePage({super.key, required this.title});
-  final String title;
-
-  final StartScreenBloc bloc = StartScreenBloc();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
-      body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                StreamBuilder(stream:bloc.countStream, 
-                builder: (context,snap){
-                  if(snap.hasData){
-                    return Text("${snap.data} veces", style: Theme.of(context).textTheme.headlineMedium);
-                  }else{
-                    return Text("0", style: Theme.of(context).textTheme.headlineMedium);
-                  }
-                })
-                ,
-              ],
-            ),
-          ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          bloc.increaseCounter();
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-
-
-}
-
+```dart
+final _watchUsecase = WatchMessagesUsecase();
+final _sendUsecase = SendMessageUsecase();
+StreamSubscription<List<Message>>? _subscription;
 ```
 
-## BehaviorSubject
-Es un sustituto de StreamController que recuerda el último valor emitido.
-
-###Bloc
-```
-import 'dart:async';
-import 'package:rxdart/rxdart.dart';
-
-
-class StartScreenBloc{
-
-  final BehaviorSubject<int> _countSubject = BehaviorSubject<int>.seeded(0);
-  Stream<int> get countStream => _countSubject.stream;
-
-  void increaseCounter() {
-    _countSubject.sink.add(_countSubject.value+1);
-  }
-
-  void dispose() {
-    _countSubject.drain();
-  }
-
-}
+```dart
+on<SubscribeToMessagesEvent>(_subscribe);
+on<_MessagesUpdatedEvent>(_onUpdated);
+on<SendMessageEvent>(_send);
 ```
 
-### Vista
-```
-import 'package:flutter/material.dart';
-import '../blocs/start_screen_bloc.dart';
+---
 
-class MyHomePage extends StatelessWidget {
-  MyHomePage({super.key, required this.title});
-  final String title;
+## Suscripción
 
-  final StartScreenBloc bloc = StartScreenBloc();
+```dart
+void _subscribe(
+  SubscribeToMessagesEvent event,
+  Emitter<ChatState> emit,
+) {
+  emit(ChatLoadingState());
+  _subscription?.cancel();
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
-      body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                StreamBuilder(stream:bloc.countStream, 
-                builder: (context,snap){
-                  if(snap.hasData){
-                    return Text("${snap.data} veces", style: Theme.of(context).textTheme.headlineMedium);
-                  }else{
-                    return Text("0", style: Theme.of(context).textTheme.headlineMedium);
-                  }
-                })
-                ,
-              ],
-            ),
-          ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          bloc.increaseCounter();
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-
-
-}
-```
-
-
-## Providers
-
-### Bloc
-```
-import 'package:flutter/material.dart';
-
-class StartScreenBloc with ChangeNotifier{
-
-  int _count = 0;
-
-  int get count => _count;
-  
-  void increaseCounter() {
-    _count++;
-    notifyListeners();
-  }
-
-}
-```
-
-
-
-### App
-Para usar los providers se requiere registrar cada BloC en el conjunto de providers de la aplicación
-```
-import 'package:flutter/material.dart';
-import 'package:miapp/src/blocs/start_screen_bloc.dart';
-import 'package:provider/provider.dart';
-import 'src/app.dart';
-
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<StartScreenBloc>(create: (context) => StartScreenBloc()),
-      ],
-      child: const App(),
-    ),
+  _subscription = _watchUsecase.execute(event.conversationId).listen(
+    (messages) => add(_MessagesUpdatedEvent(messages)),
+    onError: (e) => add(_MessagesUpdatedEvent([])),
   );
 }
 ```
-O
-```
-import 'package:flutter/material.dart';
-import 'package:miapp/src/blocs/start_screen_bloc.dart';
-import 'package:provider/provider.dart';
-import 'src/app.dart';
 
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: StartScreenBloc()),
-      ],
-      child: const App(),
-    ),
-  );
+---
+
+## Actualización
+
+```dart
+void _onUpdated(
+  _MessagesUpdatedEvent event,
+  Emitter<ChatState> emit,
+) {
+  emit(ChatLoadedState(event.messages));
 }
 ```
 
-### Vista
+---
 
-```
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../blocs/start_screen_bloc.dart';
+## Envío
 
-class MyHomePage extends StatelessWidget {
-  MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final bloc = Provider.of<StartScreenBloc>(context);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
-      body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Consumer<StartScreenBloc>(builder: (context, value, child){
-                  return Text("${value.count} veces", style: Theme.of(context).textTheme.headlineMedium);
-                })
-                ,
-              ],
-            ),
-          ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          bloc.increaseCounter();
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
+```dart
+Future<void> _send(
+  SendMessageEvent event,
+  Emitter<ChatState> emit,
+) async {
+  try {
+    final msg = Message(
+      id: '',
+      conversationId: event.conversationId,
+      senderId: event.senderId,
+      content: event.content,
+      createdAt: DateTime.now(),
     );
+
+    await _sendUsecase.execute(msg);
+  } catch (e) {
+    emit(ChatErrorState(e.toString()));
   }
 }
 ```
 
+---
 
-
-!!! Además de provider, existen otras bibliotecas populares de gestión de estado en Flutter que se pueden utilizar para implementar el patrón BloC, como GetX, Riverpod, MobX, flutter_bloc (de Google), entre otras. Estas bibliotecas proporcionan diferentes enfoques y características para la gestión de estado y la comunicación entre componentes.
-
-## Google blocs
-
-### Clase Equitable
-
-Poder comparar objetos en Dart a menudo implica tener que sobrescribir el operador `==` y `hashCode`.
-
-No solo es verboso y tedioso, sino que no hacerlo puede conducir a un código ineficiente que no se comporta como esperamos.
-
-De forma predeterminada, `==` devuelve `true` si dos objetos son la misma instancia.
-
-Digamos que tenemos la siguiente clase:
+# FASE 7: Limpieza
 
 ```dart
-class Person {
-  const Person(this.name);
-
-  final String name;
+@override
+Future<void> close() {
+  _subscription?.cancel();
+  return super.close();
 }
 ```
 
-Podemos crear instancias de `Person` de la siguiente manera:
+---
 
-```dart
-void main() {
-  final Person bob = Person("Bob");
-}
+# Cierre
+
+## Qué decir
+
+"El orden correcto de construcción NO es UI primero."
+
+"El orden correcto es:
+1. Dominio (contratos)
+2. Data (implementación)
+3. UseCases
+4. BLoC
+5. UI"
+
+```mermaid
+flowchart LR
+
+    subgraph CLIENTE
+        C["App (Flutter)\nBLoC + Streams"]
+    end
+
+    subgraph BACKEND
+        REST["PostgREST (REST API)\nQueries HTTP"]
+        WS["Realtime Server\n(WebSocket)"]
+    end
+
+    subgraph EVENTOS
+        WAL["WAL / Logical Replication"]
+    end
+
+    subgraph DB
+        PG["PostgreSQL"]
+    end
+
+    C -->|HTTP (fetch)| REST
+    C <-->|WebSocket (subscribe)| WS
+
+    REST -->|SQL queries| PG
+    PG -->|Cambios| WAL
+    WAL -->|Eventos| WS
 ```
 
-Más tarde, si intentamos comparar dos instancias de `Person` ya sea en nuestro código de producción o en nuestras pruebas, nos encontraremos con un problema.
-
-```dart
-print(bob == Person("Bob")); // false
-```
-
-Para obtener más información sobre esto, puedes consultar la Documentación oficial de Dart.
-
-Para poder comparar dos instancias de `Person`, necesitamos cambiar nuestra clase para sobrescribir `==` y `hashCode`, de la siguiente manera:
-
-```dart
-class Person {
-  const Person(this.name);
-
-  final String name;
-
-  @override
-  bool operator ==(Object other) =>
-    identical(this, other) ||
-    other is Person &&
-    runtimeType == other.runtimeType &&
-    name == other.name;
-
-  @override
-  int get hashCode => name.hashCode;
-}
-```
-
-Ahora, si ejecutamos el siguiente código nuevamente:
-
-```dart
-print(bob == Person("Bob")); // true
-```
-
-Será capaz de comparar diferentes instancias de `Person`.
-
-Puedes ver cómo esto puede convertirse rápidamente en una molestia al lidiar con clases complejas. ¡Aquí es donde entra en juego Equatable!
-
-### ¿Qué hace Equatable?
-Equatable sobrescribe `==` y `hashCode` por ti, para que no tengas que perder tiempo escribiendo mucho código repetitivo.
-
-Existen otros paquetes que generan el código repetitivo por ti; sin embargo, aún debes ejecutar el paso de generación de código, lo cual no es ideal.
-
-Con Equatable no se necesita generación de código y podemos centrarnos más en escribir aplicaciones increíbles y menos en tareas mundanas.
 
 
 
 
-## BloC pattern
 
-
-Para una aplicación que tenga registro, login, una pantalla en la que puedo ver mi perfil, otra pantalla en la que puedo hacer post tipo facebook pero también ver los post de los demás usuario. El usuario puede interactuar con cada post dando like o comentando y el usuario puede ver todos los comentarios de todos los post.
-
-Se recomienda usar esta estructura de carpetas
-´´´
-- lib
-  - blocs
-    - authentication
-      - authentication_bloc.dart
-      - authentication_event.dart
-      - authentication_state.dart
-    - user_profile
-      - user_profile_bloc.dart
-      - user_profile_event.dart
-      - user_profile_state.dart
-    - post
-      - post_bloc.dart
-      - post_event.dart
-      - post_state.dart
-    - comment
-      - comment_bloc.dart
-      - comment_event.dart
-      - comment_state.dart
-´´´
-
-Que como nota, se trata de una división por entidad, donde se va a encapsular cada evento y estado por cada entidad. De modo que las piezas de la aplicación consumen la información según sea necesario.
-
-
-## 
