@@ -88,4 +88,14 @@ ElevatedButton.icon(
   label: const Text('Tomar foto con cámara'),
 ),
 [endcode]
-.
+
+[st] 3. Configuración adicional para macOS
+
+Si tu aplicación va a correr en macOS, necesitas declarar los permisos de acceso a archivos en los archivos de entitlements. Añade la siguiente clave en `macos/Runner/DebugProfile.entitlements` y en `macos/Runner/Release.entitlements`:
+
+[code:xml]
+<key>com.apple.security.files.user-selected.read-only</key>
+<true/>
+[endcode]
+
+Sin esta configuración, el selector de imágenes no tendrá permiso para leer archivos del sistema en macOS.
