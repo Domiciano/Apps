@@ -99,5 +99,7 @@
 [lesson] lessonK2.md
 [lesson] lessonK3.md
 [lesson] lessonK4.md
+[t] Dependency Injection
+[lesson] lessonN1.md
 [t] Deploy
 [lesson] lessonM1.md
