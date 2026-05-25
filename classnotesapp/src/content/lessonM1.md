@@ -105,3 +105,20 @@ build/app/outputs/bundle/release/app-release.aab
 [endcode]
 
 Ese es el archivo que subirás a Google Play.
+
+
+[st] Generar el APK
+De todos modos si quiere generar APK debe saber que el APK es dependente de la arquitectura del procesador del dispositivo móvil
+
+Usando
+[code:bash]
+flutter build apk --release --split-per-abi
+[endcode]
+
+Esto genera 3 APKs firmados en `build/app/outputs/flutter-apk/`
+
+[code:plain]
+app-armeabi-v7a-release.apk    # ARM 32-bit  (dispositivos antiguos)
+app-arm64-v8a-release.apk      # ARM 64-bit  (la mayoría hoy en día)
+app-x86_64-release.apk         # x86 64-bit  (emuladores)
+[endcode]
