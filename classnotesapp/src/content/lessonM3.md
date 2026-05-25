@@ -2,6 +2,8 @@
 
 Con el `.aab` generado ya puedes publicar tu app. El proceso se hace desde la Google Play Console.
 
+[v] mW98Jjq0hcc | Cómo publicar una app en Google Play
+
 [st] 1. Crear la app en Google Play Console
 
 Si es la primera vez que publicas esta app:
