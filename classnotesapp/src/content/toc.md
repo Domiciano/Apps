@@ -103,3 +103,6 @@
 [lesson] lessonN1.md
 [t] Deploy
 [lesson] lessonM1.md
+[lesson] lessonM2.md
+[lesson] lessonM3.md
+[lesson] lessonM4.md
