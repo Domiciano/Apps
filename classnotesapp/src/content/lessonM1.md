@@ -122,3 +122,4 @@ app-armeabi-v7a-release.apk    # ARM 32-bit  (dispositivos antiguos)
 app-arm64-v8a-release.apk      # ARM 64-bit  (la mayoría hoy en día)
 app-x86_64-release.apk         # x86 64-bit  (emuladores)
 [endcode]
+.
