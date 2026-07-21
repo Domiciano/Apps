@@ -1,83 +1,79 @@
-[t] Programa del curso
+# Programa del curso
 
-[i] logo.png
+![Imagen](logo.png)
 
 Bienvenido a su curso de `Aplicaciones Móviles`. Este curso brinda a los estudiantes la oportunidad de experimentar un entorno multidisciplinario que refleja los desafíos que se encuentran en su vida profesional. A lo largo de este semestre, se recorrerán todas las etapas del desarrollo de aplicaciones móviles, desde el diseño inicial hasta el despliegue final. Los conceptos adquiridos durante su carrera serán aplicados y se utilizarán herramientas relevantes con el fin de lograr un objetivo común: el lanzamiento de una aplicación móvil innovadora. 
 
 En este programa de estudio, se explorarán los procesos de ideación y prototipado, así como la arquitectura y el diseño de aplicaciones móviles. Además, se adquirirán habilidades para la construcción y despliegue de productos mínimos viables. El uso de herramientas de diseño, bases de datos no relacionales, servicios Cloud y servicios web REST será parte integral de este proceso de aprendizaje. Prepárese para enfrentar los desafíos inherentes al desarrollo de aplicaciones móviles y elevar las habilidades a un nivel superior en este apasionante curso.
 
-[st] Información de la Asignatura
-[list]
-Nombre de la asignatura: Aplicaciones móviles
-Código de la asignatura: 09738 - TIC
-Periodo Académico: 202520
-Nrc: 10193
-Intensidad horaria: 4
-Intensidad Semanal: 3
-Créditos: 3
-Docente: Domiciano Rincón Niño
-[endlist]
+## Información de la Asignatura
 
-[st] Formación en competencias
-[list]
-`SO1` Solución de problemas: Identificar, formular y resolver problemas complejos de ingeniería aplicando pensamiento crítico y principios de las ciencias, las matemáticas, la ingeniería y, en particular, de las Ciencias de la Computación y de la Ingeniería de Software.
-`SO3` Comunicación efectiva: Comunicarse efectivamente de forma oral y escrita, tanto en español como en inglés.
-`SO5` Trabajar de manera efectiva en equipos, cuyos miembros brinden liderazgo de manera colectiva, creen entornos colaborativos e inclusivos, establezcan metas, planifiquen tareas y logren objetivos, mientras se adaptan a situaciones cambiantes.
-[endlist]
+- Nombre de la asignatura: Aplicaciones móviles
+- Código de la asignatura: 09738 - TIC
+- Periodo Académico: 202520
+- Nrc: 10193
+- Intensidad horaria: 4
+- Intensidad Semanal: 3
+- Créditos: 3
+- Docente: Domiciano Rincón Niño
 
-[st] Objetivo general de aprendizaje
+## Formación en competencias
+
+- `SO1` Solución de problemas: Identificar, formular y resolver problemas complejos de ingeniería aplicando pensamiento crítico y principios de las ciencias, las matemáticas, la ingeniería y, en particular, de las Ciencias de la Computación y de la Ingeniería de Software.
+- `SO3` Comunicación efectiva: Comunicarse efectivamente de forma oral y escrita, tanto en español como en inglés.
+- `SO5` Trabajar de manera efectiva en equipos, cuyos miembros brinden liderazgo de manera colectiva, creen entornos colaborativos e inclusivos, establezcan metas, planifiquen tareas y logren objetivos, mientras se adaptan a situaciones cambiantes.
+
+## Objetivo general de aprendizaje
+
 Desarrollar y aplicar habilidades del diseño, construcción, arquitectura y despliegue de aplicaciones móviles, a través de la participación activa en un equipo de trabajo, siguiendo prácticas ágiles de desarrollo y contribuyendo de manera significativa al logro de los objetivos del proyecto.
 
-[st] Unidades de aprendizaje
+## Unidades de aprendizaje
 
 `Unidad 1` Fundamentos de programación para aplicaciones móviles
-[list]
-Introducción al curso de Aplicaciones Móviles
-Instalación y familiarización con el entorno de desarrollo
-Estructura de una aplicación móvil y sus componentes principales
-Diseño de la interfaz de usuario para aplicaciones móviles
-Uso del kit de Flutter para la diagramación y composición de pantallas
-Navegación entre pantallas
-Uso de listas
-Administración de estados
-[endlist]
+
+- Introducción al curso de Aplicaciones Móviles
+- Instalación y familiarización con el entorno de desarrollo
+- Estructura de una aplicación móvil y sus componentes principales
+- Diseño de la interfaz de usuario para aplicaciones móviles
+- Uso del kit de Flutter para la diagramación y composición de pantallas
+- Navegación entre pantallas
+- Uso de listas
+- Administración de estados
 
 `Unidad 2` Diseño, Ideación y Prototipado
-[list]
-Estilos de navegación y técnicas de prototipado en el diseño de aplicaciones móviles
-Uso de herramientas como Sketch, Wireframe y Mockup para el diseño de interfaces
-Creación de prototipos no funcionales para visualizar y validar la experiencia del usuario
-Diseño de la experiencia móvil teniendo en cuenta aspectos multidisciplinarios
-[endlist]
+
+- Estilos de navegación y técnicas de prototipado en el diseño de aplicaciones móviles
+- Uso de herramientas como Sketch, Wireframe y Mockup para el diseño de interfaces
+- Creación de prototipos no funcionales para visualizar y validar la experiencia del usuario
+- Diseño de la experiencia móvil teniendo en cuenta aspectos multidisciplinarios
 
 `Unidad 3` Arquitectura y servicios
-[list]
-Exploración de la arquitectura de soluciones móviles.
-Uso del patrón de arquitectura de software BloC y Clena Architecture en el desarrollo de aplicaciones móviles.
-Utilización de bases de datos no relacionales en el contexto de aplicaciones móviles.
-Integración de servicios Cloud utilizando Supabase.
-Servicios de bases de datos en nube
-Servicios de almacenamiento en nube
-Servicios de autenticación en nube
-Notificaciones Push
-Consumo de Web Services REST y depuración de solicitudes, respuestas y deserialización de datos
-[endlist]
+
+- Exploración de la arquitectura de soluciones móviles.
+- Uso del patrón de arquitectura de software BloC y Clena Architecture en el desarrollo de aplicaciones móviles.
+- Utilización de bases de datos no relacionales en el contexto de aplicaciones móviles.
+- Integración de servicios Cloud utilizando Supabase.
+- Servicios de bases de datos en nube
+- Servicios de almacenamiento en nube
+- Servicios de autenticación en nube
+- Notificaciones Push
+- Consumo de Web Services REST y depuración de solicitudes, respuestas y deserialización de datos
 
 `Unidad 4` Construcción y Despliegue
-[list]
-Desarrollo de un Producto Mínimo Viable (MVP) en el proceso de construcción de una aplicación móvil
-Fase de lanzamiento de aplicaciones, considerando aspectos como pruebas, ajustes finales y optimización del rendimiento
-Firma digital de aplicaciones para garantizar la autenticidad y seguridad en el despliegue
-Preparación de la aplicación previo al lanzamiento en tiendas de aplicaciones como Google Play Store o App Store
-[endlist]
 
-[st] Metodologías de aprendizajes
+- Desarrollo de un Producto Mínimo Viable (MVP) en el proceso de construcción de una aplicación móvil
+- Fase de lanzamiento de aplicaciones, considerando aspectos como pruebas, ajustes finales y optimización del rendimiento
+- Firma digital de aplicaciones para garantizar la autenticidad y seguridad en el despliegue
+- Preparación de la aplicación previo al lanzamiento en tiendas de aplicaciones como Google Play Store o App Store
+
+## Metodologías de aprendizajes
+
 El curso tiene una metodología de trabajo iterativo cuyo eje principal es el proyecto final del curso. Durante el desarrollo de la clase se apropian conceptos que le permitirán trabajar de manera efectiva.
 Es responsabilidad del estudiante preparar el material general y el específico por disciplina, porque de eso depende el buen desarrollo de las sesiones con sus coequiperos.
 La asistencia es esencial.
 El uso de la IA en este curso se define como Uso Colaborativo, lo que implica que la IA participa en la co-creación del aprendizaje junto con el estudiante, respaldada por un proceso de verificación y supervisión activa.
 
-[st] Evaluación de aprendizajes
+## Evaluación de aprendizajes
 
 Pitch
 `10%      ` 
@@ -107,10 +103,12 @@ Exhibición
 `15%            `
 La actividad final del curso es exponer su aplicación en una exibición de las funcionalidades alcanzadas
 
-[st] Recursos de apoyo
+## Recursos de apoyo
+
 No es necesario comprar ningún libro para el curso. Todo el material necesario para el curso será suministrado a través de Intu, como los materiales bibliográficos, guías de clases, videos, blogs, cursos en línea y otros.
 
-[st] Enlaces y herramientas relevantes
-[link](Documentación oficial de Flutter) https://docs.flutter.dev/get-started/install
+## Enlaces y herramientas relevantes
 
-[link](Aplicaciones móviles ICESI) https://miro.com/app/board/o9J_I2waJG0=/
+[Documentación oficial de Flutter](https://docs.flutter.dev/get-started/install)
+
+[Aplicaciones móviles ICESI](https://miro.com/app/board/o9J_I2waJG0=/)

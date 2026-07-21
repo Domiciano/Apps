@@ -1,15 +1,16 @@
-[t] ScaffoldMessenger
+# ScaffoldMessenger
 
 El `ScaffoldMessenger` es un widget crucial en Flutter que permite mostrar `SnackBar`, `BottomSheet` y otros mensajes temporales de manera consistente, incluso cuando el `Scaffold` subyacente cambia o se reconstruye. Resuelve problemas comunes relacionados con la gestión de `SnackBar` en el árbol de widgets.
 
-[st] ¿Por qué necesitamos ScaffoldMessenger?
+## ¿Por qué necesitamos ScaffoldMessenger?
+
 `ScaffoldMessenger` introduce un `ScaffoldMessengerState` que persiste a través de los cambios de `Scaffold`, proporcionando un `context` estable para mostrar mensajes. Esto evita que el contexto se rompa, por ejemplo, cuando hacemos una transición entre pantallas.
 
-[st] Uso Básico de SnackBar con ScaffoldMessenger
+## Uso Básico de SnackBar con ScaffoldMessenger
 
 La forma más común de usar `ScaffoldMessenger` es para mostrar `SnackBar`. Puedes acceder a él a través de `ScaffoldMessenger.of(context)`.
 
-[code:dart]
+```dart
 // Mostrar un SnackBar simple
 ElevatedButton(
   onPressed: () {
@@ -21,13 +22,13 @@ ElevatedButton(
   },
   child: const Text('Mostrar SnackBar'),
 )
-[endcode]
+```
 
-[st] SnackBar con Acción
+## SnackBar con Acción
 
 Los `SnackBar` pueden incluir una acción, como un botón para deshacer una operación.
 
-[code:dart]
+```dart
 // Mostrar un SnackBar con una acción
 ElevatedButton(
   onPressed: () {
@@ -46,15 +47,15 @@ ElevatedButton(
   },
   child: const Text('Mostrar SnackBar con Acción'),
 )
-[endcode]
+```
 
-[st] Gestionar Múltiples SnackBar
+## Gestionar Múltiples SnackBar
 
 Si intentas mostrar varios `SnackBar`s rápidamente, por defecto se pondrán en cola. A menudo, querrás que un nuevo `SnackBar` reemplace al anterior. Para esto, puedes usar `removeCurrentSnackBar()` antes de mostrar el nuevo.
 
 El operador de cascada (`..`) es muy útil aquí para encadenar estas operaciones:
 
-[code:dart]
+```dart
 // Reemplazar el SnackBar actual con uno nuevo
 ElevatedButton(
   onPressed: () {
@@ -66,13 +67,13 @@ ElevatedButton(
   },
   child: const Text('Reemplazar SnackBar'),
 )
-[endcode]
+```
 
-[st] Ejemplo Completo
+## Ejemplo Completo
 
 Aquí tienes un ejemplo completo y funcional para DartPad que demuestra el uso de `ScaffoldMessenger` para mostrar diferentes tipos de `SnackBar`s.
 
-[code:dart]
+```dart trycode=b84dcf85c28f01a6b3304bd19693944b
 import 'package:flutter/material.dart';
 
 void main() {
@@ -140,6 +141,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] b84dcf85c28f01a6b3304bd19693944b
+```
+
 .

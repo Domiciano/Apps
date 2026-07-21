@@ -1,10 +1,10 @@
-[t] Clean Architecture con BLoC
+# Clean Architecture con BLoC
 
 En este módulo implementamos Clean Architecture combinada con BLoC para construir apps Flutter robustas y fáciles de mantener. La regla fundamental del patrón: las capas externas dependen de las internas, nunca al revés. El dominio no sabe nada del mundo exterior.
 
-[st] Las tres capas
+## Las tres capas
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" font-family="Roboto, Arial, sans-serif">
   <defs>
     <marker id="dep" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -64,21 +64,19 @@ En este módulo implementamos Clean Architecture combinada con BLoC para constru
   <!-- Bottom note -->
   <text x="260" y="510" text-anchor="middle" fill="#555" font-size="11">Las dependencias apuntan hacia el centro</text>
 </svg>
-[endsvg]
+```
 
 Las capas se leen de adentro hacia afuera. Cuanto más al centro, más pura y estable es la capa.
 
-[list]
-Dominio (núcleo) — No depende de nadie. Solo Dart puro. Aquí viven `UseCase` y `RepositoryAbstracto`.
-Aplicación — Contiene `BLoC`. Solo conoce el Dominio.
-Infraestructura (exterior) — Contiene `Vista`, `RepositoryImpl` y `DataSource`. Es la capa que toca el mundo real: HTTP, bases de datos, Flutter UI.
-[endlist]
+- Dominio (núcleo) — No depende de nadie. Solo Dart puro. Aquí viven `UseCase` y `RepositoryAbstracto`.
+- Aplicación — Contiene `BLoC`. Solo conoce el Dominio.
+- Infraestructura (exterior) — Contiene `Vista`, `RepositoryImpl` y `DataSource`. Es la capa que toca el mundo real: HTTP, bases de datos, Flutter UI.
 
-[st] Flujo de una petición
+## Flujo de una petición
 
 Cuando el usuario realiza una acción, los datos viajan así:
 
-[mermaid]
+```mermaid
 flowchart TD
   UI["Vista"] -->|"① evento"| BLOC["BLoC"]
   BLOC -->|"② llama"| UC["UseCase"]
@@ -88,35 +86,33 @@ flowchart TD
   DS -->|"⑤ HTTP"| API(("API\nREST"))
   API -->|"⑥ JSON"| DS
   DS --> REPO_IMPL --> UC --> BLOC -->|"⑦ nuevo estado"| UI
-[endmermaid]
+```
 
 El BLoC nunca llama directamente a `RepositoryImpl`. Solo conoce la abstracción. Eso es la inversión de dependencias.
 
-[st] Dominio: el núcleo puro
+## Dominio: el núcleo puro
 
 Es el corazón de la aplicación. No importa nada de Flutter, HTTP ni librerías externas. Si el dominio compila con `dart run`, estás en buen camino.
 
-[st] RepositoryAbstracto
+## RepositoryAbstracto
 
 Define el contrato que el dominio necesita. No sabe cómo se obtienen los datos, solo qué datos necesita.
 
-[code:dart]
+```dart
 abstract class MusicRepository {
   Future<List<Track>> searchTracks(String query);
 }
-[endcode]
+```
 
-[list]
-Es una clase abstracta — solo declara métodos, no los implementa.
-El `UseCase` depende de esta abstracción, nunca de `RepositoryImpl`.
-Permite cambiar la fuente de datos (HTTP, mock, SQLite) sin tocar una sola línea del dominio.
-[endlist]
+- Es una clase abstracta — solo declara métodos, no los implementa.
+- El `UseCase` depende de esta abstracción, nunca de `RepositoryImpl`.
+- Permite cambiar la fuente de datos (HTTP, mock, SQLite) sin tocar una sola línea del dominio.
 
-[st] UseCase
+## UseCase
 
 Encapsula una acción de negocio concreta. Un `UseCase` = una responsabilidad.
 
-[code:dart]
+```dart
 class SearchTracksUseCase {
   final MusicRepository repository;
 
@@ -126,23 +122,21 @@ class SearchTracksUseCase {
     return repository.searchTracks(query);
   }
 }
-[endcode]
+```
 
-[list]
-El método `call` permite usar la sintaxis `await useCase(query)` directamente.
-Solo importa entidades del dominio. Cero dependencias a HTTP, BLoC o Flutter.
-Si necesitas probar la lógica de negocio, solo mockeas `MusicRepository` — no hay más dependencias.
-[endlist]
+- El método `call` permite usar la sintaxis `await useCase(query)` directamente.
+- Solo importa entidades del dominio. Cero dependencias a HTTP, BLoC o Flutter.
+- Si necesitas probar la lógica de negocio, solo mockeas `MusicRepository` — no hay más dependencias.
 
-[st] Datos: la capa que toca el mundo exterior
+## Datos: la capa que toca el mundo exterior
 
 Aquí se implementan los contratos del dominio y se conecta con APIs, bases de datos o cualquier fuente externa.
 
-[st] DataSource
+## DataSource
 
 Hace la llamada HTTP cruda. Solo sabe hacer peticiones y devolver JSON sin procesar.
 
-[code:dart]
+```dart
 class DeezerDataSource {
   final http.Client client;
 
@@ -155,13 +149,13 @@ class DeezerDataSource {
     return List<Map<String, dynamic>>.from(json['data']);
   }
 }
-[endcode]
+```
 
-[st] RepositoryImpl
+## RepositoryImpl
 
 Implementa `RepositoryAbstracto`. Orquesta las llamadas al `DataSource` y convierte el JSON en entidades del dominio.
 
-[code:dart]
+```dart
 class MusicRepositoryImpl implements MusicRepository {
   final DeezerDataSource dataSource;
 
@@ -173,21 +167,19 @@ class MusicRepositoryImpl implements MusicRepository {
     return raw.map((json) => Track.fromJson(json)).toList();
   }
 }
-[endcode]
+```
 
-[list]
-`implements MusicRepository` — aquí ocurre la conexión entre dominio e infraestructura.
-Convierte `Map<String, dynamic>` a entidades `Track`. El BLoC nunca ve JSON crudo.
-Podría orquestar múltiples `DataSource` (red + caché) sin que el dominio lo sepa.
-[endlist]
+- `implements MusicRepository` — aquí ocurre la conexión entre dominio e infraestructura.
+- Convierte `Map<String, dynamic>` a entidades `Track`. El BLoC nunca ve JSON crudo.
+- Podría orquestar múltiples `DataSource` (red + caché) sin que el dominio lo sepa.
 
-[st] Presentación: BLoC y Vista
+## Presentación: BLoC y Vista
 
-[st] BLoC
+## BLoC
 
 Recibe eventos de la UI, invoca el `UseCase` y emite estados. No sabe nada de HTTP ni de cómo se obtienen los datos.
 
-[code:dart]
+```dart
 class MusicBloc extends Bloc<MusicEvent, MusicState> {
   final SearchTracksUseCase searchTracks;
 
@@ -203,13 +195,13 @@ class MusicBloc extends Bloc<MusicEvent, MusicState> {
     });
   }
 }
-[endcode]
+```
 
-[st] Vista / Widget
+## Vista / Widget
 
 Escucha los estados del BLoC y renderiza la UI. No contiene lógica de negocio.
 
-[code:dart]
+```dart
 BlocBuilder<MusicBloc, MusicState>(
   builder: (context, state) {
     if (state is MusicLoading) return CircularProgressIndicator();
@@ -218,11 +210,11 @@ BlocBuilder<MusicBloc, MusicState>(
     return const SizedBox.shrink();
   },
 )
-[endcode]
+```
 
-[st] Resumen: quién conoce a quién
+## Resumen: quién conoce a quién
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="580" height="210" font-family="Roboto, Arial, sans-serif" font-size="13">
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
@@ -286,12 +278,10 @@ BlocBuilder<MusicBloc, MusicState>(
   <line x1="10" y1="198" x2="35" y2="198" stroke="#66BB6A" stroke-width="2" stroke-dasharray="5,3"/>
   <text x="42" y="202" fill="#aaa" font-size="11">implementa (Impl cumple el contrato abstracto)</text>
 </svg>
-[endsvg]
+```
 
-[list]
-`Vista` solo habla con `BLoC` — nada más.
-`BLoC` solo habla con `UseCase` — jamás con `RepositoryImpl`.
-`UseCase` solo conoce `RepositoryAbstracto` — no sabe si los datos vienen de HTTP o de una base de datos.
-`RepositoryImpl` cumple el contrato del dominio e invoca `DataSource`.
-La flecha punteada verde indica implementación: `RepositoryImpl` satisface la interfaz que el dominio define.
-[endlist]
+- `Vista` solo habla con `BLoC` — nada más.
+- `BLoC` solo habla con `UseCase` — jamás con `RepositoryImpl`.
+- `UseCase` solo conoce `RepositoryAbstracto` — no sabe si los datos vienen de HTTP o de una base de datos.
+- `RepositoryImpl` cumple el contrato del dominio e invoca `DataSource`.
+- La flecha punteada verde indica implementación: `RepositoryImpl` satisface la interfaz que el dominio define.

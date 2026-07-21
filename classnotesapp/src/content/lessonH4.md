@@ -1,26 +1,31 @@
-[t] Auth y DB
+# Auth y DB
+
 Lo que debemos hacer es que los usuarios que registramos, deben estar realmente en dos registros de los servicios de supabase.
 
 El primero es `Auth` que ya lo vimos.
 
 Ahora, vamos a ver qué debemos hacer para enviar el resto de datos que levantamos en el proceso de registro.
 
-[st] Tabla Profile
+## Tabla Profile
+
 Es una tabla como cualquier otra, pero lleva una referencia al UID de la tabla de Authentitcation
 
-[code:sql]
+```sql
 create table profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   name text not null,
   email text not null,
   created_at timestamp with time zone default now()
 );
-[endcode]
+```
+
 De esta manera, si se elimina un usuario de Auth, se elimina su registro dentro de nuestra nueva tabla
 
-[st] Modelo de Profile
+## Modelo de Profile
+
 Luego, puede modelar la clase Profile para que tenga la forma de tranformarse en Json y vice versa.
-[code:dart]
+
+```dart
 class Profile {
   final String id; // UID de Supabase Auth
   final String name;
@@ -50,14 +55,15 @@ class Profile {
     );
   }
 }
-[endcode]
+```
 
-[st] Row lever security policy
+## Row lever security policy
+
 Si su interés es hacer una tabla muy segura donde sólo el usuario dueño del registro sea quien puede ver su información, puede anexar esta RLS policy.
-[list]
-Sólo añada esto hasta probar que funciona el laboratorio
-[endlist]
-[code:sql]
+
+- Sólo añada esto hasta probar que funciona el laboratorio
+
+```sql
 -- Activa Row Level Security en la tabla
 alter table profiles enable row level security;
 
@@ -75,7 +81,6 @@ using (auth.uid() = id);
 create policy "Users can insert their own profile"
 on profiles for insert
 with check (auth.uid() = id);
-[endcode]
-
+```
 
 .

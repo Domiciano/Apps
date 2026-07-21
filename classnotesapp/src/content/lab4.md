@@ -1,4 +1,5 @@
-[t] Laboratorio 4: Deezer ain't the best option
+# Laboratorio 4: Deezer ain't the best option
+
 Todos en nuestro día a día usamos aplicaciones de música que van desde Yotube, Spotify y Apple Music. Pero nunca hemos oído que alguien recomiende `Deezer` como plataforma.
 No obstante, poseen una API abierta (las demás exigen autenticación) que permite interactuar con la plataforma. Esto es una buena característica para el curso de aplicaciones móviles ya que podemos usar data actualizada, no un mock. A Deezer nadie lo usa, todos lo programan
 
@@ -7,13 +8,17 @@ El laboratorio consiste en hacer una pantalla de búsqueda de música. Cuando en
 Vamos a hacer usando 2 pantallas: `SearchMusicScreen` y `LikedSongsScreen`.
 
 El enpoint de Deezer para buscar es
-[code:plain]
+
+```plain
 https://api.deezer.com/search?q=bohemian%20rhapsody
-[endcode]
+```
+
 Sólo vamos a usar los datos de id, título, artista y albumCover.
 De modo que vamos a usar este modelo de datos
-[st] Modelo de datos
-[code:dart]
+
+## Modelo de datos
+
+```dart
 class Track {
   final int id;
   final String title;
@@ -27,9 +32,11 @@ class Track {
     required this.albumCover,
   });
 }
-[endcode]
+```
+
 Y no menos importante, debemos crear un factory para poder hacer deserializaciones
-[code:dart]
+
+```dart
 factory Track.fromJson(Map<String, dynamic> json) {
     return Track(
       ?,
@@ -38,11 +45,15 @@ factory Track.fromJson(Map<String, dynamic> json) {
       ?,
     );
 }
-[endcode]
+```
+
 Donde `?` es para que usted analice el JSON y luego de analizar, sepa qué debe poner allí.
-[st] NetworkProvider
+
+## NetworkProvider
+
 Ya teniendo todos los elementos, vamos a crear entonces el `NetworkProvider`
-[code:dart]
+
+```dart
 class DeezerNetworkProvider {
   String _baseUrl = "https://api.deezer.com";
 
@@ -62,15 +73,17 @@ class DeezerNetworkProvider {
     }
   }
 }
-[endcode]
+```
+
 Para esto necesitas agregar `http: ^1.5.0` a tu `pubspec.yml`
 
-[st] Capa de Repository
+## Capa de Repository
+
 En proyectos que aún están jóvenes o pequeños puede llegar a pensar "¿todo esto sí es necesario?" y aunque parezca que inicialmente el repositorio no tiene sentido y sólo es un bypass hacía BloC, recuerde que este punto es vital porque desde esta capa decidimos si hacemos uso de una fuente externa o de una base de datos local.
 
 Desde este punto, podemos hacer transformaciones para emitir sólo la información necesario al resto de la aplicación, podemos filtrar, mezclar, transformar y demás de acuerdo a las features que dispongamos.
 
-[code:dart]
+```dart
 /// Repository: abstrae los providers y expone una API limpia al Bloc
 class DeezerRepository {
   final DeezerNetworkProvider _networkProvider;
@@ -90,16 +103,17 @@ class DeezerRepository {
     }
   }
 }
-[endcode]
+```
 
-[st] BloC
+## BloC
+
 Recuerde que el BloC recibe eventos de la UI y emite estados. Para emitir esos estados, el BloC debe consultar a fuentes de información por medio de Repository.
 
 Debemos usar la libreria de flutter_bloc. Así que use `flutter_bloc: ^9.1.1` en su `pubspec.yml`
 
 Pero vamos en orden, primero hay que definir los eventos. Debemos usar estratégicamente la herencia.
 
-[code:dart]
+```dart
 /// Eventos que el Bloc puede recibir
 abstract class SearchEvent {}
 
@@ -109,10 +123,11 @@ class SearchSongsEvent extends SearchEvent {
 
   SearchSongsEvent(this.query);
 }
-[endcode]
+```
 
 Vamos ahora a definir los estados
-[code:dart]
+
+```dart
 /// Estados posibles del Bloc
 abstract class SearchState {}
 
@@ -135,21 +150,27 @@ class SearchFailure extends SearchState {
 
   SearchFailure(this.message);
 }
-[endcode]
+```
+
 Finalmente el BloC
-[code:dart]
+
+```dart
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final DeezerRepository repository;
   ...
 }
-[endcode]
+```
+
 Aquí vamos a usar el estado inicial por medio del constructor
-[code:dart]
+
+```dart
 SearchBloc() : super(SearchInitial()) {
 }
-[endcode]
+```
+
 A partir de este BloC, debemos usar los método `on()` para registrar los eventos y emitir respuesta.
-[code:dart]
+
+```dart
 on<SearchSongsEvent>(_onSearchSongs);
 ...
 Future<void> _onSearchSongs(
@@ -168,11 +189,13 @@ Future<void> _onSearchSongs(
       emit(SearchFailure("Error al buscar canciones: $e"));
     }
 }
-[endcode]
+```
 
-[st] Capa UI
+## Capa UI
+
 Finalmente vamos con la capa de UI. Luego de todo este periplo por capas, finalmente aterrizamos todo a un arbolde componentes.
-[code:dart]
+
+```dart
 BlocBuilder<SearchBloc, SearchState>(
   builder: (context, state) {
     if (state is SearchInitial) {
@@ -198,19 +221,23 @@ BlocBuilder<SearchBloc, SearchState>(
     }
   },
 )
-[endcode]
+```
 
 Este trozo de pantalla deberá ir dentro de un `BlocProvider` que provea los elementos de BloC. Genere lo necesario para que quede OK
 
-[st] Haciendo POST
+## Haciendo POST
+
 Use este endpoint para hacer POST de sus canciones
-[code:plain]
+
+```plain
 https://facelogprueba.firebaseio.com/playlist/miusername.json
-[endcode]
+```
+
 Si en lugar de hacer POST hace GET, puede comprobar con su navegador o con Postman si efectivamente se guardan las canciones o no
 
 Para hacer post puede usar este bloque de código de guía
-[code:dart]
+
+```dart
 Future<void> postTrack(Track track) async {
     final url = Uri.parse("$_baseUrl/tracks");
 
@@ -228,5 +255,6 @@ Future<void> postTrack(Track track) async {
     );
     print(response.statusCode);
 }
-[endcode]
+```
+
 .

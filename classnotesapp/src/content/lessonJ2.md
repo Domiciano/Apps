@@ -1,18 +1,18 @@
-[t] Subir Archivos a Supabase Storage
+# Subir Archivos a Supabase Storage
 
 En la lección anterior, aprendiste a seleccionar imágenes de la galería y a tomar fotos con la cámara. Ahora, ¿cómo guardamos esos archivos de forma permanente? En esta lección, aprenderás a subir las imágenes a un servicio de almacenamiento en la nube llamado Supabase Storage.
 
-[st] 1. Requisito: Cliente de Supabase
+## 1. Requisito: Cliente de Supabase
 
 Asegúrate de tener la dependencia de `supabase_flutter` en tu `pubspec.yaml` y de haberla instalado.
 
-[code:bash]
+```bash
 flutter pub add supabase_flutter
-[endcode]
+```
 
 Además, tu aplicación necesita inicializar Supabase para poder comunicarte con sus servicios. Generalmente, esto se hace en tu archivo `main.dart` antes de `runApp()`.
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,11 +26,11 @@ Future<void> main() async {
 
   runApp(const MyApp());
 }
-[endcode]
+```
 
 No olvides reemplazar `TU_SUPABASE_URL` y `TU_SUPABASE_ANON_KEY` con tus credenciales reales de Supabase.
 
-[st] 2. Lógica para subir la imagen
+## 2. Lógica para subir la imagen
 
 Una vez que tienes el `File` de la imagen (obtenido con `image_picker`), puedes usar el cliente de Supabase para subirlo a un "bucket" de almacenamiento.
 
@@ -40,11 +40,11 @@ El proceso es el siguiente:
 3.  Llamar al método `upload()` del bucket de storage.
 4.  (Opcional) Obtener la URL pública para poder ver la imagen.
 
-[st] Ejemplo completo: Uniendo ImagePicker y Supabase
+## Ejemplo completo: Uniendo ImagePicker y Supabase
 
 Aquí tienes una función que combina la selección de imagen y la subida a Supabase. Esta función fue la que inspiró la lección anterior.
 
-[code:dart]
+```dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -83,42 +83,45 @@ Future<void> _pickAndUploadImage(ImageSource source) async {
     print('Error al subir la imagen: $e');
   }
 }
-[endcode]
+```
+
 En este código, `alfa` es el nombre del bucket en Supabase Storage. Asegúrate de que exista y tenga los permisos correctos para la subida de archivos.
 
-[st] 3. Acceder a los Archivos Subidos
+## 3. Acceder a los Archivos Subidos
 
 Una vez que el archivo está en tu bucket de Supabase, necesitas una forma de acceder a él para mostrarlo en tu aplicación. Hay dos maneras principales de obtener la URL de un archivo.
 
-[st] a) URL Pública (`getPublicUrl`)
+## a) URL Pública (`getPublicUrl`)
 
 Este método genera una URL permanente y pública para tu archivo. Cualquiera con el enlace podrá acceder al archivo, siempre y cuando las políticas de tu bucket lo permitan (por ejemplo, una política de lectura pública).
 
-[code:dart]
+```dart
 // Obtener URL pública y permanente
 final String publicUrl = supabase.storage
     .from('beta') // Asegúrate de usar el nombre de tu bucket
     .getPublicUrl(fileName);
-[endcode]
+```
+
 Usa este método para archivos que no son sensibles, como avatares públicos, imágenes de productos, etc.
 
-[st] b) URL Firmada (`createSignedUrl`)
+## b) URL Firmada (`createSignedUrl`)
 
 Este método genera una URL temporal y segura. La URL contiene una firma única que le da acceso al archivo por un tiempo limitado que tú defines. Es la forma más segura de dar acceso a archivos privados.
 
-[code:dart]
+```dart
 // Crear una URL firmada que expira en 1 hora (3600 segundos)
 final String signedUrl = await supabase.storage
     .from('beta') // Asegúrate de usar el nombre de tu bucket
     .createSignedUrl(fileName, 60 * 60);
-[endcode]
+```
+
 Esta URL es ideal para contenido sensible o de pago, asegurando que el enlace no pueda ser compartido y usado indefinidamente.
 
-[st] Mostrando la imagen en Flutter
+## Mostrando la imagen en Flutter
 
 Independientemente del método que uses para obtener la URL, puedes usar el widget `Image.network()` para mostrar la imagen en tu aplicación.
 
-[code:dart]
+```dart
 // ... en tu widget
 if (_publicUrl != null)
   Image.network(
@@ -126,5 +129,6 @@ if (_publicUrl != null)
     height: 200, // Ejemplo de tamaño
     fit: BoxFit.cover, // Ejemplo de ajuste
   )
-[endcode]
+```
+
 .

@@ -1,28 +1,34 @@
-[t] Instalación de supabase
+# Instalación de supabase
+
 Supabase es una alternativa de código abierto a Firebase que ofrece una base de datos Postgres, autenticación, almacenamiento y mucho más. 
 
-[st] 1. Configuración del Proyecto en Supabase
-Antes de empezar, necesitas una cuenta en Supabase y un proyecto nuevo.
-[list]
-Ve a [link] (Supabase) https://supabase.com/
-Crea una organización
-Crea un proyecto
-En el panel de tu proyecto, ve a `Authentication` y asegúrate de que el proveedor de `email` esté habilitado.
-[endlist]
+## 1. Configuración del Proyecto en Supabase
 
-[st] 2. Instalación de Dependencias
+Antes de empezar, necesitas una cuenta en Supabase y un proyecto nuevo.
+
+- Ve a [Supabase](https://supabase.com/)
+- Crea una organización
+- Crea un proyecto
+- En el panel de tu proyecto, ve a `Authentication` y asegúrate de que el proveedor de `email` esté habilitado.
+
+## 2. Instalación de Dependencias
+
 Agrega el paquete `supabase_flutter` a tu archivo `pubspec.yaml` para poder interactuar con Supabase.
-[code:yaml]
+
+```yaml
 dependencies:
   flutter:
     sdk: flutter
   supabase_flutter: ^2.10.1 
-[endcode]
+```
+
 Luego, ejecuta `flutter pub get` en tu terminal para instalar el paquete.
 
-[st] 3. Inicialización de Supabase en Flutter
+## 3. Inicialización de Supabase en Flutter
+
 Debes inicializar el cliente de Supabase en tu archivo `main.dart` antes de ejecutar la aplicación. Esto permite que el cliente de Supabase esté disponible en toda tu app.
-[code:dart]
+
+```dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -38,11 +44,11 @@ void main() async {
 
 // Obtén una referencia al cliente de Supabase
 final supabase = Supabase.instance.client;
-[endcode]
+```
 
 Recuerda reemplazar `TU_SUPABASE_URL` y `TU_PUBLISHABLE_KEY` con las credenciales de tu proyecto.
 
-[st] Objetos
+## Objetos
 
 User → te da información de la identidad del usuario en Supabase Auth.
 Ejemplo: id, email, estado de confirmación, metadatos.

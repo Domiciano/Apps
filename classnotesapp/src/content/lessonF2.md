@@ -1,23 +1,23 @@
-[t] Listas Dinámicas y ListView.builder
+# Listas Dinámicas y ListView.builder
 
 En la lección anterior, vimos cómo usar `ListView` para mostrar listas simples y estáticas. Sin embargo, cuando trabajamos con listas muy largas o con datos que cambian dinámicamente (como una lista de publicaciones de redes sociales o resultados de búsqueda), usar `ListView` directamente con todos los `children` puede ser ineficiente y consumir mucha memoria.
 
 Aquí es donde entra `ListView.builder`.
 
-[st] `ListView.builder`: La Clave para Listas Eficientes
+## `ListView.builder`: La Clave para Listas Eficientes
 
 `ListView.builder` es un constructor de `ListView` que construye los elementos de la lista "a demanda" (lazy loading). Esto significa que solo renderiza los elementos que son visibles en la pantalla y unos pocos más que están a punto de ser visibles. Cuando un elemento sale de la pantalla, sus recursos pueden ser liberados, y cuando uno entra, se construye.
 
 Esto lo hace extremadamente eficiente para listas con un gran número de elementos o un número desconocido de elementos.
 
-[st] ¿Cómo funciona `ListView.builder`?
+## ¿Cómo funciona `ListView.builder`?
 
 `ListView.builder` requiere dos parámetros principales:
 
 1.  `itemCount`: El número total de elementos en la lista. Flutter lo usa para saber cuántos elementos potenciales hay y cuándo dejar de construir.
 2.  `itemBuilder`: Una función que se llama para construir cada elemento de la lista. Recibe dos argumentos: el `BuildContext` y el `index` (la posición del elemento en la lista).
 
-[code:dart]
+```dart trycode=f62169dbb31fb4c6c75bf5dfa4148ed8
 import 'package:flutter/material.dart';
 
 void main() {
@@ -48,16 +48,15 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] f62169dbb31fb4c6c75bf5dfa4148ed8
+```
 
 En este ejemplo, estamos creando una lista de 10,000 elementos. Si hubiéramos usado `ListView` con `children`, la aplicación probablemente se habría ralentizado o incluso colgado. Con `ListView.builder`, la experiencia es fluida porque solo se construyen los elementos necesarios.
 
-[st] Creando Widgets Personalizados para Elementos de Lista
+## Creando Widgets Personalizados para Elementos de Lista
 
 Aunque `ListTile` es útil, a menudo querrás que tus elementos de lista tengan un diseño más complejo y personalizado. Puedes crear tus propios `StatelessWidget` o `StatefulWidget` para representar cada elemento de la lista y pasarlos al `itemBuilder`.
 
-[code:dart]
+```dart trycode=170d1153830e0cad1ccefec6db787992
 import 'package:flutter/material.dart';
 
 void main() {
@@ -119,6 +118,6 @@ class CancionTile extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 170d1153830e0cad1ccefec6db787992
+```
+
 .

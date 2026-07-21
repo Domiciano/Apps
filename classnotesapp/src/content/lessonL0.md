@@ -1,31 +1,41 @@
-[t] Clase: Introducción a Google Maps en Flutter
+# Clase: Introducción a Google Maps en Flutter
+
 Todo conocemos Google Maps, así que no necesita mayor introducción. Salvo que Google ha dispuesto Componentes UI para que los desarrolladores puedan integrar y utilizar mapas dentro de sus propias aplicaciones.
 
-[st] Crear un nuevo proyecto Flutter
+## Crear un nuevo proyecto Flutter
+
 El primer paso es crear un nuevo proyecto de Flutter. Puedes hacerlo desde tu IDE (como VS Code o Android Studio) o utilizando la línea de comandos:
-[code:bash]
+
+```bash
 flutter create maps_hello_world
 cd maps_hello_world
-[endcode]
+```
+
 Esto creará una nueva aplicación de Flutter con la estructura básica.
 
-[st] Agregar dependencias al pubspec.yaml
+## Agregar dependencias al pubspec.yaml
+
 Abre el archivo `pubspec.yaml` en la raíz de tu proyecto y agrega las siguientes dependencias:
-[code:yaml]
+
+```yaml
 dependencies:
   flutter:
     sdk: flutter
   google_maps_flutter: ^2.9.0
-[endcode]
-Luego, ejecuta el siguiente comando en tu terminal para obtener las nuevas dependencias:
-[code:bash]
-flutter pub get
-[endcode]
+```
 
-[st] Configurar claves de API de Google Maps
+Luego, ejecuta el siguiente comando en tu terminal para obtener las nuevas dependencias:
+
+```bash
+flutter pub get
+```
+
+## Configurar claves de API de Google Maps
+
 Para que Google Maps funcione, necesitas una clave de API y configurarla para Android e iOS.
 
-[st] Obtener una API Key
+## Obtener una API Key
+
 1. Ve a la Google Cloud Console https://console.cloud.google.com/.
 2. Crea un nuevo proyecto (o selecciona uno existente).
 3. En el menú de navegación, ve a "APIs y servicios" > "Biblioteca".
@@ -36,10 +46,11 @@ Para que Google Maps funcione, necesitas una clave de API y configurarla para An
 6. Haz clic en "Crear credenciales" > "Clave de API".
 7. Copia la clave generada.
 
-[st] Android
+## Android
+
 En el archivo `android/app/src/main/AndroidManifest.xml`, agrega la siguiente etiqueta `<meta-data>` dentro de la etiqueta `<application>`:
 
-[code:xml]
+```xml
 <manifest ...>
     <application ...>
         <meta-data
@@ -48,13 +59,15 @@ En el archivo `android/app/src/main/AndroidManifest.xml`, agrega la siguiente et
         <!-- Otras configuraciones de la aplicación -->
     </application>
 </manifest>
-[endcode]
+```
+
 Reemplaza `TU_API_KEY_AQUI` con la clave de API que obtuviste.
 
-[st] iOS
+## iOS
+
 En el archivo `ios/Runner/AppDelegate.swift`, agrega la siguiente línea dentro del método `application(_:didFinishLaunchingWithOptions:)`:
 
-[code:swift]
+```swift
 import UIKit
 import Flutter
 import GoogleMaps // Asegúrate de importar GoogleMaps
@@ -70,16 +83,19 @@ import GoogleMaps // Asegúrate de importar GoogleMaps
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
-[endcode]
+```
+
 Reemplaza `TU_API_KEY_AQUI` con tu clave de API.
 
-[st] Hola Mundo de Google Maps
+## Hola Mundo de Google Maps
+
 Ahora, vamos a mostrar un mapa básico en tu aplicación.
 
-[st] Crea un archivo lib/map_screen.dart:
+## Crea un archivo lib/map_screen.dart:
+
 Crea un nuevo archivo llamado `map_screen.dart` dentro de la carpeta `lib` y pega el siguiente código:
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -113,12 +129,13 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
-[endcode]
+```
 
-[st] Y en main.dart:
+## Y en main.dart:
+
 Modifica tu archivo `lib/main.dart` para que se vea así:
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 import 'map_screen.dart'; // Importa tu nueva pantalla de mapa
 
@@ -135,6 +152,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
 Ejecuta tu app: deberías ver el mapa centrado en Mountain View (la sede de Google).

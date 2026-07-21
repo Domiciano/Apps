@@ -1,21 +1,22 @@
-[t] Interactuando con el Mapa
+# Interactuando con el Mapa
 
 Un mapa interactivo es mucho más útil. En esta lección, aprenderemos a responder a las interacciones del usuario con el mapa, como toques (taps) y pulsaciones largas (long presses), tanto en el mapa en general como en marcadores específicos.
 
-[st] Tipos de Listeners Disponibles
+## Tipos de Listeners Disponibles
+
 El widget `GoogleMap` expone varios callbacks para eventos del usuario. Los más comunes son:
 
-[list]
-`onTap`: Se activa al tocar cualquier punto del mapa.
-`onLongPress`: Se activa cuando mantienes presionado un punto.
-`onTap` (dentro de `Marker`): Se activa cuando se toca un marcador específico.
-[endlist]
+- `onTap`: Se activa al tocar cualquier punto del mapa.
+- `onLongPress`: Se activa cuando mantienes presionado un punto.
+- `onTap` (dentro de `Marker`): Se activa cuando se toca un marcador específico.
 
-[st] Escuchar Tap y Long Tap en el Mapa
+## Escuchar Tap y Long Tap en el Mapa
+
 Para detectar toques y pulsaciones largas en cualquier parte del mapa, simplemente agrega las propiedades `onTap` y `onLongPress` al widget `GoogleMap` y asígnales funciones que manejarán estos eventos.
 
 Modifica tu `GoogleMap` así:
-[code:dart]
+
+```dart
 GoogleMap(
   onMapCreated: _onMapCreated,
   initialCameraPosition: CameraPosition(
@@ -26,11 +27,11 @@ GoogleMap(
   onTap: _handleTap,        // Nuevo: Manejador para toques
   onLongPress: _handleLongPress, // Nuevo: Manejador para pulsaciones largas
 )
-[endcode]
+```
 
 Ahora, define los métodos `_handleTap` y `_handleLongPress` dentro de tu clase `_MapScreenState`:
 
-[code:dart]
+```dart
 // Dentro de la clase _MapScreenState
 
 void _handleTap(LatLng tappedPoint) {
@@ -53,17 +54,19 @@ void _handleLongPress(LatLng pressedPoint) {
     ),
   );
 }
-[endcode]
+```
 
 Resultado:
 - Un toque en cualquier parte del mapa agregará un nuevo marcador en esa posición.
 - Una pulsación larga mostrará un `SnackBar` en la parte inferior de la pantalla con las coordenadas del punto presionado.
 
-[st] Detectar Clics en un Marcador
+## Detectar Clics en un Marcador
+
 El evento de toque para un marcador se maneja directamente dentro de la definición del `Marker`, usando su parámetro `onTap`. Esto te permite definir un comportamiento específico para cada marcador individual.
 
 Ejemplo (modificando el marcador inicial de Google HQ):
-[code:dart]
+
+```dart
 Marker(
   markerId: const MarkerId('google_hq'),
   position: const LatLng(37.4219999, -122.0840575),
@@ -75,13 +78,15 @@ Marker(
     );
   },
 )
-[endcode]
+```
+
 Importante: Cada marcador puede tener su propio comportamiento `onTap` definido, lo que permite una gran flexibilidad en la interacción.
 
-[st] Ejemplo Completo
+## Ejemplo Completo
+
 Aquí tienes el código completo de `MapScreen` integrando todos los listeners que hemos visto:
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -154,5 +159,6 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
-[endcode]
+```
+
 .

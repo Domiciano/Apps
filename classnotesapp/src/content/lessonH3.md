@@ -1,17 +1,19 @@
-[t] Enviar datos a base de datos
-Vamos a supabase y creamos el modelo de datos. Nos vamosa basar por supuesto en la [link] (Guía de Supabase para Flutter) https://supabase.com/docs/reference/dart/select
+# Enviar datos a base de datos
 
-[code:sql]
+Vamos a supabase y creamos el modelo de datos. Nos vamosa basar por supuesto en la [Guía de Supabase para Flutter](https://supabase.com/docs/reference/dart/select)
+
+```sql
 create table posts (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   content text,
   created_at timestamp with time zone default now()
 );
-[endcode]
+```
 
 Luego, podemos crear un modelo de datos correspondiente. Note cómo le podemos valor por defecto a `createdAt`.
-[code:dart]
+
+```dart
 class Post {
   final String id;
   final String title;
@@ -45,11 +47,11 @@ class Post {
     );
   }
 }
-[endcode]
-
+```
 
 Se puede enviar asi
-[code:dart]
+
+```dart
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final supabase = Supabase.instance.client;
@@ -61,11 +63,11 @@ Future<void> createPost(Post post) async {
     throw Exception('Error insertando post: ${response.error!.message}');
   }
 }
-[endcode]
+```
 
 Y posteriormente se pueden recuperar asi
 
-[code:dart]
+```dart
 Future<List<Post>> getPosts() async {
   final response = await supabase.from('posts').select();
 
@@ -76,62 +78,69 @@ Future<List<Post>> getPosts() async {
   final data = response.data as List;
   return data.map((e) => Post.fromJson(e)).toList();
 }
-[endcode]
+```
 
-[list]
-Definir el modelo Dart con toJson() y fromJson().
-Crear la tabla en Supabase con SQL.
-Usar supabase.from('tabla').insert() para enviar.
-Usar supabase.from('tabla').select() para leer.
-[endlist]
+- Definir el modelo Dart con toJson() y fromJson().
+- Crear la tabla en Supabase con SQL.
+- Usar supabase.from('tabla').insert() para enviar.
+- Usar supabase.from('tabla').select() para leer.
 
-[st] Paginacion
+## Paginacion
+
 Si quiero los primeros 10 registros
-[code:dart]
+
+```dart
 final response = await supabase
     .from('posts')
     .select()
     .order('created_at', ascending: false)
     .range(0, 9);
-[endcode]
+```
+
 Si quiero los segundos 10 registros
-[code:dart]
+
+```dart
 final response = await supabase
     .from('posts')
     .select()
     .order('created_at', ascending: false)
     .range(10, 19);
-[endcode]
+```
 
-[st] Filtros
-[code:dart]
+## Filtros
+
+```dart
 final response = await supabase
     .from('profiles')
     .select()
     .eq('username', 'alfredo123');
-[endcode]
+```
 
 Así como `eq` (equals), están los de mayor / menor (gt, gte, lt, lte)
-[code:dart]
+
+```dart
 final res = await supabase
     .from('posts')
     .select()
     .gt('likes', 100); // likes > 100
-[endcode]
+```
 
 También el operador `LIKE`
-[code:dart]
+
+```dart
 final res = await supabase
     .from('profiles')
     .select()
     .like('full_name', '%Rincón%'); // contiene "Rincón"
-[endcode]
+```
 
 O coincidencia dentro de una lista de valores
-[code:dart]
+
+```dart
 final res = await supabase
     .from('profiles')
     .select()
     .inFilter('username', ['pepe', 'maria', 'juan']);
-[endcode]
+```
+
 .

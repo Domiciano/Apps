@@ -1,19 +1,21 @@
-[t] Laboratorio 3: Manejo de listas
-[st] Introducción
+# Laboratorio 3: Manejo de listas
+
+## Introducción
+
 En este corto laboratorio nos enfocaremos en producir elementos de lista usando como base el laboratorio 2.
 El objetivo es añadir otra `Page` a la aplicación, de modo que sea un buscador de canciones
 
-[st] `Page` de búsqueda de canciones
+## `Page` de búsqueda de canciones
 
 Para hacer la búsqueda haga uso de las siguientes URL
 
-[code:plain]
+```plain
 https://api.deezer.com/search?q=eminem
 (No tiene los header de CORS)
 o
 https://i2thub.icesi.edu.co:5443/deezer/search?q=eminem
 (Tiene todos los header de CORS)
-[endcode]
+```
 
 Donde el Request Param `q` es el término de búsqueda.
 

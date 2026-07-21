@@ -1,8 +1,10 @@
-[t] Factory constructors
+# Factory constructors
+
 Un factory constructor en Dart permite devolver una instancia de la clase, pero no necesariamente una nueva. Es útil para patrones como singleton, caché, o lógica de inicialización condicional.
 
-[st] Ejemplo de factory constructor
-[code:dart]
+## Ejemplo de factory constructor
+
+```dart trycode=f8d21d462a74cbc07647642ff564cf30
 class Logger {
   static final Logger _instance = Logger._internal();
 
@@ -22,13 +24,13 @@ void main() {
   var logger2 = Logger();
   print(logger1 == logger2); // true
 }
-[endcode]
-[trycode] f8d21d462a74cbc07647642ff564cf30
+```
 
 El factory constructor puede devolver una instancia existente o crear una nueva según la lógica que definas.
 
-[st] Factory para parsear objetos
-[code:dart]
+## Factory para parsear objetos
+
+```dart trycode=2ab3293d832ed38e1fc2b6afa1447689
 class Person {
   final String name;
   final int age;
@@ -48,6 +50,6 @@ void main() {
   var person = Person.fromJson(data);
   print(person.name); // Ana
 }
-[endcode]
-[trycode] 2ab3293d832ed38e1fc2b6afa1447689
-El factory constructor es ideal para crear objetos a partir de datos externos, como JSON. 
+```
+
+El factory constructor es ideal para crear objetos a partir de datos externos, como JSON.

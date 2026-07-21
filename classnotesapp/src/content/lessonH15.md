@@ -1,7 +1,8 @@
-[t] Registro de Usuarios con Supabase
+# Registro de Usuarios con Supabase
+
 Ahora, vamos a utilizar el procedimiento de registro usando el siguiente método
 
-[code:dart]
+```dart
 Future<void> _signUp() async {
   try {
     final AuthResponse res = await Supabase.instance.client.auth.signUp(
@@ -16,9 +17,10 @@ Future<void> _signUp() async {
     print(e);
   }
 }
-[endcode]
+```
 
-[st] ¿Cómo funciona el registro?
+## ¿Cómo funciona el registro?
+
 El método `supabase.auth.signUp()` es el encargado de crear un nuevo usuario. Recibe un `email` y un `password`.
 Por defecto, Supabase envía un correo de confirmación, aunque probemos en este laboratorio qué sucede con el flujo si lo desactivamos
 
@@ -33,4 +35,3 @@ El usuario ya está autenticado en este momento.
 
 `res.session == null && res.user != null`
 El usuario fue creado, pero necesita confirmar su correo antes de loggearse.
-

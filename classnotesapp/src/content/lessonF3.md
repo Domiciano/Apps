@@ -1,14 +1,14 @@
-[t] Interacción en Listas y Modelos de Datos Simples
+# Interacción en Listas y Modelos de Datos Simples
 
 Ahora que sabemos cómo mostrar listas estáticas y dinámicas de manera eficiente, el siguiente paso es hacer que nuestros elementos de lista sean interactivos. En la mayoría de las aplicaciones, al tocar un elemento de una lista, se realiza alguna acción, como navegar a una pantalla de detalles o mostrar más información.
 
 También exploraremos cómo manejar datos más complejos que simples cadenas de texto, utilizando modelos de datos.
 
-[st] Haciendo los Elementos de Lista Interactivos
+## Haciendo los Elementos de Lista Interactivos
 
 Para que un elemento de lista responda a toques, podemos envolverlo en un widget que detecte gestos, como `GestureDetector` o `InkWell`. `ListTile` ya tiene una propiedad `onTap` incorporada, lo que lo hace muy conveniente.
 
-[code:dart]
+```dart trycode=fc9c31cc40446404f7e52ff735de0068
 import 'package:flutter/material.dart';
 
 void main() {
@@ -48,18 +48,17 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] fc9c31cc40446404f7e52ff735de0068
+```
 
 En este ejemplo, cada vez que se toca un elemento de la lista, aparece un `SnackBar` en la parte inferior de la pantalla mostrando qué fruta fue tocada. La función `onTap` de `ListTile` es un `VoidCallback`, lo que significa que espera una función que no toma argumentos y no devuelve nada.
 
-[st] Modelos de Datos Simples
+## Modelos de Datos Simples
 
 Hasta ahora, hemos trabajado con listas de `String`. Sin embargo, en aplicaciones reales, los datos suelen ser más complejos y estructurados. Por ejemplo, una canción no es solo un título, sino que también tiene un artista, una duración, un género, etc.
 
 Podemos representar estos datos complejos creando clases de Dart que actúen como modelos de datos. Esto mejora la organización, la legibilidad y la seguridad de tipos de nuestro código.
 
-[code:dart]
+```dart trycode=04ef26c393591b291d1ed78770dc1efb
 import 'package:flutter/material.dart';
 
 // 1. Definimos nuestro modelo de datos para una Canción
@@ -113,7 +112,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 04ef26c393591b291d1ed78770dc1efb
+```
 
 Al usar modelos de datos, nuestro código se vuelve más organizado y fácil de entender. Cada elemento de la lista es un objeto con propiedades bien definidas, lo que facilita el acceso y la manipulación de la información.

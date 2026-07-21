@@ -1,10 +1,16 @@
-[t] Layout
+# Layout
+
 En esta lección aprenderás a organizar y personalizar la disposición de los widgets en Flutter usando `Container`, `Row` y `Column`.
-[v] 75xXoz6JvdY  
-[st] El Widget Container
+
+```youtube
+75xXoz6JvdY
+```
+
+## El Widget Container
+
 `Container` es un widget versátil que funciona como un "div" en web. Permite personalizar el ancho, alto, color y otros estilos de un área de la pantalla. Solo puede tener un hijo, pero puedes anidar varios containers para lograr diseños complejos.
 
-[code:dart]
+```dart trycode=e4cb71b3491e80ceb16a40beea6c10c7
 import 'package:flutter/material.dart';
 
 void main() {
@@ -37,12 +43,13 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] e4cb71b3491e80ceb16a40beea6c10c7
+```
 
-[st] El Widget Column
+## El Widget Column
+
 `Column` es un widget que permite organizar varios widgets hijos en una disposición vertical (de arriba a abajo). Es muy parecido a una columna en Flexbox en web.
-[code:dart]
+
+```dart trycode=29b05a170041f34fa042190dfbe58b5e
 import 'package:flutter/material.dart';
 
 void main() {
@@ -75,13 +82,13 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 29b05a170041f34fa042190dfbe58b5e
+```
 
-[st] El Widget Row
+## El Widget Row
+
 `Row` es un widget que permite organizar varios widgets hijos en una disposición horizontal (de izquierda a derecha). Es muy parecido a una fila en Flexbox en web.
 
-[code:dart]
+```dart trycode=24cbe0dae7df7765d2fbf4eac5896056
 import 'package:flutter/material.dart';
 
 void main() {
@@ -112,16 +119,15 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 24cbe0dae7df7765d2fbf4eac5896056
+```
 
-[st] Propiedades de Alineación
+## Propiedades de Alineación
 
 Los widgets `Row` y `Column` comparten propiedades clave para controlar la disposición y alineación de sus hijos:
 
 Un ejemplo práctico de cómo combinar `Row` y `Column` es la creación de una barra de iconos y texto, como las que se encuentran comúnmente en las aplicaciones móviles.
 
-[code:dart]
+```dart trycode=2bd3986b5a5872e9941399469b4b89e6
 import 'package:flutter/material.dart';
 
 void main() {
@@ -172,8 +178,8 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 2bd3986b5a5872e9941399469b4b89e6
+```
+
 Intenta cambiar las propiedades en el código de ejemplo para que veas los diferentes efectos.
 
 `mainAxisAlignment`

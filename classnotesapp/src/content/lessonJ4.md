@@ -1,28 +1,24 @@
-[t] Laboratorio 8
+# Laboratorio 8
 
-[st] Parte 1 — Foto de perfil
+## Parte 1 — Foto de perfil
 
 Como usuario, quiero poder agregar o cambiar mi foto de perfil para personalizar mi cuenta.
 
-[st] Tareas
+## Tareas
 
-[list]
-Crea un bucket en Supabase Storage para almacenar las fotos de perfil.
-Agrega la dependencia `image_picker` al proyecto.
-Implementa la selección de imagen desde la galería o cámara.
-Sube la imagen al bucket de Supabase Storage.
-Guarda la URL de la imagen en la tabla de usuarios.
-Muestra la foto de perfil en la pantalla de perfil.
-[endlist]
+- Crea un bucket en Supabase Storage para almacenar las fotos de perfil.
+- Agrega la dependencia `image_picker` al proyecto.
+- Implementa la selección de imagen desde la galería o cámara.
+- Sube la imagen al bucket de Supabase Storage.
+- Guarda la URL de la imagen en la tabla de usuarios.
+- Muestra la foto de perfil en la pantalla de perfil.
 
-[st] Parte 2 — Fotos en el chat
+## Parte 2 — Fotos en el chat
 
 Como usuario, quiero ver la foto de perfil de cada persona junto a sus mensajes en el chat.
 
-[st] Tareas
+## Tareas
 
-[list]
-Enriquece la consulta de mensajes para incluir el `avatar_url` del remitente.
-Muestra el avatar del remitente junto a cada burbuja de mensaje.
-Si el usuario no tiene foto, muestra su inicial como fallback.
-[endlist]
+- Enriquece la consulta de mensajes para incluir el `avatar_url` del remitente.
+- Muestra el avatar del remitente junto a cada burbuja de mensaje.
+- Si el usuario no tiene foto, muestra su inicial como fallback.

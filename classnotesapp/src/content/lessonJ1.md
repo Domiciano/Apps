@@ -1,28 +1,28 @@
-[t] Acceso a Galería y Cámara
+# Acceso a Galería y Cámara
 
 Esta lección te enseñará cómo permitir que tu aplicación Flutter acceda a la cámara del dispositivo para tomar fotos o a la galería para seleccionar imágenes existentes.
 
-[st] 1. Instalación de dependencias
+## 1. Instalación de dependencias
 
 Para empezar, necesitas añadir la librería `image_picker` a tu proyecto, la cual gestiona el acceso a la cámara y galería.
 
 Abre tu terminal y ejecuta el siguiente comando en la raíz de tu proyecto Flutter:
 
-[code:bash]
+```bash
 flutter pub add image_picker
-[endcode]
+```
 
 Esto añadirá la dependencia a tu archivo `pubspec.yaml`.
 
-[st] 2. Uso de ImagePicker
+## 2. Uso de ImagePicker
 
 El widget `ImagePicker` nos provee de los métodos necesarios para abrir la cámara o la galería del dispositivo.
 
-[st] Seleccionar imagen desde la galería
+## Seleccionar imagen desde la galería
 
 Para permitir al usuario seleccionar una foto de su galería, puedes usar el método `pickImage` con `ImageSource.gallery`.
 
-[code:dart]
+```dart
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -42,13 +42,13 @@ Future<void> _pickImageFromGallery() async {
   // Ahora tienes el archivo de la imagen y puedes usarlo.
   // Por ejemplo, mostrarlo en un widget Image.file(file)
 }
-[endcode]
+```
 
-[st] Tomar una foto con la cámara
+## Tomar una foto con la cámara
 
 De forma similar, para abrir la cámara y permitir al usuario tomar una foto, usa `ImageSource.camera`.
 
-[code:dart]
+```dart
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -67,13 +67,13 @@ Future<void> _takePhotoWithCamera() async {
   final file = File(pickedFile.path);
   // Ahora tienes el archivo de la imagen capturada.
 }
-[endcode]
+```
 
-[st] Integración en un Widget
+## Integración en un Widget
 
 El siguiente es un fragmento de cómo integrarías estos métodos en botones dentro de un widget.
 
-[code:dart]
+```dart
 // ... dentro de tu StateFulWidget
 
 ElevatedButton.icon(
@@ -87,15 +87,15 @@ ElevatedButton.icon(
   icon: const Icon(Icons.camera_alt),
   label: const Text('Tomar foto con cámara'),
 ),
-[endcode]
+```
 
-[st] 3. Configuración adicional para macOS
+## 3. Configuración adicional para macOS
 
 Si tu aplicación va a correr en macOS, necesitas declarar los permisos de acceso a archivos en los archivos de entitlements. Añade la siguiente clave en `macos/Runner/DebugProfile.entitlements` y en `macos/Runner/Release.entitlements`:
 
-[code:xml]
+```xml
 <key>com.apple.security.files.user-selected.read-only</key>
 <true/>
-[endcode]
+```
 
 Sin esta configuración, el selector de imágenes no tendrá permiso para leer archivos del sistema en macOS.

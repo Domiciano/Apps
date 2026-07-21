@@ -1,16 +1,16 @@
+# Objeto como estado en Cubit
 
-[t] Objeto como estado en Cubit
 Ya hemos visto como tener un estado como lista. Pero qué pasa si quiero representar un sólo objeto y no una lista. Estilo un objeto profile sobre una pantalla de Profile?
 
 El principio es exactamente el mismo. En lugar de que nuestra clase de estado contenga una lista, contendrá una única instancia de nuestro objeto. También es común incluir un estado para representar cuándo el perfil se está cargando o si ha ocurrido un error.
 
 Veamos un ejemplo para un perfil de usuario.
 
-[st] 1. Definir el Estado del Perfil
+## 1. Definir el Estado del Perfil
 
 Primero, definimos la clase `ProfileState` que manejará los diferentes estados posibles: inicial, carga, éxito (con los datos del perfil) y error.
 
-[code:dart]
+```dart
 // Se puede usar una clase abstracta o una clase con estados enumerados
 
 abstract class ProfileState {}
@@ -35,13 +35,13 @@ class UserProfile {
   final String email;
   UserProfile({required this.name, required this.email});
 }
-[endcode]
+```
 
-[st] 2. Crear el Cubit del Perfil
+## 2. Crear el Cubit del Perfil
 
 El `ProfileCubit` manejará la lógica para cargar el perfil.
 
-[code:dart]
+```dart
 class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit() : super(ProfileInitial());
 
@@ -57,13 +57,13 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 }
-[endcode]
+```
 
-[st] 3. Usar el Cubit en la UI
+## 3. Usar el Cubit en la UI
 
 Finalmente, en la UI, usamos `BlocBuilder` para reaccionar a los diferentes estados del perfil y mostrar la información correspondiente.
 
-[code:dart]
+```dart
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -98,6 +98,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
 Este enfoque nos da un control muy granular sobre la UI, permitiéndote mostrar diferentes widgets para cada estado posible de nuestro objeto.

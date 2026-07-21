@@ -3,39 +3,50 @@ import mermaid from "mermaid";
 import Box from "@mui/material/Box";
 import { useThemeMode } from "@/theme/ThemeContext";
 
-let mermaidCounter = 0;
+let initialized = false;
 
-const MermaidBlock = ({ children }) => {
-  const containerRef = useRef(null);
-  const idRef = useRef(`mermaid-block-${++mermaidCounter}`);
+const MermaidBlock = ({ chart }) => {
   const { mode } = useThemeMode();
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!initialized) {
+      mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
+      initialized = true;
+    }
+  }, []);
 
+  useEffect(() => {
+    if (!containerRef.current || !chart?.trim()) return;
+
+    const id = `mermaid-${Math.random().toString(36).slice(2)}`;
     mermaid.initialize({
       startOnLoad: false,
-      theme: mode === "dark" ? "dark" : "default",
       securityLevel: "loose",
+      theme: mode === "dark" ? "dark" : "default",
     });
 
-    // Reset container with the definition so mermaid.run() can process it
-    containerRef.current.innerHTML = `<pre class="mermaid" id="${idRef.current}">${children}</pre>`;
-
     mermaid
-      .run({ nodes: [containerRef.current.querySelector(`#${idRef.current}`)] })
-      .catch((err) => console.error("Mermaid render error:", err));
-  }, [children, mode]);
+      .render(id, chart.trim())
+      .then(({ svg }) => {
+        if (containerRef.current) containerRef.current.innerHTML = svg;
+      })
+      .catch((err) => {
+        console.error("[MermaidBlock]", err);
+        if (containerRef.current)
+          containerRef.current.textContent = `Error rendering diagram: ${err.message}`;
+      });
+  }, [chart, mode]);
 
   return (
     <Box
       ref={containerRef}
       sx={{
         my: 2,
-        display: "flex",
-        justifyContent: "center",
+        p: 2,
+        borderRadius: 2,
         overflowX: "auto",
-        "& svg": { maxWidth: "100%" },
+        "& svg": { maxWidth: "100%", height: "auto" },
       }}
     />
   );

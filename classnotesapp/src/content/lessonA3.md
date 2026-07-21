@@ -1,8 +1,10 @@
-[t] Trabajando con Strings
+# Trabajando con Strings
+
 Los strings en Dart son secuencias de caracteres que puedes manipular de varias formas. Vamos a ver las más comunes: concatenación e interpolación.
 
-[st] Concatenación de strings
-[code:dart]
+## Concatenación de strings
+
+```dart trycode=9ea5113dcc307145e4f26950b3770012
 void main() {
   String firstName = 'Ana';
   String lastName = 'García';
@@ -15,13 +17,14 @@ void main() {
   String greeting = 'Hello ' + firstName;
   print(greeting); // Hello Ana
 }
-[endcode]
-[trycode] 9ea5113dcc307145e4f26950b3770012
+```
+
 La concatenación con `+` es la forma más simple de unir strings.
 También puedes usar interpolación para unir strings.
 
-[st] Interpolación de strings
-[code:dart]
+## Interpolación de strings
+
+```dart trycode=9375d5f2e5afb0049c2deabf728a2102
 void main() {
   String name = 'Carlos';
   int age = 25;
@@ -38,13 +41,14 @@ void main() {
   String list = 'Shopping list: ${['apples', 'milk', 'bread']}';
   print(list); // Shopping list: [apples, milk, bread]
 }
-[endcode]
-[trycode] 9375d5f2e5afb0049c2deabf728a2102
+```
+
 La interpolación con `$` es más legible y eficiente que la concatenación.
 Puedes usar `${}` para expresiones más complejas.
 
-[st] Strings multilínea
-[code:dart]
+## Strings multilínea
+
+```dart trycode=fb3770f6687957ed296000cfe5a6e483
 void main() {
   // Multiline string with triple quotes
   String poem = '''
@@ -64,12 +68,13 @@ void main() {
   """;
   print(letter);
 }
-[endcode]
-[trycode] fb3770f6687957ed296000cfe5a6e483
+```
+
 Usa comillas triples `'''` o `"""` para strings que ocupan múltiples líneas.
 
-[st] Métodos útiles de strings
-[code:dart]
+## Métodos útiles de strings
+
+```dart trycode=4c4d6995aece9660c1b65839437c4c03
 void main() {
   String text = '  Hello World  ';
   
@@ -81,12 +86,10 @@ void main() {
   print(text.startsWith('  ')); // true
   print(text.endsWith('  ')); // true
 }
-[endcode]
-[trycode] 4c4d6995aece9660c1b65839437c4c03
+```
+
 `toUpperCase()` y `toLowerCase()` cambian el caso.
 
 `trim()` elimina espacios al inicio y final.
 
 `contains()`, `startsWith()` y `endsWith()` verifican contenido.
-
-

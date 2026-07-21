@@ -1,17 +1,18 @@
-[t] Text
+# Text
 
 El widget `Text` es uno de los más fundamentales en Flutter, utilizado para mostrar una cadena de texto en la pantalla. Permite una gran personalización a través de su propiedad `style`.
 
-[st] Uso Básico
+## Uso Básico
 
 Para mostrar texto, simplemente pasas una cadena al constructor de `Text`.
 
-[code:dart]
+```dart
 Text('Hola, Flutter!')
-[endcode]
+```
 
 Pruébalo por ti mismo
-[code:dart]
+
+```dart trycode=74982acbc364f84b7004d0d5a7718f43
 import 'package:flutter/material.dart';
 
 void main() {
@@ -32,25 +33,26 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 74982acbc364f84b7004d0d5a7718f43
+```
 
-[st] Estilizando el Texto
+## Estilizando el Texto
 
 La propiedad `style` del widget `Text` acepta un objeto `TextStyle`, que te permite controlar una amplia gama de propiedades visuales del texto, como el color, el tamaño de la fuente, el peso (negrita), y más.
 
-[st] Color del Texto
+## Color del Texto
 
 Para cambiar el color del texto, usa la propiedad `color` dentro de `TextStyle`.
 
-[code:dart]
+```dart
 Text(
   'Texto Rojo',
   style: TextStyle(color: Colors.red),
 )
-[endcode]
+```
+
 Pruébalo por ti mismo
-[code:dart]
+
+```dart trycode=09f602401b9ec4bf8c1b0c0ab93ced95
 import 'package:flutter/material.dart';
 
 void main() {
@@ -74,22 +76,22 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 09f602401b9ec4bf8c1b0c0ab93ced95
+```
 
-[st] Tamaño de la Fuente
+## Tamaño de la Fuente
 
 La propiedad `fontSize` controla el tamaño del texto.
 
-[code:dart]
+```dart
 Text(
   'Texto Grande',
   style: TextStyle(fontSize: 24.0),
 )
-[endcode]
+```
 
 Pruébalo por ti mismo
-[code:dart]
+
+```dart trycode=b0247e8702b421da747b8153b55aae8c
 import 'package:flutter/material.dart';
 
 void main() {
@@ -113,22 +115,22 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] b0247e8702b421da747b8153b55aae8c
+```
 
-[st] Negrita y Otros Pesos de Fuente
+## Negrita y Otros Pesos de Fuente
 
 Usa la propiedad `fontWeight` para aplicar negrita u otros pesos de fuente. `FontWeight.bold` es para negrita.
 
-[code:dart]
+```dart
 Text(
   'Texto en Negrita',
   style: TextStyle(fontWeight: FontWeight.bold),
 )
-[endcode]
+```
 
 Pruébalo por ti mismo
-[code:dart]
+
+```dart trycode=6d10a5b938b99ac69f2cc55deb4bad01
 import 'package:flutter/material.dart';
 
 void main() {
@@ -152,14 +154,13 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 6d10a5b938b99ac69f2cc55deb4bad01
+```
 
-[st] Combinando Estilos
+## Combinando Estilos
 
 Puedes combinar múltiples propiedades de estilo en un solo `TextStyle`.
 
-[code:dart]
+```dart
 Text(
   'Texto Azul y Grande',
   style: TextStyle(
@@ -168,10 +169,11 @@ Text(
     fontWeight: FontWeight.w500, // Un peso intermedio
   ),
 )
-[endcode]
+```
 
 Pruébalo por tu mismo
-[code:dart]
+
+```dart trycode=99e8e614431f0a06bfd66ec04ba09295
 import 'package:flutter/material.dart';
 
 void main() {
@@ -199,14 +201,13 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 99e8e614431f0a06bfd66ec04ba09295
+```
 
-[st] Ejemplo Completo
+## Ejemplo Completo
 
 Aquí tienes un ejemplo completo y funcional que demuestra cómo usar el widget `Text` con diferentes estilos.
 
-[code:dart]
+```dart trycode=407020861ee8301495bb36973b9edc74
 import 'package:flutter/material.dart';
 
 void main() {
@@ -260,7 +261,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] 407020861ee8301495bb36973b9edc74
+```
 
 .

@@ -1,14 +1,16 @@
-[t] Conceptos iniciales
-[st] Creando Componentes en Flutter
+# Conceptos iniciales
+
+## Creando Componentes en Flutter
+
 En Flutter, la interfaz de usuario se construye a partir de pequeños bloques de construcción llamados `Widgets`. Piensa en ellos como si fueran piezas de Lego: puedes combinar varios widgets simples para crear interfaces complejas y reutilizables. A este proceso lo llamamos "componetizar".
 
-[st] Definiendo un Componente (Widget)
+## Definiendo un Componente (Widget)
 
 Un widget es simplemente una clase de Dart que hereda de `StatelessWidget` o `StatefulWidget`. Para empezar, nos enfocaremos en los `StatelessWidget`, que son componentes simples sin estado interno.
 
 Crear un widget es tan fácil como crear una clase y definir su apariencia en el método `build`.
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 
 // Definimos nuestro nuevo widget llamado SaludoWidget
@@ -25,9 +27,9 @@ class SaludoWidget extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] ¿Por qué usamos `super.key`?
+## ¿Por qué usamos `super.key`?
 
 El parámetro `key` es un identificador que Flutter usa para diferenciar un widget de otro. Al pasarlo con `super.key`, le estamos dando una `Key` (o llave) única a nuestro widget.
 
@@ -35,13 +37,13 @@ Imagina que tienes una lista de widgets idénticos. Si uno de ellos cambia, se e
 
 Desde Dart 2.17, la forma más simple de hacerlo es usando `super-parameters`, que nos permite pasar el parámetro `key` directamente al constructor de la superclase (`StatelessWidget` en este caso) usando `super.key`.
 
-[st] Usando Variables como Propiedades (Props)
+## Usando Variables como Propiedades (Props)
 
 Un componente no es muy útil si siempre muestra lo mismo. Queremos poder pasarle datos para que sea dinámico. A estos datos los llamamos "propiedades" (o "props", como en otros frameworks).
 
 Para pasar datos, simplemente declaramos variables `final` en nuestro widget y las inicializamos en el constructor.
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 
 class SaludoPersonalizado extends StatelessWidget {
@@ -74,15 +76,15 @@ class MiPantalla extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] Usando Funciones como Propiedades (Callbacks)
+## Usando Funciones como Propiedades (Callbacks)
 
 Además de datos, también podemos pasar funciones. Esto es fundamental para gestionar interacciones del usuario, como cuando se presiona un botón. A estas funciones las llamamos "callbacks".
 
 Creemos un botón personalizado que nos notifique cuando es presionado.
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 
 class BotonPersonalizado extends StatelessWidget {
@@ -125,6 +127,6 @@ class MiPantallaConBoton extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
 Al componetizar, creamos widgets reutilizables, mantenibles y fáciles de entender. Esta es la base para construir aplicaciones robustas y escalables en Flutter.

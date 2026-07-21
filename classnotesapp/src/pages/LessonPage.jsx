@@ -42,7 +42,7 @@ const LessonPage = forwardRef(({ sections }, ref) => {
       const parsed = LessonParser({ content: rawContent });
       setParsedContent(parsed);
     } else {
-      const errorContent = `[p]Lo siento, la lección con ID "${lessonId}" no fue encontrada o el archivo "${filePath}" no existe.`;
+      const errorContent = `# Lección no encontrada\n\nLo siento, la lección con ID "${lessonId}" no fue encontrada o el archivo "${filePath}" no existe.`;
       
       const parsed = LessonParser({ content: errorContent });
       setParsedContent(parsed);

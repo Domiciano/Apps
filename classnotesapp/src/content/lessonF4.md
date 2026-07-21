@@ -1,31 +1,30 @@
-[t] Listas y estados
+# Listas y estados
 
 En las lecciones anteriores, hemos trabajado principalmente con `StatelessWidget`, que son widgets que no cambian una vez que se construyen. Sin embargo, la mayoría de las aplicaciones necesitan interactuar con el usuario y mostrar datos que cambian con el tiempo. Para esto, necesitamos `StatefulWidget`.
 
-[st] Usemos el `StatefulWidget`
+## Usemos el `StatefulWidget`
 
 Como hemos visto, un `StatefulWidget` es un widget que puede cambiar su apariencia. Puede hacerlo, entre otros, ante eventos del usuario. 
 
-[st] El Modelo de Datos: `Reminder`
+## El Modelo de Datos: `Reminder`
 
 Para nuestra aplicación de recordatorios, definiremos una clase simple `Reminder` que contendrá la descripción de cada recordatorio.
 
-[code:dart]
+```dart trycode=008afc2e841bfb8d9c31964290b4b97a
 class Reminder {
   final String description;
 
   const Reminder({required this.description});
 }
-[endcode]
-[trycode] 008afc2e841bfb8d9c31964290b4b97a
+```
 
-[st] Construyendo la Aplicación de Recordatorios
+## Construyendo la Aplicación de Recordatorios
 
 Nuestra aplicación tendrá un `TextField` para ingresar nuevos recordatorios y un `ElevatedButton` para agregarlos a una lista. La lista de recordatorios se mostrará en un `ListView`.
 
 La clave aquí es que la lista de `Reminder`s y el texto del `TextField` serán parte del estado de nuestro `StatefulWidget`.
 
-[code:dart]
+```dart trycode=857175190ca4a1f809f78a6ba695e01a
 import 'package:flutter/material.dart';
 
 // Modelo de datos para un recordatorio
@@ -131,10 +130,9 @@ class _ReminderScreenState extends State<ReminderScreen> {
     super.dispose();
   }
 }
-[endcode]
-[trycode] 857175190ca4a1f809f78a6ba695e01a
+```
 
-[st] Explicación del Estado
+## Explicación del Estado
 
 *   **`_reminders`**: Esta lista se declara dentro de la clase `_ReminderScreenState`. Esto significa que su valor se mantiene mientras el `State` del `ReminderScreen` exista. Cuando agregamos un nuevo recordatorio, modificamos esta lista.
 *   **`_textController`**: Similarmente, el controlador del `TextField` se mantiene en el estado para poder acceder y limpiar el texto.

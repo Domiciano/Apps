@@ -1,4 +1,4 @@
-[code:dart]
+```dart trycode=d95a0b5b9c85b828c94b237be21b1bb9
 import 'package:flutter/material.dart';
 
 void main() {
@@ -32,5 +32,4 @@ class MainScreen extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] d95a0b5b9c85b828c94b237be21b1bb9
+```

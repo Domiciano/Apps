@@ -1,8 +1,8 @@
-[t] Image
+# Image
 
 El widget `Image` es esencial para mostrar elementos visuales en tu aplicación. Flutter te permite cargar imágenes tanto desde los assets de tu proyecto como directamente desde una URL en internet.
 
-[st] Agregar Imágenes desde Assets
+## Agregar Imágenes desde Assets
 
 Para usar imágenes que vienen con tu aplicación (assets), necesitas configurarlas en el archivo `pubspec.yaml` y luego referenciarlas en tu código.
 
@@ -10,45 +10,45 @@ Para usar imágenes que vienen con tu aplicación (assets), necesitas configurar
 2.  Busca la sección `flutter:` (no la de `dependencies`).
 3.  Añade la clave `assets:` y especifica la carpeta donde guardarás tus imágenes. Por ejemplo, si tus imágenes están en una carpeta llamada `assets` en la raíz de tu proyecto:
 
-[code:yaml]
+```yaml
 flutter:
   assets:
     - assets/
-[endcode]
+```
 
 4.  Crea la carpeta `assets` en la raíz de tu proyecto y coloca allí tus imágenes (por ejemplo, `logo.png`).
 5.  Ejecuta `flutter pub get` en tu terminal para que Flutter reconozca los nuevos assets.
 
-[st] Mostrar una Imagen Local (desde Assets)
+## Mostrar una Imagen Local (desde Assets)
 
 Una vez configurados los assets, puedes mostrar una imagen local usando `Image.asset`.
 
-[code:dart]
+```dart
 Image.asset(
   'assets/logo.png', // Ruta relativa a la carpeta assets
   width: 200,
   height: 100,
   fit: BoxFit.contain, // Ajusta la imagen dentro de sus límites
 )
-[endcode]
+```
 
-[st] Mostrar una Imagen desde Internet
+## Mostrar una Imagen desde Internet
 
 Para mostrar imágenes alojadas en una URL, utiliza `Image.network`. Flutter las descargará y mostrará automáticamente.
 
-[code:dart]
+```dart
 Image.network(
   'https://flutter.dev/images/flutter-logo-sharing.png', // URL de la imagen
   width: 300,
   fit: BoxFit.cover, // Cubre el área disponible, recortando si es necesario
 )
-[endcode]
+```
 
-[st] Ejemplo Completo
+## Ejemplo Completo
 
 Aquí tienes un ejemplo completo y funcional que demuestra cómo mostrar imágenes desde la red y desde assets (simulando un asset con un `Container` de color si no tienes uno real).
 
-[code:dart]
+```dart trycode=ccb80513dd8e632aadd3a499337b055b
 import 'package:flutter/material.dart';
 
 void main() {
@@ -94,6 +94,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-[endcode]
-[trycode] ccb80513dd8e632aadd3a499337b055b
+```
+
 .

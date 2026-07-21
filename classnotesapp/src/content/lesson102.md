@@ -1,10 +1,10 @@
-[t] Ejemplo: Buscador Deezer · Paso a paso
+# Ejemplo: Buscador Deezer · Paso a paso
 
 Construimos un buscador de canciones usando la API pública de Deezer. El usuario escribe una query y la app muestra los resultados en un `ListView`. Seguimos exactamente la estructura del proyecto `moviles252`.
 
-[st] Estructura de carpetas
+## Estructura de carpetas
 
-[code:bash]
+```bash
 lib/
 └── features/
     └── search/
@@ -23,23 +23,23 @@ lib/
             │   └── search_bloc.dart
             └── screens/
                 └── search_screen.dart
-[endcode]
+```
 
-[st] Dependencias
+## Dependencias
 
 Agrega en `pubspec.yaml` y ejecuta `flutter pub get`:
 
-[code:yaml]
+```yaml
 dependencies:
   flutter_bloc: ^9.1.1
   http: ^1.2.1
-[endcode]
+```
 
-[st] Paso 1 · Entidad Track
+## Paso 1 · Entidad Track
 
 La entidad es un objeto Dart puro. No sabe nada de HTTP ni de BLoC.
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="118" font-family="Roboto, Arial, sans-serif">
   <rect x="30" y="10" width="220" height="98" rx="10" fill="#1e3326" stroke="#66BB6A" stroke-width="2"/>
   <text x="140" y="35" text-anchor="middle" fill="white" font-size="14" font-weight="bold">Track</text>
@@ -48,11 +48,11 @@ La entidad es un objeto Dart puro. No sabe nada de HTTP ni de BLoC.
   <text x="140" y="80" text-anchor="middle" fill="#a5d6a7" font-size="11">String artistName</text>
   <text x="140" y="97" text-anchor="middle" fill="#a5d6a7" font-size="11">String albumCover · String previewUrl</text>
 </svg>
-[endsvg]
+```
 
 `lib/features/search/domain/entities/track.dart`
 
-[code:dart]
+```dart
 class Track {
   final int id;
   final String title;
@@ -78,13 +78,13 @@ class Track {
     );
   }
 }
-[endcode]
+```
 
-[st] Paso 2 · MusicRepository (Dominio)
+## Paso 2 · MusicRepository (Dominio)
 
 Definimos el contrato abstracto. No sabe cómo se obtienen los datos.
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
   <defs>
     <marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#888"/></marker>
@@ -124,23 +124,23 @@ Definimos el contrato abstracto. No sabe cómo se obtienen los datos.
   <ellipse cx="140" cy="432" rx="80" ry="22" fill="#1e2530" stroke="#2e3545" stroke-width="1.5"/>
   <text x="140" y="437" text-anchor="middle" fill="#3d4a5e" font-size="12" font-weight="bold">api.deezer.com</text>
 </svg>
-[endsvg]
+```
 
 `lib/features/search/domain/repository/music_repository.dart`
 
-[code:dart]
+```dart
 import 'package:moviles252/features/search/domain/entities/track.dart';
 
 abstract class MusicRepository {
   Future<List<Track>> searchTracks(String query);
 }
-[endcode]
+```
 
-[st] Paso 3 · SearchTracksUsecase (Dominio)
+## Paso 3 · SearchTracksUsecase (Dominio)
 
 El UseCase encapsula la acción de negocio e instancia el repositorio directamente.
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
   <defs>
     <marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#888"/></marker>
@@ -180,11 +180,11 @@ El UseCase encapsula la acción de negocio e instancia el repositorio directamen
   <ellipse cx="140" cy="432" rx="80" ry="22" fill="#1e2530" stroke="#2e3545" stroke-width="1.5"/>
   <text x="140" y="437" text-anchor="middle" fill="#3d4a5e" font-size="12" font-weight="bold">api.deezer.com</text>
 </svg>
-[endsvg]
+```
 
 `lib/features/search/domain/usecases/search_tracks_usecase.dart`
 
-[code:dart]
+```dart
 import 'package:moviles252/features/search/domain/repository/music_repository.dart';
 import 'package:moviles252/features/search/data/repository/music_repository_impl.dart';
 import 'package:moviles252/features/search/domain/entities/track.dart';
@@ -196,13 +196,13 @@ class SearchTracksUsecase {
     return await _repository.searchTracks(query);
   }
 }
-[endcode]
+```
 
-[st] Paso 4 · MusicDataSource (Datos)
+## Paso 4 · MusicDataSource (Datos)
 
 El DataSource hace la llamada HTTP cruda. Define la abstracción y su implementación en el mismo archivo.
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
   <defs>
     <marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#888"/></marker>
@@ -242,11 +242,11 @@ El DataSource hace la llamada HTTP cruda. Define la abstracción y su implementa
   <ellipse cx="140" cy="432" rx="80" ry="22" fill="#AB47BC" stroke="#7B1FA2" stroke-width="1.5"/>
   <text x="140" y="437" text-anchor="middle" fill="white" font-size="12" font-weight="bold">api.deezer.com</text>
 </svg>
-[endsvg]
+```
 
 `lib/features/search/data/source/music_data_source.dart`
 
-[code:dart]
+```dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:moviles252/features/search/domain/entities/track.dart';
@@ -271,13 +271,13 @@ class MusicDataSourceImpl extends MusicDataSource {
     return list.map((e) => Track.fromJson(e as Map<String, dynamic>)).toList();
   }
 }
-[endcode]
+```
 
-[st] Paso 5 · MusicRepositoryImpl (Datos)
+## Paso 5 · MusicRepositoryImpl (Datos)
 
 Implementa el contrato del dominio y delega la llamada al DataSource.
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
   <defs>
     <marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#888"/></marker>
@@ -318,11 +318,11 @@ Implementa el contrato del dominio y delega la llamada al DataSource.
   <ellipse cx="140" cy="432" rx="80" ry="22" fill="#AB47BC" stroke="#7B1FA2" stroke-width="1.5"/>
   <text x="140" y="437" text-anchor="middle" fill="white" font-size="12" font-weight="bold">api.deezer.com</text>
 </svg>
-[endsvg]
+```
 
 `lib/features/search/data/repository/music_repository_impl.dart`
 
-[code:dart]
+```dart
 import 'package:moviles252/features/search/domain/entities/track.dart';
 import 'package:moviles252/features/search/domain/repository/music_repository.dart';
 import 'package:moviles252/features/search/data/source/music_data_source.dart';
@@ -335,13 +335,13 @@ class MusicRepositoryImpl extends MusicRepository {
     return await _dataSource.fetchTracks(query);
   }
 }
-[endcode]
+```
 
-[st] Paso 6 · SearchBloc (Presentación)
+## Paso 6 · SearchBloc (Presentación)
 
 El BLoC define eventos, estados y lógica en un solo archivo. Instancia el UseCase directamente.
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
   <defs>
     <marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#888"/></marker>
@@ -380,11 +380,11 @@ El BLoC define eventos, estados y lógica en un solo archivo. Instancia el UseCa
   <ellipse cx="140" cy="432" rx="80" ry="22" fill="#AB47BC" stroke="#7B1FA2" stroke-width="1.5"/>
   <text x="140" y="437" text-anchor="middle" fill="white" font-size="12" font-weight="bold">api.deezer.com</text>
 </svg>
-[endsvg]
+```
 
 `lib/features/search/ui/bloc/search_bloc.dart`
 
-[code:dart]
+```dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moviles252/features/search/domain/entities/track.dart';
 import 'package:moviles252/features/search/domain/usecases/search_tracks_usecase.dart';
@@ -437,13 +437,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     }
   }
 }
-[endcode]
+```
 
-[st] Paso 7 · SearchScreen (Presentación)
+## Paso 7 · SearchScreen (Presentación)
 
 La pantalla escucha estados del BLoC y renderiza la lista. No contiene lógica de negocio.
 
-[svg]
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
   <defs>
     <marker id="a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#888"/></marker>
@@ -481,11 +481,11 @@ La pantalla escucha estados del BLoC y renderiza la lista. No contiene lógica d
   <ellipse cx="140" cy="432" rx="80" ry="22" fill="#AB47BC" stroke="#7B1FA2" stroke-width="1.5"/>
   <text x="140" y="437" text-anchor="middle" fill="white" font-size="12" font-weight="bold">api.deezer.com</text>
 </svg>
-[endsvg]
+```
 
 `lib/features/search/ui/screens/search_screen.dart`
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moviles252/features/search/ui/bloc/search_bloc.dart';
@@ -583,16 +583,17 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
-[endcode]
+```
 
-[st] Registrar el BLoC en main.dart
+## Registrar el BLoC en main.dart
 
 Envuelve `SearchScreen` con un `BlocProvider` para que tenga acceso al `SearchBloc`.
 
-[code:dart]
+```dart
 BlocProvider(
   create: (_) => SearchBloc(),
   child: const SearchScreen(),
 )
-[endcode]
+```
+
 .

@@ -1,12 +1,12 @@
-[t] Controlando la Cámara del Mapa
+# Controlando la Cámara del Mapa
 
 Mostrar un mapa está bien, pero lo realmente útil es **poder mover la cámara** de forma programática, por ejemplo, al hacer clic en un botón para centrarla en una ubicación específica.
 
-[st] Moviendo la Cámara con un Botón
+## Moviendo la Cámara con un Botón
 
 En este ejemplo, agregaremos un botón que moverá la cámara a una coordenada fija (por ejemplo, el Parque Simón Bolívar en Bogotá).
 
-[code:dart]
+```dart
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -81,11 +81,11 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
-[endcode]
+```
 
 Al presionar el botón flotante, la cámara se moverá suavemente hacia las coordenadas del Parque Simón Bolívar y se agregará un marcador allí.
 
-[st] Ajustando la Vista de la Cámara
+## Ajustando la Vista de la Cámara
 
 Si quieres más control sobre cómo se ve el mapa (por ejemplo, su orientación o inclinación), puedes usar un objeto `CameraPosition` con propiedades como:
 
@@ -96,7 +96,7 @@ Si quieres más control sobre cómo se ve el mapa (por ejemplo, su orientación 
 
 Por ejemplo, para una vista inclinada y orientada al Este:
 
-[code:dart]
+```dart
 mapController.animateCamera(
   CameraUpdate.newCameraPosition(
     CameraPosition(
@@ -107,6 +107,6 @@ mapController.animateCamera(
     ),
   ),
 );
-[endcode]
+```
 
 Con esto puedes crear efectos más dinámicos, como un paneo o una vista en perspectiva.

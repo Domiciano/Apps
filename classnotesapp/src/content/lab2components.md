@@ -1,7 +1,8 @@
-[t] Componentes de UI con Flutter
+# Componentes de UI con Flutter
 
-[st] AppMusicListItem
-[code:dart]
+## AppMusicListItem
+
+```dart
 import 'package:flutter/material.dart';
 
 class AppMusicListItem extends StatelessWidget {
@@ -52,10 +53,11 @@ class AppMusicListItem extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] LabeledTextField
-[code:dart]
+## LabeledTextField
+
+```dart
 import 'package:flutter/material.dart';
 
 class LabeledTextField extends StatelessWidget {
@@ -109,10 +111,11 @@ class LabeledTextField extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] ProfileCard
-[code:dart]
+## ProfileCard
+
+```dart
 import 'package:flutter/material.dart';
 
 class ProfileCard extends StatelessWidget {
@@ -150,10 +153,11 @@ class ProfileCard extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] StatCard
-[code:dart]
+## StatCard
+
+```dart
 import 'package:flutter/material.dart';
 
 class StatCard extends StatelessWidget {
@@ -192,10 +196,11 @@ class StatCard extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] LabeledTextFieldWithButton
-[code:dart]
+## LabeledTextFieldWithButton
+
+```dart
 import 'package:flutter/material.dart';
 
 class LabeledTextFieldWithButton extends StatelessWidget {
@@ -263,10 +268,11 @@ class LabeledTextFieldWithButton extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] TitleWithBackground
-[code:dart]
+## TitleWithBackground
+
+```dart
 import 'package:flutter/material.dart';
 
 class TitleWithBackground extends StatelessWidget {
@@ -327,10 +333,11 @@ class TitleWithBackground extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] AppBottomNavigationBar
-[code:dart]
+## AppBottomNavigationBar
+
+```dart
 import 'package:flutter/material.dart';
 
 class AppBottomNavigationBar extends StatelessWidget {
@@ -367,10 +374,11 @@ class AppBottomNavigationBar extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] AppFloatingButton
-[code:dart]
+## AppFloatingButton
+
+```dart
 import 'package:flutter/material.dart';
 
 class AppFloatingButton extends StatelessWidget {
@@ -394,5 +402,6 @@ class AppFloatingButton extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
+
 .

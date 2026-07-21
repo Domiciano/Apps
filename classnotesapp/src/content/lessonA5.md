@@ -1,7 +1,10 @@
-[t] Tipos opcionales y null safety
+# Tipos opcionales y null safety
+
 En Dart, los tipos opcionales te permiten manejar valores que pueden ser `null`. El sistema de null safety ayuda a prevenir errores comunes.
-[st] Tipos opcionales básicos
-[code:dart]
+
+## Tipos opcionales básicos
+
+```dart trycode=f0fd4d9f795c46529176e86bc4287aaf
 void main() {
   // Variable that can be null
   String? name = null;
@@ -15,12 +18,13 @@ void main() {
   String lastName = 'García'; // Error if you try to assign null
   print(lastName);
 }
-[endcode]
-[trycode] f0fd4d9f795c46529176e86bc4287aaf
+```
+
 Usa `?` después del tipo para indicar que puede ser null. Sin `?`, la variable nunca puede ser null.
 
-[st] Verificar si es null
-[code:dart]
+## Verificar si es null
+
+```dart trycode=66405bd35f0f6d4afe60328ba63e2da9
 void main() {
   String? email = null;
   
@@ -40,12 +44,13 @@ void main() {
     print('No email');
   }
 }
-[endcode]
-[trycode] 66405bd35f0f6d4afe60328ba63e2da9
+```
+
 Usa `!= null` para verificar si una variable tiene valor. Solo después de verificar puedes usar la variable sin `?`.
 
-[st] Operador de acceso seguro (?. )
-[code:dart]
+## Operador de acceso seguro (?. )
+
+```dart trycode=778d63184ff6c07404bdaecf4171b330
 void main() {
   String? text = null;
   
@@ -58,12 +63,13 @@ void main() {
   // Without safe access would cause error
   // print(text.length); // Error if text is null
 }
-[endcode]
-[trycode] 778d63184ff6c07404bdaecf4171b330
+```
+
 El operador `?.` accede a propiedades solo si el valor no es null. Si es null, retorna null en lugar de causar error.
 
-[st] Operador de coalescencia nula (??)
-[code:dart]
+## Operador de coalescencia nula (??)
+
+```dart trycode=cebc63befd4e7eb207bb23b20187e7f2
 void main() {
   String? name = null;
   String? lastName = 'García';
@@ -79,12 +85,13 @@ void main() {
   String message = name ?? lastName ?? 'No name';
   print(message); // García
 }
-[endcode]
-[trycode] cebc63befd4e7eb207bb23b20187e7f2
+```
+
 El operador `??` proporciona un valor por defecto si la variable es null. Puedes encadenar múltiples `??` para fallbacks.
 
-[st] Asignación de coalescencia nula (??=)
-[code:dart]
+## Asignación de coalescencia nula (??=)
+
+```dart trycode=3aee48062336caac7725347bcd0bf2c4
 void main() {
   String? name = null;
   
@@ -100,6 +107,6 @@ void main() {
   age ??= '25';
   print(age); // 25
 }
-[endcode]
-[trycode] 3aee48062336caac7725347bcd0bf2c4
-El operador `??=` asigna un valor solo si la variable es null. Es útil para inicializar variables opcionales. 
+```
+
+El operador `??=` asigna un valor solo si la variable es null. Es útil para inicializar variables opcionales.

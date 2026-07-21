@@ -1,14 +1,14 @@
-[t] Navegación con BottomNavigationBar
+# Navegación con BottomNavigationBar
 
 Una de las formas más comunes de organizar la navegación en una aplicación móvil es mediante una barra de navegación inferior. El widget `BottomNavigationBar` de Flutter nos permite implementar esta funcionalidad de manera sencilla, ofreciendo al usuario acceso rápido a un número reducido de vistas principales.
 
-[st] Estructura Básica
+## Estructura Básica
 
 Para implementar una `BottomNavigationBar`, necesitamos un `StatefulWidget` que gestione el estado de la pestaña seleccionada. La barra de navegación se coloca dentro de la propiedad `bottomNavigationBar` de un `Scaffold`.
 
 La propiedad `items` de la `BottomNavigationBar` recibe una lista de widgets `BottomNavigationBarItem`, donde cada uno representa una pestaña con su propio ícono y etiqueta.
 
-[code:dart]
+```dart
 Scaffold(
   appBar: AppBar(
     title: const Text('BottomNavBar Demo'),
@@ -31,10 +31,9 @@ Scaffold(
     ],
   ),
 );
-[endcode]
+```
 
-
-[st] Manejo del Estado y la Interacción
+## Manejo del Estado y la Interacción
 
 Para que la barra de navegación sea interactiva, necesitamos tres elementos clave en nuestro `StatefulWidget`:
 
@@ -42,7 +41,7 @@ Para que la barra de navegación sea interactiva, necesitamos tres elementos cla
 2.  Una lista de los widgets (pantallas) que se mostrarán.
 3.  Una función que se ejecute cuando el usuario toque una pestaña. Esta función recibirá el nuevo índice y actualizará `_selectedIndex` dentro de una llamada a `setState`.
 
-[code:dart]
+```dart
 int _selectedIndex = 0; // Índice de la pestaña activa
 
 // Lista de pantallas que se mostrarán
@@ -58,13 +57,13 @@ void _onItemTapped(int index) {
     _selectedIndex = index;
   });
 }
-[endcode]
+```
 
-[st] Conectando Todo
+## Conectando Todo
 
 Ahora, conectamos estas partes al `Scaffold`. El `body` del `Scaffold` mostrará el widget de nuestra lista `_widgetOptions` correspondiente al `_selectedIndex`. La `BottomNavigationBar` usará `_selectedIndex` para resaltar la pestaña activa y `_onItemTapped` para manejar los clicks.
 
-[code:dart]
+```dart
 Scaffold(
   appBar: AppBar(
     title: const Text('BottomNavBar Demo'),
@@ -92,13 +91,13 @@ Scaffold(
     onTap: _onItemTapped, // Llama a la función al dar click
   ),
 );
-[endcode]
+```
 
-[st] Ejemplo Completo
+## Ejemplo Completo
 
 Este código crea una aplicación con tres pestañas. Cada pestaña muestra un texto simple, pero en una aplicación real, reemplazarías esos `Text` con tus propios widgets de pantalla (por ejemplo, `HomeScreen()`, `ProfileScreen()`, etc.).
 
-[code:dart]
+```dart trycode=e891cd454997b1e12f8c2410052cf6cf
 import 'package:flutter/material.dart';
 
 void main() => runApp(const MyApp());
@@ -172,5 +171,4 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     );
   }
 }
-[endcode]
-[trycode] e891cd454997b1e12f8c2410052cf6cf
+```

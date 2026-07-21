@@ -1,37 +1,47 @@
-[t] Cubit y estados
+# Cubit y estados
+
 En esta lección, exploraremos cómo manejar el estado en una aplicación de Flutter utilizando `Cubit`, una solución ligera y predecible para la gestión de estado que forma parte del ecosistema `flutter_bloc`.
 
-[st] ¿Qué es un Cubit?
+## ¿Qué es un Cubit?
+
 Un `Cubit` es una clase que se encarga de almacenar y exponer un estado observable.
 A diferencia de otras soluciones más complejas, un Cubit ofrece una API sencilla: expone funciones que pueden ser llamadas para actualizar y emitir nuevos estados.
 
 Su principal ventaja es que centraliza el estado en un único punto, separándolo del árbol de componentes.
 De esta forma, evitamos el problema del prop-drilling (pasar estados y funciones manualmente a través de múltiples niveles de widgets) y logramos una gestión de estado más limpia y desacoplada.
 
-[st] Paso 1: Configuración del Proyecto
+## Paso 1: Configuración del Proyecto
+
 Primero, creamos un nuevo proyecto de Flutter y agregamos la dependencia `flutter_bloc`.
 
-[st] Crear el Proyecto
-[code:bash]
-flutter create --org icesi.edu.co cubitexample
-[endcode]
+## Crear el Proyecto
 
-[st] Agregar Dependencia
+```bash
+flutter create --org icesi.edu.co cubitexample
+```
+
+## Agregar Dependencia
+
 Abre tu archivo `pubspec.yaml` y agrega `flutter_bloc` a las dependencias:
-[code:yaml]
+
+```yaml
 dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
-[endcode]
+```
+
 Luego, ejecuta `flutter pub get` en tu terminal para instalar el paquete.
 
-[st] Paso 2: Definiendo el Estado
+## Paso 2: Definiendo el Estado
+
 El estado es la información que nuestra UI mostrará. En este caso, queremos manejar una lista de contactos.
 
-[st] Modelo de Datos
+## Modelo de Datos
+
 Primero, definimos un modelo `Contact` para representar cada contacto.
-[code:dart]
+
+```dart
 class Contact {
   final String id;
   final String name;
@@ -45,21 +55,25 @@ class Contact {
     required this.phone,
   });
 }
-[endcode]
+```
 
-[st] Clase de Estado
+## Clase de Estado
+
 Luego, creamos una clase `ContactState` que contendrá la lista de contactos. Es una buena práctica hacer que el estado sea inmutable.
-[code:dart]
+
+```dart
 class ContactState {
   final List<Contact> contacts;
 
   ContactState({this.contacts = const []});
 }
-[endcode]
+```
 
-[st] Paso 3: Creando el Cubit
+## Paso 3: Creando el Cubit
+
 El `Cubit` será responsable de manejar la lógica de negocio y emitir nuevos estados.
-[code:dart]
+
+```dart
 import 'package:cubitexample/state/ContactState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -83,19 +97,21 @@ class ContactCubit extends Cubit<ContactState> {
     emit(ContactState(contacts: updatedContacts));
   }
 }
-[endcode]
-[list]
-`ContactCubit` extiende `Cubit<ContactState>`, lo que significa que manejará estados de tipo `ContactState`.
-El estado inicial se establece en el constructor (`super(ContactState())`).
-Las funciones `addProfile` y `removeProfile` emiten nuevos estados usando `emit()`. Es crucial crear una nueva instancia del estado en lugar de mutar la existente.
-[endlist]
+```
 
-[st] Paso 4: Integrando el Cubit en la UI
+- `ContactCubit` extiende `Cubit<ContactState>`, lo que significa que manejará estados de tipo `ContactState`.
+- El estado inicial se establece en el constructor (`super(ContactState())`).
+- Las funciones `addProfile` y `removeProfile` emiten nuevos estados usando `emit()`. Es crucial crear una nueva instancia del estado en lugar de mutar la existente.
+
+## Paso 4: Integrando el Cubit en la UI
+
 Ahora, conectaremos nuestro `Cubit` a la interfaz de usuario de Flutter.
 
-[st] BlocProvider
+## BlocProvider
+
 Para que un `Cubit` esté disponible en el árbol de widgets, usamos `BlocProvider`. Este widget crea e inyecta una instancia del `Cubit`.
-[code:dart]
+
+```dart
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});
 
@@ -110,11 +126,13 @@ class ContactScreen extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
 
-[st] BlocBuilder
+## BlocBuilder
+
 Para escuchar los cambios de estado y reconstruir la UI, usamos `BlocBuilder`.
-[code:dart]
+
+```dart
 // ... dentro del Scaffold
 body: BlocBuilder<ContactCubit, ContactState>(
   builder: (context, state) {
@@ -149,15 +167,16 @@ body: BlocBuilder<ContactCubit, ContactState>(
     );
   },
 ),
-[endcode]
-[list]
-`BlocBuilder<ContactCubit, ContactState>` se suscribe a `ContactCubit` y reconstruye su `builder` en respuesta a nuevos `ContactState`.
-`context.read<ContactCubit>()` nos da acceso a la instancia del `Cubit` sin suscribirnos a los cambios. Es ideal para llamar funciones en eventos como `onPressed`.
-[endlist]
+```
 
-[st] Ejemplo completo en un sólo script
+- `BlocBuilder<ContactCubit, ContactState>` se suscribe a `ContactCubit` y reconstruye su `builder` en respuesta a nuevos `ContactState`.
+- `context.read<ContactCubit>()` nos da acceso a la instancia del `Cubit` sin suscribirnos a los cambios. Es ideal para llamar funciones en eventos como `onPressed`.
+
+## Ejemplo completo en un sólo script
+
 Finalmente, aquí está el código completo para `main.dart` que une todo.
-[code:dart]
+
+```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -264,5 +283,6 @@ class ContactScreen extends StatelessWidget {
     );
   }
 }
-[endcode]
+```
+
 ¿Qué tal si requiero un objeto como estado?

@@ -1,4 +1,5 @@
-[t] Laboratorio 5 · Flujo de Registro
+# Laboratorio 5 · Flujo de Registro
+
 Vamos a aplicar lo que hemos aprendido de momento: patrón BloC, el añadido de Clean Architecture y el uso de servicios simples como Auth y DB de Supabase.
 
 Su tarea va a ser construir el flujo de registro que consiste en el siguiente flujo.
@@ -12,16 +13,20 @@ Su tarea va a ser construir el flujo de registro que consiste en el siguiente fl
 `4` Una vez autenticado, el sistema intenta hacer el `insert` del `Profile`
 
 `5` Si todo resulta existoso, la aplicacion navega hasta ProfileScreen. Aquí necesitará
-[code:dart]
+
+```dart
 WidgetsBinding.instance.addPostFrameCallback((_) {
   Navigator.pushReplacementNamed(context, '/profile');
 });
-[endcode]
+```
+
 Yo se por qué se lo digo
 
-[st] Capa de Data Source
+## Capa de Data Source
+
 Aca solo vamos a hacer operaciones de CRUD simples
-[code:dart]
+
+```dart
 // data/datasources/auth_datasource.dart
 abstract class AuthDataSource {
   Future<String> signUp(String email, String password);
@@ -32,21 +37,26 @@ abstract class AuthDataSource {
 abstract class ProfileDataSource {
   Future<void> createProfile(String userId, String name);
 }
-[endcode]
+```
+
 Implemente las clases abstractas donde debe usar el acceso porporcionado por el SDK de Supabase.
 
-[st] Abstract Repository
+## Abstract Repository
+
 Aca debemos tener en cuenta que las clases abstractas deben ir en el dominio y que las clases concretas que extiendan de estas deben ir en la capa de `data`.
-[code:dart]
+
+```dart
 // domain/repositories/user_repository.dart
 abstract class UserRepository {
   Future<void> registerUser(String email, String password, String name);
 }
-[endcode]
+```
 
-[st] Implementación de Repository
+## Implementación de Repository
+
 La implementación de repository, ya fuera del dominio puede tener dependencias, en este caso la de los diferentes datasources. Aquí es donde se orquesta la lógica.
-[code:dart]
+
+```dart
 // data/repositories/user_repository_impl.dart
 class UserRepositoryImpl implements UserRepository {
   final AuthDataSource authDataSource = AuthDataSourceImpl();
@@ -60,14 +70,17 @@ class UserRepositoryImpl implements UserRepository {
     await profileDataSource.createProfile(userId, name);
   }
 }
-[endcode]
+```
+
 Como se evidencia, se hace la operación de registro en el servicio de GoTrue y posteriormente se usa PostgREST para enviar el user.
 
-[st] Capa Use Case
+## Capa Use Case
+
 La capa de UseCases modela los flujos de la aplicación, donde cada clase se enfoca en una tarea del dominio. En lugar de tener lógica repartida entre BLoCs o Repositorios, cada flujo (registro, login, búsqueda, etc.) se centraliza en un caso de uso, que orquesta la interacción con los repositorios de datos.
 
 En esta capa, al tratarse de lógica de dominio específica, no es necesario definir una combinación de interfaz e implementación. La razón es que un caso de uso no suele tener múltiples variantes: su responsabilidad es única y concreta. En cambio, lo que sí hace el caso de uso es apoyarse en repositorios definidos como interfaces para acceder a los datos, manteniendo así la independencia de la capa de dominio frente a los detalles de infraestructura.
-[code:dart]
+
+```dart
 // domain/usecases/register_user_usecase.dart
 class RegisterUserUseCase {
   final UserRepository repository = UserRepositoryImpl();
@@ -76,12 +89,15 @@ class RegisterUserUseCase {
     return repository.registerUser(email, password, name);
   }
 }
-[endcode]
+```
+
 Lo que sigue de aquí en adelante es la estructura de BloC, es decir, modelar eventos, estados y las funciones que reciben eventos para emitir estados.
 
-[st] BloC
+## BloC
+
 Finalmente el BLoC lo que utiliza es el UseCase para realizar su operación.
-[code:dart]
+
+```dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
@@ -108,5 +124,6 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     }
   }
 }
-[endcode]
+```
+
 Modele usted los estados y eventos. No olvide que debe crear un evento y un estado abstracto generales para luego extender los eventos y estados específicos.

@@ -1,30 +1,30 @@
-[t] TextField
+# TextField
 
 El widget `TextField` es fundamental para permitir a los usuarios introducir texto en tu aplicación. Es altamente personalizable y soporta diversas configuraciones para la entrada de datos.
 
-[st] Uso Básico
+## Uso Básico
 
 El uso más simple de un `TextField` es sin ninguna configuración adicional. Esto creará un campo de texto básico.
 
-[code:dart]
+```dart
 TextField()
-[endcode]
+```
 
-[st] Controladores de Texto (TextEditingController)
+## Controladores de Texto (TextEditingController)
 
 Para obtener el texto introducido por el usuario o para establecer el texto programáticamente, se utiliza un `TextEditingController`. Es una buena práctica asociar un controlador a cada `TextField`.
 
-[code:dart]
+```dart
 TextEditingController _controller = TextEditingController();
 ...
 TextField(
   controller: _controller,
 )
-[endcode]
+```
 
 El lugar adecuado para declarar el `TextEditingController` es en una clase `State` de un `StatefulWidget`.
 
-[code:dart]
+```dart trycode=8d35af6ef04e6ef7045b2ce842028bd4
 import 'package:flutter/material.dart';
 
 class FormScreen extends StatefulWidget {
@@ -73,15 +73,15 @@ class MyApp extends StatelessWidget {
 void main() {
   runApp(const MyApp());
 }
-[endcode]
-[trycode] 8d35af6ef04e6ef7045b2ce842028bd4
+```
 
-[st] Extracción de texto
+## Extracción de texto
+
 Simplemente usando `_controller.text` se puede acceder al texto escrito en el `TextField`. Observa este ejemplo.
 
 En el ejemplo se extrae el texto para ser usado como una variable de estado. Ten en cuenta que la variable `_controller.text` es en sí misma un estado también, pero no es de solo lectura. Por lo tanto, evita usar la variable de forma directa como si fuera una variable de estado, ya que cuando lo quieras cambiar, no podrías usar el método `setState`.
 
-[code:dart]
+```dart trycode=f5c5c94135b2d27e13bd5f50a011288d
 import 'package:flutter/material.dart';
 
 class FormScreen extends StatefulWidget {
@@ -146,28 +146,29 @@ class MyApp extends StatelessWidget {
 void main() {
   runApp(const MyApp());
 }
-[endcode]
-[trycode] f5c5c94135b2d27e13bd5f50a011288d
-[st] InputDecoration
+```
+
+## InputDecoration
 
 La propiedad `decoration` de `TextField` acepta un objeto `InputDecoration`, que permite añadir etiquetas, texto de ayuda, iconos, bordes y más, para mejorar la experiencia de usuario.
 
-[st] LabelText
+## LabelText
 
 `labelText` muestra una etiqueta flotante que se anima cuando el campo está en foco.
 
-[code:dart]
+```dart
 TextField(
   decoration: InputDecoration(
     labelText: 'Nombre de Usuario',
   ),
 )
-[endcode]
+```
 
-[st] Borde 
+## Borde
+
 Puedes añadir diferentes tipos de bordes, como `OutlineInputBorder` para un borde rectangular.
 
-[code:dart]
+```dart
 TextField(
   decoration: InputDecoration(
     labelText: 'Contraseña',
@@ -175,13 +176,13 @@ TextField(
   ),
   obscureText: true, // Para campos de contraseña
 )
-[endcode]
+```
 
-[st] Iconos
+## Iconos
 
 `prefixIcon` y `suffixIcon` permiten añadir iconos al inicio o al final del campo de texto.
 
-[code:dart]
+```dart
 TextField(
   decoration: InputDecoration(
     labelText: 'Buscar',
@@ -189,29 +190,27 @@ TextField(
     suffixIcon: Icon(Icons.clear),
   ),
 )
-[endcode]
+```
 
-[st] Texto de Ayuda (helperText, hintText)
+## Texto de Ayuda (helperText, hintText)
 
-[list]
-`helperText`: Texto que aparece debajo del campo de texto.
-`hintText`: Texto que aparece dentro del campo cuando está vacío.
-[endlist]
+- `helperText`: Texto que aparece debajo del campo de texto.
+- `hintText`: Texto que aparece dentro del campo cuando está vacío.
 
-[code:dart]
+```dart
 TextField(
   decoration: InputDecoration(
     hintText: 'Introduce tu email',
     helperText: 'Nunca compartiremos tu email.',
   ),
 )
-[endcode]
+```
 
-[st] Ejemplo Completo
+## Ejemplo Completo
 
 Aquí tienes un ejemplo completo y funcional que demuestra cómo usar el widget `TextField` con controladores y diversas decoraciones.
 
-[code:dart]
+```dart trycode=f9ea28d713db887153bb4fc11d755377
 import 'package:flutter/material.dart';
 
 void main() {
@@ -311,6 +310,6 @@ class _MyTextFieldScreenState extends State<MyTextFieldScreen> {
     );
   }
 }
-[endcode]
-[trycode] f9ea28d713db887153bb4fc11d755377
+```
+
 .
