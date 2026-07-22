@@ -41,7 +41,7 @@ Reutilice el indicador numérico tres veces para formar una fila con publicacion
 
 Reutilice el bloque de información de perfil dentro de una tarjeta, agregando un botón de edición.
 
-![Imagen](Lab1Block2.png "icon")
+![Imagen](Lab1Block2.png "frame60")
 
 ### Lista de últimas conversaciones
 
