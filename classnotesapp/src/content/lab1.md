@@ -3,7 +3,7 @@
 El objetivo del taller es utilizar los elementos básicos de Flutter para construir Components y Screens. Se usarán los layout convencionales para acomodar los widgets convencionales, además se utilizarán las propiedades de tamaño y los widgets de decoración para definir las dimensiones.
 Consulte el siguiente link para descargar los recursos
 
-[Proyecto de Figma](https://www.figma.com/design/p0BC4jwSeRZrAfpxQ7CaJd/Login-Mobile-App-Screens-%7C-Free-(Community)?node-id=6-60&t=NJEheAiP3AIiwfaG-1)
+[Proyecto de Figma](https://www.figma.com/design/cn5cLhBPnuJC4tvewTtVmq/Aplicaciones-M%C3%B3viles?node-id=2014-421&t=oULdr2bxOVE437ux-1)
 
 ## 1. Piezas base de una pantalla de perfil
 
