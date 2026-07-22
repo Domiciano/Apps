@@ -1,13 +1,13 @@
-# UI Basics con Jetpack Compose
+# UI Basics con Flutter
 
-El objetivo del taller es utilizar los elementos básicos de Jetpack Compose para construir Components y Screens. Se usarán los layout convencionales para acomodar los widget convencionales, además se utilizarán los modificadores para definir las dimensiones.
+El objetivo del taller es utilizar los elementos básicos de Flutter para construir Components y Screens. Se usarán los layout convencionales para acomodar los widgets convencionales, además se utilizarán las propiedades de tamaño y los widgets de decoración para definir las dimensiones.
 Consulte el siguiente link para descargar los recursos
 
 [Proyecto de Figma](https://www.figma.com/design/p0BC4jwSeRZrAfpxQ7CaJd/Login-Mobile-App-Screens-%7C-Free-(Community)?node-id=6-60&t=NJEheAiP3AIiwfaG-1)
 
 ## 1. Piezas base de una pantalla de perfil
 
-Una interfaz rara vez se construye de una sola vez: se arma a partir de componentes pequeños que luego se combinan. En Jetpack Compose, la forma más simple de componente es un widget sin estado propio (stateless widget): una función `@Composable` que recibe datos por parámetros y únicamente se encarga de mostrarlos, sin manejar ninguna variable interna.
+Una interfaz rara vez se construye de una sola vez: se arma a partir de componentes pequeños que luego se combinan. En Flutter, la forma más simple de componente es un widget sin estado propio (stateless widget): una clase que extiende `StatelessWidget`, recibe datos por parámetros en su constructor y únicamente se encarga de mostrarlos en su método `build`, sin manejar ninguna variable interna.
 
 En este punto construirá, uno por uno, los componentes más pequeños que luego usará para armar la pantalla de perfil. Empiece por estas tres piezas base:
 
@@ -51,8 +51,8 @@ Reutilice el elemento de conversación varias veces debajo de un encabezado con 
 
 ## 2. Pantalla de Login Convencional
 
-Defina primero los composables, luego arme las pantallas de login y de registro
-Para probar esta segunda pantalla, defina el composable que se mostrará en el método onCreate. En este punto aún no sabemos cómo navegar entre pantallas
+Defina primero los widgets, luego arme las pantallas de login y de registro
+Para probar esta segunda pantalla, defina el widget que se mostrará como `home` de la `MaterialApp` dentro de la función `main`. En este punto aún no sabemos cómo navegar entre pantallas
 
 ![Imagen](Lab1Image2.png "icon")
 
@@ -60,6 +60,6 @@ Para probar esta segunda pantalla, defina el composable que se mostrará en el m
 
 Ya tiene todas las piezas construidas. Ahora ensámblelas para completar la pantalla: coloque la fila de estadísticas dentro de la tarjeta de perfil y luego apile esta tarjeta junto con la lista de últimas conversaciones.
 
-Para lograr la imagen de perfil circular NO use un PNG ya recortado. En su lugar, use modificadores para crear el marco requerido.
+Para lograr la imagen de perfil circular NO use un PNG ya recortado. En su lugar, use widgets como `ClipOval` o una decoración con forma circular para crear el marco requerido.
 
 ![Imagen](Lab1Screen1.png "icon")
