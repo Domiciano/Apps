@@ -15,19 +15,19 @@ En este punto construirá, uno por uno, los componentes más pequeños que luego
 
 Una fila que representa un chat: foto de contacto, nombre, hora del último mensaje, texto de la vista previa y el ícono de estado de lectura.
 
-![Imagen](Lab1Item1.png "icon")
+![Imagen](Lab1Item1.png "frame")
 
 ### Bloque de información de perfil
 
 Foto de perfil, nombre, usuario/rol y una breve descripción, junto con el correo y la ubicación.
 
-![Imagen](Lab1Item2.png "icon")
+![Imagen](Lab1Item2.png "frame")
 
 ### Indicador numérico
 
 Un componente pequeño que muestra un número junto a su etiqueta, como en un contador de publicaciones o seguidores.
 
-![Imagen](Lab1Item3.png "icon")
+![Imagen](Lab1Item3.png "frame")
 
 Con estas tres piezas listas, combínelas para construir componentes más grandes:
 
@@ -35,7 +35,7 @@ Con estas tres piezas listas, combínelas para construir componentes más grande
 
 Reutilice el indicador numérico tres veces para formar una fila con publicaciones, seguidores y seguidos.
 
-![Imagen](Lab1Block1.png "icon")
+![Imagen](Lab1Block1.png "frame")
 
 ### Tarjeta de perfil
 
@@ -47,7 +47,7 @@ Reutilice el bloque de información de perfil dentro de una tarjeta, agregando u
 
 Reutilice el elemento de conversación varias veces debajo de un encabezado con un enlace de "Ver todas".
 
-![Imagen](Lab1Block3.png "icon")
+![Imagen](Lab1Block3.png "frame")
 
 ## 2. Ensamblando la pantalla de perfil
 

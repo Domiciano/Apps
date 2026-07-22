@@ -12,6 +12,7 @@ import ImageBlock from "@/components/lesson/ImageBlock";
 import LessonContainer from "@/components/lesson/LessonContainer";
 import DartPadEmbed from "@/components/embed/DartPadEmbed";
 import IconBlock from "@/components/lesson/IconBlock";
+import FramedImageBlock from "@/components/lesson/FramedImageBlock";
 import Link from "@/components/lesson/Link";
 import images from "@/assets";
 import TryCodeButton from "./TryCodeButton";
@@ -126,6 +127,7 @@ const LessonParser = ({ content }) => {
     a: ({ href, children }) => <Link displayname={children} url={href} />,
     img: ({ src, alt, title }) => {
       const resolved = resolveImageSrc(src);
+      if (title === "frame") return <FramedImageBlock src={resolved} alt={alt} />;
       return title === "icon" ? (
         <IconBlock src={resolved} alt={alt} />
       ) : (
