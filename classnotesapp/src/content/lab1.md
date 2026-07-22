@@ -60,6 +60,6 @@ Para probar esta segunda pantalla, defina el widget que se mostrará como `home`
 
 Ya tiene todas las piezas construidas. Ahora ensámblelas para completar la pantalla: coloque la fila de estadísticas dentro de la tarjeta de perfil y luego apile esta tarjeta junto con la lista de últimas conversaciones.
 
-Para lograr la imagen de perfil circular NO use un PNG ya recortado. En su lugar, use widgets como `ClipOval` o una decoración con forma circular para crear el marco requerido.
+Para lograr la imagen de perfil circular NO use un PNG ya recortado. En su lugar, use widgets como `CircleAvatar`, `ClipOval` o una decoración con forma circular para crear el marco requerido.
 
 ![Imagen](Lab1Screen1.png "icon")
