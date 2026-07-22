@@ -5,11 +5,49 @@ Consulte el siguiente link para descargar los recursos
 
 [Proyecto de Figma](https://www.figma.com/design/p0BC4jwSeRZrAfpxQ7CaJd/Login-Mobile-App-Screens-%7C-Free-(Community)?node-id=6-60&t=NJEheAiP3AIiwfaG-1)
 
-## 1. Componente de lista de chats de Whatsapp
+## 1. Piezas base de una pantalla de perfil
 
-La siguiente imagen es una muestra de un contacto en Whatsapp. Intente replicarlo
+Una interfaz rara vez se construye de una sola vez: se arma a partir de componentes pequeños que luego se combinan. En Jetpack Compose, la forma más simple de componente es un widget sin estado propio (stateless widget): una función `@Composable` que recibe datos por parámetros y únicamente se encarga de mostrarlos, sin manejar ninguna variable interna.
 
-![Imagen](Lab1Image1.png "icon")
+En este punto construirá, uno por uno, los componentes más pequeños que luego usará para armar la pantalla de perfil. Empiece por estas tres piezas base:
+
+### Elemento de conversación
+
+Una fila que representa un chat: foto de contacto, nombre, hora del último mensaje, texto de la vista previa y el ícono de estado de lectura.
+
+![Imagen](Lab1Item1.png "icon")
+
+### Bloque de información de perfil
+
+Foto de perfil, nombre, usuario/rol y una breve descripción, junto con el correo y la ubicación.
+
+![Imagen](Lab1Item2.png "icon")
+
+### Indicador numérico
+
+Un componente pequeño que muestra un número junto a su etiqueta, como en un contador de publicaciones o seguidores.
+
+![Imagen](Lab1Item3.png "icon")
+
+Con estas tres piezas listas, combínelas para construir componentes más grandes:
+
+### Fila de estadísticas
+
+Reutilice el indicador numérico tres veces para formar una fila con publicaciones, seguidores y seguidos.
+
+![Imagen](Lab1Block1.png "icon")
+
+### Tarjeta de perfil
+
+Reutilice el bloque de información de perfil dentro de una tarjeta, agregando un botón de edición.
+
+![Imagen](Lab1Block2.png "icon")
+
+### Lista de últimas conversaciones
+
+Reutilice el elemento de conversación varias veces debajo de un encabezado con un enlace de "Ver todas".
+
+![Imagen](Lab1Block3.png "icon")
 
 ## 2. Pantalla de Login Convencional
 
@@ -18,8 +56,10 @@ Para probar esta segunda pantalla, defina el composable que se mostrará en el m
 
 ![Imagen](Lab1Image2.png "icon")
 
-## 3. Card
+## 3. Ensamblando la pantalla de perfil
 
-Las card son elementos importantes de las interfaces hoy en día. Cree esta tarjeta como un composable. Use cualquier imagen de fondo y cualquier imagen de perfil. Para lograr la imagen circular NO use PNG de una vez recortados. En su lugar, busque la manera de usar modificadores para crear el marco requerido.
+Ya tiene todas las piezas construidas. Ahora ensámblelas para completar la pantalla: coloque la fila de estadísticas dentro de la tarjeta de perfil y luego apile esta tarjeta junto con la lista de últimas conversaciones.
 
-![Imagen](Lab1Image3.png "icon")
+Para lograr la imagen de perfil circular NO use un PNG ya recortado. En su lugar, use modificadores para crear el marco requerido.
+
+![Imagen](Lab1Screen1.png "icon")
