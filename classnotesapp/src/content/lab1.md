@@ -49,17 +49,17 @@ Reutilice el elemento de conversación varias veces debajo de un encabezado con 
 
 ![Imagen](Lab1Block3.png "icon")
 
-## 2. Pantalla de Login Convencional
-
-Defina primero los widgets, luego arme las pantallas de login y de registro
-Para probar esta segunda pantalla, defina el widget que se mostrará como `home` de la `MaterialApp` dentro de la función `main`. En este punto aún no sabemos cómo navegar entre pantallas
-
-![Imagen](Lab1Image2.png "icon")
-
-## 3. Ensamblando la pantalla de perfil
+## 2. Ensamblando la pantalla de perfil
 
 Ya tiene todas las piezas construidas. Ahora ensámblelas para completar la pantalla: coloque la fila de estadísticas dentro de la tarjeta de perfil y luego apile esta tarjeta junto con la lista de últimas conversaciones.
 
 Para lograr la imagen de perfil circular NO use un PNG ya recortado. En su lugar, use widgets como `CircleAvatar`, `ClipOval` o una decoración con forma circular para crear el marco requerido.
 
 ![Imagen](Lab1Screen1.png "icon")
+
+## 3. Pantalla de Login Convencional
+
+Defina primero los widgets, luego arme las pantallas de login y de registro
+Para probar esta segunda pantalla, defina el widget que se mostrará como `home` de la `MaterialApp` dentro de la función `main`. En este punto aún no sabemos cómo navegar entre pantallas
+
+![Imagen](Lab1Image2.png "icon")
