@@ -2,33 +2,25 @@ import React from 'react';
 import Box from '@mui/material/Box';
 
 // For screenshots exported with a transparent background (isolated component
-// crops). Wraps the image in a rounded card matching the design's own card
-// color (#FCF8FF, sampled from the full-screen mockups) so text stays legible
-// regardless of the app's light/dark theme.
-const FramedImageBlock = ({ src, alt = 'Imagen' }) => {
+// crops). The inner box wraps the image with a small padding, so the white
+// card hugs the image's rendered size (plus breathing room) instead of the
+// full column width — white shows through only around the image, never
+// beyond it. `scale` shrinks that whole unit (kept at its own aspect ratio)
+// inside a fully transparent outer container.
+const FramedImageBlock = ({ src, alt = 'Imagen', scale = 1 }) => {
   return (
-    <Box
-      sx={{
-        width: '100%',
-        borderRadius: 4,
-        boxShadow: 20,
-        overflow: 'hidden',
-        my: 2,
-        backgroundColor: '#FCF8FF',
-        display: 'flex',
-        justifyContent: 'center',
-        p: 3,
-      }}
-    >
-      <img
-        src={src}
-        alt={alt}
-        style={{
-          maxWidth: '100%',
-          height: 'auto',
-          display: 'block',
-        }}
-      />
+    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', my: 2 }}>
+      <Box sx={{ width: `${scale * 100}%`, backgroundColor: 'rgb(246, 247, 250)', borderRadius: 3, p: 2 }}>
+        <img
+          src={src}
+          alt={alt}
+          style={{
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+          }}
+        />
+      </Box>
     </Box>
   );
 };

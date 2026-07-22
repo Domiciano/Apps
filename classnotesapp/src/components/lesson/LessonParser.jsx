@@ -127,7 +127,11 @@ const LessonParser = ({ content }) => {
     a: ({ href, children }) => <Link displayname={children} url={href} />,
     img: ({ src, alt, title }) => {
       const resolved = resolveImageSrc(src);
-      if (title === "frame") return <FramedImageBlock src={resolved} alt={alt} />;
+      const frameMatch = /^frame(\d{1,3})?$/.exec(title || "");
+      if (frameMatch) {
+        const scale = frameMatch[1] ? Number(frameMatch[1]) / 100 : 1;
+        return <FramedImageBlock src={resolved} alt={alt} scale={scale} />;
+      }
       return title === "icon" ? (
         <IconBlock src={resolved} alt={alt} />
       ) : (
