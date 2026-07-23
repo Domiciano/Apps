@@ -1,73 +1,72 @@
 // src/auth/LoginIllustration.jsx
 //
-// Decorative, full-bleed SVG mosaic for the login side panel — a tiled
-// <pattern> of flat, bold-outline prototype/UI elements (phone mockups, form
-// fields, buttons, checks, image placeholders). Purely ornamental; the motif
-// is chosen per course in loginBranding.js. No external assets.
+// Decorative, full-bleed SVG mosaic for the login side panel. The 'mobile'
+// motif tiles a low-fidelity prototype flow — distinct wireframe screens joined
+// by arrows — and the whole pattern is slightly rotated. Purely ornamental;
+// the motif is chosen per course in loginBranding.js. No external assets.
 
 import React from 'react';
 import Box from '@mui/material/Box';
 import { useThemeMode } from '@/theme/ThemeContext';
 import { loginBranding } from './loginBranding';
 
-const INK = '#141821';
-const PAPER = '#FFFFFF';
-const PLACE = '#E9E6FB';
+const LINE = '#FFFFFF';
 const PURPLE = '#4B49E6';
-const CORAL = '#FF7A6B';
-const GREEN = '#28C76F';
 
-// One 300×300 tile packed with self-contained prototype widgets so it reads as
-// UI design when repeated. Everything stays inside the tile so it tiles cleanly.
+// 360×280 tile. The flow runs along y=140 and is drawn so the arrow leaving the
+// right edge meets the arrow entering the next tile's left edge → a continuous
+// wireframe flow when repeated. Two different screens: a list and a detail view.
 const MobileTile = () => (
-  <g fill="none" stroke={INK} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
-    {/* phone mock */}
-    <rect x="24" y="24" width="86" height="122" rx="14" fill={PAPER} />
-    <line x1="54" y1="36" x2="80" y2="36" strokeWidth="2.5" />
-    <rect x="36" y="58" width="62" height="50" rx="4" fill={PLACE} strokeWidth="2" />
-    <path d="M36 58 L98 108 M98 58 L36 108" strokeWidth="1.6" />
-    <rect x="36" y="120" width="62" height="14" rx="4" strokeWidth="2" />
+  <g fill="none" stroke={LINE} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    {/* connecting arrows along the flow */}
+    <g strokeWidth="2.5" opacity="0.9">
+      <line x1="0" y1="140" x2="30" y2="140" />
+      <path d="M22 134 L30 140 L22 146" />
+      <line x1="150" y1="140" x2="230" y2="140" />
+      <path d="M222 134 L230 140 L222 146" />
+      <line x1="350" y1="140" x2="360" y2="140" />
+    </g>
 
-    {/* form card */}
-    <rect x="150" y="24" width="126" height="122" rx="10" fill={PAPER} />
-    <rect x="165" y="42" width="96" height="14" rx="4" strokeWidth="2" />
-    <rect x="165" y="66" width="96" height="14" rx="4" strokeWidth="2" />
-    <rect x="165" y="90" width="60" height="14" rx="4" strokeWidth="2" />
-    <rect x="165" y="114" width="54" height="20" rx="6" fill={CORAL} strokeWidth="2.5" />
+    {/* Screen A — list view */}
+    <rect x="30" y="40" width="120" height="200" rx="16" fill={LINE} fillOpacity="0.06" />
+    <rect x="44" y="54" width="92" height="16" rx="4" strokeWidth="2" />
+    <g strokeWidth="2">
+      <rect x="44" y="84" width="18" height="18" rx="4" />
+      <line x1="70" y1="93" x2="136" y2="93" />
+      <rect x="44" y="112" width="18" height="18" rx="4" />
+      <line x1="70" y1="121" x2="136" y2="121" />
+      <rect x="44" y="140" width="18" height="18" rx="4" />
+      <line x1="70" y1="149" x2="120" y2="149" />
+    </g>
+    <rect x="44" y="206" width="92" height="20" rx="6" strokeWidth="2" />
 
-    {/* pill button + checkbox row */}
-    <rect x="24" y="180" width="112" height="30" rx="15" fill={PURPLE} strokeWidth="3" />
-    <rect x="24" y="228" width="30" height="30" rx="7" fill={PAPER} strokeWidth="3" />
-    <path d="M31 243 L38 250 L48 236" stroke={GREEN} strokeWidth="4" />
-    <rect x="64" y="236" width="72" height="12" rx="4" fill={PAPER} strokeWidth="2" />
-    <rect x="64" y="254" width="48" height="10" rx="4" strokeWidth="2" />
-
-    {/* media card with avatar row */}
-    <rect x="150" y="168" width="126" height="108" rx="10" fill={PAPER} />
-    <rect x="162" y="180" width="102" height="48" rx="5" fill={PLACE} strokeWidth="2" />
-    <path d="M162 180 L264 228 M264 180 L162 228" strokeWidth="1.6" />
-    <circle cx="176" cy="252" r="11" fill={CORAL} strokeWidth="2.5" />
-    <rect x="196" y="244" width="66" height="9" rx="4" strokeWidth="2" />
-    <rect x="196" y="259" width="44" height="9" rx="4" strokeWidth="2" />
+    {/* Screen B — detail view */}
+    <rect x="230" y="40" width="120" height="200" rx="16" fill={LINE} fillOpacity="0.06" />
+    <rect x="244" y="54" width="92" height="14" rx="4" strokeWidth="2" />
+    <rect x="244" y="80" width="92" height="66" rx="4" strokeWidth="2" />
+    <path d="M244 80 L336 146 M336 80 L244 146" strokeWidth="1.6" />
+    <line x1="244" y1="162" x2="336" y2="162" strokeWidth="2" />
+    <line x1="244" y1="176" x2="300" y2="176" strokeWidth="2" />
+    <rect x="244" y="196" width="92" height="24" rx="12" strokeWidth="2.5" />
   </g>
 );
 
 const NetworkTile = () => (
-  <g fill="none" stroke={PAPER} strokeWidth="2.5" strokeLinecap="round">
-    <line x1="60" y1="70" x2="170" y2="150" opacity="0.8" />
-    <line x1="170" y1="150" x2="250" y2="60" opacity="0.8" />
-    <line x1="170" y1="150" x2="120" y2="250" opacity="0.8" />
-    <line x1="170" y1="150" x2="260" y2="240" opacity="0.8" />
-    <circle cx="60" cy="70" r="12" fill={PURPLE} strokeWidth="3" />
-    <circle cx="170" cy="150" r="20" fill={PURPLE} strokeWidth="3" />
-    <circle cx="250" cy="60" r="14" fill={PURPLE} strokeWidth="3" />
-    <circle cx="120" cy="250" r="14" fill={PURPLE} strokeWidth="3" />
-    <circle cx="260" cy="240" r="12" fill={PURPLE} strokeWidth="3" />
+  <g fill="none" stroke={LINE} strokeWidth="2.5" strokeLinecap="round">
+    <g opacity="0.85">
+      <line x1="60" y1="70" x2="170" y2="150" />
+      <line x1="170" y1="150" x2="250" y2="60" />
+      <line x1="170" y1="150" x2="120" y2="250" />
+      <line x1="170" y1="150" x2="260" y2="240" />
+    </g>
+    {[[60, 70, 12], [170, 150, 20], [250, 60, 14], [120, 250, 14], [260, 240, 12]].map(([x, y, r], i) => (
+      <circle key={i} cx={x} cy={y} r={r} fill={PURPLE} strokeWidth="3" />
+    ))}
   </g>
 );
 
 const GeometricTile = () => (
-  <g fill="none" stroke={PAPER} strokeWidth="2.5">
+  <g fill="none" stroke={LINE} strokeWidth="2.5">
     <circle cx="80" cy="80" r="42" />
     <rect x="180" y="40" width="80" height="80" rx="14" fill={PURPLE} strokeWidth="3" />
     <circle cx="220" cy="220" r="50" />
@@ -75,22 +74,27 @@ const GeometricTile = () => (
   </g>
 );
 
-const TILE = { mobile: <MobileTile />, network: <NetworkTile />, geometric: <GeometricTile /> };
+const TILES = {
+  mobile: { w: 360, h: 280, node: <MobileTile /> },
+  network: { w: 300, h: 300, node: <NetworkTile /> },
+  geometric: { w: 300, h: 300, node: <GeometricTile /> },
+};
 
 const LoginIllustration = () => {
   const { theme } = useThemeMode();
-  const tile = TILE[loginBranding.motif] || TILE.geometric;
+  const { w, h, node } = TILES[loginBranding.motif] || TILES.geometric;
 
   return (
     <Box aria-hidden sx={{ position: 'absolute', inset: 0 }}>
       <svg width="100%" height="100%" preserveAspectRatio="xMidYMid slice" style={{ display: 'block' }}>
         <defs>
-          <pattern id="protoMosaic" width="300" height="300" patternUnits="userSpaceOnUse">
-            {tile}
+          {/* slight tilt so the flow reads as a hand-laid prototype board */}
+          <pattern id="protoMosaic" width={w} height={h} patternUnits="userSpaceOnUse" patternTransform="rotate(-9)">
+            {node}
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={theme.accent} />
-        <rect width="100%" height="100%" fill="url(#protoMosaic)" opacity="0.9" />
+        <rect width="100%" height="100%" fill="url(#protoMosaic)" opacity="0.92" />
       </svg>
     </Box>
   );
