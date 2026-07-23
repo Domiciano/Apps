@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import { useThemeMode } from '@/theme/ThemeContext';
 import { useAuth } from './AuthContext';
+import LoginBackground from './LoginBackground';
 
 // Accepts "usuario", "github.com/usuario" or "https://github.com/usuario"
 // (with optional trailing slash) and returns the bare handle, or null.
@@ -55,6 +56,7 @@ const ProfileForm = () => {
   return (
     <Box
       sx={{
+        position: 'relative',
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
@@ -63,10 +65,13 @@ const ProfileForm = () => {
         background: theme.background,
       }}
     >
+      <LoginBackground />
       <Box
         component="form"
         onSubmit={handleSubmit}
         sx={{
+          position: 'relative',
+          zIndex: 1,
           width: '100%',
           maxWidth: 460,
           background: theme.backgroundLight,

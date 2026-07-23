@@ -6,9 +6,10 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import SchoolRoundedIcon from '@mui/icons-material/SchoolRounded';
 import { useThemeMode } from '@/theme/ThemeContext';
 import { useAuth } from './AuthContext';
+import LoginBackground from './LoginBackground';
+import icesiLogo from '@/assets/icesi-logo.svg';
 
 const GoogleG = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -26,6 +27,7 @@ const LoginScreen = () => {
   return (
     <Box
       sx={{
+        position: 'relative',
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
@@ -34,8 +36,12 @@ const LoginScreen = () => {
         background: theme.background,
       }}
     >
+      <LoginBackground />
+
       <Box
         sx={{
+          position: 'relative',
+          zIndex: 1,
           width: '100%',
           maxWidth: 420,
           background: theme.backgroundLight,
@@ -43,18 +49,26 @@ const LoginScreen = () => {
           borderRadius: 3,
           p: { xs: 3, sm: 4 },
           textAlign: 'center',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.18)',
         }}
       >
+        {/* Logo institucional sobre chip blanco para asegurar contraste */}
         <Box
           sx={{
-            width: 56, height: 56, mx: 'auto', mb: 2, borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: theme.accent,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#fff',
+            borderRadius: 2,
+            px: 2.5,
+            py: 1.5,
+            mb: 3,
+            boxShadow: '0 2px 10px rgba(0,0,0,0.10)',
           }}
         >
-          <SchoolRoundedIcon sx={{ color: theme.appBarText, fontSize: 30 }} />
+          <img src={icesiLogo} alt="Universidad Icesi" style={{ height: 40, width: 'auto', display: 'block' }} />
         </Box>
+
         <Typography variant="h5" sx={{ color: theme.textPrimary, fontWeight: 700, mb: 1 }}>
           Inicia sesión para continuar
         </Typography>
@@ -65,16 +79,18 @@ const LoginScreen = () => {
         <Button
           onClick={signInWithGoogle}
           fullWidth
-          variant="outlined"
           startIcon={<GoogleG />}
+          disableElevation
           sx={{
             textTransform: 'none',
             fontWeight: 600,
+            fontSize: '0.95rem',
             py: 1.2,
-            borderColor: theme.border,
-            color: theme.textPrimary,
+            color: '#3c4043',
             background: '#fff',
-            '&:hover': { borderColor: theme.accent, background: '#fff' },
+            border: '1px solid #dadce0',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+            '&:hover': { background: '#f7f8f8', borderColor: '#c9ccd1', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' },
           }}
         >
           Continuar con Google
