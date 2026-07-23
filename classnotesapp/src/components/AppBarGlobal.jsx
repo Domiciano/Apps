@@ -9,6 +9,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useThemeMode } from '@/theme/ThemeContext';
+import AccountMenu from '@/auth/AccountMenu';
 import techlogo from '@/assets/techlogo.svg';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
@@ -62,6 +63,7 @@ const AppBarGlobal = ({ onOpenMobileToc, onOpenMobileNav }) => {
               <MenuBookIcon sx={{ color: theme.accent }} />
             </IconButton>
           )}
+          <AccountMenu />
         </Box>
       </Toolbar>
     </AppBar>
