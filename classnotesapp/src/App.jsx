@@ -1,67 +1,58 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'; // Importa useLocation y useNavigate
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import '@/App.css';
 
 import Layout from '@/components/drawer/Layout';
 import TableOfContentsParser from '@/utils/tableOfContentsParser';
-import tocContent from '@/content/toc.md?raw';
+import courseConfig from '@/content/config.js';
 import LessonPage from '@/pages/LessonPage';
 import AppBarGlobal from '@/components/AppBarGlobal';
-import { StudiedLessonsProvider } from '@/theme/StudiedLessonsContext';
 
 function App() {
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
-  const location = useLocation(); // Hook para acceder al objeto location
-  const navigate = useNavigate(); // Hook para navegar programáticamente
+  const [tocError, setTocError] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
   const lessonPageRef = useRef();
   const layoutNavRef = useRef();
 
   useEffect(() => {
     const loadSections = async () => {
       try {
-        const parsedSections = await TableOfContentsParser(tocContent);
+        const response = await fetch(courseConfig.tocUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status} al cargar toc.md`);
+        const rawToc = await response.text();
+        const parsedSections = TableOfContentsParser(rawToc);
         setSections(parsedSections);
       } catch (error) {
-        console.error("Error cargando la tabla de contenido:", error);
+        console.error('[App] Error cargando la tabla de contenido:', error);
+        setTocError(error.message);
       } finally {
         setLoading(false);
       }
     };
 
     loadSections();
-  }, []); // Se ejecuta solo una vez al montar
+  }, []);
 
   const firstLessonId = useMemo(() => {
     const firstLesson = sections.find(s => s.type === 'lesson');
     return firstLesson ? firstLesson.id : null;
   }, [sections]);
 
-  // *** LÓGICA CLAVE PARA EL MANEJO DE RUTAS PROFUNDAS DESDE 404.html ***
+  // Deep-link redirect: GitHub Pages 404.html appends ?p=<path>
   useEffect(() => {
-    // Solo actuamos si la aplicación ya cargó las secciones y si estamos en la raíz del basename
-    // o si hay un parámetro de búsqueda 'p'
     if (!loading && sections.length > 0) {
       const params = new URLSearchParams(location.search);
-      const deepPath = params.get('p'); // Obtiene el valor del parámetro 'p'
-
+      const deepPath = params.get('p');
       if (deepPath) {
-        // Si hay un deepPath, navegamos a esa ruta y reemplazamos la URL actual
-        // para que la URL en el navegador se vea limpia (sin ?p=).
         navigate(deepPath, { replace: true });
       } else if (location.pathname === '/' && firstLessonId) {
-        // Si no hay deepPath y estamos en la ruta raíz del basename,
-        // redirigimos a la lección guardada en localStorage o a la primera por defecto.
-        const lastLesson = localStorage.getItem('lastLesson');
-        if (lastLesson) {
-          navigate(`/lesson/${lastLesson}`, { replace: true });
-        } else {
         navigate(`/lesson/${firstLessonId}`, { replace: true });
-        }
       }
     }
-  }, [loading, sections, location.search, firstLessonId, navigate, location.pathname]); // Dependencias del efecto
-  // *** FIN DE LA LÓGICA CLAVE ***
+  }, [loading, sections, location.search, firstLessonId, navigate, location.pathname]);
 
   if (loading) {
     return (
@@ -75,16 +66,17 @@ function App() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
         <h2>No se pudo cargar el contenido del curso.</h2>
-        <p>Por favor, verifica el archivo `toc.md` y la carpeta `content`.</p>
+        <p>Verifica la URL configurada en <code>src/content/config.js</code>.</p>
+        {tocError && <p style={{ color: '#FF5370', fontSize: '0.9em' }}>{tocError}</p>}
       </div>
     );
   }
 
   return (
-    <StudiedLessonsProvider>
-      <AppBarGlobal 
-        onOpenMobileToc={() => lessonPageRef.current?.openMobileToc()} 
-        onOpenMobileNav={() => layoutNavRef.current?.()} 
+    <>
+      <AppBarGlobal
+        onOpenMobileToc={() => lessonPageRef.current?.openMobileToc()}
+        onOpenMobileNav={() => layoutNavRef.current?.()}
       />
       <Layout sections={sections} onOpenMobileNav={layoutNavRef}>
         <Routes>
@@ -103,7 +95,7 @@ function App() {
           } />
         </Routes>
       </Layout>
-    </StudiedLessonsProvider>
+    </>
   );
 }
 

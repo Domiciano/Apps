@@ -7,8 +7,8 @@ import "prismjs/components/prism-jsx";
 import "prismjs/components/prism-java";
 import "prismjs/components/prism-sql";
 import "prismjs/themes/prism-tomorrow.css";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-shell-session";
+import "prismjs/components/prism-yaml";
+import "prismjs/components/prism-ini";
 
 // Importar lenguajes personalizados
 import "@/prism/languages/prism-http.js";
@@ -38,13 +38,11 @@ const CodeBlock = ({ children, language, className = "" }) => {
       className={`flutter-code ${className}`}
       sx={{ 
         position: "relative", 
-        mt: 0,
-        mb: 0,
+        my: 0,
         maxWidth: '100%',
         '& pre': {
           border: 'none !important',
           boxShadow: 'none !important',
-          marginBottom: '0 !important',
         },
         '& code': {
           border: 'none !important',
@@ -60,12 +58,8 @@ const CodeBlock = ({ children, language, className = "" }) => {
       >
         <ContentCopyIcon fontSize="small" />
       </IconButton>
-      <pre style={{ margin: 0, marginBottom: 0, maxWidth: 800, overflowX: 'auto', paddingBottom: 8, scrollbarWidth: 'none' }}
-        className="codeblock-pre-hide-scroll"
-      >
-        {/* Usamos 'ref' para que Prism.js pueda acceder al elemento <code> */}
-        {/* El texto va directamente dentro de <code>, Prism lo resaltará */}
-        <code className={`language-${language}`} ref={codeRef}>
+      <pre style={{ margin: 0, marginBottom: 0, width: '100%', maxWidth: '100%', overflowX: 'auto', paddingBottom: 8, display: 'block', whiteSpace: 'pre' }}>
+        <code className={`language-${language}`} ref={codeRef} style={{ width: '100%', maxWidth: '100%', display: 'block' }}>
           {children}
         </code>
       </pre>

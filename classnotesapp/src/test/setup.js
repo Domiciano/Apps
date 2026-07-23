@@ -15,20 +15,24 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// BeanVisualizer canvas uses ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
 
+// useContentSpy uses IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
 
+// window.scrollTo used by LessonPage and TableOfContents
 window.scrollTo = vi.fn();
 
+// Reset localStorage between tests
 afterEach(() => {
   localStorage.clear();
 });

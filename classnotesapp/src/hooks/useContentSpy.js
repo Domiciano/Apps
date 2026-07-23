@@ -1,69 +1,57 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+// Función para convertir texto a slug válido para URL
 const createSlug = (text) => {
   return text
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim('-');
+    .normalize('NFD') // Normaliza caracteres acentuados
+    .replace(/[\u0300-\u036f]/g, '') // Remueve diacríticos
+    .replace(/[^a-z0-9\s-]/g, '') // Solo letras, números, espacios y guiones
+    .replace(/\s+/g, '-') // Reemplaza espacios con guiones
+    .replace(/-+/g, '-') // Reemplaza múltiples guiones con uno solo
+    .trim('-'); // Remueve guiones al inicio y final
 };
 
 export const useContentSpy = (subtitles) => {
-  const [activeSections, setActiveSections] = useState([]);
+  const [activeSection, setActiveSection] = useState('');
   const location = useLocation();
-  const intersectingIdsRef = useRef(new Set());
-  const subtitleElementsRef = useRef({}); // To store references to DOM elements and their positions
 
-  // Initial active section (first subtitle) - only if no hash and no active sections
+  // Set initial active section when subtitles are loaded
   useEffect(() => {
-    if (subtitles.length > 0 && activeSections.length === 0 && !location.hash) {
+    if (subtitles.length > 0 && !activeSection) {
       const firstSubtitle = subtitles[0];
-      setActiveSections([firstSubtitle.id]);
-      const slug = createSlug(firstSubtitle.text);
-      window.history.replaceState(null, null, `#${slug}`);
+      setActiveSection(firstSubtitle.id);
+      
+      // If no hash in URL, set the first section as active
+      if (!location.hash) {
+        const slug = createSlug(firstSubtitle.text);
+        window.history.replaceState(null, null, `#${slug}`);
+      }
     }
-  }, [subtitles, activeSections, location.hash]);
+  }, [subtitles, activeSection, location.hash]);
 
   useEffect(() => {
     if (!subtitles || subtitles.length === 0) return;
 
-    // Populate subtitleElementsRef
-    subtitles.forEach(subtitle => {
-      const element = document.getElementById(subtitle.id);
-      if (element) {
-        subtitleElementsRef.current[subtitle.id] = element;
-      }
-    });
-
     const observerOptions = {
       root: null,
-      rootMargin: '-64px 0px -64px 0px', // Top: AppBar (64px), Bottom: 64px
-      threshold: 0.01 // At least 1% visible
+      rootMargin: '-10% 0px -60% 0px', // Más sensible: activa cuando está en el top 10% del viewport
+      threshold: [0, 0.1, 0.5, 1] // Múltiples thresholds para mejor detección
     };
 
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0) {
-          intersectingIdsRef.current.add(entry.target.id);
-        } else {
-          intersectingIdsRef.current.delete(entry.target.id);
-        }
-      });
-
-      // Determine active sections based on intersection and scroll position
-      updateActiveSections();
-
-      // Update hash based on the most visible intersecting entry
-      const mostVisibleEntry = entries
-        .filter(entry => entry.isIntersecting && entry.intersectionRatio > 0)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-      if (mostVisibleEntry) {
+      // Ordenar entradas por ratio de intersección (más visible primero)
+      const sortedEntries = entries
+        .filter(entry => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+      
+      if (sortedEntries.length > 0) {
+        const mostVisibleEntry = sortedEntries[0];
         const sectionId = mostVisibleEntry.target.id;
+        setActiveSection(sectionId);
+        
+        // Find the subtitle text for this ID
         const subtitle = subtitles.find(sub => sub.id === sectionId);
         if (subtitle) {
           const slug = createSlug(subtitle.text);
@@ -75,62 +63,56 @@ export const useContentSpy = (subtitles) => {
       }
     }, observerOptions);
 
+    // Observe all subtitle elements
     subtitles.forEach(subtitle => {
-      const element = subtitleElementsRef.current[subtitle.id];
+      const element = document.getElementById(subtitle.id);
       if (element) {
         observer.observe(element);
       }
     });
 
-    const updateActiveSections = () => {
-      let newActiveSections = Array.from(intersectingIdsRef.current);
-
-      if (newActiveSections.length === 0) {
-        // If no subtitles are currently intersecting, find the last one that passed the reading line
-        const scrollY = window.scrollY;
-        const readingLine = scrollY + window.innerHeight * 0.3; // 30% down the viewport
-
-        let lastPassedSubtitleId = null;
-        // Iterate backwards to find the last subtitle whose top is above the reading line
-        for (let i = subtitles.length - 1; i >= 0; i--) {
-          const subtitle = subtitles[i];
-          const element = subtitleElementsRef.current[subtitle.id];
-          if (element && element.offsetTop <= readingLine) {
-            lastPassedSubtitleId = subtitle.id;
-            break;
-          }
-        }
-        if (lastPassedSubtitleId) {
-          newActiveSections = [lastPassedSubtitleId];
-        } else if (subtitles.length > 0) {
-          // Fallback to the first subtitle if nothing else is found (e.g., at very top of page)
-          newActiveSections = [subtitles[0].id];
+    // Función para detectar cuando estamos cerca del final de la página
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Si estamos a menos del 10% del final de la página, activar el último elemento
+      if (scrollPosition >= documentHeight * 0.9 && subtitles.length > 0) {
+        const lastSubtitle = subtitles[subtitles.length - 1];
+        setActiveSection(lastSubtitle.id);
+        
+        const slug = createSlug(lastSubtitle.text);
+        const newHash = `#${slug}`;
+        if (location.hash !== newHash) {
+          window.history.replaceState(null, null, newHash);
         }
       }
-      setActiveSections(newActiveSections);
     };
 
-    // Add scroll listener to trigger updateActiveSections more frequently
-    window.addEventListener('scroll', updateActiveSections, { passive: true });
+    // Agregar listener de scroll para detectar final de página
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Cleanup
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', updateActiveSections);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [subtitles, location.hash]);
 
-  // Handle initial hash navigation (simplified for activeSections array)
+  // Handle initial hash navigation
   useEffect(() => {
     if (location.hash && subtitles.length > 0) {
       const targetSlug = location.hash.substring(1);
+      
+      // Find subtitle by slug
       const targetSubtitle = subtitles.find(sub => createSlug(sub.text) === targetSlug);
-
+      
       if (targetSubtitle) {
-        // Cuando navegamos vía hash, aseguramos que solo esa sección esté activa inicialmente
-        setActiveSections([targetSubtitle.id]);
-        const targetElement = subtitleElementsRef.current[targetSubtitle.id];
+        setActiveSection(targetSubtitle.id);
+        const targetElement = document.getElementById(targetSubtitle.id);
+        
         if (targetElement) {
+          // Use the same scroll logic as TableOfContents with proper offset
           setTimeout(() => {
             const elementTop = targetElement.offsetTop;
             const offset = 80; // 64px AppBar + 16px padding
@@ -141,14 +123,14 @@ export const useContentSpy = (subtitles) => {
           }, 100);
         }
       } else {
-        // Si el hash no coincide con ningún subtítulo, por defecto el primero
+        // If hash doesn't match any subtitle, default to first
         const firstSubtitle = subtitles[0];
-        setActiveSections([firstSubtitle.id]);
+        setActiveSection(firstSubtitle.id);
         const slug = createSlug(firstSubtitle.text);
         window.history.replaceState(null, null, `#${slug}`);
       }
     }
   }, [location.hash, subtitles]);
 
-  return { activeSections };
+  return { activeSection };
 }; 

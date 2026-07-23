@@ -4,11 +4,34 @@ import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } 
 import { useParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import LessonParser from '@/components/lesson/LessonParser';
-import allLessonRawContents from '@/utils/lessonImporter';
 import TableOfContents from '@/components/lesson/TableOfContents';
 import { useThemeMode } from '@/theme/ThemeContext';
 import CloseIcon from '@mui/icons-material/Close';
 import { useContentSpy } from '@/hooks/useContentSpy';
+import { useLessonContentCache } from '@/theme/LessonContentCache';
+
+// Named constants — match Layout.jsx drawerWidth and TableOfContents desktop width
+const DRAWER_WIDTH = 280;
+const TOC_WIDTH = 235;
+const CONTENT_LEFT_OFFSET = DRAWER_WIDTH - 40;  // 240px
+const CONTENT_RIGHT_OFFSET = TOC_WIDTH - 15;    // 220px
+
+const SkeletonBlock = ({ height, width, theme }) => (
+  <Box
+    sx={{
+      height,
+      width,
+      borderRadius: 1,
+      backgroundColor: theme.backgroundLight,
+      animation: 'lesson-skeleton-pulse 1.4s ease-in-out infinite',
+      '@keyframes lesson-skeleton-pulse': {
+        '0%': { opacity: 1 },
+        '50%': { opacity: 0.4 },
+        '100%': { opacity: 1 },
+      },
+    }}
+  />
+);
 
 const LessonPage = forwardRef(({ sections }, ref) => {
   const { lessonId } = useParams();
@@ -16,41 +39,35 @@ const LessonPage = forwardRef(({ sections }, ref) => {
   const [parsedContent, setParsedContent] = useState({ elements: null, subtitles: [], lessonTitle: '' });
   const [showMobileToc, setShowMobileToc] = useState(false);
   const { theme } = useThemeMode();
-  
-  // Use content spy to track active sections
-  const { activeSections } = useContentSpy(parsedContent.subtitles);
+  const { getOrFetch } = useLessonContentCache();
+
+  const { activeSection } = useContentSpy(parsedContent.subtitles);
 
   const lessonMap = useMemo(() => {
     const map = new Map();
     sections.forEach(sec => {
-      if (sec.type === 'lesson') {
-        map.set(sec.id, sec.filePath);
-      }
+      if (sec.type === 'lesson') map.set(sec.id, sec);
     });
     return map;
   }, [sections]);
 
   useEffect(() => {
-    setLoading(true);
+    const section = lessonMap.get(lessonId);
 
-    const filePath = lessonMap.get(lessonId);
-
-    if (filePath && allLessonRawContents[filePath]) {
-      const rawContent = allLessonRawContents[filePath];
-      
-      // Parse the content to get elements and subtitles
-      const parsed = LessonParser({ content: rawContent });
-      setParsedContent(parsed);
-    } else {
-      const errorContent = `# Lección no encontrada\n\nLo siento, la lección con ID "${lessonId}" no fue encontrada o el archivo "${filePath}" no existe.`;
-      
-      const parsed = LessonParser({ content: errorContent });
-      setParsedContent(parsed);
+    if (!section) {
+      const error = `# Lección no encontrada\n\nLa lección con ID "${lessonId}" no fue encontrada.`;
+      setParsedContent(LessonParser({ content: error }));
+      setLoading(false);
+      window.scrollTo(0, 0);
+      return;
     }
-    setLoading(false);
-    
-    // Scroll to top when lesson changes (instant, no animation)
-    window.scrollTo(0, 0);
+
+    setLoading(true);
+    getOrFetch(lessonId, section.url).then(rawContent => {
+      setParsedContent(LessonParser({ content: rawContent }));
+      setLoading(false);
+      window.scrollTo(0, 0);
+    });
   }, [lessonId, lessonMap]);
 
   useImperativeHandle(ref, () => ({
@@ -59,84 +76,68 @@ const LessonPage = forwardRef(({ sections }, ref) => {
   }));
 
   if (loading) {
-    return <div>Cargando contenido de la lección...</div>;
+    return (
+      <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 800 }}>
+        <SkeletonBlock height="48px" width="60%" theme={theme} />
+        <SkeletonBlock height="28px" width="40%" theme={theme} />
+        <SkeletonBlock height="120px" width="100%" theme={theme} />
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      width: '100%', 
-      flexDirection: { xs: 'column', lg: 'row' },
-      minWidth: 0 
-    }}>
-      <Box sx={{ 
-        flex: 1, 
-        right:{lg:280, xs: 10},
-        left:{lg:280, xs: 10},
-        botom:0,
-        top:{lg:0, xs: 20},
-        position:'absolute',
-        overflow:'scroll',
-        
-        bottom:0,
-        zIndex:0, // Asegura que el contenido esté debajo de la sidebar
-        scrollbarWidth: 'none', // Firefox
-        msOverflowStyle: 'none', // IE y Edge
-        '&::-webkit-scrollbar': {
-          display: 'none',      // Chrome, Safari, Opera
-          width: 0,
-          height: 0,
-          background: 'transparent',
-        },
-      }}
+    <Box sx={{ display: 'flex', width: '100%', flexDirection: { xs: 'column', lg: 'row' }, minWidth: 0 }}>
+      <Box
+        sx={{
+          flex: 1,
+          right: { lg: CONTENT_RIGHT_OFFSET, xs: 10 },
+          left: { lg: CONTENT_LEFT_OFFSET, xs: 10 },
+          position: 'absolute',
+          overflow: 'scroll',
+          height: '100vh',
+          bottom: 0,
+        }}
+        className="hide-scrollbar"
       >
         {parsedContent.elements}
       </Box>
-      {/* TOC en desktop */}
-      <Box sx={{ 
-        width: { lg: 235 }, 
-        flexShrink: 0, 
+
+      <Box sx={{
+        width: { lg: TOC_WIDTH },
+        flexShrink: 0,
         display: { xs: 'none', lg: 'block' },
         mr: 2,
-        position:'fixed',
+        position: 'fixed',
         right: 0,
         top: 64,
       }}>
-        <TableOfContents 
-          subtitles={parsedContent.subtitles} 
+        <TableOfContents
+          subtitles={parsedContent.subtitles}
           lessonTitle={parsedContent.lessonTitle}
-          activeSections={activeSections}
+          activeSection={activeSection}
           lessonId={lessonId}
         />
       </Box>
-      {/* TOC en mobile: Drawer temporal */}
+
       {showMobileToc && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            width: '85vw',
-            maxWidth: 320,
-            height: '100vh',
-            backgroundColor: theme.background,
-            zIndex: 2000,
-            boxShadow: 6,
-            p: 2,
-            display: { xs: 'block', lg: 'none' },
-          }}
-        >
-          {/* Botón de cerrar fijo arriba a la derecha */}
+        <Box sx={{
+          position: 'fixed', top: 0, right: 0,
+          width: '85vw', maxWidth: 320, height: '100vh',
+          backgroundColor: theme.background, zIndex: 2000, boxShadow: 6, p: 2,
+          display: { xs: 'block', lg: 'none' },
+        }}>
           <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2100 }}>
-            <button onClick={() => setShowMobileToc(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }} aria-label="Cerrar TOC">
+            <button onClick={() => setShowMobileToc(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+              aria-label="Cerrar TOC">
               <CloseIcon sx={{ color: theme.primaryTitle, fontSize: 28 }} />
             </button>
           </Box>
           <Box sx={{ pt: 4 }}>
-            <TableOfContents 
-              subtitles={parsedContent.subtitles} 
+            <TableOfContents
+              subtitles={parsedContent.subtitles}
               lessonTitle={parsedContent.lessonTitle}
-              activeSections={activeSections}
+              activeSection={activeSection}
               lessonId={lessonId}
             />
           </Box>

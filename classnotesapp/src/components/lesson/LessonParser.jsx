@@ -17,6 +17,7 @@ import Link from "@/components/lesson/Link";
 import images from "@/assets";
 import TryCodeButton from "./TryCodeButton";
 import Typography from "@mui/material/Typography";
+import BeanVisualizer from "@/components/BeanVisualizer/BeanVisualizer";
 import MermaidBlock from "@/components/lesson/MermaidBlock";
 
 // Reused across calls — plugins are registered once at freeze() time.
@@ -127,6 +128,8 @@ const LessonParser = ({ content }) => {
     a: ({ href, children }) => <Link displayname={children} url={href} />,
     img: ({ src, alt, title }) => {
       const resolved = resolveImageSrc(src);
+      // `frameNN` title (e.g. "frame60") wraps the image in a padded white card
+      // scaled to NN% width — for screenshots exported on a transparent bg.
       const frameMatch = /^frame(\d{1,3})?$/.exec(title || "");
       if (frameMatch) {
         const scale = frameMatch[1] ? Number(frameMatch[1]) / 100 : 1;
@@ -157,6 +160,7 @@ const LessonParser = ({ content }) => {
       const raw = String(children).replace(/\n$/, "");
 
       if (lang === "mermaid") return <MermaidBlock chart={raw} />;
+      if (lang === "beansim") return <BeanVisualizer initialCode={raw} />;
       if (lang === "svg") {
         return (
           <div
@@ -177,7 +181,7 @@ const LessonParser = ({ content }) => {
       const meta = node?.data?.meta || node?.properties?.metastring || "";
       const trycodeMatch = /trycode=(\S+)/.exec(meta);
       if (trycodeMatch) {
-        return <TryCodeButton gistId={trycodeMatch[1]} code={raw} language={lang} />;
+        return <TryCodeButton gistId={trycodeMatch[1]} codeBlock={codeBlock} />;
       }
       return codeBlock;
     },

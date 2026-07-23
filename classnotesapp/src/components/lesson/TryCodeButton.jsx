@@ -3,70 +3,85 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import DartPadEmbed from '../embed/DartPadEmbed';
 import { useThemeMode } from '@/theme/ThemeContext';
-import CodeBlock from '../code/CodeBlock';
 
-const TryCodeButton = ({ gistId, code, language }) => {
-  console.log('TryCodeButton props:', { code, language, gistId });
+const TryCodeButton = ({ gistId, codeBlock }) => {
   const [showDartPad, setShowDartPad] = useState(false);
   const { theme } = useThemeMode();
   
   return (
     <Box sx={{ my: 2 }}>
-      {/* Botones tipo toggle, no pestañas */}
-      <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+      {/* Pestañas */}
+      <Box sx={{ display: 'flex', borderBottom: 1, borderColor: 'divider', mb: 0 }}>
         <Button
+          variant={!showDartPad ? 'contained' : 'text'}
           onClick={() => setShowDartPad(false)}
           sx={{
-            borderRadius: 2,
+            borderRadius: '8px 8px 0 0',
+            borderBottom: !showDartPad ? 'none' : '1px solid',
+            borderColor: 'divider',
+            minWidth: 'auto',
             px: 2,
-            py: 0.7,
-            fontSize: '0.95rem',
+            py: 1,
+            fontSize: '0.875rem',
             fontWeight: 600,
-            backgroundColor: !showDartPad ? theme.accent : 'transparent',
-            color: !showDartPad ? '#fff' : theme.textSecondary,
-            border: !showDartPad ? 'none' : `1px solid ${theme.border}`,
+            backgroundColor: !showDartPad ? 'primary.main' : 'transparent',
+            color: !showDartPad ? 'white' : theme.textSecondary,
             boxShadow: 'none',
             outline: 'none',
-            minWidth: 0,
-            transition: 'all 0.18s',
-            '&:hover': {
-              backgroundColor: !showDartPad ? theme.accent : theme.backgroundLight,
-              color: !showDartPad ? '#fff' : theme.textPrimary,
-              border: `1px solid ${theme.accent}`,
+            '&:focus': {
+              outline: 'none',
+              boxShadow: 'none',
             },
+            '&:focus-visible': {
+              outline: 'none',
+              boxShadow: 'none',
+            },
+            '&:hover': {
+              backgroundColor: !showDartPad ? 'primary.dark' : 'action.hover',
+            }
           }}
         >
           Código
         </Button>
         <Button
+          variant={showDartPad ? 'contained' : 'text'}
           onClick={() => setShowDartPad(true)}
           sx={{
-            borderRadius: 2,
+            borderRadius: '8px 8px 0 0',
+            borderBottom: showDartPad ? 'none' : '1px solid',
+            borderColor: 'divider',
+            minWidth: 'auto',
             px: 2,
-            py: 0.7,
-            fontSize: '0.95rem',
+            py: 1,
+            fontSize: '0.875rem',
             fontWeight: 600,
-            backgroundColor: showDartPad ? theme.accent : 'transparent',
-            color: showDartPad ? '#fff' : theme.textSecondary,
-            border: showDartPad ? 'none' : `1px solid ${theme.border}`,
+            backgroundColor: showDartPad ? 'primary.main' : 'transparent',
+            color: showDartPad ? 'white' : theme.textSecondary,
             boxShadow: 'none',
             outline: 'none',
-            minWidth: 0,
-            transition: 'all 0.18s',
-            '&:hover': {
-              backgroundColor: showDartPad ? theme.accent : theme.backgroundLight,
-              color: showDartPad ? '#fff' : theme.textPrimary,
-              border: `1px solid ${theme.accent}`,
+            '&:focus': {
+              outline: 'none',
+              boxShadow: 'none',
             },
+            '&:focus-visible': {
+              outline: 'none',
+              boxShadow: 'none',
+            },
+            '&:hover': {
+              backgroundColor: showDartPad ? 'primary.dark' : 'action.hover',
+            }
           }}
         >
           Fire it up!
         </Button>
       </Box>
-      {/* Contenido de los botones */}
+      
+      {/* Contenido de las pestañas */}
       <Box sx={{ 
-        border: 'none',
-        borderRadius: 2,
+        border: 1, 
+        borderColor: 'divider', 
+        borderTop: 'none',
+        borderRadius: '0 0 8px 8px',
         overflow: 'hidden',
         mt: 0,
         p: 0
@@ -74,7 +89,9 @@ const TryCodeButton = ({ gistId, code, language }) => {
         {showDartPad ? (
           <DartPadEmbed gistId={gistId} />
         ) : (
-          <CodeBlock language={language}>{code}</CodeBlock>
+          <Box>
+            {codeBlock}
+          </Box>
         )}
       </Box>
     </Box>

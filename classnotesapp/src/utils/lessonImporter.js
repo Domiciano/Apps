@@ -7,6 +7,4 @@ for (const path in modules) {
   lessonRawContents[fileName] = modules[path];
 }
 
-console.log('Imported lesson raw contents:', lessonRawContents);
-
 export default lessonRawContents;

@@ -1,17 +1,16 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 
+// SPEC-08 P5: corrected aspect ratio — 56.25% = 9/16 (true 16:9)
 const YouTubeEmbed = ({ videoId, title = "YouTube video" }) => {
   return (
     <Box
       sx={{
         position: 'relative',
-        paddingBottom: {lg:'38%', xs:'48%'}, // 16:9
+        paddingBottom: '56.25%',
         height: 0,
-        marginLeft:0,
-        marginRight:0,
         overflow: 'hidden',
-        borderRadius: 4,
+        borderRadius: 2,
         boxShadow: 3,
         my: 3,
       }}

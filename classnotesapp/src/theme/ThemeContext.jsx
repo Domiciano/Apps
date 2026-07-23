@@ -22,7 +22,6 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     document.body.classList.remove('dark', 'light');
     document.body.classList.add(mode);
-    // Guardar en localStorage si cambia desde otro lugar
     localStorage.setItem('themeMode', mode);
   }, [mode]);
 

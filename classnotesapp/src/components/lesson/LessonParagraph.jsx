@@ -13,7 +13,8 @@ const LessonParagraph = ({ children }) => {
       component="div"
       sx={{
         color: theme.textPrimary,
-        fontSize: { xs: '1.05rem', md: '1.18rem' },
+        fontSize: { xs: '1rem', md: '1.1rem' },
+        mb: 2,
         lineHeight: 1.7,
         fontFamily: 'Roboto, Arial, sans-serif',
       }}

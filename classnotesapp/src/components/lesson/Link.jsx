@@ -5,6 +5,8 @@ import { useThemeMode } from '@/theme/ThemeContext';
 const Link = ({ displayname, url }) => {
   const { theme } = useThemeMode();
   return (
+    // display: inline-flex (not a wrapping <div>) so this stays valid nested
+    // inside a <p> — standard Markdown links are almost always inline text.
     <a
       href={url}
       target="_blank"
@@ -18,8 +20,6 @@ const Link = ({ displayname, url }) => {
         gap: 4,
         position: 'relative',
         transition: 'color 0.2s',
-        marginLeft: 2,
-        marginRight: 2,
       }}
       onMouseOver={e => (e.currentTarget.style.color = theme.contentTitle)}
       onMouseOut={e => (e.currentTarget.style.color = theme.accent)}

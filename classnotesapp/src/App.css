@@ -64,22 +64,55 @@
 }
 
 .inline-code {
-  background-color: #2196F3;                                                                                       
-  border-radius: 6px;                                                                                              
-  font-family: 'Fira Code', 'Roboto Mono', monospace;                                                              
-  padding: 0.15em 0.4em;                                                                                           
-  white-space: pre-wrap;
-  color: #fff; 
-
+  background-color: #234236;
+  border-radius: 6px;
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  padding: 0.15em 0.4em;
+  white-space: nowrap;
+  color: #fff;
 }
 
-/* Ocultar visualmente la barra de scroll en bloques de código y su contenedor */
+/* Ocultar barra de scroll horizontal en bloques de código */
 .codeblock-pre-hide-scroll {
+  overflow-x: hidden !important;
+  scrollbar-width: none !important; /* Firefox */
+}
+.codeblock-pre-hide-scroll::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* Ocultar visualmente la barra de scroll pero mantener el scroll funcional */
+.hide-scrollbar {
   scrollbar-width: none !important;        /* Firefox */
   -ms-overflow-style: none !important;     /* IE y Edge */
 }
-.codeblock-pre-hide-scroll::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar {
   display: none !important;                /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+/* Ocultar visualmente la barra de scroll en bloques de código y su contenedor */
+.flutter-code {
+  scrollbar-width: none !important;        /* Firefox */
+  -ms-overflow-style: none !important;     /* IE y Edge */
+}
+.flutter-code::-webkit-scrollbar {
+  display: none !important;                /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+.flutter-code pre {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.flutter-code pre::-webkit-scrollbar {
+  display: none !important;
   width: 0 !important;
   height: 0 !important;
   background: transparent !important;
