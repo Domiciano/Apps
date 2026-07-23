@@ -5,22 +5,17 @@
 // Firestore security rules + the "Authorized domains" list in the Firebase
 // console (Authentication → Settings). So it is safe to commit these values.
 //
-// FOUNDING A COURSE (one Firebase project PER course — see docs/AUTH_SETUP.md):
-//   1. Firebase console → create a project → add a Web app → copy its config
-//      object and paste it below (replace every REPLACE_* value).
-//   2. Set `courseId` to a short slug for this course (stored on each student
-//      record so a shared analytics pipeline can tell courses apart).
-//
-// While the values are left as REPLACE_* the auth gate stays DISABLED and the
-// app renders normally — handy for the template and for local development.
+// Curso: Aplicaciones Móviles — proyecto Firebase "facelogprueba".
 
 export const firebaseConfig = {
-  apiKey: 'REPLACE_WITH_FIREBASE_API_KEY',
-  authDomain: 'REPLACE_PROJECT.firebaseapp.com',
-  projectId: 'REPLACE_PROJECT',
-  storageBucket: 'REPLACE_PROJECT.appspot.com',
-  messagingSenderId: 'REPLACE_SENDER_ID',
-  appId: 'REPLACE_APP_ID',
+  apiKey: 'AIzaSyAKjGpzI_x_wlONFdf_qKYNT3QyFW8PlnA',
+  authDomain: 'facelogprueba.firebaseapp.com',
+  databaseURL: 'https://facelogprueba.firebaseio.com',
+  projectId: 'facelogprueba',
+  storageBucket: 'facelogprueba.appspot.com',
+  messagingSenderId: '612300733454',
+  appId: '1:612300733454:web:4eb26ff9e113fc0bf9505f',
+  measurementId: 'G-0JEJMW08Q0',
 };
 
 // Short identifier for this course, saved on every student record.
