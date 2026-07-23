@@ -33,7 +33,8 @@ const LoginScreen = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex' }}>
-      {/* Left — decorative prototype mosaic (hidden on small screens) */}
+      {/* Left — decorative panel (hidden on small screens): a per-course photo
+          if one is set in loginBranding, otherwise the prototype mosaic. */}
       <Box
         sx={{
           flex: '1.05',
@@ -44,7 +45,25 @@ const LoginScreen = () => {
           borderRight: `3px solid ${theme.border}`,
         }}
       >
-        <LoginIllustration />
+        {loginBranding.backgroundImage ? (
+          <>
+            <Box
+              component="img"
+              src={loginBranding.backgroundImage}
+              alt=""
+              sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                background: `linear-gradient(180deg, ${theme.accent}22 0%, transparent 35%, rgba(0,0,0,0.28) 100%)`,
+              }}
+            />
+          </>
+        ) : (
+          <LoginIllustration />
+        )}
       </Box>
 
       {/* Right — sign-in panel */}
