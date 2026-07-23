@@ -33,14 +33,13 @@ const LoginScreen = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex' }}>
-      {/* Left — illustration panel (hidden on small screens) */}
+      {/* Left — decorative prototype mosaic (hidden on small screens) */}
       <Box
         sx={{
           flex: '1.05',
-          display: { xs: 'none', md: 'flex' },
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 6,
+          display: { xs: 'none', md: 'block' },
+          position: 'relative',
+          overflow: 'hidden',
           background: theme.accent,
           borderRight: `3px solid ${theme.border}`,
         }}
