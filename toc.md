@@ -60,16 +60,18 @@
 [t] BloC
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonG1.md | Cubit y estados | 0045
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonG2.md | Objeto como estado en Cubit | 0046
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab4.md | Laboratorio 4: Deezer ain't the best option | 0047
-[t] BloC y Clean
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonG3.md | Introducción a Bloc | 0048
+
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab4.md | Laboratorio 4: Deezer ain't the best option | 0047
+
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson101.md | Clean Architecture con BLoC | 0049
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson102.md | Ejemplo: Buscador Deezer · Paso a paso | 0050
+
+[t] Supabase Auth
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonX5.md | Self-hosted Supabase | 0054
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH1.md | Instalación de supabase | 0051
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH2.md | Inicio de Sesión con Supabase y Flutter | 0052
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab5.md | Laboratorio 5: Flujo de login | 0053
-[t] Supabase
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonX5.md | Self-hosted Supabase | 0054
 **[t] Autenticación
 **[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH15.md | Registro de Usuarios con Supabase | 0055
 **[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH5.md | Clean Architecure | 0056
