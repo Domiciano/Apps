@@ -99,9 +99,9 @@ Cada caja es una clase y cada paso construye una. Las flechas de la izquierda ba
   <defs><marker id="l4tr-a" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L0,8 L10,4 z" fill="#888"/></marker></defs>
   <text x="115" y="32" text-anchor="middle" fill="#AB47BC" font-size="11" font-weight="bold">JSON de Deezer</text>
   <rect x="30" y="40" width="170" height="70" rx="8" fill="#AB47BC" fill-opacity="0.12" stroke="#AB47BC" stroke-opacity="0.6"/>
-  <text x="42" y="64" fill="#888" font-size="10" font-family="monospace">{ id, title,</text>
-  <text x="42" y="80" fill="#888" font-size="10" font-family="monospace">  artist: { name },</text>
-  <text x="42" y="96" fill="#888" font-size="10" font-family="monospace">  album: { cover_medium } }</text>
+  <text x="38" y="64" fill="#888" font-size="9.5" font-family="monospace" style="white-space:pre">{ id, title,</text>
+  <text x="38" y="80" fill="#888" font-size="9.5" font-family="monospace" style="white-space:pre">  artist: { name },</text>
+  <text x="38" y="96" fill="#888" font-size="9.5" font-family="monospace" style="white-space:pre">  album: { cover_medium } }</text>
   <text x="229" y="66" text-anchor="middle" fill="#888" font-size="10" font-family="monospace">fromJson</text>
   <line x1="203" y1="75" x2="255" y2="75" stroke="#888" stroke-width="1.5" marker-end="url(#l4tr-a)"/>
   <rect x="260" y="15" width="200" height="120" rx="10" fill="#66BB6A" fill-opacity="0.10" stroke="#66BB6A"/>

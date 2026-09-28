@@ -60,6 +60,7 @@
 [t] Cubit · State management
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonG1.md | Cubit y estados | 0045
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonG2.md | Objeto como estado en Cubit | 0046
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/labCubit.md | Laboratorio Cubit | 0087
 [t] Bloc · State management
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonG3.md | Introducción a Bloc | 0048
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson103.md | State Management Strategies | 0085
