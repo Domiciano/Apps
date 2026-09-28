@@ -63,6 +63,8 @@
 [t] Bloc · State management
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonG3.md | Introducción a Bloc | 0048
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson101.md | Clean Architecture con BLoC | 0049
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson103.md | State Management Strategies | 0085
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson104.md | Vista y BLoC: filtrar por categoría | 0086
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson102.md | Ejemplo: Buscador Deezer · Paso a paso | 0050
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab4.md | Laboratorio 4: Deezer ain't the best option | 0047
 [t] Supabase Auth
