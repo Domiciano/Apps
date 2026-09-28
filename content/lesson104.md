@@ -1,6 +1,6 @@
 # Vista y BLoC: filtrar por categoría
 
-<!-- tags: CategorySelectedEvent, context.read().add, selectedCategory, el chip no se queda marcado, ChoiceChip, BlocBuilder, emit, callback onSelected, marcar el chip con setState, estado base, restartable, filtrar por categoría -->
+<!-- tags: CategorySelectedEvent, context.read().add, selectedCategory, context that does not contain a Bloc, ChoiceChip, BlocBuilder, emit, callback onSelected, un evento dos estados, estado base, la vista no decide, filtrar por categoría -->
 
 Seguimos con el catálogo de *State Management Strategies*, con la estrategia de clase padre con subclases: la lista de productos vive en la clase padre del estado. Con el estado único y `copyWith` el recorrido entre la vista y el `Bloc` es exactamente el mismo; solo cambia cómo se emite cada estado. Ahora el usuario puede filtrar tocando una categoría. Esa sola interacción recorre el camino completo entre las dos capas: la vista avisa al `Bloc` con un evento, el `Bloc` emite estados y la vista se redibuja con lo que recibe. De cada paso se muestra solo el código mínimo.
 
@@ -307,7 +307,7 @@ Future<void> _onCategorySelected(
 
 ## Paso 4 · La vista se redibuja
 
-En la `Screen`, debajo del `BlocProvider`, un `BlocBuilder` conecta las dos direcciones: le da a los chips el estado actual y convierte su aviso en un evento.
+En la `Screen`, debajo del `BlocProvider`, un `BlocBuilder` conecta las dos direcciones: le da a los chips el estado actual y convierte su aviso en un evento. Tiene que quedar **debajo**, en un widget aparte del que crea el provider: si `context.read<ProductsBloc>()` se llama con un `context` que está por encima del `BlocProvider`, Flutter lanza `BlocProvider.of() called with a context that does not contain a Bloc`.
 
 ```dart
 BlocBuilder<ProductsBloc, ProductsState>(

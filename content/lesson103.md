@@ -174,6 +174,8 @@ abstract class ProductsEvent {}
 class LoadProductsEvent extends ProductsEvent {}
 ```
 
+Cada evento es una clase. Todas heredan de `ProductsEvent`, que es el tipo de evento que acepta el `Bloc`: así la vista puede lanzar cualquiera de ellos, y el `Bloc` sabe exactamente cuáles existen.
+
 ```dart
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   final ProductsRepository _repository;
@@ -196,6 +198,14 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   }
 }
 ```
+
+Así se lee un `Bloc`, pieza por pieza:
+
+- `extends Bloc<ProductsEvent, ProductsState>` declara qué eventos recibe y qué estados entrega.
+- `super(ProductsInitialState())` es el estado con el que arranca, antes de que llegue cualquier evento.
+- `on<LoadProductsEvent>(_onLoadProducts)` dice: «cuando llegue un `LoadProductsEvent`, ejecuta `_onLoadProducts`». Un `Bloc` registra un `on` por cada evento que atiende.
+- El manejador recibe el `event` que llegó y un `emit`. Cada `emit(...)` le entrega un estado nuevo a la vista, y un mismo evento puede emitir varios: aquí, primero «cargando» y después el resultado.
+- `state` es el estado actual del `Bloc`, el último que se emitió.
 
 `state.products` funciona sin preguntar el tipo ni castear: sea cual sea el estado actual, la lista está declarada en la clase padre. Cada `emit` es una decisión explícita sobre la lista:
 
