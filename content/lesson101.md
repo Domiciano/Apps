@@ -9,7 +9,7 @@ Parte de `Bloc` (eventos y estados) y de una arquitectura por capas típica: `UI
 ## Las tres capas
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" font-family="Roboto, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="520" font-family="Roboto, Arial, sans-serif" style="display:block;margin:0 auto;">
   <defs>
     <marker id="dep" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
       <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
@@ -61,9 +61,9 @@ Parte de `Bloc` (eventos y estados) y de una arquitectura por capas típica: `UI
   <line x1="260" y1="178" x2="260" y2="192" stroke="#555" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#dep)"/>
   <!-- RepoImpl → Domain (lower-left edge of inner circle) -->
   <!-- inner circle edge at 225°: x=260−70·sin(45°)≈211, y=265+70·cos(45°)≈314 -->
-  <line x1="145" y1="388" x2="218" y2="317" stroke="#555" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#dep)"/>
+  <line x1="172" y1="400" x2="218" y2="317" stroke="#555" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#dep)"/>
   <!-- DataSource → RepoImpl (just showing connection within outer ring) -->
-  <line x1="375" y1="388" x2="302" y2="317" stroke="#555" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#dep)"/>
+  <line x1="348" y1="400" x2="302" y2="317" stroke="#555" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#dep)"/>
 
   <!-- Bottom note -->
   <text x="260" y="510" text-anchor="middle" fill="#555" font-size="11">Las dependencias apuntan hacia el centro</text>
@@ -303,7 +303,7 @@ Es la única línea que conoce a la vez `MusicRepositoryImpl` y `MusicDataSource
 ## Resumen: quién conoce a quién
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" width="580" height="210" font-family="Roboto, Arial, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" width="580" height="210" font-family="Roboto, Arial, sans-serif" font-size="13" style="display:block;margin:0 auto;">
   <defs>
     <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
       <path d="M0,0 L0,6 L8,3 z" fill="#777"/>
