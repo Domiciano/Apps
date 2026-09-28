@@ -192,4 +192,4 @@ Es la única línea de toda la app que conoce a la vez la implementación concre
 - `RepositoryImpl` cumple el contrato del dominio e invoca al `DataSource`.
 - La flecha punteada verde indica implementación: `RepositoryImpl` satisface la interfaz que el dominio define.
 
-En la siguiente lección, *Ejemplo: Buscador Deezer · Paso a paso*, cada una de estas piezas se escribe en Dart, aplicada a un buscador de música.
+En el *Laboratorio 4*, cada una de estas piezas se escribe en Dart, aplicada a un buscador de música.
