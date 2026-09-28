@@ -4,11 +4,9 @@
 
 Un `Bloc` decide qué estados existen, y cada estado decide qué datos viajan con él. Esa segunda decisión es la que define cómo se comporta la pantalla mientras carga o cuando algo falla. En esta lección comparamos dos estrategias sobre un mismo ejemplo, el catálogo de una tienda, y solo miramos la capa de `Bloc`: estados, eventos y el `Bloc` mismo. La vista y el acceso a datos no cambian de una estrategia a otra.
 
-Si vienes de *Clean Architecture con BLoC*, ya usaste esta idea sin que tuviera nombre: `SearchState` guardaba `tracks` en la clase padre. Aquí se explica por qué.
-
 ## El ejemplo: catálogo de una tienda
 
-La pantalla lista los productos de una tienda. Cada `Product` tiene `id`, `name`, `price` y `category`, y la lista llega de un `GetProductsUseCase`, igual que `SearchTracksUseCase` en la lección anterior. De dónde salen los datos no importa aquí.
+La pantalla lista los productos de una tienda. Cada `Product` tiene `id`, `name`, `price` y `category`, y la lista llega de un `ProductsRepository` con un método `getProducts()`. De dónde salen esos datos —red, caché, una base local— no importa aquí: al `Bloc` solo le interesa la lista que regresa.
 
 La pantalla pasa por cuatro momentos: arranca sin nada, carga, muestra la lista y a veces falla. Además tiene un botón de recargar. La pregunta que separa las dos estrategias es esta: **si el usuario ya ve cinco productos y toca recargar, ¿qué ve mientras llega la respuesta? ¿Y si la recarga falla?**
 
@@ -217,9 +215,9 @@ abstract class ProductsEvent {}
 class LoadProductsEvent extends ProductsEvent {}
 
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
-  final GetProductsUseCase _getProducts;
+  final ProductsRepository _repository;
 
-  ProductsBloc(this._getProducts) : super(ProductsInitialState()) {
+  ProductsBloc(this._repository) : super(ProductsInitialState()) {
     on<LoadProductsEvent>(_onLoadProducts);
   }
 
@@ -229,7 +227,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   ) async {
     emit(ProductsLoadingState(products: state.products));
     try {
-      final products = await _getProducts();
+      final products = await _repository.getProducts();
       emit(ProductsLoadedState(products: products));
     } on Exception catch (e) {
       emit(ProductsErrorState(e.toString(), products: state.products));

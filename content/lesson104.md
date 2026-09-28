@@ -139,7 +139,7 @@ El usuario ve todos los productos con el chip **Todos** marcado y toca **Bebidas
 
 1. **Toca «Bebidas».** El chip no se marca solo: la vista convierte el toque en un evento y se lo manda al `Bloc` con `add`.
 2. **El chip cambia, la lista espera.** El `Bloc` emite de inmediato un `ProductsLoadingState` con la categoría nueva. El chip se marca y aparece la barra de progreso, pero la lista sigue siendo la de antes, porque vive en el estado base.
-3. **Llega la lista filtrada.** Cuando el caso de uso responde, el `Bloc` emite un `ProductsLoadedState` con las bebidas. La vista se redibuja una vez más.
+3. **Llega la lista filtrada.** Cuando el repositorio responde, el `Bloc` emite un `ProductsLoadedState` con las bebidas. La vista se redibuja una vez más.
 
 Debajo de cada pantalla está el estado que la produce. La vista no decide nada: dibuja lo que dice el estado.
 
@@ -150,12 +150,12 @@ sequenceDiagram
   actor U as Usuario
   participant V as Vista
   participant B as ProductsBloc
-  participant UC as GetProductsUseCase
+  participant R as ProductsRepository
   U->>V: toca el chip Bebidas
   V->>B: add(CategorySelectedEvent('Bebidas'))
   B-->>V: emit(ProductsLoadingState)
-  B->>UC: _getProducts(category: 'Bebidas')
-  UC-->>B: 4 productos
+  B->>R: getProducts(category: 'Bebidas')
+  R-->>B: 4 productos
   B-->>V: emit(ProductsLoadedState)
 ```
 
@@ -209,7 +209,7 @@ class ProductsErrorState extends ProductsState {
 }
 ```
 
-Como `selectedCategory` es `required`, el compilador marca cada `emit` que no la pasa, incluido el de `_onLoadProducts`. Ahí se pasa `state.selectedCategory`, y el caso de uso se llama con `category: state.selectedCategory`: así recargar respeta el filtro elegido.
+Como `selectedCategory` es `required`, el compilador marca cada `emit` que no la pasa, incluido el de `_onLoadProducts`. Ahí se pasa `state.selectedCategory`, y el repositorio se llama con `category: state.selectedCategory`: así recargar respeta el filtro elegido.
 
 ## Paso 2 · La vista avisa con un evento
 
@@ -284,7 +284,7 @@ Future<void> _onCategorySelected(
     selectedCategory: event.category,
   ));
   try {
-    final products = await _getProducts(category: event.category);
+    final products = await _repository.getProducts(category: event.category);
     emit(ProductsLoadedState(
       products: products,
       selectedCategory: event.category,
@@ -303,7 +303,7 @@ Future<void> _onCategorySelected(
 - El segundo es el paso ③: la lista filtrada reemplaza a la anterior.
 - Si falla, el chip vuelve a `previousCategory`. La lista que queda en pantalla es la de antes, así que el chip tiene que volver a la categoría que le corresponde a esa lista.
 
-`GetProductsUseCase` ahora recibe un `category` opcional. Cómo filtra es asunto del dominio y no cambia nada de esta comunicación.
+`ProductsRepository` ahora recibe un `category` opcional. Cómo filtra no cambia nada de esta comunicación.
 
 ## Paso 4 · La vista se redibuja
 
@@ -343,15 +343,3 @@ BlocBuilder<ProductsBloc, ProductsState>(
 - `state.selectedCategory` y `state.products` se leen sin preguntar el tipo, porque están en la clase padre. Es la misma ventaja que tenía el `Bloc` en la lección anterior, ahora del lado de la vista.
 - `state.message` sí necesita el `if (state is ProductsErrorState)`, porque solo existe en esa subclase. Aquí el `is` sí promueve el tipo: `state` es un parámetro del `builder`, no el getter del `Bloc`.
 - No hay `setState` en ningún lado. Cada `emit` reconstruye el `builder`, y con eso basta para que el chip, la barra y la lista cambien juntos.
-
-## Errores típicos
-
-**El chip no se queda marcado mientras carga.** Salta de vuelta a **Todos** y solo se marca cuando llega la lista. Algún `emit` está pasando la categoría vieja: revisa que el `ProductsLoadingState` lleve `event.category`.
-
-**Marcar el chip con `setState`.** Convertir `CategoryChips` en `StatefulWidget` y guardar ahí la categoría marcada hace que el chip cambie, pero el `Bloc` no se entera: la lista no se filtra, o al recargar el chip y la lista dejan de coincidir. La categoría vive en el estado base; los chips solo la pintan.
-
-**Tocar dos categorías seguidas muestra la equivocada.** Por defecto, un `Bloc` atiende varios eventos del mismo tipo a la vez. Si la respuesta de **Frutas** tarda más que la de **Bebidas**, llega de última y la pantalla termina en **Frutas** aunque el usuario tocó **Bebidas** después. El transformador `restartable()` del paquete `bloc_concurrency` cancela el evento anterior cuando llega uno nuevo:
-
-```dart
-on<CategorySelectedEvent>(_onCategorySelected, transformer: restartable());
-```
