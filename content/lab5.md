@@ -1,8 +1,12 @@
 # Laboratorio 5: Flujo de login
 
+<!-- tags: Clean Architecture, AuthRepository, SignInUseCase, SupabaseAuthDataSource, LoginBloc, AuthUser, signInWithPassword, signUp, tabla profiles, Null check operator used on a null value -->
+
 En este laboratorio vas a implementar autenticación real usando `Supabase` como backend, pero organizada bajo los principios de `Clean Architecture`. El objetivo es que la lógica de negocio quede completamente desacoplada del proveedor de autenticación.
 
 Al finalizar, tu app tendrá dos features completas: `registro` y `login`, con pantallas, BloC, casos de uso, repositorios y fuentes de datos bien separados.
+
+Necesitas un proyecto de Supabase con el cliente ya inicializado, conocer el patrón `Bloc` y las capas de Clean Architecture (dominio, datos y presentación).
 
 ## ¿Por qué Clean Architecture aquí?
 
@@ -75,10 +79,24 @@ Agrega en tu `pubspec.yaml` y ejecuta `flutter pub get`:
 ```yaml
 dependencies:
   flutter_bloc: ^9.1.1
-  supabase_flutter: ^2.9.1
+  supabase_flutter: ^2.10.1
 ```
 
 Inicializa Supabase en `main.dart` con `await Supabase.initialize(url: ..., anonKey: ...)` antes de llamar a `runApp`. Encuentra tus credenciales en el dashboard de tu proyecto en `Project Settings > API`.
+
+## Referencia del SDK
+
+Lo único que necesitas del SDK vive en `SupabaseAuthDataSource`. Todos los métodos devuelven un `AuthResponse` con `user` y `session`, y lanzan `AuthException` si algo falla:
+
+```dart
+final signInRes = await _client.auth.signInWithPassword(email: email, password: password);
+final signUpRes = await _client.auth.signUp(email: email, password: password);
+await _client.auth.signOut();
+```
+
+- `user` es `null` si la operación no produjo un usuario: valídalo antes de usar `user!` y lanza una excepción propia, o verás `Null check operator used on a null value`.
+- Con la confirmación de correo activada, `signUp` devuelve un `user` pero `session` es `null`: el usuario existe, pero no puede iniciar sesión hasta confirmar. Para este laboratorio desactívala en `Authentication > Providers > Email`.
+- El `AuthUser` se arma con el `id` y el `email` de ese `user`.
 
 ## Dominio · Entidad
 
@@ -239,7 +257,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
 `lib/features/login/ui/screens/login_screen.dart`
 
-Usa `BlocProvider` para proveer el `LoginBloc` y `BlocBuilder` para reaccionar a cada estado. En carga muestra un `CircularProgressIndicator`, en fallo un texto de error, en éxito navega a la pantalla principal.
+Usa `BlocProvider` para proveer el `LoginBloc` y `BlocBuilder` para reaccionar a cada estado. En carga muestra un `CircularProgressIndicator`, en fallo un texto de error, en éxito navega a la pantalla principal. El `create:` del `BlocProvider` es el único lugar donde se ensambla la cadena de capas, de la más externa a la más interna.
 
 ```dart
 class LoginScreen extends StatelessWidget {
@@ -248,7 +266,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => LoginBloc(/* TODO: inyectar dependencias */),
+      create: (_) => LoginBloc(/* TODO: SignInUseCase(AuthRepositoryImpl(SupabaseAuthDataSource(...))) */),
       child: const _LoginView(),
     );
   }
@@ -272,10 +290,27 @@ class _LoginView extends StatefulWidget {
 - Goal 9 · Configura la navegación entre `LoginScreen` y `RegisterScreen`. Desde login un botón lleva a registro, y desde registro un botón vuelve a login.
 - Goal 10 · Agrega un campo `username` al formulario de registro. Luego de un `signUp` exitoso, inserta ese username en la tabla `profiles` de Supabase. Extiende `SupabaseAuthDataSource` con un método `createProfile` para esto.
 
+## Tabla profiles (Goal 10)
+
+Créala en el `SQL Editor` de Supabase. Cada perfil apunta al usuario de `Auth` que lo creó:
+
+```sql
+create table profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text not null
+);
+```
+
+Una tabla creada por SQL nace con `Row Level Security` desactivado, así que el `insert` funciona sin políticas. El insert desde Dart es:
+
+```dart
+await _client.from('profiles').insert({'id': userId, 'username': username});
+```
+
 ## Criterios de entrega
 
 - La app compila y corre sin errores en modo debug.
 - El registro crea un usuario real en tu proyecto de Supabase, verificable en el dashboard.
 - El login autentica al usuario y muestra su email en la pantalla de destino.
 - La estructura de carpetas respeta exactamente la definida en este laboratorio.
-- `AuthRepository` es abstracto · `AuthRepositoryImpl` es la implementación concreta · la UI nunca importa nada de `data/`.
+- `AuthRepository` es abstracto · `AuthRepositoryImpl` es la implementación concreta · el dominio y el `LoginBloc` nunca importan nada de `data/`: solo el `create:` del `BlocProvider` conoce las clases concretas.

@@ -1,6 +1,10 @@
 # Clean Architecture con BLoC
 
+<!-- tags: Clean Architecture, UseCase, Repository abstracto, RepositoryImpl, DataSource, inversión de dependencias, capa de dominio, BlocProvider, inyección por constructor, quién crea las dependencias -->
+
 En este módulo implementamos Clean Architecture combinada con BLoC para construir apps Flutter robustas y fáciles de mantener. La regla fundamental del patrón: las capas externas dependen de las internas, nunca al revés. El dominio no sabe nada del mundo exterior.
+
+Parte de `Bloc` (eventos y estados) y de una app que ya separa capas: `UI → Bloc → Repository → NetworkProvider`. Aquí esa cadena se refina en dos pasos: el `Repository` se parte en un contrato abstracto y su implementación, y aparece el `UseCase` entre el `Bloc` y el repositorio. El `NetworkProvider` pasa a llamarse `DataSource`.
 
 ## Las tres capas
 
@@ -72,6 +76,8 @@ Las capas se leen de adentro hacia afuera. Cuanto más al centro, más pura y es
 - Aplicación — Contiene `BLoC`. Solo conoce el Dominio.
 - Infraestructura (exterior) — Contiene `Vista`, `RepositoryImpl` y `DataSource`. Es la capa que toca el mundo real: HTTP, bases de datos, Flutter UI.
 
+En carpetas esto se ve como `domain/`, `data/` (`RepositoryImpl` y `DataSource`) y `ui/` (`BLoC` y `Vista`). El anillo exterior del gráfico agrupa `data/` y la Vista porque ambas tocan el mundo real.
+
 ## Flujo de una petición
 
 Cuando el usuario realiza una acción, los datos viajan así:
@@ -94,6 +100,38 @@ El BLoC nunca llama directamente a `RepositoryImpl`. Solo conoce la abstracción
 
 Es el corazón de la aplicación. No importa nada de Flutter, HTTP ni librerías externas. Si el dominio compila con `dart run`, estás en buen camino.
 
+## Entidad
+
+El objeto de negocio que viaja por todas las capas. Es Dart puro.
+
+```dart
+class Track {
+  final int id;
+  final String title;
+  final String artistName;
+  final String albumCover;
+  final String previewUrl;
+
+  Track({
+    required this.id,
+    required this.title,
+    required this.artistName,
+    required this.albumCover,
+    required this.previewUrl,
+  });
+
+  factory Track.fromJson(Map<String, dynamic> json) {
+    return Track(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      artistName: (json['artist'] as Map<String, dynamic>)['name'] as String,
+      albumCover: (json['album'] as Map<String, dynamic>)['cover_medium'] as String,
+      previewUrl: json['preview'] as String,
+    );
+  }
+}
+```
+
 ## RepositoryAbstracto
 
 Define el contrato que el dominio necesita. No sabe cómo se obtienen los datos, solo qué datos necesita.
@@ -104,13 +142,13 @@ abstract class MusicRepository {
 }
 ```
 
-- Es una clase abstracta — solo declara métodos, no los implementa.
+- Es una clase abstracta: solo declara métodos, no los implementa.
 - El `UseCase` depende de esta abstracción, nunca de `RepositoryImpl`.
 - Permite cambiar la fuente de datos (HTTP, mock, SQLite) sin tocar una sola línea del dominio.
 
 ## UseCase
 
-Encapsula una acción de negocio concreta. Un `UseCase` = una responsabilidad.
+Encapsula una acción de negocio concreta. Un `UseCase` = una responsabilidad. Recibe el repositorio por constructor.
 
 ```dart
 class SearchTracksUseCase {
@@ -125,8 +163,8 @@ class SearchTracksUseCase {
 ```
 
 - El método `call` permite usar la sintaxis `await useCase(query)` directamente.
-- Solo importa entidades del dominio. Cero dependencias a HTTP, BLoC o Flutter.
-- Si necesitas probar la lógica de negocio, solo mockeas `MusicRepository` — no hay más dependencias.
+- Solo importa entidades y contratos del dominio. Cero dependencias a HTTP, BLoC o Flutter.
+- Si necesitas probar la lógica de negocio, solo mockeas `MusicRepository`: no hay más dependencias.
 
 ## Datos: la capa que toca el mundo exterior
 
@@ -134,44 +172,49 @@ Aquí se implementan los contratos del dominio y se conecta con APIs, bases de d
 
 ## DataSource
 
-Hace la llamada HTTP cruda. Solo sabe hacer peticiones y devolver JSON sin procesar.
+Hace la llamada HTTP y convierte el JSON en entidades. Es la única clase que sabe que existe HTTP.
 
 ```dart
-class DeezerDataSource {
-  final http.Client client;
+abstract class MusicDataSource {
+  Future<List<Track>> fetchTracks(String query);
+}
 
-  DeezerDataSource(this.client);
+class MusicDataSourceImpl implements MusicDataSource {
+  @override
+  Future<List<Track>> fetchTracks(String query) async {
+    final uri = Uri.parse('https://api.deezer.com/search?q=${Uri.encodeComponent(query)}');
+    final response = await http.get(uri);
 
-  Future<List<Map<String, dynamic>>> fetchTracks(String query) async {
-    final uri = Uri.parse('https://api.deezer.com/search?q=$query');
-    final response = await client.get(uri);
-    final json = jsonDecode(response.body);
-    return List<Map<String, dynamic>>.from(json['data']);
+    if (response.statusCode != 200) {
+      throw Exception('Error ${response.statusCode}');
+    }
+
+    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    final list = body['data'] as List;
+    return list.map((e) => Track.fromJson(e as Map<String, dynamic>)).toList();
   }
 }
 ```
 
 ## RepositoryImpl
 
-Implementa `RepositoryAbstracto`. Orquesta las llamadas al `DataSource` y convierte el JSON en entidades del dominio.
+Implementa `RepositoryAbstracto` y recibe el `DataSource` por constructor. Es el puente entre dominio y datos.
 
 ```dart
 class MusicRepositoryImpl implements MusicRepository {
-  final DeezerDataSource dataSource;
+  final MusicDataSource dataSource;
 
   MusicRepositoryImpl(this.dataSource);
 
   @override
-  Future<List<Track>> searchTracks(String query) async {
-    final raw = await dataSource.fetchTracks(query);
-    return raw.map((json) => Track.fromJson(json)).toList();
+  Future<List<Track>> searchTracks(String query) {
+    return dataSource.fetchTracks(query);
   }
 }
 ```
 
-- `implements MusicRepository` — aquí ocurre la conexión entre dominio e infraestructura.
-- Convierte `Map<String, dynamic>` a entidades `Track`. El BLoC nunca ve JSON crudo.
-- Podría orquestar múltiples `DataSource` (red + caché) sin que el dominio lo sepa.
+- `implements MusicRepository`: aquí ocurre la conexión entre dominio e infraestructura.
+- Es el lugar para decidir de dónde salen los datos: puede orquestar varios `DataSource` (red + caché) sin que el dominio lo sepa.
 
 ## Presentación: BLoC y Vista
 
@@ -180,17 +223,42 @@ class MusicRepositoryImpl implements MusicRepository {
 Recibe eventos de la UI, invoca el `UseCase` y emite estados. No sabe nada de HTTP ni de cómo se obtienen los datos.
 
 ```dart
-class MusicBloc extends Bloc<MusicEvent, MusicState> {
+abstract class SearchEvent {}
+
+class SubmitSearchEvent extends SearchEvent {
+  final String query;
+  SubmitSearchEvent(this.query);
+}
+
+abstract class SearchState {
+  final List<Track> tracks;
+  SearchState({this.tracks = const []});
+}
+
+class SearchIdleState extends SearchState {}
+
+class SearchLoadingState extends SearchState {}
+
+class SearchLoadedState extends SearchState {
+  SearchLoadedState({required super.tracks});
+}
+
+class SearchErrorState extends SearchState {
+  final String message;
+  SearchErrorState(this.message);
+}
+
+class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final SearchTracksUseCase searchTracks;
 
-  MusicBloc(this.searchTracks) : super(MusicInitial()) {
-    on<SearchRequested>((event, emit) async {
-      emit(MusicLoading());
+  SearchBloc(this.searchTracks) : super(SearchIdleState()) {
+    on<SubmitSearchEvent>((event, emit) async {
+      emit(SearchLoadingState());
       try {
         final tracks = await searchTracks(event.query);
-        emit(MusicLoaded(tracks));
-      } catch (e) {
-        emit(MusicError(e.toString()));
+        emit(SearchLoadedState(tracks: tracks));
+      } on Exception catch (e) {
+        emit(SearchErrorState(e.toString()));
       }
     });
   }
@@ -202,15 +270,35 @@ class MusicBloc extends Bloc<MusicEvent, MusicState> {
 Escucha los estados del BLoC y renderiza la UI. No contiene lógica de negocio.
 
 ```dart
-BlocBuilder<MusicBloc, MusicState>(
+BlocBuilder<SearchBloc, SearchState>(
   builder: (context, state) {
-    if (state is MusicLoading) return CircularProgressIndicator();
-    if (state is MusicLoaded) return TrackListView(tracks: state.tracks);
-    if (state is MusicError) return Text(state.message);
-    return const SizedBox.shrink();
+    if (state is SearchLoadingState) return const CircularProgressIndicator();
+    if (state is SearchErrorState) return Text(state.message);
+    return ListView(
+      children: state.tracks.map((t) => ListTile(title: Text(t.title))).toList(),
+    );
   },
 )
 ```
+
+## Ensamblaje
+
+Ninguna capa crea a la capa de la que depende: alguien de afuera las construye y se las pasa. Ese ensamblaje ocurre en un solo lugar, el `BlocProvider`, de la capa más externa a la más interna:
+
+```dart
+BlocProvider(
+  create: (_) => SearchBloc(
+    SearchTracksUseCase(
+      MusicRepositoryImpl(
+        MusicDataSourceImpl(),
+      ),
+    ),
+  ),
+  child: const SearchScreen(),
+)
+```
+
+Es la única línea que conoce a la vez `MusicRepositoryImpl` y `MusicDataSourceImpl`. Cambiar la fuente de datos es cambiar esa línea.
 
 ## Resumen: quién conoce a quién
 
@@ -281,7 +369,7 @@ BlocBuilder<MusicBloc, MusicState>(
 ```
 
 - `Vista` solo habla con `BLoC` — nada más.
-- `BLoC` solo habla con `UseCase` — jamás con `RepositoryImpl`.
+- `BLoC` solo habla con `UseCase`, jamás con `RepositoryImpl`.
 - `UseCase` solo conoce `RepositoryAbstracto` — no sabe si los datos vienen de HTTP o de una base de datos.
 - `RepositoryImpl` cumple el contrato del dominio e invoca `DataSource`.
 - La flecha punteada verde indica implementación: `RepositoryImpl` satisface la interfaz que el dominio define.

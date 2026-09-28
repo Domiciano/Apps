@@ -1,6 +1,8 @@
 # Instalación de supabase
 
-Supabase es una alternativa de código abierto a Firebase que ofrece una base de datos Postgres, autenticación, almacenamiento y mucho más. 
+<!-- tags: supabase_flutter, Supabase.initialize, anonKey, publishable key, Supabase.instance.client, User y Session, WidgetsFlutterBinding.ensureInitialized, Project URL, You must initialize the supabase instance -->
+
+Supabase es una alternativa de código abierto a Firebase que ofrece una base de datos Postgres, autenticación, almacenamiento y mucho más. Esta lección deja la app Flutter conectada a un proyecto de Supabase en la nube. Si prefieres una instancia propia con Docker (self-hosted), el cliente se inicializa igual, con la URL y la clave de esa instancia.
 
 ## 1. Configuración del Proyecto en Supabase
 
@@ -10,6 +12,7 @@ Antes de empezar, necesitas una cuenta en Supabase y un proyecto nuevo.
 - Crea una organización
 - Crea un proyecto
 - En el panel de tu proyecto, ve a `Authentication` y asegúrate de que el proveedor de `email` esté habilitado.
+- Ve a `Project Settings > API` y copia dos valores: la `Project URL` y la `publishable key` (antes llamada `anon key`). Son las credenciales que usarás en el paso 3.
 
 ## 2. Instalación de Dependencias
 
@@ -46,14 +49,15 @@ void main() async {
 final supabase = Supabase.instance.client;
 ```
 
-Recuerda reemplazar `TU_SUPABASE_URL` y `TU_PUBLISHABLE_KEY` con las credenciales de tu proyecto.
+Recuerda reemplazar `TU_SUPABASE_URL` y `TU_PUBLISHABLE_KEY` con las credenciales de tu proyecto. Esa clave es pública por diseño: la seguridad de los datos la dan las políticas de la base de datos, no ocultar la clave. Nunca uses en la app la clave `service_role` (o `secret`): da acceso total.
+
+Si intentas usar `Supabase.instance` antes de `initialize`, Flutter lanza `You must initialize the supabase instance before calling Supabase.instance`. Por eso `main` es `async` y llama a `WidgetsFlutterBinding.ensureInitialized()` primero.
 
 ## Objetos
 
-User → te da información de la identidad del usuario en Supabase Auth.
-Ejemplo: id, email, estado de confirmación, metadatos.
-Sirve para saber quién es ese usuario aunque aún no esté loggeado.
+Los dos objetos que devuelve Supabase Auth:
 
-Session → representa una sesión activa (autenticación vigente).
-Incluye los tokens (access_token, refresh_token), tiempo de expiración y referencia al User.
-Es lo que te dice “este usuario ya está autenticado y puede hacer peticiones a la API”.
+- `User`: la identidad del usuario. Incluye `id`, `email`, estado de confirmación y metadatos.
+- `Session`: una sesión activa (autenticación vigente). Incluye los tokens (`access_token`, `refresh_token`), el tiempo de expiración y una referencia al `User`. Es lo que dice "este usuario ya está autenticado y puede hacer peticiones a la API".
+
+Un usuario puede existir sin sesión: por ejemplo, cuando se registra y todavía debe confirmar su correo. En ese caso `user != null` y `session == null`.

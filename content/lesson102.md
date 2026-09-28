@@ -1,6 +1,14 @@
 # Ejemplo: Buscador Deezer · Paso a paso
 
-Construimos un buscador de canciones usando la API pública de Deezer. El usuario escribe una query y la app muestra los resultados en un `ListView`. Seguimos exactamente la estructura del proyecto `moviles252`.
+<!-- tags: Clean Architecture, buscador Deezer, SearchBloc, SearchTracksUseCase, MusicRepositoryImpl, MusicDataSource, BlocProvider, TextEditingController, Uri.encodeComponent, const constructor error -->
+
+Construimos un buscador de canciones usando la API pública de Deezer. El usuario escribe una query y la app muestra los resultados en un `ListView`. Aplicamos Clean Architecture con `Bloc`: cada capa recibe por constructor a la capa que necesita.
+
+Crea el proyecto con el nombre `moviles252`, porque los `import` de esta lección usan ese nombre de paquete (si usas otro, cámbialo en los `import`):
+
+```bash
+flutter create --org icesi.edu.co moviles252
+```
 
 ## Estructura de carpetas
 
@@ -9,6 +17,8 @@ lib/
 └── features/
     └── search/
         ├── domain/
+        │   ├── entities/
+        │   │   └── track.dart
         │   ├── repository/
         │   │   └── music_repository.dart
         │   └── usecases/
@@ -32,7 +42,7 @@ Agrega en `pubspec.yaml` y ejecuta `flutter pub get`:
 ```yaml
 dependencies:
   flutter_bloc: ^9.1.1
-  http: ^1.2.1
+  http: ^1.5.0
 ```
 
 ## Paso 1 · Entidad Track
@@ -103,7 +113,7 @@ Definimos el contrato abstracto. No sabe cómo se obtienen los datos.
   <line x1="140" y1="124" x2="140" y2="148" stroke="#2e3545" stroke-width="1.5" marker-end="url(#d)"/>
   <!-- UseCase -->
   <rect x="42" y="148" width="196" height="42" rx="6" fill="#1e2530" stroke="#2e3545" stroke-width="1.5"/>
-  <text x="140" y="173" text-anchor="middle" fill="#3d4a5e" font-size="12" font-weight="bold">SearchTracksUsecase</text>
+  <text x="140" y="173" text-anchor="middle" fill="#3d4a5e" font-size="12" font-weight="bold">SearchTracksUseCase</text>
   <line x1="140" y1="190" x2="140" y2="212" stroke="#2e3545" stroke-width="1.5" marker-end="url(#d)"/>
   <!-- RepoAbs ACTIVE -->
   <rect x="42" y="212" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
@@ -136,9 +146,9 @@ abstract class MusicRepository {
 }
 ```
 
-## Paso 3 · SearchTracksUsecase (Dominio)
+## Paso 3 · SearchTracksUseCase (Dominio)
 
-El UseCase encapsula la acción de negocio e instancia el repositorio directamente.
+El UseCase encapsula la acción de negocio. Recibe el contrato `MusicRepository` por constructor: el dominio no importa nada de `data/`.
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
@@ -159,7 +169,7 @@ El UseCase encapsula la acción de negocio e instancia el repositorio directamen
   <line x1="140" y1="124" x2="140" y2="148" stroke="#2e3545" stroke-width="1.5" marker-end="url(#d)"/>
   <!-- UseCase ACTIVE -->
   <rect x="42" y="148" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
-  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUsecase</text>
+  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUseCase</text>
   <line x1="140" y1="190" x2="140" y2="212" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- RepoAbs ACTIVE -->
   <rect x="42" y="212" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
@@ -186,21 +196,22 @@ El UseCase encapsula la acción de negocio e instancia el repositorio directamen
 
 ```dart
 import 'package:moviles252/features/search/domain/repository/music_repository.dart';
-import 'package:moviles252/features/search/data/repository/music_repository_impl.dart';
 import 'package:moviles252/features/search/domain/entities/track.dart';
 
-class SearchTracksUsecase {
-  MusicRepository _repository = MusicRepositoryImpl();
+class SearchTracksUseCase {
+  final MusicRepository _repository;
 
-  Future<List<Track>> execute(String query) async {
-    return await _repository.searchTracks(query);
+  SearchTracksUseCase(this._repository);
+
+  Future<List<Track>> call(String query) {
+    return _repository.searchTracks(query);
   }
 }
 ```
 
 ## Paso 4 · MusicDataSource (Datos)
 
-El DataSource hace la llamada HTTP cruda. Define la abstracción y su implementación en el mismo archivo.
+El DataSource hace la llamada HTTP y convierte el JSON en entidades `Track`. Define la abstracción y su implementación en el mismo archivo.
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
@@ -221,7 +232,7 @@ El DataSource hace la llamada HTTP cruda. Define la abstracción y su implementa
   <line x1="140" y1="124" x2="140" y2="148" stroke="#2e3545" stroke-width="1.5" marker-end="url(#d)"/>
   <!-- UseCase ACTIVE -->
   <rect x="42" y="148" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
-  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUsecase</text>
+  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUseCase</text>
   <line x1="140" y1="190" x2="140" y2="212" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- RepoAbs ACTIVE -->
   <rect x="42" y="212" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
@@ -255,7 +266,7 @@ abstract class MusicDataSource {
   Future<List<Track>> fetchTracks(String query);
 }
 
-class MusicDataSourceImpl extends MusicDataSource {
+class MusicDataSourceImpl implements MusicDataSource {
   @override
   Future<List<Track>> fetchTracks(String query) async {
     final encoded = Uri.encodeComponent(query);
@@ -275,7 +286,7 @@ class MusicDataSourceImpl extends MusicDataSource {
 
 ## Paso 5 · MusicRepositoryImpl (Datos)
 
-Implementa el contrato del dominio y delega la llamada al DataSource.
+Implementa el contrato del dominio y delega la llamada al DataSource, que recibe por constructor.
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
@@ -297,7 +308,7 @@ Implementa el contrato del dominio y delega la llamada al DataSource.
   <line x1="140" y1="124" x2="140" y2="148" stroke="#2e3545" stroke-width="1.5" marker-end="url(#d)"/>
   <!-- UseCase ACTIVE -->
   <rect x="42" y="148" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
-  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUsecase</text>
+  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUseCase</text>
   <line x1="140" y1="190" x2="140" y2="212" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- RepoAbs ACTIVE -->
   <rect x="42" y="212" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
@@ -327,19 +338,21 @@ import 'package:moviles252/features/search/domain/entities/track.dart';
 import 'package:moviles252/features/search/domain/repository/music_repository.dart';
 import 'package:moviles252/features/search/data/source/music_data_source.dart';
 
-class MusicRepositoryImpl extends MusicRepository {
-  MusicDataSource _dataSource = MusicDataSourceImpl();
+class MusicRepositoryImpl implements MusicRepository {
+  final MusicDataSource _dataSource;
+
+  MusicRepositoryImpl(this._dataSource);
 
   @override
-  Future<List<Track>> searchTracks(String query) async {
-    return await _dataSource.fetchTracks(query);
+  Future<List<Track>> searchTracks(String query) {
+    return _dataSource.fetchTracks(query);
   }
 }
 ```
 
 ## Paso 6 · SearchBloc (Presentación)
 
-El BLoC define eventos, estados y lógica en un solo archivo. Instancia el UseCase directamente.
+El BLoC define eventos, estados y lógica en un solo archivo. Recibe el UseCase por constructor.
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="280" height="475" font-family="Roboto, Arial, sans-serif">
@@ -360,7 +373,7 @@ El BLoC define eventos, estados y lógica en un solo archivo. Instancia el UseCa
   <line x1="140" y1="124" x2="140" y2="148" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- UseCase ACTIVE -->
   <rect x="42" y="148" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
-  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUsecase</text>
+  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUseCase</text>
   <line x1="140" y1="190" x2="140" y2="212" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- RepoAbs ACTIVE -->
   <rect x="42" y="212" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
@@ -418,9 +431,9 @@ class SearchErrorState extends SearchState {
 
 // ─── BLoC ───────────────────────────────────────────
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  SearchTracksUsecase _usecase = SearchTracksUsecase();
+  final SearchTracksUseCase _usecase;
 
-  SearchBloc() : super(SearchIdleState()) {
+  SearchBloc(this._usecase) : super(SearchIdleState()) {
     on<SubmitSearchEvent>(_onSearch);
   }
 
@@ -430,7 +443,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   ) async {
     emit(SearchLoadingState());
     try {
-      final tracks = await _usecase.execute(event.query);
+      final tracks = await _usecase(event.query);
       emit(SearchLoadedState(tracks: tracks));
     } on Exception catch (e) {
       emit(SearchErrorState(e.toString()));
@@ -461,7 +474,7 @@ La pantalla escucha estados del BLoC y renderiza la lista. No contiene lógica d
   <line x1="140" y1="124" x2="140" y2="148" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- UseCase ACTIVE -->
   <rect x="42" y="148" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
-  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUsecase</text>
+  <text x="140" y="173" text-anchor="middle" fill="white" font-size="12" font-weight="bold">SearchTracksUseCase</text>
   <line x1="140" y1="190" x2="140" y2="212" stroke="#888" stroke-width="1.5" marker-end="url(#a)"/>
   <!-- RepoAbs ACTIVE -->
   <rect x="42" y="212" width="196" height="42" rx="6" fill="#66BB6A" stroke="#388E3C" stroke-width="1.5"/>
@@ -491,6 +504,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moviles252/features/search/ui/bloc/search_bloc.dart';
 
 class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
+
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -585,15 +600,41 @@ class _SearchScreenState extends State<SearchScreen> {
 }
 ```
 
-## Registrar el BLoC en main.dart
+## Ensamblar en main.dart
 
-Envuelve `SearchScreen` con un `BlocProvider` para que tenga acceso al `SearchBloc`.
+Aquí, y solo aquí, se construye la cadena completa de la capa más externa a la más interna y se le entrega al `SearchBloc` por medio de un `BlocProvider`.
+
+`lib/main.dart`
 
 ```dart
-BlocProvider(
-  create: (_) => SearchBloc(),
-  child: const SearchScreen(),
-)
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:moviles252/features/search/data/repository/music_repository_impl.dart';
+import 'package:moviles252/features/search/data/source/music_data_source.dart';
+import 'package:moviles252/features/search/domain/usecases/search_tracks_usecase.dart';
+import 'package:moviles252/features/search/ui/bloc/search_bloc.dart';
+import 'package:moviles252/features/search/ui/screens/search_screen.dart';
+
+void main() {
+  runApp(
+    MaterialApp(
+      routes: {
+        '/': (_) => BlocProvider(
+              create: (_) => SearchBloc(
+                SearchTracksUseCase(
+                  MusicRepositoryImpl(
+                    MusicDataSourceImpl(),
+                  ),
+                ),
+              ),
+              child: const SearchScreen(),
+            ),
+      },
+    ),
+  );
+}
 ```
+
+`SearchScreen` no importa nada de `data/` ni de `domain/`: solo conoce al `SearchBloc`.
 
 .
