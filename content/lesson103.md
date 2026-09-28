@@ -326,18 +326,6 @@ Es la misma pantalla que con subclases, pero la decisión se invierte. Con subcl
 
 Del lado de la vista, la pregunta también cambia de forma: en vez de `state is ProductsLoadingState` se pregunta `state.status == ProductsStatus.loading`, y un `switch (state.status)` obliga a cubrir los cuatro momentos, porque Dart revisa que un `switch` sobre un `enum` sea exhaustivo.
 
-## Cuál elegir
-
-| | Clase padre con subclases | Estado único con `copyWith` |
-|---|---|---|
-| Cómo se sabe el momento | Por el tipo: `state is ProductsLoadingState` | Por un campo: `state.status` |
-| Datos que sobreviven entre estados | Se pasan a mano, y el `required` lo exige | Se conservan solos |
-| Datos de un solo momento | Solo existen en su subclase | Existen siempre, aunque no apliquen |
-| Agregar un dato al estado base | Tocar la clase padre y cada subclase | Un campo y una línea en `copyWith` |
-| Cantidad de clases | Una por momento | Una, más el `enum` |
-
-Las subclases convienen cuando cada momento trae datos que no tienen sentido en los demás y quieres que el tipo lo garantice: un `message` que solo existe dentro de un `ProductsErrorState` no se puede leer por error en otro momento. El estado único conviene cuando la pantalla tiene muchos datos que sobreviven entre momentos, como una lista con filtros o un formulario: ahí pasar cada campo a mano en cada `emit` se vuelve ruido, y `copyWith` lo resuelve de una vez.
-
 ## Errores típicos
 
 ### Con subclases
@@ -354,16 +342,4 @@ Las subclases convienen cuando cada momento trae datos que no tienen sentido en 
 
 ```dart
 errorMessage: errorMessage,
-```
-
-### Con las dos
-
-**`Unsupported operation: Cannot add to an unmodifiable list`.** Modificaste la lista del estado en lugar de crear una nueva. `const []` no se puede modificar, y aunque la lista sí se pudiera, estarías cambiando también la del estado anterior. La forma correcta es crear una lista nueva que copie la actual:
-
-```dart
-emit(ProductsLoadedState(products: [...state.products, event.product]));
-```
-
-```dart
-emit(state.copyWith(products: [...state.products, event.product]));
 ```
