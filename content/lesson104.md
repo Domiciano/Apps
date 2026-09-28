@@ -2,7 +2,7 @@
 
 <!-- tags: CategorySelectedEvent, context.read().add, selectedCategory, el chip no se queda marcado, ChoiceChip, BlocBuilder, emit, callback onSelected, marcar el chip con setState, estado base, restartable, filtrar por categoría -->
 
-Seguimos con el catálogo de *State Management Strategies*, donde la lista de productos vive en la clase padre del estado. Ahora el usuario puede filtrar tocando una categoría. Esa sola interacción recorre el camino completo entre las dos capas: la vista avisa al `Bloc` con un evento, el `Bloc` emite estados y la vista se redibuja con lo que recibe. De cada paso se muestra solo el código mínimo.
+Seguimos con el catálogo de *State Management Strategies*, con la estrategia de clase padre con subclases: la lista de productos vive en la clase padre del estado. Con el estado único y `copyWith` el recorrido entre la vista y el `Bloc` es exactamente el mismo; solo cambia cómo se emite cada estado. Ahora el usuario puede filtrar tocando una categoría. Esa sola interacción recorre el camino completo entre las dos capas: la vista avisa al `Bloc` con un evento, el `Bloc` emite estados y la vista se redibuja con lo que recibe. De cada paso se muestra solo el código mínimo.
 
 ## La interacción
 
