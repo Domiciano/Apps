@@ -1,6 +1,6 @@
 # Laboratorio Cubit
 
-<!-- tags: ProductsCubit, entrega y recibe entre capas, Product.fromJson, 'int' is not a subtype of type 'double', respuesta envuelta en data, ProductsRepository, loadProducts, BlocProvider y ..loadProducts(), BlocBuilder, context.read, paginación con ?page, Page 3 exceeds total pages -->
+<!-- tags: ProductsCubit, entrega y recibe entre capas, Product.fromJson, 'int' is not a subtype of type 'double', respuesta envuelta en data, capa de infraestructura, loadProducts, BlocProvider y ..loadProducts(), BlocBuilder, context.read, paginación con ?page, Page 3 exceeds total pages -->
 
 Vamos a mostrar el catálogo de una tienda de ropa desde una API real, `https://fakestoreapi.noksha.dev/api/products`, con un `Cubit` que carga los productos y una vista que solo dibuja lo que el `Cubit` le entrega.
 
@@ -23,12 +23,13 @@ La API y sus imágenes aceptan peticiones desde el navegador, así que la app fu
 ```plain
 lib/
 ├── main.dart
-└── features/products/
-    ├── product.dart
-    ├── products_repository.dart
-    ├── products_cubit.dart
-    └── products_screen.dart
+├── models/          product.dart
+├── ui/              products_screen.dart
+├── cubit/           products_cubit.dart
+└── infrastructure/  products_api.dart
 ```
+
+Una carpeta por capa: `ui/` para la vista, `cubit/` para el `Cubit` e `infrastructure/` para lo que habla con la API. `Product` no es una capa: es el dato que viaja entre las tres.
 
 En los bloques de código se omiten los `import`: el editor los sugiere.
 
@@ -48,8 +49,8 @@ En los bloques de código se omiten los `import`: el editor los sugiere.
   <text x="320" y="124" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsCubit</text>
   <text x="320" y="139" text-anchor="middle" fill="#FFFFFF" font-size="10">Cubit</text>
   <rect x="220" y="188" width="200" height="44" rx="8" fill="#FFA726"/>
-  <text x="320" y="208" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsRepository</text>
-  <text x="320" y="223" text-anchor="middle" fill="#FFFFFF" font-size="10">Repository · HTTP</text>
+  <text x="320" y="208" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsApi</text>
+  <text x="320" y="223" text-anchor="middle" fill="#FFFFFF" font-size="10">Infrastructure · HTTP</text>
   <ellipse cx="320" cy="294" rx="110" ry="22" fill="#AB47BC"/>
   <text x="320" y="299" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="bold">fakestoreapi.noksha.dev</text>
   <line x1="300" y1="67" x2="300" y2="101" stroke="#FF7043" stroke-width="2" marker-end="url(#lcmap-e)"/>
@@ -71,7 +72,7 @@ En los bloques de código se omiten los `import`: el editor los sugiere.
 </svg>
 ```
 
-Tres capas y la API. La vista le **entrega** llamadas al `Cubit` y **recibe** estados. El `Cubit` le **entrega** la petición al `ProductsRepository` y **recibe** la lista. El `Repository` es la única clase que habla con la API.
+Tres capas: la vista, el `Cubit` y la infraestructura. La vista le **entrega** llamadas al `Cubit` y **recibe** estados. El `Cubit` le **entrega** la petición a `ProductsApi` y **recibe** la lista. La infraestructura es la única capa que habla con la API.
 
 ## Paso 1 · Product
 
@@ -269,7 +270,7 @@ class ProductsScreen extends StatelessWidget {
   <rect x="510" y="100" width="175" height="205" rx="10" fill="#42A5F5" fill-opacity="0.15"/>
   <text x="597" y="122" text-anchor="middle" fill="#42A5F5" font-size="12" font-weight="bold" font-family="monospace">loadProducts()</text>
   <text x="524" y="152" fill="#888" font-size="11">1 · emite Loading</text>
-  <text x="524" y="176" fill="#888" font-size="11">2 · pide al Repository</text>
+  <text x="524" y="176" fill="#888" font-size="11">2 · pide a ProductsApi</text>
   <text x="524" y="200" fill="#888" font-size="11">3 · emite Success</text>
   <text x="538" y="218" fill="#888" font-size="11">o Error</text>
 
@@ -286,11 +287,11 @@ class ProductsScreen extends StatelessWidget {
   <text x="572" y="336" text-anchor="end" font-size="10"><tspan fill="#888">entrega </tspan><tspan fill="#FF7043" font-family="monospace" font-weight="bold">getProducts()</tspan></text>
   <text x="572" y="351" text-anchor="end" font-size="10"><tspan fill="#888">recibe </tspan><tspan fill="#26A69A" font-family="monospace" font-weight="bold">List&lt;Product&gt;</tspan></text>
   <rect x="505" y="360" width="180" height="44" rx="8" fill="#FFA726" fill-opacity="0.15" stroke="#FFA726"/>
-  <text x="595" y="387" text-anchor="middle" fill="#FFA726" font-size="12" font-weight="bold">ProductsRepository</text>
+  <text x="595" y="387" text-anchor="middle" fill="#FFA726" font-size="12" font-weight="bold">ProductsApi</text>
 </svg>
 ```
 
-El `Cubit` es el que decide. La vista le **entrega** una llamada a `loadProducts()`; el `Cubit` emite `ProductsLoading`, le **entrega** la petición al `Repository`, **recibe** la lista y emite `ProductsSuccess` con los productos, o `ProductsError` con el mensaje si algo falló.
+El `Cubit` es el que decide. La vista le **entrega** una llamada a `loadProducts()`; el `Cubit` emite `ProductsLoading`, le **entrega** la petición a `ProductsApi`, **recibe** la lista y emite `ProductsSuccess` con los productos, o `ProductsError` con el mensaje si algo falló.
 
 ```dart
 abstract class ProductsState {}
@@ -314,14 +315,14 @@ class ProductsError extends ProductsState {
 
 ```dart
 class ProductsCubit extends Cubit<ProductsState> {
-  final ProductsRepository _repository;
+  final ProductsApi _api;
 
-  ProductsCubit(this._repository) : super(ProductsInitial());
+  ProductsCubit(this._api) : super(ProductsInitial());
 
   Future<void> loadProducts() async {
     emit(ProductsLoading());
     try {
-      emit(ProductsSuccess(await _repository.getProducts()));
+      emit(ProductsSuccess(await _api.getProducts()));
     } on Exception catch (e) {
       emit(ProductsError(e.toString()));
     }
@@ -329,7 +330,7 @@ class ProductsCubit extends Cubit<ProductsState> {
 }
 ```
 
-## Paso 4 · El Repository
+## Paso 4 · Infrastructure
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="366" viewBox="0 0 640 366" font-family="Roboto, Arial, sans-serif" style="display:block;margin:0 auto;max-width:100%;height:auto;">
@@ -345,8 +346,8 @@ class ProductsCubit extends Cubit<ProductsState> {
   <text x="320" y="124" text-anchor="middle" fill="#888" font-size="13" font-weight="bold">ProductsCubit</text>
   <text x="320" y="139" text-anchor="middle" fill="#888" font-size="10">Cubit</text>
   <rect x="220" y="188" width="200" height="44" rx="8" fill="#FFA726"/>
-  <text x="320" y="208" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsRepository</text>
-  <text x="320" y="223" text-anchor="middle" fill="#FFFFFF" font-size="10">Repository · HTTP</text>
+  <text x="320" y="208" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsApi</text>
+  <text x="320" y="223" text-anchor="middle" fill="#FFFFFF" font-size="10">Infrastructure · HTTP</text>
   <ellipse cx="320" cy="294" rx="110" ry="22" fill="#AB47BC"/>
   <text x="320" y="299" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="bold">fakestoreapi.noksha.dev</text>
   <line x1="300" y1="67" x2="300" y2="101" stroke="#9E9E9E" stroke-width="2" marker-end="url(#lcrep-g)" opacity="0.6"/>
@@ -371,7 +372,7 @@ class ProductsCubit extends Cubit<ProductsState> {
 Es la única clase que sabe que existe HTTP. Hace el `GET` y convierte el JSON en productos. La API no devuelve la lista directamente: la envuelve en un objeto, `{ "data": [...], "totalPages": 2, ... }`, así que primero hay que sacarla de `data`.
 
 ```dart
-class ProductsRepository {
+class ProductsApi {
   Future<List<Product>> getProducts() async {
     final response = await http.get(Uri.parse('https://fakestoreapi.noksha.dev/api/products'));
     if (response.statusCode != 200) throw Exception('Error ${response.statusCode}');
@@ -390,12 +391,12 @@ class ProductsRepository {
   <rect x="142" y="44" width="436" height="132" rx="12" fill="#42A5F5" fill-opacity="0.10" stroke="#42A5F5"/>
   <text x="158" y="66" fill="#42A5F5" font-size="12" font-weight="bold" font-family="monospace">ProductsCubit(</text>
   <rect x="164" y="78" width="392" height="52" rx="8" fill="#FFA726" fill-opacity="0.18" stroke="#FFA726"/>
-  <text x="360" y="109" text-anchor="middle" fill="#FFA726" font-size="12" font-weight="bold" font-family="monospace">ProductsRepository()</text>
+  <text x="360" y="109" text-anchor="middle" fill="#FFA726" font-size="12" font-weight="bold" font-family="monospace">ProductsApi()</text>
   <text x="566" y="160" text-anchor="end" fill="#42A5F5" font-size="12" font-weight="bold" font-family="monospace">)..loadProducts()</text>
 </svg>
 ```
 
-El `Cubit` recibe su `Repository` por constructor, y los dos se crean en el `create` del `BlocProvider`. `..loadProducts()` es una cascada: llama `loadProducts()` sobre el `Cubit` recién creado y le entrega ese mismo `Cubit` al provider. Así la pantalla arranca cargando.
+El `Cubit` recibe su `ProductsApi` por constructor, y los dos se crean en el `create` del `BlocProvider`. `..loadProducts()` es una cascada: llama `loadProducts()` sobre el `Cubit` recién creado y le entrega ese mismo `Cubit` al provider. Así la pantalla arranca cargando.
 
 ```dart
 void main() {
@@ -403,7 +404,7 @@ void main() {
     MaterialApp(
       routes: {
         '/': (_) => BlocProvider(
-              create: (_) => ProductsCubit(ProductsRepository())..loadProducts(),
+              create: (_) => ProductsCubit(ProductsApi())..loadProducts(),
               child: const ProductsScreen(),
             ),
       },
@@ -432,8 +433,8 @@ Ahora es tu turno. La API entrega 20 productos por página, y hay más. Agrega u
   <text x="320" y="124" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsCubit</text>
   <text x="320" y="139" text-anchor="middle" fill="#FFFFFF" font-size="10">Cubit</text>
   <rect x="220" y="188" width="200" height="44" rx="8" fill="#FFA726"/>
-  <text x="320" y="208" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsRepository</text>
-  <text x="320" y="223" text-anchor="middle" fill="#FFFFFF" font-size="10">Repository · HTTP</text>
+  <text x="320" y="208" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="bold">ProductsApi</text>
+  <text x="320" y="223" text-anchor="middle" fill="#FFFFFF" font-size="10">Infrastructure · HTTP</text>
   <ellipse cx="320" cy="294" rx="110" ry="22" fill="#AB47BC"/>
   <text x="320" y="299" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="bold">fakestoreapi.noksha.dev</text>
   <line x1="300" y1="67" x2="300" y2="101" stroke="#FF7043" stroke-width="2" marker-end="url(#lcpag-e)"/>
@@ -461,7 +462,7 @@ Qué agregar en cada capa:
 |---|---|
 | Vista | Un botón «Cargar más» después del último producto, que llama `loadMore()`. Se oculta cuando ya no hay más páginas |
 | Cubit | `ProductsSuccess` guarda también `page` y `totalPages`. `loadMore()` pide la página siguiente y emite un `ProductsSuccess` con la lista anterior más la nueva |
-| Repository | `getProducts(page)` agrega `?page=` a la URL y devuelve los productos junto con `totalPages` |
+| Infrastructure | `getProducts(page)` de `ProductsApi` agrega `?page=` a la URL y devuelve los productos junto con `totalPages` |
 
 La página se pide con `?page=`:
 
@@ -469,14 +470,14 @@ La página se pide con `?page=`:
 Uri.parse('https://fakestoreapi.noksha.dev/api/products?page=$page')
 ```
 
-Pedir una página que no existe no devuelve una lista vacía: devuelve un error `400` con el mensaje `Page 3 exceeds total pages (2)`. Por eso el `Repository` devuelve también `totalPages`, y el `Cubit` deja de pedir cuando la alcanza. Un *record* devuelve los dos valores sin crear una clase nueva:
+Pedir una página que no existe no devuelve una lista vacía: devuelve un error `400` con el mensaje `Page 3 exceeds total pages (2)`. Por eso `ProductsApi` devuelve también `totalPages`, y el `Cubit` deja de pedir cuando la alcanza. Un *record* devuelve los dos valores sin crear una clase nueva:
 
 ```dart
 return (products, body['totalPages'] as int);
 ```
 
 ```dart
-final (products, totalPages) = await _repository.getProducts(page);
+final (products, totalPages) = await _api.getProducts(page);
 ```
 
 Dentro de `loadMore()` necesitas la lista actual, que solo existe en `ProductsSuccess`. Escribir `if (state is ProductsSuccess)` no alcanza: `state` es un getter del `Cubit` y Dart no promueve el tipo de un getter. Cópialo a una variable local, que sí se promueve:
@@ -492,4 +493,4 @@ if (current is! ProductsSuccess) return;
 - Cada producto muestra foto, título, categoría y precio.
 - El botón ↻ recarga la lista.
 - «Cargar más» trae la página siguiente, la suma a la lista y desaparece en la última página.
-- Solo `ProductsRepository` usa `http`, y la vista solo habla con el `Cubit`.
+- Solo `ProductsApi`, en la infraestructura, usa `http`, y la vista solo habla con el `Cubit`.
