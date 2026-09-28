@@ -4,7 +4,7 @@
 
 En este módulo implementamos Clean Architecture combinada con BLoC para construir apps Flutter robustas y fáciles de mantener. La regla fundamental del patrón: las capas externas dependen de las internas, nunca al revés. El dominio no sabe nada del mundo exterior.
 
-Parte de `Bloc` (eventos y estados) y de una app que ya separa capas: `UI → Bloc → Repository → NetworkProvider`. Aquí esa cadena se refina en dos pasos: el `Repository` se parte en un contrato abstracto y su implementación, y aparece el `UseCase` entre el `Bloc` y el repositorio. El `NetworkProvider` pasa a llamarse `DataSource`.
+Parte de `Bloc` (eventos y estados) y de una arquitectura por capas típica: `UI → Bloc → Repository → NetworkProvider`. Aquí esa cadena se refina en dos pasos: el `Repository` se parte en un contrato abstracto y su implementación, y aparece el `UseCase` entre el `Bloc` y el repositorio. El `NetworkProvider` pasa a llamarse `DataSource`.
 
 ## Las tres capas
 
