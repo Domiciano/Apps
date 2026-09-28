@@ -1,6 +1,6 @@
 # State Management Strategies
 
-<!-- tags: estado base, copyWith, clase padre del estado, ProductsStatus, la lista desaparece al recargar, olvidé un campo en copyWith, super.products, state.products, estado único con copyWith, enum de estado, copyWith no puede volver a null, The getter 'products' isn't defined -->
+<!-- tags: estado base, copyWith, clase padre del estado, ProductsStatus, conservar la lista mientras carga, on<Evento> y emit, super.products, state.products, estado único con copyWith, enum de estado, qué va en la clase padre, required super.products -->
 
 Un `Bloc` decide qué estados existen, y cada estado decide qué datos viajan con él. Esa segunda decisión es la que define cómo se comporta la pantalla mientras carga o cuando algo falla. En esta lección vemos dos estrategias para tomarla sobre un mismo ejemplo, el catálogo de una tienda, y solo miramos la capa de `Bloc`: estados, eventos y el `Bloc` mismo. La vista y el acceso a datos no cambian de una estrategia a otra.
 
@@ -325,21 +325,3 @@ Nadie escribe `state.products`. La lista sobrevive porque `copyWith` conserva to
 Es la misma pantalla que con subclases, pero la decisión se invierte. Con subclases dices **qué se conserva** (`products: state.products`); con `copyWith` dices **qué cambia**, y lo demás se conserva solo.
 
 Del lado de la vista, la pregunta también cambia de forma: en vez de `state is ProductsLoadingState` se pregunta `state.status == ProductsStatus.loading`, y un `switch (state.status)` obliga a cubrir los cuatro momentos, porque Dart revisa que un `switch` sobre un `enum` sea exhaustivo.
-
-## Errores típicos
-
-### Con subclases
-
-**La lista desaparece al recargar.** Algún `emit` crea un estado con una lista que no es la actual, por ejemplo `ProductsLoadingState(products: const [])`. Revisa que cada `emit` que no trae datos nuevos pase `state.products`.
-
-**`The getter 'products' isn't defined for the type 'ProductsState'`.** Declaraste `products` en una subclase y lo lees desde `state`, que es de tipo `ProductsState`. Súbelo a la clase padre.
-
-### Con copyWith
-
-**Un campo nuevo vuelve a su valor por defecto en cada `emit`.** Agregaste un campo a `ProductsState` y a su constructor, pero no a `copyWith`. Como `copyWith` construye un estado nuevo, todo campo que no copie queda con el valor por defecto. Cada campo nuevo va en tres lugares: la clase, el constructor y `copyWith`.
-
-**El mensaje de error sigue ahí después de una recarga exitosa.** `copyWith` no puede volver un campo a `null`: pasarle `errorMessage: null` es lo mismo que no pasarlo, y el `??` conserva el valor anterior. Después de un `failure` seguido de un `success`, `errorMessage` todavía tiene el error viejo. Decide qué se muestra por `status`, nunca por `errorMessage != null`. Si necesitas que el mensaje desaparezca, no lo copies con `??` y deja que cada `emit` lo borre salvo que lo traiga:
-
-```dart
-errorMessage: errorMessage,
-```
