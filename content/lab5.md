@@ -217,7 +217,7 @@ dependencies:
   <text x="516" y="804" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">A donde llega quien inicia sesión</text>
   <circle cx="880" cy="804" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="804" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">7</text>
   <text class="h" x="892" y="88" text-anchor="end">PASO</text>
-  <text class="foot" x="48" y="862" data-fit="860">Los nombres de archivo van en minúscula y con guion bajo. Respeta esta estructura: es un criterio de entrega.</text>
+  <text class="foot" x="48" y="862" data-fit="860">Los nombres de archivo van en minúscula y con guion bajo.</text>
 </svg>
 ```
 
@@ -573,12 +573,3 @@ create table profiles (
 ```dart
 await _client.from('profiles').insert({'id': userId, 'username': username});
 ```
-
-## Criterios de entrega
-
-- La app compila y corre sin errores en modo debug.
-- El registro crea un usuario real y su fila en `profiles`, verificables en el dashboard.
-- El login lleva a `HomeScreen`, que muestra el email del usuario.
-- La estructura de carpetas es la de este laboratorio.
-- El dominio y los `Bloc` no importan nada de `data/`: solo `main.dart` conoce las clases concretas.
-- Los estados usan una sola clase con `copyWith`.

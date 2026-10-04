@@ -275,7 +275,7 @@ def l5_carpetas():
         if step:
             s += '  ' + chip(880, y, step)
     s += f'  <text class="h" x="892" y="88" text-anchor="end">PASO</text>\n'
-    return s + tail(h, 'Los nombres de archivo van en minúscula y con guion bajo. Respeta esta estructura: es un criterio de entrega.')
+    return s + tail(h, 'Los nombres de archivo van en minúscula y con guion bajo.')
 
 
 FIGS['l5Carpetas'] = l5_carpetas
