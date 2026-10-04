@@ -21,14 +21,14 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'TU_SUPABASE_URL',
-    anonKey: 'TU_SUPABASE_ANON_KEY',
+    publishableKey: 'TU_PUBLISHABLE_KEY',
   );
 
   runApp(const MyApp());
 }
 ```
 
-No olvides reemplazar `TU_SUPABASE_URL` y `TU_SUPABASE_ANON_KEY` con tus credenciales reales de Supabase.
+No olvides reemplazar `TU_SUPABASE_URL` y `TU_PUBLISHABLE_KEY` con tus credenciales reales de Supabase.
 
 ## 2. Lógica para subir la imagen
 

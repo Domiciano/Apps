@@ -40,7 +40,7 @@ Agrega `get_it` al `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  supabase_flutter: ^2.10.1
+  supabase_flutter: ^2.18.0
   flutter_bloc: ^9.1.0
   get_it: ^8.0.3
 ```
@@ -154,7 +154,7 @@ void main() async {
 
   await Supabase.initialize(
     url: 'TU_SUPABASE_URL',
-    anonKey: 'TU_PUBLISHABLE_KEY',
+    publishableKey: 'TU_PUBLISHABLE_KEY',
   );
 
   await initDependencies();

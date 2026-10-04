@@ -3,14 +3,14 @@
 <!-- tags: Clean Architecture, AuthRepository, SignInUseCase, SupabaseAuthDataSource, LoginBloc, copyWith,
      LoginStatus, signInWithPassword, signUp, tabla profiles, BlocListener, Null check operator used on a null value -->
 
-Vas a construir el registro y el inicio de sesión con `Supabase`, organizados con Clean Architecture y `Bloc`. Son diez pasos, de la capa de adentro hacia la de afuera.
+Vas a construir el registro y el inicio de sesión con `Supabase`, organizados con Clean Architecture y `Bloc`. Son once pasos, de la capa de adentro hacia la de afuera.
 
 ## El mapa
 
 ```svg
 <svg id="l5Ruta" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 760" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Ruta-ttl l5Ruta-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="l5Ruta-ttl">El mapa del laboratorio</title>
-  <desc id="l5Ruta-dsc">Mapa de capas con los diez pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase en el 3, ProfileRepository en el 10. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, ProfileRepositoryImpl en el 10. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen en el 8, y la navegación entre las dos pantallas en el 9. Supabase Auth y la tabla profiles quedan fuera de la app.</desc>
+  <desc id="l5Ruta-dsc">Mapa de capas con los once pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase en el 3, ProfileRepository en el 11. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, ProfileRepositoryImpl en el 11. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen en el 8, y la navegación entre las dos pantallas en el 9. En Supabase, la tabla profiles se crea en el paso 10.</desc>
   <defs>
     <style>
       #l5Ruta .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -72,18 +72,18 @@ Vas a construir el registro y el inicio de sesión con `Supabase`, organizados c
   <rect x="392" y="336" width="176" height="44" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="480" y="358" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9" data-fit="160">AuthRepository</text>
   <circle cx="398" cy="338" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="398" y="338" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
   <rect x="720" y="336" width="176" height="44" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="808" y="358" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9" data-fit="160">ProfileRepository</text>
-  <circle cx="726" cy="338" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="726" y="338" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">10</text>
+  <circle cx="726" cy="338" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="726" y="338" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">11</text>
   <rect x="392" y="452" width="176" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="480" y="474" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="160">AuthRepositoryImpl</text>
   <circle cx="398" cy="454" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="398" y="454" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">5</text>
   <rect x="720" y="452" width="176" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="808" y="474" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="160">ProfileRepositoryImpl</text>
-  <circle cx="726" cy="454" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="726" y="454" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">10</text>
+  <circle cx="726" cy="454" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="726" y="454" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">11</text>
   <rect x="392" y="528" width="504" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="644" y="550" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="488">SupabaseAuthDataSource</text>
   <circle cx="398" cy="530" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="398" y="530" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
   <rect x="392" y="630" width="176" height="44" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="480" y="652" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="160">Supabase Auth</text>
   <rect x="720" y="630" width="176" height="44" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="808" y="652" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="160">tabla profiles</text>
   <circle cx="726" cy="632" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="726" y="632" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">10</text>
   <circle cx="556" cy="162" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="556" y="162" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">9</text>
-  <text class="foot" x="48" y="732" data-fit="860">El paso 9 es la navegación entre las dos pantallas. El paso 10 agrega el perfil: toca dominio, datos y la tabla.</text>
+  <text class="foot" x="48" y="732" data-fit="860">El paso 9 es la navegación entre las dos pantallas. El 10 crea la tabla en Supabase y el 11 la usa desde la app.</text>
 </svg>
 ```
 
@@ -96,7 +96,7 @@ Necesitas un proyecto de Supabase. En `Authentication > Providers > Email` desac
 ```yaml
 dependencies:
   flutter_bloc: ^9.1.1
-  supabase_flutter: ^2.10.1
+  supabase_flutter: ^2.18.0
 ```
 
 ```svg
@@ -153,7 +153,7 @@ dependencies:
   <rect x="164" y="349" width="275" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
   <text class="mono" x="174" y="362" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="263">repository/profile_repository.dart</text>
   <text x="516" y="362" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El contrato del perfil</text>
-  <circle cx="880" cy="362" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="362" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">10</text>
+  <circle cx="880" cy="362" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="362" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">11</text>
   <path d="M150,273 V396 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="164" y="383" width="238" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
   <text class="mono" x="174" y="396" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="226">usecases/sign_in_usecase.dart</text>
@@ -182,7 +182,7 @@ dependencies:
   <rect x="164" y="553" width="312" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
   <text class="mono" x="174" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="300">repository/profile_repository_impl.dart</text>
   <text x="516" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Cumple el contrato</text>
-  <circle cx="880" cy="566" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="566" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">10</text>
+  <circle cx="880" cy="566" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="566" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">11</text>
   <path d="M102,205 V600 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="116" y="587" width="88" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
   <text class="mono" x="126" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="76">login/ui/</text>
@@ -464,7 +464,7 @@ El `create` del `BlocProvider` es el único lugar donde se arma la cadena comple
 ```dart
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(url: 'TU_URL', anonKey: 'TU_ANON_KEY');
+  await Supabase.initialize(url: 'TU_URL', publishableKey: 'TU_PUBLISHABLE_KEY');
   runApp(const App());
 }
 
@@ -493,7 +493,7 @@ class App extends StatelessWidget {
 }
 ```
 
-La URL y la clave están en `Project Settings > API`.
+La `Project URL` y la `publishable key` se copian como en *Instalación de supabase*.
 
 `login/ui/screens/login_screen.dart`
 
@@ -552,16 +552,64 @@ Créalo desde cero con la misma forma del login: `RegisterSubmitted`, `RegisterS
 
 Un botón en `LoginScreen` lleva a `/register`, y uno en `RegisterScreen` vuelve a `/login`. Cada ruta tiene su propio `BlocProvider`.
 
-## Paso 10 · El perfil
+## Paso 10 · La tabla profiles
 
-Agrega un campo `username` al registro. Ahora registrar son dos pasos, y quien los ordena es `SignUpUseCase`: primero `signUp` y, si sale bien, `createProfile` con el `id` que devolvió. La lección *Laboratorio 5 a nivel conceptual* muestra el flujo completo.
+```svg
+<svg id="l5Tabla" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 424" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Tabla-ttl l5Tabla-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+  <title id="l5Tabla-ttl">La tabla profiles</title>
+  <desc id="l5Tabla-dsc">Dos tablas. auth.users la maneja Supabase Auth y tiene id y email. profiles la creas tú y tiene id y username. El id de profiles es llave primaria y a la vez referencia al id de auth.users: cada perfil lleva el mismo id de su cuenta.</desc>
+  <defs>
+    <style>
+      #l5Tabla .title{fill:#161A26;font-size:22px;font-weight:700}
+      #l5Tabla .sub{fill:#79809A;font-size:13.5px}
+      #l5Tabla .h{font-size:12px;font-weight:700;letter-spacing:.08em;fill:#556074}
+      #l5Tabla .foot{fill:#79809A;font-size:12px}
+      #l5Tabla .mono{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace}
+      #l5Tabla .tree{fill:none;stroke:#C4CBD8;stroke-width:1.75}
+      #l5Tabla .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#l5Tabla-arrow)}
+    </style>
+    <marker id="l5Tabla-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
+    </marker>
+  </defs>
+  <rect width="960" height="424" rx="16" fill="#FBFBFD"/>
+  <text class="title" x="48" y="56">La tabla <tspan class="mono">profiles</tspan></text>
+  <text class="sub" x="48" y="80" data-fit="860">Supabase Auth guarda la cuenta. El username va en una tabla tuya, unida a la cuenta por el mismo id.</text>
+  <rect x="96" y="116" width="296" height="164" rx="12" fill="#FFFFFF" stroke="#C4CBD8" stroke-width="2"/>
+  <path d="M96,160 V128 A12,12 0 0 1 108,116 H380 A12,12 0 0 1 392,128 V160 Z" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="2"/>
+  <text class="mono" x="112" y="138" dy="0.35em" font-size="14" font-weight="700" fill="#556074">auth.users</text>
+  <text x="376" y="138" dy="0.35em" text-anchor="end" font-size="12" fill="#454C61" data-fit="150">la maneja Supabase Auth</text>
+  <text class="mono" x="112" y="180" dy="0.35em" font-size="13.5" font-weight="700" fill="#161A26">id</text>
+  <text class="mono" x="226" y="180" dy="0.35em" font-size="12.5" fill="#79809A">uuid</text>
+  <rect x="345" y="169" width="31" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>
+  <text x="361" y="180" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#A96C05">PK</text>
+  <path d="M97,200 H391" stroke="#E4E7EE" stroke-width="1.25"/>
+  <text class="mono" x="112" y="220" dy="0.35em" font-size="13.5" font-weight="400" fill="#161A26">email</text>
+  <text class="mono" x="226" y="220" dy="0.35em" font-size="12.5" fill="#79809A">text</text>
+  <path d="M97,240 H391" stroke="#E4E7EE" stroke-width="1.25"/>
+  <text class="mono" x="112" y="260" dy="0.35em" font-size="13.5" font-weight="400" fill="#161A26">…</text>
+  <text class="mono" x="226" y="260" dy="0.35em" font-size="12.5" fill="#79809A"></text>
+  <rect x="568" y="116" width="296" height="124" rx="12" fill="#FFFFFF" stroke="#A9B4F2" stroke-width="2"/>
+  <path d="M568,160 V128 A12,12 0 0 1 580,116 H852 A12,12 0 0 1 864,128 V160 Z" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="2"/>
+  <text class="mono" x="584" y="138" dy="0.35em" font-size="14" font-weight="700" fill="#4453C9">profiles</text>
+  <text x="848" y="138" dy="0.35em" text-anchor="end" font-size="12" fill="#454C61" data-fit="150">la creas tú</text>
+  <text class="mono" x="584" y="180" dy="0.35em" font-size="13.5" font-weight="700" fill="#161A26">id</text>
+  <text class="mono" x="698" y="180" dy="0.35em" font-size="12.5" fill="#79809A">uuid</text>
+  <rect x="780" y="169" width="68" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>
+  <text x="814" y="180" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#A96C05">PK · FK</text>
+  <path d="M569,200 H863" stroke="#E4E7EE" stroke-width="1.25"/>
+  <text class="mono" x="584" y="220" dy="0.35em" font-size="13.5" font-weight="400" fill="#161A26">username</text>
+  <text class="mono" x="698" y="220" dy="0.35em" font-size="12.5" fill="#79809A">text</text>
+  <path class="link" d="M568,180 H394"/>
+  <text x="480" y="170" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">el mismo id</text>
+  <text x="480" y="200" text-anchor="middle" font-size="12" fill="#454C61">references</text>
+  <g transform="translate(96,300)"><rect width="296" height="60" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#556074" data-fit="268">Paso 1 del registro</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="268">signUp crea esta fila y devuelve su id.</text></g>
+  <g transform="translate(568,300)"><rect width="296" height="77" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="268">Paso 2 del registro</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="268">createProfile inserta aquí ese mismo id</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="268">junto con el username.</text></g>
+  <text class="foot" x="48" y="396" data-fit="860">on delete cascade: si se borra la cuenta, su perfil se borra con ella.</text>
+</svg>
+```
 
-- Crea el contrato `ProfileRepository` con `createProfile`, y su `ProfileRepositoryImpl`.
-- Extiende `SupabaseAuthDataSource` con el `insert`.
-- Ni el `Bloc` ni el `DataSource` encadenan los dos pasos.
-- Si `createProfile` falla, `SignUpUseCase` atrapa la excepción y decide qué hacer.
-
-La tabla se crea en el `SQL Editor` de Supabase:
+Supabase Auth guarda el correo y la contraseña, pero no el `username`. Para eso creas una tabla propia, cuyo `id` es el mismo de la cuenta. Ejecuta esto en el `SQL Editor` de Supabase:
 
 ```sql
 create table profiles (
@@ -569,6 +617,17 @@ create table profiles (
   username text not null
 );
 ```
+
+Una tabla creada por SQL nace con `Row Level Security` desactivado, así que el `insert` del siguiente paso funciona sin políticas.
+
+## Paso 11 · El perfil
+
+Agrega un campo `username` al registro. Ahora registrar son dos pasos, y quien los ordena es `SignUpUseCase`: primero `signUp` y, si sale bien, `createProfile` con el `id` que devolvió. La lección *Laboratorio 5 a nivel conceptual* muestra el flujo completo.
+
+- Crea el contrato `ProfileRepository` con `createProfile`, y su `ProfileRepositoryImpl`.
+- Extiende `SupabaseAuthDataSource` con el `insert`.
+- Ni el `Bloc` ni el `DataSource` encadenan los dos pasos.
+- Si `createProfile` falla, `SignUpUseCase` atrapa la excepción y decide qué hacer.
 
 ```dart
 await _client.from('profiles').insert({'id': userId, 'username': username});

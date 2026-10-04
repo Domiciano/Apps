@@ -185,10 +185,10 @@ def l5_ruta():
     fid, h = 'l5Ruta', 760
     s = head(fid, h, 'El mapa del laboratorio', 'El mapa del laboratorio',
              'Cada caja es una clase y el número dice en qué paso la construyes. Se avanza de adentro hacia afuera.',
-             'Mapa de capas con los diez pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase '
-             'en el 3, ProfileRepository en el 10. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, '
-             'ProfileRepositoryImpl en el 10. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen '
-             'en el 8, y la navegación entre las dos pantallas en el 9. Supabase Auth y la tabla profiles quedan fuera de la app.')
+             'Mapa de capas con los once pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase '
+             'en el 3, ProfileRepository en el 11. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, '
+             'ProfileRepositoryImpl en el 11. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen '
+             'en el 8, y la navegación entre las dos pantallas en el 9. En Supabase, la tabla profiles se crea en el paso 10.')
     s += band(104, 104, 'violet', 'PRESENTACIÓN', 'Pantallas y Bloc')
     s += band(224, 184, 'amber', 'DOMINIO', 'Reglas y contratos')
     s += band(424, 168, 'teal', 'DATOS', 'Habla con Supabase')
@@ -207,8 +207,8 @@ def l5_ruta():
         (568, 140, 152, 'violet', 'RegisterScreen', 8), (744, 140, 152, 'violet', 'RegisterBloc', 8),
         (216, 256, 152, 'amber', 'SignInUseCase', 3), (744, 256, 152, 'amber', 'SignUpUseCase', 3),
         (480, 256, 152, 'indigo', 'AuthUser', 1),
-        (392, 336, 176, 'indigo', 'AuthRepository', 2), (720, 336, 176, 'indigo', 'ProfileRepository', 10),
-        (392, 452, 176, 'teal', 'AuthRepositoryImpl', 5), (720, 452, 176, 'teal', 'ProfileRepositoryImpl', 10),
+        (392, 336, 176, 'indigo', 'AuthRepository', 2), (720, 336, 176, 'indigo', 'ProfileRepository', 11),
+        (392, 452, 176, 'teal', 'AuthRepositoryImpl', 5), (720, 452, 176, 'teal', 'ProfileRepositoryImpl', 11),
         (392, 528, 504, 'teal', 'SupabaseAuthDataSource', 4),
     ]
     for x, y, w, color, name, n in nodes:
@@ -218,7 +218,7 @@ def l5_ruta():
     s += '  ' + box(720, 630, 176, 44, 'slate', 'tabla profiles', mono=False)
     s += '  ' + chip(726, 632, 10)
     s += '  ' + chip(556, 162, 9)
-    return s + tail(h, 'El paso 9 es la navegación entre las dos pantallas. El paso 10 agrega el perfil: toca dominio, datos y la tabla.')
+    return s + tail(h, 'El paso 9 es la navegación entre las dos pantallas. El 10 crea la tabla en Supabase y el 11 la usa desde la app.')
 
 
 FIGS['l5Ruta'] = l5_ruta
@@ -234,13 +234,13 @@ def l5_carpetas():
         (3, 'domain/', 'amber', 'No importa nada de Flutter ni de Supabase', ''),
         (4, 'entities/auth_user.dart', 'amber', 'El usuario, en tus propios términos', '1'),
         (4, 'repository/auth_repository.dart', 'amber', 'El contrato de autenticación', '2'),
-        (4, 'repository/profile_repository.dart', 'amber', 'El contrato del perfil', '10'),
+        (4, 'repository/profile_repository.dart', 'amber', 'El contrato del perfil', '11'),
         (4, 'usecases/sign_in_usecase.dart', 'amber', 'Iniciar sesión', '3'),
         (4, 'usecases/sign_up_usecase.dart', 'amber', 'Registrar', '3'),
         (3, 'data/', 'teal', 'El único lugar que conoce a Supabase', ''),
         (4, 'source/supabase_auth_data_source.dart', 'teal', 'Las llamadas al SDK', '4'),
         (4, 'repository/auth_repository_impl.dart', 'teal', 'Cumple el contrato', '5'),
-        (4, 'repository/profile_repository_impl.dart', 'teal', 'Cumple el contrato', '10'),
+        (4, 'repository/profile_repository_impl.dart', 'teal', 'Cumple el contrato', '11'),
         (2, 'login/ui/', 'violet', 'La pantalla de login y su Bloc', ''),
         (3, 'bloc/', 'violet', 'login_bloc · login_event · login_state', '6'),
         (3, 'screens/login_screen.dart', 'violet', 'El formulario', '7'),
@@ -325,6 +325,43 @@ def l5_estado():
 
 
 FIGS['l5Estado'] = l5_estado
+
+
+def l5_tabla():
+    fid, h = 'l5Tabla', 424
+    s = head(fid, h, 'La tabla <tspan class="mono">profiles</tspan>', 'La tabla profiles',
+             'Supabase Auth guarda la cuenta. El username va en una tabla tuya, unida a la cuenta por el mismo id.',
+             'Dos tablas. auth.users la maneja Supabase Auth y tiene id y email. profiles la creas tú y tiene id y username. El id de '
+             'profiles es llave primaria y a la vez referencia al id de auth.users: cada perfil lleva el mismo id de su cuenta.')
+
+    def table(x, color, name, who, cols):
+        soft, border, strong = FAM[color]
+        o = f'  <rect x="{x}" y="116" width="296" height="{44 + 40*len(cols)}" rx="12" fill="#FFFFFF" stroke="{border}" stroke-width="2"/>\n'
+        o += f'  <path d="M{x},160 V128 A12,12 0 0 1 {x+12},116 H{x+284} A12,12 0 0 1 {x+296},128 V160 Z" fill="{soft}" stroke="{border}" stroke-width="2"/>\n'
+        o += f'  <text class="mono" x="{x+16}" y="138" dy="0.35em" font-size="14" font-weight="700" fill="{strong}">{name}</text>\n'
+        o += f'  <text x="{x+280}" y="138" dy="0.35em" text-anchor="end" font-size="12" fill="#454C61" data-fit="150">{who}</text>\n'
+        for i, (col, typ, key) in enumerate(cols):
+            y = 180 + i * 40
+            if i:
+                o += f'  <path d="M{x+1},{y-20} H{x+295}" stroke="#E4E7EE" stroke-width="1.25"/>\n'
+            o += f'  <text class="mono" x="{x+16}" y="{y}" dy="0.35em" font-size="13.5" font-weight="{700 if key else 400}" fill="#161A26">{col}</text>\n'
+            o += f'  <text class="mono" x="{x+130}" y="{y}" dy="0.35em" font-size="12.5" fill="#79809A">{typ}</text>\n'
+            if key:
+                o += f'  <rect x="{x+296-16-len(key)*7.4-16:.0f}" y="{y-11}" width="{len(key)*7.4+16:.0f}" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>\n'
+                o += f'  <text x="{x+296-24-len(key)*3.7:.0f}" y="{y}" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#A96C05">{key}</text>\n'
+        return o
+
+    s += table(96, 'slate', 'auth.users', 'la maneja Supabase Auth', [('id', 'uuid', 'PK'), ('email', 'text', ''), ('…', '', '')])
+    s += table(568, 'indigo', 'profiles', 'la creas tú', [('id', 'uuid', 'PK · FK'), ('username', 'text', '')])
+    s += '  <path class="link" d="M568,180 H394"/>\n'
+    s += '  <text x="480" y="170" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">el mismo id</text>\n'
+    s += '  <text x="480" y="200" text-anchor="middle" font-size="12" fill="#454C61">references</text>\n'
+    s += '  ' + note(96, 300, 296, 'slate', 'Paso 1 del registro', ['signUp crea esta fila y devuelve su id.'])
+    s += '  ' + note(568, 300, 296, 'indigo', 'Paso 2 del registro', ['createProfile inserta aquí ese mismo id', 'junto con el username.'])
+    return s + tail(h, 'on delete cascade: si se borra la cuenta, su perfil se borra con ella.')
+
+
+FIGS['l5Tabla'] = l5_tabla
 
 
 def main():

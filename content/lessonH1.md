@@ -1,6 +1,6 @@
 # Instalación de supabase
 
-<!-- tags: supabase_flutter, Supabase.initialize, anonKey, publishable key, Supabase.instance.client, User y Session, WidgetsFlutterBinding.ensureInitialized, Project URL, You must initialize the supabase instance -->
+<!-- tags: supabase_flutter, Supabase.initialize, publishableKey, anonKey obsoleto, Supabase.instance.client, User y Session, WidgetsFlutterBinding.ensureInitialized, Project URL, You must initialize the supabase instance -->
 
 Supabase es una alternativa de código abierto a Firebase que ofrece una base de datos Postgres, autenticación, almacenamiento y mucho más. Esta lección deja la app Flutter conectada a un proyecto de Supabase en la nube. Si prefieres una instancia propia con Docker (self-hosted), el cliente se inicializa igual, con la URL y la clave de esa instancia.
 
@@ -12,7 +12,9 @@ Antes de empezar, necesitas una cuenta en Supabase y un proyecto nuevo.
 - Crea una organización
 - Crea un proyecto
 - En el panel de tu proyecto, ve a `Authentication` y asegúrate de que el proveedor de `email` esté habilitado.
-- Ve a `Project Settings > API` y copia dos valores: la `Project URL` y la `publishable key` (antes llamada `anon key`). Son las credenciales que usarás en el paso 3.
+- Copia dos valores: la `Project URL` y la `publishable key`, que empieza por `sb_publishable_`. La clave está en `Project Settings > API Keys`, y también aparece en el diálogo `Connect` del proyecto. Son las credenciales que usarás en el paso 3.
+
+La `publishable key` reemplaza a la antigua `anon key`. Supabase retira las claves `anon` y `service_role` a finales de 2026, así que un proyecto nuevo debe usar la `publishable key` desde el principio.
 
 ## 2. Instalación de Dependencias
 
@@ -22,10 +24,10 @@ Agrega el paquete `supabase_flutter` a tu archivo `pubspec.yaml` para poder inte
 dependencies:
   flutter:
     sdk: flutter
-  supabase_flutter: ^2.10.1 
+  supabase_flutter: ^2.18.0
 ```
 
-Luego, ejecuta `flutter pub get` en tu terminal para instalar el paquete.
+Luego, ejecuta `flutter pub get` en tu terminal para instalar el paquete. El parámetro `publishableKey` del paso 3 existe desde la versión `2.14.0`: con una versión anterior el código no compila.
 
 ## 3. Inicialización de Supabase en Flutter
 
@@ -40,7 +42,7 @@ void main() async {
 
   await Supabase.initialize(
     url: 'TU_SUPABASE_URL',
-    anonKey: 'TU_PUBLISHABLE_KEY',
+    publishableKey: 'TU_PUBLISHABLE_KEY',
   );
   runApp(MyApp());
 }
@@ -49,7 +51,9 @@ void main() async {
 final supabase = Supabase.instance.client;
 ```
 
-Recuerda reemplazar `TU_SUPABASE_URL` y `TU_PUBLISHABLE_KEY` con las credenciales de tu proyecto. Esa clave es pública por diseño: la seguridad de los datos la dan las políticas de la base de datos, no ocultar la clave. Nunca uses en la app la clave `service_role` (o `secret`): da acceso total.
+Recuerda reemplazar `TU_SUPABASE_URL` y `TU_PUBLISHABLE_KEY` con las credenciales de tu proyecto. Esa clave es pública por diseño: la seguridad de los datos la dan las políticas de la base de datos, no ocultar la clave. Nunca uses en la app la `secret key` (`sb_secret_...`, antes `service_role`): da acceso total.
+
+En tutoriales y proyectos anteriores vas a encontrar `anonKey:` en lugar de `publishableKey:`. Todavía funciona y recibe la misma clave, pero está marcado como obsoleto y el editor lo muestra tachado.
 
 Si intentas usar `Supabase.instance` antes de `initialize`, Flutter lanza `You must initialize the supabase instance before calling Supabase.instance`. Por eso `main` es `async` y llama a `WidgetsFlutterBinding.ensureInitialized()` primero.
 

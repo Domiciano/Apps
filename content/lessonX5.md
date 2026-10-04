@@ -68,12 +68,12 @@ Reemplaza `<host>` por la dirección de la máquina donde corre Supabase.
 
 ## Conectar la app Flutter
 
-La app necesita dos datos: la URL del gateway y la clave anónima, que es el valor `ANON_KEY` de tu archivo `.env`. Nunca uses `SERVICE_ROLE_KEY` en la app: da acceso total a la base de datos.
+La app necesita dos datos: la URL del gateway y la clave anónima, que es el valor `ANON_KEY` de tu archivo `.env`. En la instancia propia la clave conserva ese nombre, pero en Flutter se pasa en el mismo parámetro `publishableKey`. Nunca uses `SERVICE_ROLE_KEY` en la app: da acceso total a la base de datos.
 
 ```dart
 await Supabase.initialize(
   url: 'http://10.0.2.2:8000',
-  anonKey: 'VALOR_DE_ANON_KEY',
+  publishableKey: 'VALOR_DE_ANON_KEY',
 );
 ```
 

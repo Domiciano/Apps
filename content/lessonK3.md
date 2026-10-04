@@ -91,7 +91,7 @@ void main() async {
 
   await Supabase.initialize(
     url: 'https://yzosfzyewkdpnmlbgbej.supabase.co',
-    anonKey: 'sb_publishable_sVlCTCKFQ9NktJjQTOmahw_QoBUGODX',
+    publishableKey: 'sb_publishable_sVlCTCKFQ9NktJjQTOmahw_QoBUGODX',
   );
 
   runApp(const App());
