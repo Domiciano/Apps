@@ -1,17 +1,9 @@
 # Entendiendo BlocProvider y BlocBuilder
 
 <!-- tags: BlocProvider, BlocBuilder, context.read, alcance del Bloc en el árbol, Could not find the correct Provider,
-     qué se redibuja con cada estado, ProviderNotFoundException, create y child, builder y state, buildWhen,
-     cuándo se cierra el Bloc, Bloc en otra ruta con pushNamed -->
+     qué se redibuja con cada estado, ProviderNotFoundException, create y child, builder y state, buildWhen -->
 
 En las lecciones anteriores `BlocProvider` y `BlocBuilder` aparecieron siempre juntos y ya escritos. Aquí se miran por separado y despacio: qué hace cada uno, qué significa cada parámetro y dónde tiene que ir en el árbol de widgets. Todos los ejemplos usan el catálogo de productos: `ProductsBloc`, `LoadProductsEvent` y los estados `ProductsLoadingState`, `ProductsLoadedState` y `ProductsErrorState`.
-
-La idea corta, antes del detalle:
-
-| Widget | Pregunta que responde |
-|---|---|
-| `BlocProvider` | ¿Dónde vive el `Bloc` y quién lo puede usar? |
-| `BlocBuilder` | ¿Qué se dibuja cuando el `Bloc` entrega un estado? |
 
 ## BlocProvider: dónde vive el Bloc
 
@@ -179,11 +171,6 @@ BlocProvider<ProductsBloc>(
 )
 ```
 
-- **`<ProductsBloc>`** es el tipo del `Bloc` que se guarda. Es también la etiqueta con la que después se busca: quien pida un `ProductsBloc` recibe este. Casi siempre se puede omitir, porque Dart lo deduce de lo que devuelve `create`.
-- **`create`** es una función que construye el `Bloc`. `BlocProvider` la llama **una sola vez**. Recibe un `BuildContext` que aquí no se usa, por eso se escribe `_`.
-- **`..add(LoadProductsEvent())`** es opcional. Los dos puntos (`..`) lanzan el evento y devuelven el mismo `Bloc`, así que la pantalla abre pidiendo datos sin que nadie toque nada.
-- **`child`** es el pedazo de árbol que queda con el `Bloc` a su alcance.
-
 En este curso el `BlocProvider` va en la tabla de rutas, envolviendo a la `Screen`:
 
 ```dart
@@ -203,88 +190,6 @@ void main() {
   );
 }
 ```
-
-## Cuándo nace y cuándo muere el Bloc
-
-`BlocProvider` no solo guarda el `Bloc`: maneja su vida completa.
-
-```svg
-<svg id="bpVida" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 424" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpVida-ttl bpVida-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
-  <title id="bpVida-ttl">Cuándo nace y cuándo muere el Bloc</title>
-  <desc id="bpVida-dsc">Línea de tiempo en cuatro pasos: se abre la pantalla y el BlocProvider entra al árbol sin crear todavía el Bloc; un widget lo pide por primera vez y se ejecuta create; mientras la pantalla sigue abierta se usa siempre la misma instancia; y al cerrar la pantalla el BlocProvider sale del árbol y cierra el Bloc llamando a close.</desc>
-  <defs>
-    <style>
-      #bpVida .title{fill:#161A26;font-size:22px;font-weight:700}
-      #bpVida .sub{fill:#79809A;font-size:13.5px}
-      #bpVida .h{font-size:12px;font-weight:700;letter-spacing:.08em;fill:#556074}
-      #bpVida .foot{fill:#79809A;font-size:12px}
-      #bpVida .mono{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace}
-      #bpVida .tree{fill:none;stroke:#C4CBD8;stroke-width:1.75}
-      #bpVida .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#bpVida-arrow)}
-    </style>
-    <marker id="bpVida-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
-    </marker>
-  </defs>
-  <rect width="960" height="424" rx="16" fill="#FBFBFD"/>
-  <text class="title" x="48" y="56">Cuándo nace y cuándo muere el <tspan class="mono">Bloc</tspan></text>
-  <text class="sub" x="48" y="80" data-fit="860">BlocProvider maneja la vida del Bloc completa. Tú no lo creas con new en la pantalla ni lo cierras a mano.</text>
-  <g transform="translate(48,112)"><rect width="204" height="180" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-    <circle cx="28" cy="32" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="28" y="32" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
-    <text x="16" y="70" font-size="14" font-weight="700" fill="#161A26" data-fit="176">Se abre la pantalla</text>
-    <text x="16" y="93" font-size="13" fill="#454C61" data-fit="176">BlocProvider entra al</text>
-    <text x="16" y="111" font-size="13" fill="#454C61" data-fit="176">árbol. El Bloc todavía</text>
-    <text x="16" y="129" font-size="13" fill="#454C61" data-fit="176">no se ha creado.</text>
-    <rect x="16" y="142" width="172" height="24" rx="6" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>
-    <text class="mono" x="102" y="154" dy="0.35em" text-anchor="middle" font-size="12" font-weight="600" fill="#A96C05" data-fit="160">BlocProvider(...)</text>
-  </g>
-  <g transform="translate(268,112)"><rect width="204" height="180" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-    <circle cx="28" cy="32" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="28" y="32" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">2</text>
-    <text x="16" y="70" font-size="14" font-weight="700" fill="#161A26" data-fit="176">Alguien pide el Bloc</text>
-    <text x="16" y="93" font-size="13" fill="#454C61" data-fit="176">La primera vez que un</text>
-    <text x="16" y="111" font-size="13" fill="#454C61" data-fit="176">widget lo busca, se</text>
-    <text x="16" y="129" font-size="13" fill="#454C61" data-fit="176">ejecuta create.</text>
-    <rect x="16" y="142" width="172" height="24" rx="6" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.25"/>
-    <text class="mono" x="102" y="154" dy="0.35em" text-anchor="middle" font-size="12" font-weight="600" fill="#4453C9" data-fit="160">create: (_) => ...</text>
-  </g>
-  <g transform="translate(488,112)"><rect width="204" height="180" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-    <circle cx="28" cy="32" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="28" y="32" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text>
-    <text x="16" y="70" font-size="14" font-weight="700" fill="#161A26" data-fit="176">La pantalla sigue ahí</text>
-    <text x="16" y="93" font-size="13" fill="#454C61" data-fit="176">Cada reconstrucción</text>
-    <text x="16" y="111" font-size="13" fill="#454C61" data-fit="176">recibe la misma</text>
-    <text x="16" y="129" font-size="13" fill="#454C61" data-fit="176">instancia, con su estado.</text>
-    <rect x="16" y="142" width="172" height="24" rx="6" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.25"/>
-    <text class="mono" x="102" y="154" dy="0.35em" text-anchor="middle" font-size="12" font-weight="600" fill="#4453C9" data-fit="160">misma instancia</text>
-  </g>
-  <g transform="translate(708,112)"><rect width="204" height="180" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-    <circle cx="28" cy="32" r="12" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5"/><text x="28" y="32" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#C2354F">4</text>
-    <text x="16" y="70" font-size="14" font-weight="700" fill="#161A26" data-fit="176">Se cierra la pantalla</text>
-    <text x="16" y="93" font-size="13" fill="#454C61" data-fit="176">BlocProvider sale del</text>
-    <text x="16" y="111" font-size="13" fill="#454C61" data-fit="176">árbol y cierra el Bloc</text>
-    <text x="16" y="129" font-size="13" fill="#454C61" data-fit="176">por ti.</text>
-    <rect x="16" y="142" width="172" height="24" rx="6" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.25"/>
-    <text class="mono" x="102" y="154" dy="0.35em" text-anchor="middle" font-size="12" font-weight="600" fill="#C2354F" data-fit="160">bloc.close()</text>
-  </g>
-  <text class="h" x="48" y="328">VIDA DEL BLOC</text>
-  <rect x="48" y="340" width="212" height="28" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5" stroke-dasharray="5 4"/>
-  <text x="154" y="354" dy="0.35em" text-anchor="middle" font-size="12.5" fill="#556074" data-fit="190">todavía no existe</text>
-  <rect x="268" y="340" width="432" height="28" rx="8" fill="#EEF1FF" stroke="#4453C9" stroke-width="2"/>
-  <text x="484" y="354" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9" data-fit="400">vivo · una sola instancia · conserva su estado</text>
-  <rect x="708" y="340" width="204" height="28" rx="8" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5" stroke-dasharray="5 4"/>
-  <text x="810" y="354" dy="0.35em" text-anchor="middle" font-size="12.5" fill="#C2354F" data-fit="180">cerrado</text>
-  <text class="foot" x="48" y="396" data-fit="860">Si la pantalla se vuelve a abrir, el ciclo empieza de nuevo: un Bloc nuevo, en su estado inicial.</text>
-</svg>
-```
-
-1. **Se abre la pantalla.** `BlocProvider` entra al árbol, pero todavía no ejecuta `create`.
-2. **Alguien pide el `Bloc`.** La primera vez que un widget lo busca (normalmente el `BlocBuilder`, en el primer dibujo de la pantalla), se ejecuta `create`. En la práctica esto pasa de inmediato.
-3. **La pantalla sigue abierta.** Aunque los widgets se reconstruyan muchas veces, `create` no se repite. Todos reciben la misma instancia, con el estado que lleve en ese momento.
-4. **Se cierra la pantalla.** Cuando `BlocProvider` sale del árbol, por ejemplo con `Navigator.pop`, cierra el `Bloc` llamando a `close()`.
-
-De aquí salen dos reglas:
-
-- **No crees el `Bloc` dentro de `build`** con `final bloc = ProductsBloc(...)`. `build` se ejecuta muchas veces, y cada vez nacería un `Bloc` nuevo en estado inicial.
-- **No llames a `close()` a mano.** El `BlocProvider` que lo creó es el que lo cierra.
 
 ## Alcanzar el Bloc: context.read
 
@@ -390,10 +295,6 @@ Error: Could not find the correct Provider<ProductsBloc> above this ProductsScre
 ```
 
 El mensaje dice exactamente lo que pasó: no hay un provider *above*, arriba, de `ProductsScreen`.
-
-La solución es la del lado derecho: el `BlocProvider` va **arriba** de la `Screen`, en la tabla de rutas, como en el apartado anterior. Así el `context` de `ProductsScreen`, y el de todo lo que ella contiene, ya queda debajo del provider.
-
-Lo mismo explica otro caso: una pantalla que se abre con `Navigator.pushNamed` **no** queda debajo del `BlocProvider` de la pantalla anterior. Cada ruta cuelga del `Navigator`, una al lado de la otra. Por eso cada ruta lleva su propio `BlocProvider` en la tabla de rutas.
 
 ## BlocBuilder: dibujar cada estado
 
@@ -508,11 +409,6 @@ BlocBuilder<ProductsBloc, ProductsState>(
   },
 )
 ```
-
-- **`<ProductsBloc, ProductsState>`** son dos tipos, en ese orden: a qué `Bloc` se escucha y qué tipo de estado entrega. Aquí sí hay que escribirlos, porque Dart no los puede deducir.
-- **No se le pasa el `Bloc`.** `BlocBuilder` lo busca solo, hacia arriba, igual que `context.read`. Por eso también tiene que estar debajo del `BlocProvider`.
-- **`builder`** es una función que recibe el `context` y el **estado actual**, y devuelve el widget que se dibuja para ese estado.
-- `builder` se ejecuta una vez al aparecer, con el estado que el `Bloc` tenga en ese momento, y otra vez por cada estado nuevo que el `Bloc` emita.
 
 ## Un estado, un dibujo
 
@@ -764,14 +660,3 @@ class ProductsScreen extends StatelessWidget {
 ```
 
 No hay `setState` ni `StatefulWidget`: la pantalla es un `StatelessWidget` porque el estado vive en el `Bloc`.
-
-## En resumen
-
-| | `BlocProvider` | `BlocBuilder` |
-|---|---|---|
-| Qué hace | Crea el `Bloc`, lo guarda y lo cierra | Escucha al `Bloc` y dibuja cada estado |
-| Parámetros | `create` y `child` | `builder`, y `buildWhen` si hace falta |
-| Tipos | `<ProductsBloc>`, se puede omitir | `<ProductsBloc, ProductsState>`, obligatorios |
-| Dónde va | Arriba de la `Screen`, en la tabla de rutas | Lo más abajo posible, sobre lo que cambia |
-| Cuántos | Uno por `Bloc` | Los que hagan falta |
-| Error típico | Buscar el `Bloc` con un `context` que está arriba del provider | Envolver toda la pantalla, o lanzar eventos dentro de `builder` |

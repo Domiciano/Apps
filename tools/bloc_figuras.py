@@ -198,42 +198,6 @@ FIGS['bpAnatomia'] = lambda: frame(dict(
 ))
 
 
-def bp_vida():
-    fid, h = 'bpVida', 424
-    s = head(fid, h, 'Cuándo nace y cuándo muere el <tspan class="mono">Bloc</tspan>', 'Cuándo nace y cuándo muere el Bloc',
-             'BlocProvider maneja la vida del Bloc completa. Tú no lo creas con new en la pantalla ni lo cierras a mano.',
-             'Línea de tiempo en cuatro pasos: se abre la pantalla y el BlocProvider entra al árbol sin crear todavía el Bloc; un widget '
-             'lo pide por primera vez y se ejecuta create; mientras la pantalla sigue abierta se usa siempre la misma instancia; y al '
-             'cerrar la pantalla el BlocProvider sale del árbol y cierra el Bloc llamando a close.')
-    cards = [
-        ('amber', 'Se abre la pantalla', ['BlocProvider entra al', 'árbol. El Bloc todavía', 'no se ha creado.'], 'BlocProvider(...)'),
-        ('indigo', 'Alguien pide el Bloc', ['La primera vez que un', 'widget lo busca, se', 'ejecuta create.'], 'create: (_) => ...'),
-        ('indigo', 'La pantalla sigue ahí', ['Cada reconstrucción', 'recibe la misma', 'instancia, con su estado.'], 'misma instancia'),
-        ('rose', 'Se cierra la pantalla', ['BlocProvider sale del', 'árbol y cierra el Bloc', 'por ti.'], 'bloc.close()'),
-    ]
-    for i, (color, title, lines, tag) in enumerate(cards):
-        soft, border, strong = FAM[color]
-        x = 48 + i * 220
-        s += f'  <g transform="translate({x},112)"><rect width="204" height="180" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
-        s += '    ' + chip(28, 32, i + 1, color)
-        s += f'    <text x="16" y="70" font-size="14" font-weight="700" fill="#161A26" data-fit="176">{title}</text>\n'
-        for j, ln in enumerate(lines):
-            s += f'    <text x="16" y="{93 + j*18}" font-size="13" fill="#454C61" data-fit="176">{ln}</text>\n'
-        s += f'    <rect x="16" y="142" width="172" height="24" rx="6" fill="{soft}" stroke="{border}" stroke-width="1.25"/>\n'
-        s += f'    <text class="mono" x="102" y="154" dy="0.35em" text-anchor="middle" font-size="12" font-weight="600" fill="{strong}" data-fit="160">{tag}</text>\n  </g>\n'
-    s += '  <text class="h" x="48" y="328">VIDA DEL BLOC</text>\n'
-    s += '  <rect x="48" y="340" width="212" height="28" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5" stroke-dasharray="5 4"/>\n'
-    s += '  <text x="154" y="354" dy="0.35em" text-anchor="middle" font-size="12.5" fill="#556074" data-fit="190">todavía no existe</text>\n'
-    s += '  <rect x="268" y="340" width="432" height="28" rx="8" fill="#EEF1FF" stroke="#4453C9" stroke-width="2"/>\n'
-    s += '  <text x="484" y="354" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9" data-fit="400">vivo · una sola instancia · conserva su estado</text>\n'
-    s += '  <rect x="708" y="340" width="204" height="28" rx="8" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5" stroke-dasharray="5 4"/>\n'
-    s += '  <text x="810" y="354" dy="0.35em" text-anchor="middle" font-size="12.5" fill="#C2354F" data-fit="180">cerrado</text>\n'
-    return s + tail(h, 'Si la pantalla se vuelve a abrir, el ciclo empieza de nuevo: un Bloc nuevo, en su estado inicial.')
-
-
-FIGS['bpVida'] = bp_vida
-
-
 def bp_context():
     fid, h = 'bpContext', 520
     s = head(fid, h, '<tspan class="mono">context.read</tspan> busca hacia arriba', 'context.read busca hacia arriba',
