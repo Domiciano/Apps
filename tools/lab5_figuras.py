@@ -1,7 +1,7 @@
-"""Figuras SVG de la lección «Laboratorio 5 a nivel conceptual» (0090).
+"""Figuras SVG de «Laboratorio 5: Flujo de login» (0053) y «Laboratorio 5 a nivel conceptual» (0090).
 
     python3 tools/lab5_figuras.py <carpeta>     escribe un .svg por figura, para revisarlas
-    python3 tools/lab5_figuras.py --inject      reemplaza cada bloque ```svg de content/lab5concept.md
+    python3 tools/lab5_figuras.py --inject      reemplaza cada bloque ```svg de content/lab5.md y lab5concept.md
                                                 por la figura con el mismo id
 
 No editar los SVG dentro del Markdown: se cambia este script y se vuelve a inyectar.
@@ -14,10 +14,10 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from bloc_figuras import FAM, box, chip, head, note, tail  # noqa: E402
+from bloc_figuras import FAM, MONO, box, chip, head, note, phone, spinner, tail  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-LESSONS = ['lab5concept.md']
+LESSONS = ['lab5.md', 'lab5concept.md']
 FIGS = {}
 
 
@@ -176,6 +176,155 @@ def l5_falla():
 
 
 FIGS['l5Falla'] = l5_falla
+
+
+# ───────────────────────────── Laboratorio 5: Flujo de login
+
+
+def l5_ruta():
+    fid, h = 'l5Ruta', 760
+    s = head(fid, h, 'El mapa del laboratorio', 'El mapa del laboratorio',
+             'Cada caja es una clase y el número dice en qué paso la construyes. Se avanza de adentro hacia afuera.',
+             'Mapa de capas con los diez pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase '
+             'en el 3, ProfileRepository en el 10. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, '
+             'ProfileRepositoryImpl en el 10. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen '
+             'en el 8, y la navegación entre las dos pantallas en el 9. Supabase Auth y la tabla profiles quedan fuera de la app.')
+    s += band(104, 104, 'violet', 'PRESENTACIÓN', 'Pantallas y Bloc')
+    s += band(224, 184, 'amber', 'DOMINIO', 'Reglas y contratos')
+    s += band(424, 168, 'teal', 'DATOS', 'Habla con Supabase')
+    s += band(608, 88, 'slate', 'SUPABASE', 'Servicio externo')
+    s += '  <path class="link" d="M392,162 H370"/>\n  <path class="link" d="M720,162 H742"/>\n'
+    s += '  <path class="link" d="M292,184 V254"/>\n  <path class="link" d="M820,184 V254"/>\n'
+    s += '  <path class="link" d="M292,300 V318 H440 V334"/>\n  <path class="link" d="M764,300 V318 H520 V334"/>\n'
+    s += '  <path class="link" d="M860,300 V334"/>\n'
+    s += '  <path class="link" stroke-dasharray="5 4" d="M480,452 V382"/>\n  <path class="link" stroke-dasharray="5 4" d="M808,452 V382"/>\n'
+    s += '  <text x="490" y="420" font-size="12" font-weight="600" fill="#556074">implementa</text>\n'
+    s += '  <text x="818" y="420" font-size="12" font-weight="600" fill="#556074">implementa</text>\n'
+    s += '  <path class="link" d="M480,496 V526"/>\n  <path class="link" d="M808,496 V526"/>\n'
+    s += '  <path class="link" d="M480,572 V628"/>\n  <path class="link" d="M808,572 V628"/>\n'
+    nodes = [
+        (216, 140, 152, 'violet', 'LoginBloc', 6), (392, 140, 152, 'violet', 'LoginScreen', 7),
+        (568, 140, 152, 'violet', 'RegisterScreen', 8), (744, 140, 152, 'violet', 'RegisterBloc', 8),
+        (216, 256, 152, 'amber', 'SignInUseCase', 3), (744, 256, 152, 'amber', 'SignUpUseCase', 3),
+        (480, 256, 152, 'indigo', 'AuthUser', 1),
+        (392, 336, 176, 'indigo', 'AuthRepository', 2), (720, 336, 176, 'indigo', 'ProfileRepository', 10),
+        (392, 452, 176, 'teal', 'AuthRepositoryImpl', 5), (720, 452, 176, 'teal', 'ProfileRepositoryImpl', 10),
+        (392, 528, 504, 'teal', 'SupabaseAuthDataSource', 4),
+    ]
+    for x, y, w, color, name, n in nodes:
+        s += '  ' + box(x, y, w, 44, color, name, fs=12.5)
+        s += '  ' + chip(x + 6, y + 2, n)
+    s += '  ' + box(392, 630, 176, 44, 'slate', 'Supabase Auth', mono=False)
+    s += '  ' + box(720, 630, 176, 44, 'slate', 'tabla profiles', mono=False)
+    s += '  ' + chip(726, 632, 10)
+    s += '  ' + chip(556, 162, 9)
+    return s + tail(h, 'El paso 9 es la navegación entre las dos pantallas. El paso 10 agrega el perfil: toca dominio, datos y la tabla.')
+
+
+FIGS['l5Ruta'] = l5_ruta
+
+
+def l5_carpetas():
+    fid = 'l5Carpetas'
+    rows = [
+        (0, 'lib/', 'slate', '', ''),
+        (1, 'main.dart', 'violet', 'Inicializa Supabase y declara las rutas', '7'),
+        (1, 'features/', 'slate', '', ''),
+        (2, 'auth/', 'slate', 'Lo que comparten login y registro', ''),
+        (3, 'domain/', 'amber', 'No importa nada de Flutter ni de Supabase', ''),
+        (4, 'entities/auth_user.dart', 'amber', 'El usuario, en tus propios términos', '1'),
+        (4, 'repository/auth_repository.dart', 'amber', 'El contrato de autenticación', '2'),
+        (4, 'repository/profile_repository.dart', 'amber', 'El contrato del perfil', '10'),
+        (4, 'usecases/sign_in_usecase.dart', 'amber', 'Iniciar sesión', '3'),
+        (4, 'usecases/sign_up_usecase.dart', 'amber', 'Registrar', '3'),
+        (3, 'data/', 'teal', 'El único lugar que conoce a Supabase', ''),
+        (4, 'source/supabase_auth_data_source.dart', 'teal', 'Las llamadas al SDK', '4'),
+        (4, 'repository/auth_repository_impl.dart', 'teal', 'Cumple el contrato', '5'),
+        (4, 'repository/profile_repository_impl.dart', 'teal', 'Cumple el contrato', '10'),
+        (2, 'login/ui/', 'violet', 'La pantalla de login y su Bloc', ''),
+        (3, 'bloc/', 'violet', 'login_bloc · login_event · login_state', '6'),
+        (3, 'screens/login_screen.dart', 'violet', 'El formulario', '7'),
+        (2, 'register/ui/', 'violet', 'La misma forma, para el registro', ''),
+        (3, 'bloc/', 'violet', 'register_bloc · register_event · register_state', '8'),
+        (3, 'screens/register_screen.dart', 'violet', 'El formulario', '8'),
+        (2, 'home/ui/screens/home_screen.dart', 'violet', 'A donde llega quien inicia sesión', '7'),
+    ]
+    y0, rh = 112, 34
+    h = y0 + rh * len(rows) + 64
+    s = head(fid, h, 'La estructura de carpetas', 'La estructura de carpetas',
+             'auth/ guarda lo que se comparte. login/ y register/ solo tienen su pantalla y su Bloc.',
+             'Árbol de carpetas dentro de lib: main.dart y features. En features, auth con domain (entities, repository y usecases) y '
+             'data (source y repository); login con ui (bloc y screens); register con ui (bloc y screens); y home con su pantalla. Cada archivo indica el '
+             'paso del laboratorio en que se crea.')
+    s += f'  <rect x="48" y="96" width="864" height="{rh*len(rows)+20}" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    last = {}
+    for i, (lvl, name, color, text, step) in enumerate(rows):
+        soft, border, strong = FAM[color]
+        y = y0 + i * rh + 12
+        x = 68 + lvl * 24
+        if lvl:
+            py = last[lvl - 1]
+            s += f'  <path d="M{x-14},{py+13} V{y} H{x-3}" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>\n'
+        last[lvl] = y
+        folder = name.endswith('/')
+        w = len(name) * 7.5 + 20
+        s += f'  <rect x="{x}" y="{y-13}" width="{w:.0f}" height="26" rx="{8 if folder else 4}" fill="{soft}" stroke="{border}" stroke-width="1.5"/>\n'
+        s += f'  <text class="mono" x="{x+10}" y="{y}" dy="0.35em" font-size="12.5" font-weight="600" fill="{strong}" data-fit="{w-12:.0f}">{name}</text>\n'
+        if text:
+            s += f'  <text x="516" y="{y}" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">{text}</text>\n'
+        if step:
+            s += '  ' + chip(880, y, step)
+    s += f'  <text class="h" x="892" y="88" text-anchor="end">PASO</text>\n'
+    return s + tail(h, 'Los nombres de archivo van en minúscula y con guion bajo. Respeta esta estructura: es un criterio de entrega.')
+
+
+FIGS['l5Carpetas'] = l5_carpetas
+
+
+def l5_estado():
+    fid, h = 'l5Estado', 540
+    s = head(fid, h, 'Un solo estado, cuatro momentos', 'Un solo estado, cuatro momentos',
+             'LoginState es una sola clase. El momento lo dice el campo status, y copyWith cambia solo lo que hace falta.',
+             'Cuatro columnas, una por valor de LoginStatus. En initial la pantalla muestra el formulario. En loading, el formulario con '
+             'un indicador de progreso en lugar del botón; copyWith cambia solo status. En success la app navega a la pantalla de '
+             'inicio; copyWith cambia status y user. En failure vuelve el formulario con el mensaje de error; copyWith cambia status y '
+             'errorMessage.')
+    cols = [
+        (150, 'slate', 'initial', 'const LoginState()', 'el estado de arranque'),
+        (370, 'amber', 'loading', 'status', 'lo demás se conserva'),
+        (590, 'green', 'success', 'status · user', 'llega el AuthUser'),
+        (810, 'rose', 'failure', 'status · errorMessage', 'llega el mensaje'),
+    ]
+    for cx, color, status, change, why in cols:
+        soft, border, strong = FAM[color]
+        s += '  ' + box(cx - 96, 108, 192, 36, color, f'status: {status}', fs=13)
+        s += f'  <path class="link" d="M{cx},144 V166"/>\n'
+        px, py = cx - 80, 170
+        title = 'Inicio' if status == 'success' else 'Login'
+        s += '  ' + phone(px, py, 160, 216, title)
+        if status == 'success':
+            s += f'  <circle cx="{cx}" cy="{py+104}" r="18" fill="#E8F6E3" stroke="#3A8235" stroke-width="2"/>\n'
+            s += f'  <path d="M{cx-8},{py+104} l6,6 l11,-12" fill="none" stroke="#3A8235" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>\n'
+            s += f'  <text x="{cx}" y="{py+148}" dy="0.35em" text-anchor="middle" font-size="13" fill="#161A26" data-fit="140">ana@icesi.edu.co</text>\n'
+        else:
+            for k, label in enumerate(['correo', 'contraseña']):
+                s += f'  <rect x="{px+16}" y="{py+58+k*36}" width="128" height="26" rx="6" fill="#F5F6FA" stroke="#C4CBD8" stroke-width="1.25"/>\n'
+                s += f'  <text x="{px+26}" y="{py+71+k*36}" dy="0.35em" font-size="12" fill="#79809A">{label}</text>\n'
+            if status == 'loading':
+                s += '  ' + spinner(cx, py + 150, 13)
+            else:
+                s += f'  <rect x="{px+16}" y="{py+136}" width="128" height="28" rx="14" fill="#4453C9"/>\n'
+                s += f'  <text x="{cx}" y="{py+150}" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#FFFFFF">Entrar</text>\n'
+            if status == 'failure':
+                s += f'  <text x="{cx}" y="{py+188}" dy="0.35em" text-anchor="middle" font-size="12" font-weight="600" fill="#C2354F" data-fit="140">Credenciales inválidas</text>\n'
+        s += f'  <text class="h" x="{cx}" y="414" text-anchor="middle">{"SE CREA CON" if status == "initial" else "copyWith CAMBIA"}</text>\n'
+        s += f'  <rect x="{cx-96}" y="424" width="192" height="26" rx="6" fill="{soft}" stroke="{border}" stroke-width="1.25"/>\n'
+        s += f'  <text class="mono" x="{cx}" y="437" dy="0.35em" text-anchor="middle" font-size="12" font-weight="600" fill="{strong}" data-fit="180">{change}</text>\n'
+        s += f'  <text x="{cx}" y="468" text-anchor="middle" font-size="12.5" fill="#454C61" data-fit="190">{why}</text>\n'
+    return s + tail(h, 'RegisterState se arma igual, con su propio RegisterStatus.')
+
+
+FIGS['l5Estado'] = l5_estado
 
 
 def main():
