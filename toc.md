@@ -73,6 +73,7 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson105.md | Entendiendo BlocProvider y BlocBuilder | 0089
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonX5.md | Self-hosted Supabase | 0054
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH1.md | Instalación de supabase | 0051
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH1cli.md | Alternativa: Configurar Supabase desde la terminal | 0091
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH2.md | Inicio de Sesión con Supabase y Flutter | 0052
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab5.md | Laboratorio 5: Flujo de login | 0053
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab5concept.md | Laboratorio 5 a nivel conceptual | 0090

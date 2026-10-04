@@ -88,6 +88,14 @@ Texto del apartado.
 | `##` | Apartados. Alimentan el índice lateral, el `subsection_dwell` de la analítica y el contexto que se le manda a la IA |
 | `###` en adelante | Estructura interna del apartado; no salen en el índice ni cortan la subsección |
 
+### Sin tablas
+
+**Al profesor no le gustan las tablas en las lecciones.** No usar tablas Markdown ni en
+lecciones ni en laboratorios nuevos: lo que iría en una tabla se dice en prosa corta, en
+una lista, o se dibuja en una figura SVG. Lo mismo con las **estructuras de carpetas**:
+van en SVG, no en un bloque de texto con `├──`. El estilo general es figura más uno o dos
+párrafos cortos por apartado; en los laboratorios los bloques de código sí se quedan.
+
 ### La sección de tags
 
 Va en un **comentario HTML** justo bajo el `#`. GitHub no lo muestra, el visor tampoco:
@@ -157,6 +165,7 @@ ciclos) se generan con un script en `tools/`, igual que en `SeminarioSoftware`:
 `tools/code_frame.py` es copia literal del de ese repo y `tools/bloc_figuras.py` trae las
 siete de «Entendiendo BlocProvider y BlocBuilder» (0089). `tools/lab5_figuras.py` trae las cuatro
 de «Laboratorio 5 a nivel conceptual» (0090), se usa igual y reutiliza los ayudantes del anterior.
+`tools/supabase_cli_figuras.py` trae las dos de la lección del CLI de Supabase (0091).
 
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
