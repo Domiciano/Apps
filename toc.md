@@ -69,8 +69,8 @@
 **[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson102.md | Ejemplo: Buscador Deezer · Paso a paso | 0050
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab4.md | Laboratorio 4: Deezer ain't the best option | 0047
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab4store.md | Laboratorio 4: Fake Store | 0088
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson105.md | Entendiendo BlocProvider y BlocBuilder | 0089
 [t] Supabase Auth
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lesson105.md | Entendiendo BlocProvider y BlocBuilder | 0089
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonX5.md | Self-hosted Supabase | 0054
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH1.md | Instalación de supabase | 0051
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH2.md | Inicio de Sesión con Supabase y Flutter | 0052
