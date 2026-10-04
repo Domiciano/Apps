@@ -155,7 +155,8 @@ Toda valla cercada **debe declarar lenguaje** (` ```dart `, nunca ` ``` ` a seca
 Las figuras explicativas de una lección (código anotado con flechas, árboles de widgets,
 ciclos) se generan con un script en `tools/`, igual que en `SeminarioSoftware`:
 `tools/code_frame.py` es copia literal del de ese repo y `tools/bloc_figuras.py` trae las
-siete de «Entendiendo BlocProvider y BlocBuilder» (0089).
+siete de «Entendiendo BlocProvider y BlocBuilder» (0089). `tools/lab5_figuras.py` trae las cuatro
+de «Laboratorio 5 a nivel conceptual» (0090), se usa igual y reutiliza los ayudantes del anterior.
 
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas

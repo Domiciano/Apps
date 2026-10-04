@@ -288,7 +288,7 @@ class _LoginView extends StatefulWidget {
 - Goal 7 · Completa `LoginScreen`: agrega los `TextFormField` de email y password, el botón que despacha `LoginSubmitted`, y el `BlocBuilder` que reacciona a cada estado.
 - Goal 8 · Crea desde cero los archivos de la feature `register`: eventos, estados, `RegisterBloc` con `SignUpUseCase`, y `RegisterScreen`. Valida que las contraseñas coincidan antes de despachar el evento.
 - Goal 9 · Configura la navegación entre `LoginScreen` y `RegisterScreen`. Desde login un botón lleva a registro, y desde registro un botón vuelve a login.
-- Goal 10 · Agrega un campo `username` al formulario de registro. Luego de un `signUp` exitoso, inserta ese username en la tabla `profiles` de Supabase. Extiende `SupabaseAuthDataSource` con un método `createProfile` para esto.
+- Goal 10 · Agrega un campo `username` al formulario de registro. El registro pasa a tener dos pasos, y quien los ordena es `SignUpUseCase`: primero `signUp` y, solo si sale bien, `createProfile` con el `id` del usuario que devolvió el primer paso. Para el segundo paso crea el contrato `ProfileRepository` con su método `createProfile`, impleméntalo en `ProfileRepositoryImpl` y extiende `SupabaseAuthDataSource` con el `insert` en la tabla `profiles`. Ni el `Bloc` ni el `DataSource` encadenan los dos pasos. Si `createProfile` falla, `SignUpUseCase` atrapa la excepción y decide qué hacer. La lección «Laboratorio 5 a nivel conceptual» muestra el flujo completo.
 
 ## Tabla profiles (Goal 10)
 
