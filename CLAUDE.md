@@ -150,6 +150,22 @@ Toda valla cercada **debe declarar lenguaje** (` ```dart `, nunca ` ``` ` a seca
 > puede leer el código que escribe el estudiante, ni si compila, ni el error. Solo se
 > registra que lo abrió y cuánto tiempo tuvo el foco.
 
+### Figuras SVG generadas
+
+Las figuras explicativas de una lección (código anotado con flechas, árboles de widgets,
+ciclos) se generan con un script en `tools/`, igual que en `SeminarioSoftware`:
+`tools/code_frame.py` es copia literal del de ese repo y `tools/bloc_figuras.py` trae las
+ocho de «Entendiendo BlocProvider y BlocBuilder» (0089).
+
+```bash
+python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
+python3 tools/bloc_figuras.py --inject    # reemplaza cada bloque svg de la lección por su figura
+```
+
+**No editar esos SVG dentro del Markdown**: se cambia el script y se vuelve a inyectar. Las
+reglas de estilo (id único que prefija todo selector, fondo claro fijo, `viewBox` de 960)
+están en el `CLAUDE.md` de `SeminarioSoftware`, sección «Estilo de las lecciones».
+
 ### Darla de alta en `toc.md`
 
 ```
