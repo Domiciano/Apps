@@ -126,7 +126,7 @@ def bp_arbol():
     s = head(fid, h, 'El <tspan class="mono">Bloc</tspan> cuelga del árbol de widgets', 'El Bloc cuelga del árbol de widgets',
              'BlocProvider es un widget más del árbol. Guarda el Bloc y lo deja al alcance de todo lo que tiene debajo.',
              'Árbol de widgets: MaterialApp, debajo BlocProvider, que guarda un ProductsBloc, y debajo ProductsScreen, Scaffold, AppBar, '
-             'BlocBuilder con su ListView y un FloatingActionButton. Una zona resaltada marca que todos los widgets que están debajo del '
+             'BlocBuilder con su ListView y un IconButton. Una zona resaltada marca que todos los widgets que están debajo del '
              'BlocProvider pueden alcanzar el Bloc, y que MaterialApp, que está arriba, no.')
     s += '  <rect x="48" y="264" width="544" height="296" rx="14" fill="#E8F6E3" fill-opacity=".55" stroke="#9FD68D" stroke-width="1.5" stroke-dasharray="6 5"/>\n'
     s += '  <text class="h" x="576" y="288" text-anchor="end" fill="#3A8235" style="fill:#3A8235" data-fit="230">AQUÍ SE ALCANZA EL BLOC</text>\n'
@@ -140,7 +140,7 @@ def bp_arbol():
     s += '  ' + box(72, 376, 240, 40, 'slate', 'Scaffold')
     s += '  ' + box(72, 448, 112, 40, 'slate', 'AppBar')
     s += '  ' + box(200, 448, 152, 40, 'violet', 'BlocBuilder')
-    s += '  ' + box(368, 448, 208, 40, 'teal', 'FloatingActionButton')
+    s += '  ' + box(368, 448, 208, 40, 'teal', 'IconButton')
     s += '  ' + box(200, 512, 152, 36, 'slate', 'ListView')
     s += '  ' + note(624, 112, 288, 'slate', 'Arriba del provider', ['MaterialApp no puede pedir el Bloc:', 'está por encima de quien lo guarda.'])
     s += '  ' + note(624, 200, 288, 'indigo', 'Una sola instancia', ['BlocProvider crea el Bloc una vez y lo', 'conserva mientras siga en el árbol.'])
