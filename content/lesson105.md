@@ -315,8 +315,8 @@ context.read<ProductsBloc>().add(LoadProductsEvent());
 
 ```svg
 <svg id="bpRead" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 648" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpRead-ttl bpRead-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
-  <title id="bpRead-ttl">Del toque al evento: context.read</title>
-  <desc id="bpRead-dsc">Animación en cinco pasos. Uno: el usuario toca el IconButton y corre su onPressed. Dos: el código usa el context de ProductsScreen. Tres: context.read de ProductsBloc sube por el árbol hasta el BlocProvider y devuelve el ProductsBloc que guarda. Cuatro: add le entrega LoadProductsEvent, que sale de la vista y entra a la capa de Bloc. Cinco: el Bloc lo atiende en su manejador on de LoadProductsEvent.</desc>
+  <title id="bpRead-ttl">Del toque a la respuesta: context.read</title>
+  <desc id="bpRead-dsc">Animación en ocho pasos y tres columnas: lo que se ve con el código que se ejecuta, el árbol de widgets y la capa de Bloc. Uno: el usuario toca el IconButton y corre su onPressed. Dos: el código usa el context de ProductsScreen. Tres: context.read de ProductsBloc sube por el árbol hasta el BlocProvider y devuelve el ProductsBloc que guarda. Cuatro: add le entrega LoadProductsEvent. Cinco: el Bloc lo atiende y emite ProductsLoadingState, y la pantalla muestra la carga. Seis: el Bloc hace un HTTP GET a la API. Siete: con la respuesta emite ProductsLoadedState. Ocho: BlocBuilder ejecuta builder y la pantalla muestra los productos nuevos.</desc>
   <defs>
     <style>
       #bpRead .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -328,92 +328,143 @@ context.read<ProductsBloc>().add(LoadProductsEvent());
       #bpRead .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#bpRead-arrow)}
       #bpRead .ar-indigo{fill:none;stroke:#4453C9;stroke-width:1.75;marker-end:url(#bpRead-ar-indigo)}
       #bpRead .ar-teal{fill:none;stroke:#0F8478;stroke-width:1.75;marker-end:url(#bpRead-ar-teal)}
-      #bpRead .an{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}
-      #bpRead .st{animation:bpRead-hide 15s linear infinite}
+      #bpRead .ar-green{fill:none;stroke:#3A8235;stroke-width:1.75;marker-end:url(#bpRead-ar-green)}
+      #bpRead .ar-amber{fill:none;stroke:#A96C05;stroke-width:1.75;marker-end:url(#bpRead-ar-amber)}
+      #bpRead .an,#bpRead .ls,#bpRead .st{animation-duration:24s;animation-iteration-count:infinite;animation-timing-function:linear}
+      #bpRead .an{opacity:0}
+      #bpRead .st{animation-name:bpRead-hide}
+      #bpRead .spin{animation:bpRead-spin 1s linear infinite;transform-box:fill-box;transform-origin:center}
+      @keyframes bpRead-spin{to{transform:rotate(360deg)}}
       #bpRead .a1{animation-name:bpRead-a1}
-      @keyframes bpRead-a1{0%{opacity:0} 2%{opacity:1} 18%{opacity:1} 20%{opacity:0} 100%{opacity:0}}
+      @keyframes bpRead-a1{0%{opacity:0} 2.0%{opacity:1} 10.5%{opacity:1} 12.5%{opacity:0} 100%{opacity:0}}
       #bpRead .a2{animation-name:bpRead-a2}
-      @keyframes bpRead-a2{0%{opacity:0} 20%{opacity:0} 22%{opacity:1} 38%{opacity:1} 40%{opacity:0} 100%{opacity:0}}
+      @keyframes bpRead-a2{0%{opacity:0} 12.5%{opacity:0} 14.5%{opacity:1} 23.0%{opacity:1} 25.0%{opacity:0} 100%{opacity:0}}
       #bpRead .a3{animation-name:bpRead-a3}
-      @keyframes bpRead-a3{0%{opacity:0} 40%{opacity:0} 42%{opacity:1} 58%{opacity:1} 60%{opacity:0} 100%{opacity:0}}
+      @keyframes bpRead-a3{0%{opacity:0} 25.0%{opacity:0} 27.0%{opacity:1} 35.5%{opacity:1} 37.5%{opacity:0} 100%{opacity:0}}
       #bpRead .a4{animation-name:bpRead-a4}
-      @keyframes bpRead-a4{0%{opacity:0} 60%{opacity:0} 62%{opacity:1} 78%{opacity:1} 80%{opacity:0} 100%{opacity:0}}
+      @keyframes bpRead-a4{0%{opacity:0} 37.5%{opacity:0} 39.5%{opacity:1} 48.0%{opacity:1} 50.0%{opacity:0} 100%{opacity:0}}
       #bpRead .a5{animation-name:bpRead-a5}
-      @keyframes bpRead-a5{0%{opacity:0} 80%{opacity:0} 82%{opacity:1} 98%{opacity:1} 100%{opacity:0}}
+      @keyframes bpRead-a5{0%{opacity:0} 50.0%{opacity:0} 52.0%{opacity:1} 60.5%{opacity:1} 62.5%{opacity:0} 100%{opacity:0}}
+      #bpRead .a6{animation-name:bpRead-a6}
+      @keyframes bpRead-a6{0%{opacity:0} 62.5%{opacity:0} 64.5%{opacity:1} 73.0%{opacity:1} 75.0%{opacity:0} 100%{opacity:0}}
+      #bpRead .a7{animation-name:bpRead-a7}
+      @keyframes bpRead-a7{0%{opacity:0} 75.0%{opacity:0} 77.0%{opacity:1} 85.5%{opacity:1} 87.5%{opacity:0} 100%{opacity:0}}
+      #bpRead .a8{animation-name:bpRead-a8}
+      @keyframes bpRead-a8{0%{opacity:0} 87.5%{opacity:0} 89.5%{opacity:1} 98.0%{opacity:1} 100%{opacity:0}}
       #bpRead .a23{animation-name:bpRead-a23}
-      @keyframes bpRead-a23{0%{opacity:0} 20%{opacity:0} 22%{opacity:1} 58%{opacity:1} 60%{opacity:0} 100%{opacity:0}}
+      @keyframes bpRead-a23{0%{opacity:0} 12.5%{opacity:0} 14.5%{opacity:1} 35.5%{opacity:1} 37.5%{opacity:0} 100%{opacity:0}}
       #bpRead .a33{animation-name:bpRead-a33}
-      @keyframes bpRead-a33{0%{opacity:0} 50%{opacity:0} 52%{opacity:1} 58%{opacity:1} 60%{opacity:0} 100%{opacity:0}}
+      @keyframes bpRead-a33{0%{opacity:0} 31%{opacity:0} 33%{opacity:1} 35.5%{opacity:1} 37.5%{opacity:0} 100%{opacity:0}}
+      #bpRead .g1{animation-name:bpRead-g1}
+      @keyframes bpRead-g1{0%{opacity:0} 2%{opacity:1} 48%{opacity:1} 50%{opacity:0} 100%{opacity:0}}
+      #bpRead .g2{animation-name:bpRead-g2}
+      @keyframes bpRead-g2{0%{opacity:0} 50%{opacity:0} 52%{opacity:1} 85.5%{opacity:1} 87.5%{opacity:0} 100%{opacity:0}}
       #bpRead .tap{animation-name:bpRead-tap;transform-box:fill-box;transform-origin:center}
+      @keyframes bpRead-tap{0%,1%{opacity:0;transform:scale(.3)}2%{opacity:.9;transform:scale(.3)}6%{opacity:0;transform:scale(1.5)}6.5%{opacity:.9;transform:scale(.3)}10.5%,100%{opacity:0;transform:scale(1.5)}}
       #bpRead .tk1{animation-name:bpRead-tk1}
+      @keyframes bpRead-tk1{0%,25.5%{opacity:0;transform:translate(0,0)}26.5%{opacity:1;transform:translate(0,0)}27.5%{opacity:1;transform:translate(-18px,0)}30%{opacity:1;transform:translate(-18px,-64px)}31%{opacity:1;transform:translate(0,-64px)}32%,100%{opacity:0;transform:translate(0,-64px)}}
       #bpRead .tk2{animation-name:bpRead-tk2}
+      @keyframes bpRead-tk2{0%,38%{opacity:0;transform:translate(0,0)}39%{opacity:1;transform:translate(0,0)}40.5%{opacity:1;transform:translate(0,44px)}45%{opacity:1;transform:translate(298px,44px)}48%{opacity:1;transform:translate(298px,-142px)}49%,100%{opacity:0;transform:translate(298px,-142px)}}
+      #bpRead .tkL{animation-name:bpRead-tkL}
+      @keyframes bpRead-tkL{0%,52%{opacity:0;transform:translate(0,0)}53%{opacity:1;transform:translate(0,0)}54.5%{opacity:1;transform:translate(-48px,0)}58%{opacity:1;transform:translate(-48px,176px)}59.5%{opacity:1;transform:translate(-94px,176px)}60.5%,100%{opacity:0;transform:translate(-94px,176px)}}
+      #bpRead .tkG{animation-name:bpRead-tkG}
+      @keyframes bpRead-tkG{0%,63%{opacity:0;transform:translate(0,0)}64%{opacity:1;transform:translate(0,0)}67.5%{opacity:1;transform:translate(0,88px)}68.5%,100%{opacity:0;transform:translate(0,88px)}}
+      #bpRead .tkJ{animation-name:bpRead-tkJ}
+      @keyframes bpRead-tkJ{0%,68%{opacity:0;transform:translate(0,0)}69%{opacity:1;transform:translate(0,0)}72.5%{opacity:1;transform:translate(0,-90px)}73.5%,100%{opacity:0;transform:translate(0,-90px)}}
+      #bpRead .tkE{animation-name:bpRead-tkE}
+      @keyframes bpRead-tkE{0%,77%{opacity:0;transform:translate(0,0)}78%{opacity:1;transform:translate(0,0)}79.5%{opacity:1;transform:translate(-48px,0)}83%{opacity:1;transform:translate(-48px,176px)}84.5%{opacity:1;transform:translate(-94px,176px)}85.5%,100%{opacity:0;transform:translate(-94px,176px)}}
       @keyframes bpRead-hide{from{opacity:0}to{opacity:0}}
-      @keyframes bpRead-tap{0%,2%{opacity:0;transform:scale(.3)}4%{opacity:.9;transform:scale(.3)}10%{opacity:0;transform:scale(1.5)}11%{opacity:.9;transform:scale(.3)}17%,100%{opacity:0;transform:scale(1.5)}}
-      @keyframes bpRead-tk1{0%,41%{opacity:0;transform:translate(0,0)}43%{opacity:1;transform:translate(0,0)}45%{opacity:1;transform:translate(-24px,0)}49%{opacity:1;transform:translate(-24px,-64px)}51%{opacity:1;transform:translate(0,-64px)}53%,100%{opacity:0;transform:translate(0,-64px)}}
-      @keyframes bpRead-tk2{0%,62%{opacity:0;transform:translate(0,0)}64%{opacity:1;transform:translate(0,0)}72%{opacity:1;transform:translate(432px,0)}76%{opacity:1;transform:translate(432px,-186px)}78%,100%{opacity:0;transform:translate(432px,-186px)}}
-      @media (prefers-reduced-motion: reduce){#bpRead .an,#bpRead .st{animation:none}}
+      @media (prefers-reduced-motion: reduce){#bpRead .an,#bpRead .ls,#bpRead .st,#bpRead .spin{animation:none}}
     </style>
     <marker id="bpRead-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
     </marker>
     <marker id="bpRead-ar-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#4453C9"/></marker>
     <marker id="bpRead-ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#0F8478"/></marker>
+    <marker id="bpRead-ar-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#3A8235"/></marker>
+    <marker id="bpRead-ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#A96C05"/></marker>
   </defs>
   <rect width="960" height="648" rx="16" fill="#FBFBFD"/>
-  <text class="title" x="48" y="56">Del toque al evento: <tspan class="mono">context.read</tspan></text>
-  <text class="sub" x="48" y="80" data-fit="860">Qué pasa al tocar el botón: el código usa context para subir por el árbol, encuentra el Bloc y le entrega el evento.</text>
+  <text class="title" x="48" y="56">Del toque a la respuesta: <tspan class="mono">context.read</tspan></text>
+  <text class="sub" x="48" y="80" data-fit="860">Al tocar el botón, el evento llega al Bloc con context.read; el Bloc consigue los datos y la respuesta vuelve a la pantalla.</text>
   <rect x="48" y="104" width="312" height="416" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-  <text class="h" x="64" y="126" data-fit="280">VISTA · ÁRBOL DE WIDGETS</text>
-  <rect x="624" y="152" width="288" height="160" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-  <text class="h" x="640" y="174" data-fit="256">CAPA DE BLOC</text>
-  <path class="tree" d="M216,184 V208 M216,248 V272 M216,312 V336 M216,376 V400 M216,440 V464"/>
-  <path d="M336,228 H648" stroke="#4453C9" stroke-width="1.75" stroke-dasharray="4 4" fill="none"/>
-  <text x="492" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#4453C9">guarda</text>
-  <rect x="96" y="144" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="164" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">MaterialApp</text>
-  <rect x="96" y="208" width="240" height="40" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="2.5"/><text class="mono" x="216" y="228" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="224">BlocProvider</text>
-  <rect x="96" y="272" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="292" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">ProductsScreen</text>
-  <rect x="96" y="336" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="356" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">Scaffold</text>
-  <rect x="96" y="400" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="420" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">AppBar</text>
-  <rect x="96" y="464" width="240" height="40" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="216" y="484" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="224">IconButton</text>
-  <rect x="108" y="262" width="68" height="20" rx="10" fill="#4453C9"/>
-  <text class="mono" x="142" y="272" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">context</text>
-  <rect x="648" y="204" width="240" height="48" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="768" y="219" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="224">ProductsBloc</text><text x="768" y="238" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="224">la instancia que guarda el provider</text>
-  <rect x="672" y="264" width="192" height="32" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="768" y="280" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="176">on&lt;LoadProductsEvent&gt;</text>
-  <path class="ar-indigo" d="M96,292 H72 V228 H94"/>
-  <path class="ar-teal" d="M336,484 H768 V298"/>
-  <text class="mono" x="552" y="474" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">.add(LoadProductsEvent())</text>
-  <text x="552" y="504" text-anchor="middle" font-size="12" fill="#454C61" data-fit="380">el evento sale de la vista y entra a la capa de Bloc</text>
-  <circle cx="336" cy="464" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="336" y="464" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">1</text>
-  <circle cx="336" cy="272" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="336" y="272" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">2</text>
-  <circle cx="72" cy="260" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="72" y="260" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text>
-  <circle cx="768" cy="400" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="768" y="400" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">4</text>
-  <circle cx="864" cy="264" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="864" y="264" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">5</text>
-  <text class="h" x="384" y="336" data-fit="336">EL CÓDIGO DEL BOTÓN</text>
-  <rect x="384" y="348" width="336" height="100" rx="10" fill="#1F2430"/>
-  <rect class="an a1" x="400" y="357" width="78" height="22" rx="5" fill="#0F8478" fill-opacity=".45" stroke="#0F8478" stroke-width="1.5"/>
-  <rect class="an a23" x="532" y="357" width="62" height="22" rx="5" fill="#4453C9" fill-opacity=".45" stroke="#4453C9" stroke-width="1.5"/>
-  <rect class="an a23" x="431" y="381" width="172" height="22" rx="5" fill="#4453C9" fill-opacity=".45" stroke="#4453C9" stroke-width="1.5"/>
-  <rect class="an a4" x="431" y="405" width="203" height="22" rx="5" fill="#0F8478" fill-opacity=".45" stroke="#0F8478" stroke-width="1.5"/>
-  <text class="mono" x="404" y="373" font-size="13" fill="#E6EAF2" data-fit="300">onPressed: () =&gt; context</text>
-  <text class="mono" x="435.2" y="397" font-size="13" fill="#E6EAF2" data-fit="300">.read&lt;ProductsBloc&gt;()</text>
-  <text class="mono" x="435.2" y="421" font-size="13" fill="#E6EAF2" data-fit="300">.add(LoadProductsEvent()),</text>
-  <rect class="an a1" x="90" y="458" width="252" height="52" rx="14" fill="none" stroke="#0F8478" stroke-width="3"/>
-  <circle class="an tap" cx="216" cy="484" r="26" fill="#0F8478" fill-opacity=".35" stroke="#0F8478" stroke-width="2"/>
-  <rect class="an a2" x="90" y="254" width="252" height="64" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
-  <rect class="an a33" x="90" y="202" width="252" height="52" rx="14" fill="none" stroke="#A96C05" stroke-width="3"/>
-  <path class="an a33" d="M342,228 H642" stroke="#4453C9" stroke-width="3.5" fill="none"/>
-  <rect class="an a33" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
-  <rect class="an a5" x="666" y="258" width="204" height="44" rx="12" fill="none" stroke="#0F8478" stroke-width="3"/>
-  <rect class="an a5" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
-  <circle class="an tk1" cx="96" cy="292" r="8" fill="#4453C9" stroke="#FFFFFF" stroke-width="2"/>
-  <circle class="an tk2" cx="336" cy="484" r="8" fill="#0F8478" stroke="#FFFFFF" stroke-width="2"/>
+  <text class="h" x="64" y="128" data-fit="280">LO QUE SE VE</text>
+  <rect x="376" y="104" width="256" height="416" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="392" y="128" data-fit="224">VISTA · ÁRBOL DE WIDGETS</text>
+  <rect x="704" y="104" width="208" height="416" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="720" y="128" data-fit="176">CAPA DE BLOC</text>
+  <rect x="60" y="144" width="288" height="152" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="76" y="168" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Catálogo</text><path d="M62,186 H346" stroke="#D9DEE8" stroke-width="1.5"/>
+  <circle cx="324" cy="166" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <path d="M329,166 A5,5 0 1 1 326.5,161.7" fill="none" stroke="#0F8478" stroke-width="1.75" stroke-linecap="round"/>
+  <path d="M324.2,158.6 L327.4,161.9 L323,163.2 Z" fill="#0F8478"/>
+  <g class="ls g1"><rect x="72" y="196" width="264" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="211" dy="0.35em" font-size="13" fill="#161A26" data-fit="244">Manzana</text><rect x="72" y="228" width="264" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="243" dy="0.35em" font-size="13" fill="#161A26" data-fit="244">Jugo de mora</text><rect x="72" y="260" width="264" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="275" dy="0.35em" font-size="13" fill="#161A26" data-fit="244">Leche</text></g>
+  <g class="an g2"><g class="spin"><circle cx="204" cy="244" r="16" fill="none" stroke="#FFF3DC" stroke-width="5"/><path d="M204,228 A16,16 0 0 1 220,244" fill="none" stroke="#A96C05" stroke-width="5" stroke-linecap="round"/></g></g>
+  <g class="an a8"><rect x="72" y="196" width="264" height="30" rx="7" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.25"/><text x="84" y="211" dy="0.35em" font-size="13" fill="#161A26" data-fit="244">Pan</text><rect x="72" y="228" width="264" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="243" dy="0.35em" font-size="13" fill="#161A26" data-fit="244">Manzana</text><rect x="72" y="260" width="264" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="275" dy="0.35em" font-size="13" fill="#161A26" data-fit="244">Jugo de mora</text></g>
+  <text class="h" x="64" y="328" data-fit="280">EL CÓDIGO QUE SE EJECUTA</text>
+  <rect x="60" y="340" width="288" height="156" rx="10" fill="#1F2430"/>
+  <path d="M60,350 A10,10 0 0 1 70,340 H338 A10,10 0 0 1 348,350 V366 H60 Z" fill="#2A3040"/>
+  <g class="ls g1"><text class="mono" x="72" y="353" dy="0.35em" font-size="12" fill="#9AA3B5" data-fit="264">ProductsScreen · IconButton</text><rect class="an a1" x="68.0" y="373" width="72.8" height="20" rx="5" fill="#0F8478" fill-opacity=".45" stroke="#0F8478" stroke-width="1.5"/><rect class="an a23" x="190.4" y="373" width="58.4" height="20" rx="5" fill="#4453C9" fill-opacity=".45" stroke="#4453C9" stroke-width="1.5"/><rect class="an a23" x="82.4" y="395" width="159.2" height="20" rx="5" fill="#4453C9" fill-opacity=".45" stroke="#4453C9" stroke-width="1.5"/><rect class="an a4" x="82.4" y="417" width="188.0" height="20" rx="5" fill="#0F8478" fill-opacity=".45" stroke="#0F8478" stroke-width="1.5"/><text class="mono" x="72.0" y="388" font-size="12" fill="#E6EAF2" textLength="172.8" lengthAdjust="spacingAndGlyphs" data-fit="268">onPressed: () =&gt; context</text><text class="mono" x="86.4" y="410" font-size="12" fill="#E6EAF2" textLength="151.2" lengthAdjust="spacingAndGlyphs" data-fit="268">.read&lt;ProductsBloc&gt;()</text><text class="mono" x="86.4" y="432" font-size="12" fill="#E6EAF2" textLength="187.2" lengthAdjust="spacingAndGlyphs" data-fit="268">.add(LoadProductsEvent()),</text></g>
+  <g class="an g2"><text class="mono" x="72" y="353" dy="0.35em" font-size="12" fill="#9AA3B5" data-fit="264">ProductsBloc · on&lt;LoadProductsEvent&gt;</text><rect class="an a5" x="82.4" y="395" width="216.8" height="20" rx="5" fill="#3A8235" fill-opacity=".45" stroke="#3A8235" stroke-width="1.5"/><rect class="an a6" x="176.0" y="417" width="116.0" height="20" rx="5" fill="#A96C05" fill-opacity=".45" stroke="#A96C05" stroke-width="1.5"/><rect class="an a7" x="82.4" y="439" width="238.4" height="20" rx="5" fill="#3A8235" fill-opacity=".45" stroke="#3A8235" stroke-width="1.5"/><text class="mono" x="72.0" y="388" font-size="12" fill="#E6EAF2" textLength="201.6" lengthAdjust="spacingAndGlyphs" data-fit="268">_onLoad(event, emit) async {</text><text class="mono" x="86.4" y="410" font-size="12" fill="#E6EAF2" textLength="208.8" lengthAdjust="spacingAndGlyphs" data-fit="268">emit(ProductsLoadingState());</text><text class="mono" x="86.4" y="432" font-size="12" fill="#E6EAF2" textLength="208.8" lengthAdjust="spacingAndGlyphs" data-fit="268">final data = await api.get();</text><text class="mono" x="86.4" y="454" font-size="12" fill="#E6EAF2" textLength="230.4" lengthAdjust="spacingAndGlyphs" data-fit="268">emit(ProductsLoadedState(data));</text><text class="mono" x="72.0" y="476" font-size="12" fill="#E6EAF2" textLength="7.2" lengthAdjust="spacingAndGlyphs" data-fit="268">}</text></g>
+  <g class="an a8"><text class="mono" x="72" y="353" dy="0.35em" font-size="12" fill="#9AA3B5" data-fit="264">ProductsScreen · BlocBuilder</text><rect class="an a8" x="96.8" y="417" width="159.2" height="20" rx="5" fill="#3A8235" fill-opacity=".45" stroke="#3A8235" stroke-width="1.5"/><text class="mono" x="72.0" y="388" font-size="12" fill="#E6EAF2" textLength="194.4" lengthAdjust="spacingAndGlyphs" data-fit="268">builder: (context, state) {</text><text class="mono" x="86.4" y="410" font-size="12" fill="#E6EAF2" textLength="252.0" lengthAdjust="spacingAndGlyphs" data-fit="268">if (state is ProductsLoadedState) {</text><text class="mono" x="100.8" y="432" font-size="12" fill="#E6EAF2" textLength="151.2" lengthAdjust="spacingAndGlyphs" data-fit="268">return ListView(...);</text><text class="mono" x="86.4" y="454" font-size="12" fill="#E6EAF2" textLength="7.2" lengthAdjust="spacingAndGlyphs" data-fit="268">}</text></g>
+  <path class="tree" d="M516,184 V208 M516,248 V272 M516,312 V336 M516,376 V388 M462,400 V388 H570 V400"/>
+  <path d="M620,228 H716" stroke="#4453C9" stroke-width="1.75" stroke-dasharray="4 4" fill="none"/>
+  <text x="660" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#4453C9">guarda</text>
+  <rect x="412" y="144" width="208" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="516" y="164" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="192">MaterialApp</text>
+  <rect x="412" y="208" width="208" height="40" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="2.5"/><text class="mono" x="516" y="228" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="192">BlocProvider</text>
+  <rect x="412" y="272" width="208" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="516" y="292" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="192">ProductsScreen</text>
+  <rect x="412" y="336" width="208" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="516" y="356" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="192">Scaffold</text>
+  <rect x="412" y="400" width="100" height="40" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="462" y="420" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#0F8478" data-fit="84">IconButton</text>
+  <rect x="520" y="400" width="100" height="40" rx="10" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text class="mono" x="570" y="420" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#7439B8" data-fit="84">BlocBuilder</text>
+  <rect x="424" y="262" width="68" height="20" rx="10" fill="#4453C9"/>
+  <text class="mono" x="458" y="272" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">context</text>
+  <rect x="716" y="204" width="184" height="48" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="808" y="219" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="168">ProductsBloc</text><text x="808" y="238" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="168">lo guarda el BlocProvider</text>
+  <rect x="724" y="264" width="168" height="32" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="808" y="280" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#0F8478" data-fit="152">on&lt;LoadProductsEvent&gt;</text>
+  <rect x="792" y="388" width="108" height="48" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text class="mono" x="846" y="403" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="92">API</text><text x="846" y="422" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="92">fuera de la app</text>
+  <path class="ar-indigo" d="M412,292 H394 V228 H410"/>
+  <path class="ar-teal" d="M462,440 V484 H760 V298"/>
+  <text class="mono" x="808" y="506" text-anchor="middle" font-size="12" font-weight="600" fill="#0F8478" data-fit="196">.add(LoadProductsEvent())</text>
+  <path class="ar-green" d="M716,244 H668 V420 H622"/>
+  <text class="mono" x="662" y="300" text-anchor="end" font-size="12" font-weight="600" fill="#3A8235">emit</text>
+  <path class="ar-amber" d="M828,298 V386"/><path class="ar-amber" d="M864,388 V298"/>
+  <text class="mono" x="820" y="372" text-anchor="end" font-size="12" font-weight="600" fill="#A96C05">GET</text>
+  <text class="mono" x="872" y="372" font-size="12" font-weight="600" fill="#A96C05">JSON</text>
+  <circle cx="412" cy="400" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="412" y="400" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">1</text>
+  <circle cx="620" cy="272" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="620" y="272" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">2</text>
+  <circle cx="394" cy="260" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="394" y="260" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text>
+  <circle cx="760" cy="440" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="760" y="440" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">4</text>
+  <circle cx="892" cy="264" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="892" y="264" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">5</text>
+  <circle cx="846" cy="340" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="846" y="340" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">6</text>
+  <circle cx="668" cy="348" r="12" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="668" y="348" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235">7</text>
+  <circle cx="620" cy="400" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="620" y="400" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">8</text>
+  <circle class="an a1" cx="324" cy="166" r="16" fill="none" stroke="#0F8478" stroke-width="3"/>
+  <circle class="an tap" cx="324" cy="166" r="24" fill="#0F8478" fill-opacity=".35" stroke="#0F8478" stroke-width="2"/>
+  <rect class="an a1" x="406" y="394" width="112" height="52" rx="14" fill="none" stroke="#0F8478" stroke-width="3"/>
+  <rect class="an a2" x="406" y="254" width="220" height="64" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <rect class="an a33" x="406" y="202" width="220" height="52" rx="14" fill="none" stroke="#A96C05" stroke-width="3"/>
+  <rect class="an a33" x="710" y="198" width="196" height="60" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <rect class="an a5" x="718" y="258" width="180" height="44" rx="14" fill="none" stroke="#0F8478" stroke-width="3"/>
+  <rect class="an a5" x="710" y="198" width="196" height="60" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <rect class="an a6" x="786" y="382" width="120" height="60" rx="14" fill="none" stroke="#A96C05" stroke-width="3"/>
+  <rect class="an a6" x="718" y="258" width="180" height="44" rx="14" fill="none" stroke="#0F8478" stroke-width="3"/>
+  <rect class="an a7" x="710" y="198" width="196" height="60" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <rect class="an a8" x="514" y="394" width="112" height="52" rx="14" fill="none" stroke="#7439B8" stroke-width="3"/>
+  <path class="an a33" d="M626,228 H710" stroke="#4453C9" stroke-width="3.5" fill="none"/>
+  <circle class="an tk1" cx="412" cy="292" r="8" fill="#4453C9" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tk2" cx="462" cy="440" r="8" fill="#0F8478" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tkL" cx="716" cy="244" r="8" fill="#3A8235" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tkG" cx="828" cy="298" r="8" fill="#A96C05" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tkJ" cx="864" cy="388" r="8" fill="#A96C05" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tkE" cx="716" cy="244" r="8" fill="#3A8235" stroke="#FFFFFF" stroke-width="2"/>
   <rect x="48" y="536" width="864" height="56" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-  <g class="an a1"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">1</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El usuario toca el botón.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">Se ejecuta el onPressed del IconButton.</text></g>
+  <g class="an a1"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">1</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El usuario toca el botón de recargar.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">En el árbol es el IconButton: se ejecuta su onPressed.</text></g>
   <g class="an a2"><circle cx="76" cy="564" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">2</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El código usa context.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">Es el de ProductsScreen: el onPressed está escrito dentro de su build.</text></g>
   <g class="an a3"><circle cx="76" cy="564" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">context.read&lt;ProductsBloc&gt;() sube por el árbol desde ahí.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">Encuentra el BlocProvider y devuelve el ProductsBloc que guarda.</text></g>
   <g class="an a4"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">4</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">.add(LoadProductsEvent()) le entrega el evento a ese Bloc.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">El evento sale de la vista y entra a la capa de Bloc.</text></g>
-  <g class="an a5"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">5</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El Bloc lo atiende en su on&lt;LoadProductsEvent&gt;.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">La vista no hace nada más: espera el estado nuevo.</text></g>
-  <g class="st"><text x="68" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="820">Una sola línea hace dos cosas: read busca el Bloc hacia arriba y add le entrega el evento.</text><text x="68" y="577" font-size="13" fill="#454C61" data-fit="820">Los números marcan el orden: toque, context, búsqueda, evento y manejador.</text></g>
+  <g class="an a5"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">5</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El Bloc atiende el evento en su on&lt;LoadProductsEvent&gt; y emite ProductsLoadingState.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">BlocBuilder lo recibe y la pantalla muestra la carga.</text></g>
+  <g class="an a6"><circle cx="76" cy="564" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">6</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El Bloc consigue los datos: hace un HTTP GET a la API y espera la respuesta.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">La vista no se entera de esta parte.</text></g>
+  <g class="an a7"><circle cx="76" cy="564" r="12" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235">7</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">Con la respuesta, el Bloc emite ProductsLoadedState con los productos.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">El estado baja hasta el BlocBuilder, que está debajo del mismo BlocProvider.</text></g>
+  <g class="an a8"><circle cx="76" cy="564" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">8</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">BlocBuilder ejecuta builder con ese estado y devuelve la lista.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">La pantalla muestra los productos nuevos.</text></g>
+  <g class="st"><text x="68" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="820">El evento sube al Bloc con context.read y add; la respuesta baja como estado hasta el BlocBuilder.</text><text x="68" y="577" font-size="13" fill="#454C61" data-fit="820">Los números marcan el orden de los ocho pasos.</text></g>
   <text class="foot" x="48" y="620" data-fit="860">La vista nunca recibe el Bloc por constructor: lo alcanza a través del context cada vez que lo necesita.</text>
 </svg>
 ```

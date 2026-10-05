@@ -303,95 +303,147 @@ def bp_init_state(freeze=None):
 FIGS['bpInitState'] = bp_init_state
 
 
+def travel(fid, name, t0, pts, t1):
+    first, last = pts[0][1], pts[-1][1]
+    body = f'0%,{t0}%{{opacity:0;transform:translate({first})}}'
+    body += ''.join(f'{t}%{{opacity:1;transform:translate({xy})}}' for t, xy in pts)
+    body += f'{t1}%,100%{{opacity:0;transform:translate({last})}}'
+    return f'      #{fid} .{name}{{animation-name:{fid}-{name}}}\n      @keyframes {fid}-{name}{{{body}}}\n'
+
+
 def bp_read(freeze=None):
-    """Animada: cinco pasos de 3 s, del toque al evento. Con freeze=1..5 sale el fotograma fijo de ese paso."""
+    """Animada: ocho pasos de 3 s, del toque a la respuesta en pantalla. Con freeze=1..8 sale el fotograma fijo de ese paso."""
     fid, h = 'bpRead', 648
-    s = head(fid, h, 'Del toque al evento: <tspan class="mono">context.read</tspan>', 'Del toque al evento: context.read',
-             'Qué pasa al tocar el botón: el código usa context para subir por el árbol, encuentra el Bloc y le entrega el evento.',
-             'Animación en cinco pasos. Uno: el usuario toca el IconButton y corre su onPressed. Dos: el código usa el context de '
-             'ProductsScreen. Tres: context.read de ProductsBloc sube por el árbol hasta el BlocProvider y devuelve el ProductsBloc que '
-             'guarda. Cuatro: add le entrega LoadProductsEvent, que sale de la vista y entra a la capa de Bloc. Cinco: el Bloc lo atiende '
-             'en su manejador on de LoadProductsEvent.',
-             colors=('indigo', 'teal'))
-    steps = {1: [(0, 20)], 2: [(20, 40)], 3: [(40, 60)], 4: [(60, 80)], 5: [(80, 100)], 23: [(20, 60)], 33: [(50, 60)]}
+    s = head(fid, h, 'Del toque a la respuesta: <tspan class="mono">context.read</tspan>', 'Del toque a la respuesta: context.read',
+             'Al tocar el botón, el evento llega al Bloc con context.read; el Bloc consigue los datos y la respuesta vuelve a la pantalla.',
+             'Animación en ocho pasos y tres columnas: lo que se ve con el código que se ejecuta, el árbol de widgets y la capa de Bloc. '
+             'Uno: el usuario toca el IconButton y corre su onPressed. Dos: el código usa el context de ProductsScreen. Tres: '
+             'context.read de ProductsBloc sube por el árbol hasta el BlocProvider y devuelve el ProductsBloc que guarda. Cuatro: add '
+             'le entrega LoadProductsEvent. Cinco: el Bloc lo atiende y emite ProductsLoadingState, y la pantalla muestra la carga. '
+             'Seis: el Bloc hace un HTTP GET a la API. Siete: con la respuesta emite ProductsLoadedState. Ocho: BlocBuilder ejecuta '
+             'builder y la pantalla muestra los productos nuevos.',
+             colors=('indigo', 'teal', 'green', 'amber'))
+    spans = {f'a{k}': [((k - 1) * 12.5, k * 12.5)] for k in range(1, 9)}
+    spans.update({'a23': [(12.5, 37.5)], 'a33': [(31, 37.5)], 'g1': [(0, 50)], 'g2': [(50, 87.5)]})
     if freeze:
-        on = {1: ['a1'], 2: ['a2', 'a23'], 3: ['a3', 'a23', 'a33'], 4: ['a4', 'tk2'], 5: ['a5']}[freeze]
-        css = f'      #{fid} .an,#{fid} .st{{opacity:0}}\n' + ''.join(f'      #{fid} .{c}{{opacity:1}}\n' for c in on)
-        css += f'      #{fid} .tk2{{transform:translate(432px,-90px)}}\n'
+        on = {1: ['a1', 'g1'], 2: ['a2', 'a23', 'g1'], 3: ['a3', 'a23', 'a33', 'g1'], 4: ['a4', 'g1', 'tk2'],
+              5: ['a5', 'g2', 'tkL'], 6: ['a6', 'g2', 'tkG'], 7: ['a7', 'g2', 'tkE'], 8: ['a8']}[freeze]
+        css = f'      #{fid} .an,#{fid} .st,#{fid} .ls{{opacity:0}}\n' + ''.join(f'      #{fid} .{c}{{opacity:1}}\n' for c in on)
+        css += (f'      #{fid} .tk2{{transform:translate(298px,-40px)}}\n      #{fid} .tkL,#{fid} .tkE{{transform:translate(-48px,90px)}}\n'
+                f'      #{fid} .tkG{{transform:translate(0,44px)}}\n')
     else:
-        css = (f'      #{fid} .an{{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
-               f'      #{fid} .st{{animation:{fid}-hide 15s linear infinite}}\n')
-        for k, spans in steps.items():
-            css += f'      #{fid} .a{k}{{animation-name:{fid}-a{k}}}\n' + keyframes(f'{fid}-a{k}', spans)
+        css = (f'      #{fid} .an,#{fid} .ls,#{fid} .st{{animation-duration:24s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
+               f'      #{fid} .an{{opacity:0}}\n      #{fid} .st{{animation-name:{fid}-hide}}\n'
+               f'      #{fid} .spin{{animation:{fid}-spin 1s linear infinite;transform-box:fill-box;transform-origin:center}}\n'
+               f'      @keyframes {fid}-spin{{to{{transform:rotate(360deg)}}}}\n')
+        for k, sp in spans.items():
+            css += f'      #{fid} .{k}{{animation-name:{fid}-{k}}}\n' + keyframes(f'{fid}-{k}', sp)
         css += (f'      #{fid} .tap{{animation-name:{fid}-tap;transform-box:fill-box;transform-origin:center}}\n'
-                f'      #{fid} .tk1{{animation-name:{fid}-tk1}}\n      #{fid} .tk2{{animation-name:{fid}-tk2}}\n'
-                f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
-                f'      @keyframes {fid}-tap{{0%,2%{{opacity:0;transform:scale(.3)}}4%{{opacity:.9;transform:scale(.3)}}'
-                f'10%{{opacity:0;transform:scale(1.5)}}11%{{opacity:.9;transform:scale(.3)}}17%,100%{{opacity:0;transform:scale(1.5)}}}}\n'
-                f'      @keyframes {fid}-tk1{{0%,41%{{opacity:0;transform:translate(0,0)}}43%{{opacity:1;transform:translate(0,0)}}'
-                f'45%{{opacity:1;transform:translate(-24px,0)}}49%{{opacity:1;transform:translate(-24px,-64px)}}'
-                f'51%{{opacity:1;transform:translate(0,-64px)}}53%,100%{{opacity:0;transform:translate(0,-64px)}}}}\n'
-                f'      @keyframes {fid}-tk2{{0%,62%{{opacity:0;transform:translate(0,0)}}64%{{opacity:1;transform:translate(0,0)}}'
-                f'72%{{opacity:1;transform:translate(432px,0)}}76%{{opacity:1;transform:translate(432px,-186px)}}'
-                f'78%,100%{{opacity:0;transform:translate(432px,-186px)}}}}\n'
-                f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .st{{animation:none}}}}\n')
+                f'      @keyframes {fid}-tap{{0%,1%{{opacity:0;transform:scale(.3)}}2%{{opacity:.9;transform:scale(.3)}}'
+                f'6%{{opacity:0;transform:scale(1.5)}}6.5%{{opacity:.9;transform:scale(.3)}}10.5%,100%{{opacity:0;transform:scale(1.5)}}}}\n')
+        css += travel(fid, 'tk1', 25.5, [(26.5, '0,0'), (27.5, '-18px,0'), (30, '-18px,-64px'), (31, '0,-64px')], 32)
+        css += travel(fid, 'tk2', 38, [(39, '0,0'), (40.5, '0,44px'), (45, '298px,44px'), (48, '298px,-142px')], 49)
+        css += travel(fid, 'tkL', 52, [(53, '0,0'), (54.5, '-48px,0'), (58, '-48px,176px'), (59.5, '-94px,176px')], 60.5)
+        css += travel(fid, 'tkG', 63, [(64, '0,0'), (67.5, '0,88px')], 68.5)
+        css += travel(fid, 'tkJ', 68, [(69, '0,0'), (72.5, '0,-90px')], 73.5)
+        css += travel(fid, 'tkE', 77, [(78, '0,0'), (79.5, '-48px,0'), (83, '-48px,176px'), (84.5, '-94px,176px')], 85.5)
+        css += (f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
+                f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .ls,#{fid} .st,#{fid} .spin{{animation:none}}}}\n')
     s = s.replace('    </style>', css + '    </style>', 1)
-    ind, teal = FAM['indigo'][2], FAM['teal'][2]
+    ind, teal, green, amber = (FAM[c][2] for c in ('indigo', 'teal', 'green', 'amber'))
 
-    s += '  <rect x="48" y="104" width="312" height="416" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
-    s += '  <text class="h" x="64" y="126" data-fit="280">VISTA · ÁRBOL DE WIDGETS</text>\n'
-    s += '  <rect x="624" y="152" width="288" height="160" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
-    s += '  <text class="h" x="640" y="174" data-fit="256">CAPA DE BLOC</text>\n'
-    tree = [('MaterialApp', 'slate'), ('BlocProvider', 'amber'), ('ProductsScreen', 'slate'), ('Scaffold', 'slate'),
-            ('AppBar', 'slate'), ('IconButton', 'teal')]
-    s += '  <path class="tree" d="' + ' '.join(f'M216,{184 + i*64} V{208 + i*64}' for i in range(5)) + '"/>\n'
-    s += f'  <path d="M336,228 H648" stroke="{ind}" stroke-width="1.75" stroke-dasharray="4 4" fill="none"/>\n'
-    s += f'  <text x="492" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="{ind}">guarda</text>\n'
-    for i, (name, color) in enumerate(tree):
-        s += '  ' + box(96, 144 + i*64, 240, 40, color, name, hero=name == 'BlocProvider')
-    s += f'  <rect x="108" y="262" width="68" height="20" rx="10" fill="{ind}"/>\n'
-    s += '  <text class="mono" x="142" y="272" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">context</text>\n'
-    s += '  ' + box(648, 204, 240, 48, 'indigo', 'ProductsBloc', sub='la instancia que guarda el provider')
-    s += '  ' + box(672, 264, 192, 32, 'teal', 'on&lt;LoadProductsEvent&gt;', fs=12.5)
-    s += '  <path class="ar-indigo" d="M96,292 H72 V228 H94"/>\n'
-    s += '  <path class="ar-teal" d="M336,484 H768 V298"/>\n'
-    s += f'  <text class="mono" x="552" y="474" text-anchor="middle" font-size="12.5" font-weight="600" fill="{teal}" data-fit="280">.add(LoadProductsEvent())</text>\n'
-    s += f'  <text x="552" y="504" text-anchor="middle" font-size="12" fill="#454C61" data-fit="380">el evento sale de la vista y entra a la capa de Bloc</text>\n'
-    s += '  ' + chip(336, 464, 1, 'teal') + '  ' + chip(336, 272, 2, 'indigo') + '  ' + chip(72, 260, 3, 'indigo')
-    s += '  ' + chip(768, 400, 4, 'teal') + '  ' + chip(864, 264, 5, 'teal')
+    for x, w, label in ((48, 312, 'LO QUE SE VE'), (376, 256, 'VISTA · ÁRBOL DE WIDGETS'), (704, 208, 'CAPA DE BLOC')):
+        s += f'  <rect x="{x}" y="104" width="{w}" height="416" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+        s += f'  <text class="h" x="{x+16}" y="128" data-fit="{w-32}">{label}</text>\n'
 
-    s += '  <text class="h" x="384" y="336" data-fit="336">EL CÓDIGO DEL BOTÓN</text>\n'
-    s += '  <rect x="384" y="348" width="336" height="100" rx="10" fill="#1F2430"/>\n'
-    hl = [('a1', 400, 357, 78, teal), ('a23', 532, 357, 62, ind), ('a23', 431, 381, 172, ind), ('a4', 431, 405, 203, teal)]
-    for cls, x, y, w, color in hl:
-        s += f'  <rect class="an {cls}" x="{x}" y="{y}" width="{w}" height="22" rx="5" fill="{color}" fill-opacity=".45" stroke="{color}" stroke-width="1.5"/>\n'
-    code = [(404, 'onPressed: () =&gt; context'), (435.2, '.read&lt;ProductsBloc&gt;()'), (435.2, '.add(LoadProductsEvent()),')]
-    for i, (x, line) in enumerate(code):
-        s += f'  <text class="mono" x="{x}" y="{373 + i*24}" font-size="13" fill="#E6EAF2" data-fit="300">{line}</text>\n'
+    s += '  ' + phone(60, 144, 288, 152, 'Catálogo')
+    s += f'  <circle cx="324" cy="166" r="12" fill="{FAM["teal"][0]}" stroke="{FAM["teal"][1]}" stroke-width="1.5"/>\n'
+    s += f'  <path d="M329,166 A5,5 0 1 1 326.5,161.7" fill="none" stroke="{teal}" stroke-width="1.75" stroke-linecap="round"/>\n'
+    s += f'  <path d="M324.2,158.6 L327.4,161.9 L323,163.2 Z" fill="{teal}"/>\n'
+    s += '  <g class="ls g1">' + rows(72, 196, 264, PRODUCTS, gap=32).strip() + '</g>\n'
+    s += '  <g class="an g2"><g class="spin">' + spinner(204, 244, r=16).strip() + '</g></g>\n'
+    s += ('  <g class="an a8">' + rows(72, 196, 264, ['Pan'], color='green').strip() +
+          rows(72, 228, 264, PRODUCTS[:2], gap=32).strip() + '</g>\n')
 
-    s += f'  <rect class="an a1" x="90" y="458" width="252" height="52" rx="14" fill="none" stroke="{teal}" stroke-width="3"/>\n'
-    s += f'  <circle class="an tap" cx="216" cy="484" r="26" fill="{teal}" fill-opacity=".35" stroke="{teal}" stroke-width="2"/>\n'
-    s += f'  <rect class="an a2" x="90" y="254" width="252" height="64" rx="14" fill="none" stroke="{ind}" stroke-width="3"/>\n'
-    s += f'  <rect class="an a33" x="90" y="202" width="252" height="52" rx="14" fill="none" stroke="{FAM["amber"][2]}" stroke-width="3"/>\n'
-    s += f'  <path class="an a33" d="M342,228 H642" stroke="{ind}" stroke-width="3.5" fill="none"/>\n'
-    s += f'  <rect class="an a33" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="{ind}" stroke-width="3"/>\n'
-    s += f'  <rect class="an a5" x="666" y="258" width="204" height="44" rx="12" fill="none" stroke="{teal}" stroke-width="3"/>\n'
-    s += f'  <rect class="an a5" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="{ind}" stroke-width="3"/>\n'
-    s += f'  <circle class="an tk1" cx="96" cy="292" r="8" fill="{ind}" stroke="#FFFFFF" stroke-width="2"/>\n'
-    s += f'  <circle class="an tk2" cx="336" cy="484" r="8" fill="{teal}" stroke="#FFFFFF" stroke-width="2"/>\n'
+    s += '  <text class="h" x="64" y="328" data-fit="280">EL CÓDIGO QUE SE EJECUTA</text>\n'
+    s += '  <rect x="60" y="340" width="288" height="156" rx="10" fill="#1F2430"/>\n'
+    s += '  <path d="M60,350 A10,10 0 0 1 70,340 H338 A10,10 0 0 1 348,350 V366 H60 Z" fill="#2A3040"/>\n'
+    panes = [('ls g1', 'ProductsScreen · IconButton',
+              ['onPressed: () => context', '  .read<ProductsBloc>()', '  .add(LoadProductsEvent()),'],
+              [('a1', 0, 'onPressed', teal), ('a23', 0, 'context', ind), ('a23', 1, '.read<ProductsBloc>()', ind),
+               ('a4', 2, '.add(LoadProductsEvent())', teal)]),
+             ('an g2', 'ProductsBloc · on<LoadProductsEvent>',
+              ['_onLoad(event, emit) async {', '  emit(ProductsLoadingState());', '  final data = await api.get();',
+               '  emit(ProductsLoadedState(data));', '}'],
+              [('a5', 1, 'emit(ProductsLoadingState());', green), ('a6', 2, 'await api.get()', amber),
+               ('a7', 3, 'emit(ProductsLoadedState(data));', green)]),
+             ('an a8', 'ProductsScreen · BlocBuilder',
+              ['builder: (context, state) {', '  if (state is ProductsLoadedState) {', '    return ListView(...);', '  }'],
+              [('a8', 2, 'return ListView(...);', green)])]
+    for cls, tab, lines, marks in panes:
+        s += f'  <g class="{cls}"><text class="mono" x="72" y="353" dy="0.35em" font-size="12" fill="#9AA3B5" data-fit="264">{tab.replace("<", "&lt;").replace(">", "&gt;")}</text>'
+        for mcls, row, find, color in marks:
+            col = lines[row].index(find)
+            s += (f'<rect class="an {mcls}" x="{72 + col*7.2 - 4:.1f}" y="{373 + row*22}" width="{len(find)*7.2 + 8:.1f}" height="20" rx="5" '
+                  f'fill="{color}" fill-opacity=".45" stroke="{color}" stroke-width="1.5"/>')
+        for i, line in enumerate(lines):
+            indent = len(line) - len(line.lstrip())
+            text = line.strip()
+            s += (f'<text class="mono" x="{72 + indent*7.2:.1f}" y="{388 + i*22}" font-size="12" fill="#E6EAF2" textLength="{len(text)*7.2:.1f}" '
+                  f'lengthAdjust="spacingAndGlyphs" data-fit="268">{text.replace("<", "&lt;").replace(">", "&gt;")}</text>')
+        s += '</g>\n'
+
+    s += '  <path class="tree" d="M516,184 V208 M516,248 V272 M516,312 V336 M516,376 V388 M462,400 V388 H570 V400"/>\n'
+    s += f'  <path d="M620,228 H716" stroke="{ind}" stroke-width="1.75" stroke-dasharray="4 4" fill="none"/>\n'
+    s += f'  <text x="660" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="{ind}">guarda</text>\n'
+    for i, (name, color) in enumerate([('MaterialApp', 'slate'), ('BlocProvider', 'amber'), ('ProductsScreen', 'slate'), ('Scaffold', 'slate')]):
+        s += '  ' + box(412, 144 + i*64, 208, 40, color, name, hero=name == 'BlocProvider')
+    s += '  ' + box(412, 400, 100, 40, 'teal', 'IconButton', fs=12) + '  ' + box(520, 400, 100, 40, 'violet', 'BlocBuilder', fs=12)
+    s += f'  <rect x="424" y="262" width="68" height="20" rx="10" fill="{ind}"/>\n'
+    s += '  <text class="mono" x="458" y="272" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">context</text>\n'
+    s += '  ' + box(716, 204, 184, 48, 'indigo', 'ProductsBloc', sub='lo guarda el BlocProvider')
+    s += '  ' + box(724, 264, 168, 32, 'teal', 'on&lt;LoadProductsEvent&gt;', fs=12)
+    s += '  ' + box(792, 388, 108, 48, 'amber', 'API', sub='fuera de la app')
+    s += '  <path class="ar-indigo" d="M412,292 H394 V228 H410"/>\n'
+    s += '  <path class="ar-teal" d="M462,440 V484 H760 V298"/>\n'
+    s += f'  <text class="mono" x="808" y="506" text-anchor="middle" font-size="12" font-weight="600" fill="{teal}" data-fit="196">.add(LoadProductsEvent())</text>\n'
+    s += '  <path class="ar-green" d="M716,244 H668 V420 H622"/>\n'
+    s += f'  <text class="mono" x="662" y="300" text-anchor="end" font-size="12" font-weight="600" fill="{green}">emit</text>\n'
+    s += '  <path class="ar-amber" d="M828,298 V386"/><path class="ar-amber" d="M864,388 V298"/>\n'
+    s += f'  <text class="mono" x="820" y="372" text-anchor="end" font-size="12" font-weight="600" fill="{amber}">GET</text>\n'
+    s += f'  <text class="mono" x="872" y="372" font-size="12" font-weight="600" fill="{amber}">JSON</text>\n'
+    for x, y, n, color in ((412, 400, 1, 'teal'), (620, 272, 2, 'indigo'), (394, 260, 3, 'indigo'), (760, 440, 4, 'teal'),
+                           (892, 264, 5, 'teal'), (846, 340, 6, 'amber'), (668, 348, 7, 'green'), (620, 400, 8, 'violet')):
+        s += '  ' + chip(x, y, n, color)
+
+    s += f'  <circle class="an a1" cx="324" cy="166" r="16" fill="none" stroke="{teal}" stroke-width="3"/>\n'
+    s += f'  <circle class="an tap" cx="324" cy="166" r="24" fill="{teal}" fill-opacity=".35" stroke="{teal}" stroke-width="2"/>\n'
+    rings = [('a1', 406, 394, 112, 52, teal), ('a2', 406, 254, 220, 64, ind), ('a33', 406, 202, 220, 52, amber),
+             ('a33', 710, 198, 196, 60, ind), ('a5', 718, 258, 180, 44, teal), ('a5', 710, 198, 196, 60, ind),
+             ('a6', 786, 382, 120, 60, amber), ('a6', 718, 258, 180, 44, teal), ('a7', 710, 198, 196, 60, ind),
+             ('a8', 514, 394, 112, 52, FAM['violet'][2])]
+    for cls, x, y, w, hh, color in rings:
+        s += f'  <rect class="an {cls}" x="{x}" y="{y}" width="{w}" height="{hh}" rx="14" fill="none" stroke="{color}" stroke-width="3"/>\n'
+    s += f'  <path class="an a33" d="M626,228 H710" stroke="{ind}" stroke-width="3.5" fill="none"/>\n'
+    for cls, cx, cy, color in (('tk1', 412, 292, ind), ('tk2', 462, 440, teal), ('tkL', 716, 244, green), ('tkG', 828, 298, amber),
+                               ('tkJ', 864, 388, amber), ('tkE', 716, 244, green)):
+        s += f'  <circle class="an {cls}" cx="{cx}" cy="{cy}" r="8" fill="{color}" stroke="#FFFFFF" stroke-width="2"/>\n'
 
     s += '  <rect x="48" y="536" width="864" height="56" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
-    caps = [(1, 'teal', 'El usuario toca el botón.', 'Se ejecuta el onPressed del IconButton.'),
+    caps = [(1, 'teal', 'El usuario toca el botón de recargar.', 'En el árbol es el IconButton: se ejecuta su onPressed.'),
             (2, 'indigo', 'El código usa context.', 'Es el de ProductsScreen: el onPressed está escrito dentro de su build.'),
             (3, 'indigo', 'context.read&lt;ProductsBloc&gt;() sube por el árbol desde ahí.', 'Encuentra el BlocProvider y devuelve el ProductsBloc que guarda.'),
             (4, 'teal', '.add(LoadProductsEvent()) le entrega el evento a ese Bloc.', 'El evento sale de la vista y entra a la capa de Bloc.'),
-            (5, 'teal', 'El Bloc lo atiende en su on&lt;LoadProductsEvent&gt;.', 'La vista no hace nada más: espera el estado nuevo.')]
+            (5, 'teal', 'El Bloc atiende el evento en su on&lt;LoadProductsEvent&gt; y emite ProductsLoadingState.', 'BlocBuilder lo recibe y la pantalla muestra la carga.'),
+            (6, 'amber', 'El Bloc consigue los datos: hace un HTTP GET a la API y espera la respuesta.', 'La vista no se entera de esta parte.'),
+            (7, 'green', 'Con la respuesta, el Bloc emite ProductsLoadedState con los productos.', 'El estado baja hasta el BlocBuilder, que está debajo del mismo BlocProvider.'),
+            (8, 'violet', 'BlocBuilder ejecuta builder con ese estado y devuelve la lista.', 'La pantalla muestra los productos nuevos.')]
     for n, color, l1, l2 in caps:
         s += (f'  <g class="an a{n}">' + chip(76, 564, n, color).strip() +
               f'<text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">{l1}</text>'
               f'<text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">{l2}</text></g>\n')
-    s += ('  <g class="st"><text x="68" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="820">Una sola línea hace dos cosas: read busca el Bloc hacia arriba y add le entrega el evento.</text>'
-          '<text x="68" y="577" font-size="13" fill="#454C61" data-fit="820">Los números marcan el orden: toque, context, búsqueda, evento y manejador.</text></g>\n')
+    s += ('  <g class="st"><text x="68" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="820">El evento sube al Bloc con context.read y add; la respuesta baja como estado hasta el BlocBuilder.</text>'
+          '<text x="68" y="577" font-size="13" fill="#454C61" data-fit="820">Los números marcan el orden de los ocho pasos.</text></g>\n')
     return s + tail(h, 'La vista nunca recibe el Bloc por constructor: lo alcanza a través del context cada vez que lo necesita.')
 
 
