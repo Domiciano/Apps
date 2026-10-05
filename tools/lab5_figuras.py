@@ -188,7 +188,7 @@ def l5_ruta():
              'Mapa de capas con los once pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase '
              'en el 3, ProfileRepository en el 11. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, '
              'ProfileRepositoryImpl en el 11. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen '
-             'en el 8, y la navegación entre las dos pantallas en el 9. En Supabase, la tabla profiles se crea en el paso 10.')
+             'en el 8, y la navegación entre las dos pantallas en el 9. En Supabase, la tabla profiles se revisa en el paso 10.')
     s += band(104, 104, 'violet', 'PRESENTACIÓN', 'Pantallas y Bloc')
     s += band(224, 184, 'amber', 'DOMINIO', 'Reglas y contratos')
     s += band(424, 168, 'teal', 'DATOS', 'Habla con Supabase')
@@ -218,7 +218,7 @@ def l5_ruta():
     s += '  ' + box(720, 630, 176, 44, 'slate', 'tabla profiles', mono=False)
     s += '  ' + chip(726, 632, 10)
     s += '  ' + chip(556, 162, 9)
-    return s + tail(h, 'El paso 9 es la navegación entre las dos pantallas. El 10 crea la tabla en Supabase y el 11 la usa desde la app.')
+    return s + tail(h, 'El paso 9 es la navegación entre las dos pantallas. El 10 revisa la tabla en Supabase y el 11 la usa desde la app.')
 
 
 FIGS['l5Ruta'] = l5_ruta
@@ -352,7 +352,7 @@ def l5_tabla():
         return o
 
     s += table(96, 'slate', 'auth.users', 'la maneja Supabase Auth', [('id', 'uuid', 'PK'), ('email', 'text', ''), ('…', '', '')])
-    s += table(568, 'indigo', 'profiles', 'la creas tú', [('id', 'uuid', 'PK · FK'), ('username', 'text', '')])
+    s += table(568, 'indigo', 'profiles', 'la creaste tú', [('id', 'uuid', 'PK · FK'), ('username', 'text', '')])
     s += '  <path class="link" d="M568,180 H394"/>\n'
     s += '  <text x="480" y="170" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">el mismo id</text>\n'
     s += '  <text x="480" y="200" text-anchor="middle" font-size="12" fill="#454C61">references</text>\n'

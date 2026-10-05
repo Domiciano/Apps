@@ -31,7 +31,7 @@ La respuesta trae un `user` y una `session`, y su combinación dice qué pasó:
 - `res.user != null` y `res.session == null`: el usuario se creó, pero debe confirmar su correo antes de iniciar sesión. Es el comportamiento por defecto de Supabase.
 - Si la contraseña es débil o el correo es inválido, se lanza una `AuthException`. Por eso el `try/catch`. Con la confirmación de correo desactivada, un correo ya registrado lanza `User already registered`; con ella activada, Supabase no revela si el correo ya existía y responde como si fuera nuevo.
 
-La confirmación de correo se activa o desactiva en el panel de Supabase, en `Authentication > Providers > Email`. Mientras pruebas, puedes desactivarla para que `signUp` devuelva la sesión de inmediato.
+En *Configurando los servicios* desactivaste la confirmación de correo, así que `signUp` devuelve la sesión de inmediato. También se puede cambiar en el panel de Supabase, en `Authentication > Providers > Email`.
 
 ## Pantalla de login
 

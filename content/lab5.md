@@ -10,7 +10,7 @@ Vas a construir el registro y el inicio de sesión con `Supabase`, organizados c
 ```svg
 <svg id="l5Ruta" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 760" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Ruta-ttl l5Ruta-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="l5Ruta-ttl">El mapa del laboratorio</title>
-  <desc id="l5Ruta-dsc">Mapa de capas con los once pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase en el 3, ProfileRepository en el 11. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, ProfileRepositoryImpl en el 11. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen en el 8, y la navegación entre las dos pantallas en el 9. En Supabase, la tabla profiles se crea en el paso 10.</desc>
+  <desc id="l5Ruta-dsc">Mapa de capas con los once pasos. Dominio: AuthUser en el paso 1, AuthRepository en el 2, SignInUseCase y SignUpUseCase en el 3, ProfileRepository en el 11. Datos: SupabaseAuthDataSource en el paso 4, AuthRepositoryImpl en el 5, ProfileRepositoryImpl en el 11. Presentación: LoginBloc en el paso 6, LoginScreen en el 7, RegisterBloc y RegisterScreen en el 8, y la navegación entre las dos pantallas en el 9. En Supabase, la tabla profiles se revisa en el paso 10.</desc>
   <defs>
     <style>
       #l5Ruta .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -83,7 +83,7 @@ Vas a construir el registro y el inicio de sesión con `Supabase`, organizados c
   <rect x="720" y="630" width="176" height="44" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="808" y="652" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="160">tabla profiles</text>
   <circle cx="726" cy="632" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="726" y="632" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">10</text>
   <circle cx="556" cy="162" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="556" y="162" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">9</text>
-  <text class="foot" x="48" y="732" data-fit="860">El paso 9 es la navegación entre las dos pantallas. El 10 crea la tabla en Supabase y el 11 la usa desde la app.</text>
+  <text class="foot" x="48" y="732" data-fit="860">El paso 9 es la navegación entre las dos pantallas. El 10 revisa la tabla en Supabase y el 11 la usa desde la app.</text>
 </svg>
 ```
 
@@ -91,7 +91,7 @@ El dominio no sabe que existe Supabase. Si mañana cambia el proveedor, solo se 
 
 ## Preparación
 
-Necesitas un proyecto de Supabase. En `Authentication > Providers > Email` desactiva la confirmación de correo: con ella activada, el usuario recién registrado no puede iniciar sesión.
+Necesitas el proyecto de Supabase de *Instalación de supabase*, con la tabla `profiles` y el Auth por email que dejaste listos en *Configurando los servicios*. Trabaja en el mismo proyecto de Flutter, `moviles_auth`.
 
 ```yaml
 dependencies:
@@ -592,7 +592,7 @@ Un botón en `LoginScreen` lleva a `/register`, y uno en `RegisterScreen` vuelve
   <rect x="568" y="116" width="296" height="124" rx="12" fill="#FFFFFF" stroke="#A9B4F2" stroke-width="2"/>
   <path d="M568,160 V128 A12,12 0 0 1 580,116 H852 A12,12 0 0 1 864,128 V160 Z" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="2"/>
   <text class="mono" x="584" y="138" dy="0.35em" font-size="14" font-weight="700" fill="#4453C9">profiles</text>
-  <text x="848" y="138" dy="0.35em" text-anchor="end" font-size="12" fill="#454C61" data-fit="150">la creas tú</text>
+  <text x="848" y="138" dy="0.35em" text-anchor="end" font-size="12" fill="#454C61" data-fit="150">la creaste tú</text>
   <text class="mono" x="584" y="180" dy="0.35em" font-size="13.5" font-weight="700" fill="#161A26">id</text>
   <text class="mono" x="698" y="180" dy="0.35em" font-size="12.5" fill="#79809A">uuid</text>
   <rect x="780" y="169" width="68" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>
@@ -609,16 +609,7 @@ Un botón en `LoginScreen` lleva a `/register`, y uno en `RegisterScreen` vuelve
 </svg>
 ```
 
-Supabase Auth guarda el correo y la contraseña, pero no el `username`. Para eso creas una tabla propia, cuyo `id` es el mismo de la cuenta. Ejecuta esto en el `SQL Editor` de Supabase:
-
-```sql
-create table profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  username text not null
-);
-```
-
-Una tabla creada por SQL nace con `Row Level Security` desactivado, así que el `insert` del siguiente paso funciona sin políticas.
+Es la tabla que creaste en *Configurando los servicios*, con su permiso y su regla de acceso. Comprueba en el `Table Editor` del dashboard que existe antes de seguir. Si falta, o si le falta el `grant`, el `insert` del siguiente paso falla con `permission denied for table profiles`.
 
 ## Paso 11 · El perfil
 
@@ -628,6 +619,8 @@ Agrega un campo `username` al registro. Ahora registrar son dos pasos, y quien l
 - Extiende `SupabaseAuthDataSource` con el `insert`.
 - Ni el `Bloc` ni el `DataSource` encadenan los dos pasos.
 - Si `createProfile` falla, `SignUpUseCase` atrapa la excepción y decide qué hacer.
+
+El `insert` funciona porque después de `signUp` ya hay una sesión, y la regla de la tabla solo deja escribir la fila cuyo `id` es el UID de quien la inició.
 
 ```dart
 await _client.from('profiles').insert({'id': userId, 'username': username});

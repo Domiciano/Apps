@@ -2,7 +2,7 @@
 
 <!-- tags: supabase_flutter, Supabase.initialize, publishableKey, anonKey obsoleto, Supabase.instance.client, User y Session, WidgetsFlutterBinding.ensureInitialized, Project URL, You must initialize the supabase instance -->
 
-Supabase es una alternativa de código abierto a Firebase que ofrece una base de datos Postgres, autenticación, almacenamiento y mucho más. Esta lección deja la app Flutter conectada a un proyecto de Supabase en la nube. Si prefieres una instancia propia con Docker (self-hosted), el cliente se inicializa igual, con la URL y la clave de esa instancia.
+Supabase es una alternativa de código abierto a Firebase que ofrece una base de datos Postgres, autenticación, almacenamiento y mucho más. Esta lección deja la app Flutter conectada a un proyecto de Supabase en la nube.
 
 ## 1. Configuración del Proyecto en Supabase
 
@@ -10,15 +10,22 @@ Antes de empezar, necesitas una cuenta en Supabase y un proyecto nuevo.
 
 - Ve a [Supabase](https://supabase.com/)
 - Crea una organización
-- Crea un proyecto
-- En el panel de tu proyecto, ve a `Authentication` y asegúrate de que el proveedor de `email` esté habilitado.
+- Crea un proyecto. Al crearlo te pide una contraseña para la base de datos: **guárdala**, la vas a necesitar en la siguiente lección.
+- Si ya tenías un proyecto y aparece pausado, ábrelo y reanúdalo con el botón de restaurar: el plan gratuito pausa los proyectos que llevan tiempo sin uso.
 - Copia dos valores: la `Project URL` y la `publishable key`, que empieza por `sb_publishable_`. La clave está en `Project Settings > API Keys`, y también aparece en el diálogo `Connect` del proyecto. Son las credenciales que usarás en el paso 3.
+- Fíjate en la `Project URL`: tiene la forma `https://abcdefghijklmnopqrst.supabase.co`. Esas veinte letras son el identificador de tu proyecto, y la siguiente lección lo pide.
 
 La `publishable key` reemplaza a la antigua `anon key`. Supabase retira las claves `anon` y `service_role` a finales de 2026, así que un proyecto nuevo debe usar la `publishable key` desde el principio.
 
 ## 2. Instalación de Dependencias
 
-Agrega el paquete `supabase_flutter` a tu archivo `pubspec.yaml` para poder interactuar con Supabase.
+Crea el proyecto de Flutter que vas a usar en toda esta sección, hasta el Laboratorio 5:
+
+```shell
+flutter create --org icesi.edu.co moviles_auth
+```
+
+Agrega el paquete `supabase_flutter` a su archivo `pubspec.yaml`.
 
 ```yaml
 dependencies:
@@ -65,3 +72,5 @@ Los dos objetos que devuelve Supabase Auth:
 - `Session`: una sesión activa (autenticación vigente). Incluye los tokens (`access_token`, `refresh_token`), el tiempo de expiración y una referencia al `User`. Es lo que dice "este usuario ya está autenticado y puede hacer peticiones a la API".
 
 Un usuario puede existir sin sesión: por ejemplo, cuando se registra y todavía debe confirmar su correo. En ese caso `user != null` y `session == null`.
+
+La app ya está conectada, pero el proyecto todavía no tiene dónde guardar los datos de tus usuarios. De eso se encarga la siguiente lección, *Configurando los servicios*.
