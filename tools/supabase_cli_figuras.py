@@ -23,16 +23,16 @@ def sb_pasos():
     fid, h = 'sbPasos', 400
     s = head(fid, h, 'Seis pasos, casi todos en la terminal', 'Seis pasos, casi todos en la terminal',
              'El navegador solo aparece una vez, para autorizar la terminal. Lo demás son comandos.',
-             'Seis pasos en orden: instalar el CLI, iniciar sesión con supabase login, crear el proyecto con supabase projects create, '
+             'Seis pasos en orden: comprobar que hay Node.js, iniciar sesión con supabase login, crear el proyecto con supabase projects create, '
              'obtener la clave con supabase projects api-keys, crear la tabla con supabase db push y configurar el Auth con supabase '
              'config push. Solo el inicio de sesión abre el navegador.')
     steps = [
-        ('slate', 'Instalar el CLI', 'supabase --version', 'Una sola vez por computador.'),
-        ('amber', 'Iniciar sesión', 'supabase login', 'Abre el navegador para autorizar.'),
-        ('indigo', 'Crear el proyecto', 'supabase projects create', 'Te da la URL del proyecto.'),
-        ('indigo', 'Obtener la clave', 'supabase projects api-keys', 'La publishable key para Flutter.'),
-        ('teal', 'Crear la tabla', 'supabase db push', 'Sube el SQL de profiles.'),
-        ('teal', 'Configurar el Auth', 'supabase config push', 'Email activo, sin confirmación.'),
+        ('slate', 'Tener Node.js', 'node --version', 'El CLI se ejecuta con npx.'),
+        ('amber', 'Iniciar sesión', 'npx supabase login', 'Abre el navegador para autorizar.'),
+        ('indigo', 'Crear el proyecto', 'npx supabase projects create', 'Te da la URL del proyecto.'),
+        ('indigo', 'Obtener la clave', 'npx supabase projects api-keys', 'La publishable key para Flutter.'),
+        ('teal', 'Crear la tabla', 'npx supabase db push', 'Sube el SQL de profiles.'),
+        ('teal', 'Configurar el Auth', 'npx supabase config push', 'Email activo, sin confirmación.'),
     ]
     for i, (color, title, cmd, text) in enumerate(steps):
         soft, border, strong = FAM[color]
@@ -56,7 +56,7 @@ def sb_carpetas():
         (0, 'moviles_auth/', 'slate', 'Tu proyecto de Flutter'),
         (1, 'lib/', 'slate', 'El código Dart'),
         (1, 'pubspec.yaml', 'slate', ''),
-        (1, 'supabase/', 'teal', 'La crea supabase init'),
+        (1, 'supabase/', 'teal', 'La crea npx supabase init'),
         (2, 'config.toml', 'teal', 'La configuración del proyecto. Aquí va el Auth'),
         (2, 'migrations/', 'teal', 'Los cambios de la base de datos, en orden'),
         (3, '20261004120000_create_profiles.sql', 'teal', 'El SQL de la tabla profiles'),
