@@ -192,6 +192,98 @@ FIGS['bpAnatomia'] = lambda: frame(dict(
 ))
 
 
+def keyframes(name, spans):
+    pts = {0: 0, 100: 0}
+    for a, b in spans:
+        pts.update({a: 0, a + 2: 1, b - 2: 1, b: 0})
+    body = ' '.join(f'{k}%{{opacity:{v}}}' for k, v in sorted(pts.items()))
+    return f'      @keyframes {name}{{{body}}}\n'
+
+
+def bp_init_state(freeze=None):
+    """Animada: cinco pasos de 3 s. Con freeze=1..5 sale el fotograma fijo de ese paso, para revisarlo."""
+    fid, h = 'bpInitState', 616
+    s = head(fid, h, 'El primer evento sale de <tspan class="mono">initState</tspan>', 'El primer evento sale de initState',
+             'El ciclo de vida de ProductsScreen, paso a paso: initState corre una sola vez y ahí se le pide al Bloc la carga inicial.',
+             'Animación en cinco pasos del ciclo de vida de ProductsScreen. Uno: createState crea el State. Dos: initState corre una '
+             'sola vez y lanza LoadProductsEvent al ProductsBloc con context.read y add. Tres: build dibuja la pantalla con el estado '
+             'inicial. Cuatro: el Bloc emite un estado nuevo y BlocBuilder vuelve a ejecutar builder, ahora con los productos. '
+             'Cinco: dispose, cuando la pantalla sale del árbol.',
+             colors=('teal', 'green'))
+    steps = {1: [(0, 20)], 2: [(20, 40)], 3: [(40, 60)], 4: [(60, 80)], 5: [(80, 100)], 34: [(40, 80)]}
+    if freeze:
+        css = f'      #{fid} .an,#{fid} .st{{opacity:0}}\n      #{fid} .ls{{opacity:{1 if freeze == 4 else 0}}}\n'
+        css += f'      #{fid} .a{freeze}{{opacity:1}}\n'
+        if freeze in (3, 4):
+            css += f'      #{fid} .a34{{opacity:1}}\n'
+        css += f'      #{fid} .tk1{{transform:translate(152px,0)}}\n      #{fid} .tk2{{transform:translate(-200px,52px)}}\n'
+    else:
+        css = (f'      #{fid} .an{{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
+               f'      #{fid} .ls{{animation:{fid}-a4 15s linear infinite}}\n'
+               f'      #{fid} .st{{animation:{fid}-hide 15s linear infinite}}\n')
+        for k, spans in steps.items():
+            css += f'      #{fid} .a{k}{{animation-name:{fid}-a{k}}}\n' + keyframes(f'{fid}-a{k}', spans)
+        css += (f'      #{fid} .tk1{{animation-name:{fid}-tk1}}\n      #{fid} .tk2{{animation-name:{fid}-tk2}}\n'
+                f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
+                f'      @keyframes {fid}-tk1{{0%,23%{{opacity:0;transform:translate(0,0)}}25%{{opacity:1;transform:translate(0,0)}}'
+                f'36%{{opacity:1;transform:translate(304px,0)}}38%,100%{{opacity:0;transform:translate(304px,0)}}}}\n'
+                f'      @keyframes {fid}-tk2{{0%,62%{{opacity:0;transform:translate(0,0)}}64%{{opacity:1;transform:translate(0,0)}}'
+                f'67%{{opacity:1;transform:translate(0,52px)}}76%{{opacity:1;transform:translate(-424px,52px)}}'
+                f'78%,100%{{opacity:0;transform:translate(-424px,52px)}}}}\n'
+                f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .ls,#{fid} .st{{animation:none}}}}\n')
+    s = s.replace('    </style>', css + '    </style>', 1)
+
+    life = [(1, 152, 'slate', 'createState()', 'Flutter crea el State'),
+            (2, 232, 'teal', 'initState()', 'una sola vez'),
+            (3, 312, 'violet', 'build()', 'cada vez que hay que dibujar'),
+            (5, 416, 'slate', 'dispose()', 'al salir del árbol')]
+    s += f'  <text class="h" x="48" y="124" data-fit="288">CICLO DE VIDA DE PRODUCTSSCREEN</text>\n'
+    s += '  <path class="link" d="M212,204 V230"/><path class="link" d="M212,284 V310"/><path class="link" d="M212,364 V414"/>\n'
+    s += '  <text x="226" y="393" font-size="12" fill="#79809A" data-fit="200">mientras siga en el árbol</text>\n'
+    for n, y, color, label, sub in life:
+        s += '  ' + box(88, y, 248, 52, color, label, sub=sub, hero=(n == 2))
+        s += '  ' + chip(60, y + 26, n, color)
+    s += '  ' + note(624, 112, 288, 'teal', 'Por qué en initState', ['Corre una vez, al entrar al árbol.', 'build corre muchas: un add ahí', 'repetiría la carga con cada dibujo.'])
+    s += '  ' + box(640, 230, 240, 56, 'indigo', 'ProductsBloc', sub='guardado en el BlocProvider')
+    s += '  <path class="ar-teal" d="M336,258 H638"/>\n'
+    s += f'  <text class="mono" x="488" y="246" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">context.read&lt;ProductsBloc&gt;()</text>\n'
+    s += f'  <text class="mono" x="488" y="278" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">.add(LoadProductsEvent())</text>\n'
+    s += '  <path class="ar-green" d="M760,286 V338 H338"/>\n'
+    s += '  ' + chip(788, 312, 4, 'green')
+    s += '  <text class="mono" x="548" y="328" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3A8235" data-fit="280">emit(estado nuevo)</text>\n'
+    s += '  <text x="548" y="358" text-anchor="middle" font-size="12" fill="#454C61" data-fit="380">BlocBuilder vuelve a ejecutar builder</text>\n'
+    s += '  <text class="h" x="640" y="376" data-fit="240">LO QUE SE VE</text>\n'
+    s += '  ' + phone(640, 388, 240, 160, 'Catálogo')
+    s += '  <g class="an a3">' + ''.join(
+        f'<rect x="656" y="{440 + i*34}" width="208" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/>'
+        f'<rect x="668" y="{451 + i*34}" width="{w}" height="8" rx="4" fill="#C4CBD8"/>' for i, w in enumerate((96, 132, 72))) + '</g>\n'
+    s += '  <g class="ls">' + rows(656, 440, 208, PRODUCTS, gap=34).strip() + '</g>\n'
+
+    for n, y, color, _, _ in life:
+        cls = 'a34' if n == 3 else f'a{n}'
+        s += f'  <rect class="an {cls}" x="82" y="{y-6}" width="260" height="64" rx="14" fill="none" stroke="{FAM[color][2]}" stroke-width="3"/>\n'
+    s += f'  <rect class="an a4" x="634" y="224" width="252" height="68" rx="14" fill="none" stroke="{FAM["indigo"][2]}" stroke-width="3"/>\n'
+    s += f'  <circle class="an tk1" cx="336" cy="258" r="8" fill="{FAM["teal"][2]}" stroke="#FFFFFF" stroke-width="2"/>\n'
+    s += f'  <circle class="an tk2" cx="760" cy="286" r="8" fill="{FAM["green"][2]}" stroke="#FFFFFF" stroke-width="2"/>\n'
+
+    s += '  <rect x="48" y="492" width="544" height="64" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    caps = [(1, 'slate', 'Flutter crea el State de ProductsScreen.', 'Todavía no hay nada dibujado.'),
+            (2, 'teal', 'initState corre una sola vez y lanza', 'LoadProductsEvent al Bloc que tiene encima.'),
+            (3, 'violet', 'build dibuja la pantalla con el estado inicial,', 'el ProductState() que recibió el Bloc en create.'),
+            (4, 'green', 'El Bloc emite un estado nuevo y la lista se dibuja', 'con los productos. initState no se repite.'),
+            (5, 'slate', 'Al salir de la pantalla corre dispose', 'y el State se descarta.')]
+    for n, color, l1, l2 in caps:
+        s += (f'  <g class="an a{n}">' + chip(76, 524, n, color).strip() +
+              f'<text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">{l1}</text>'
+              f'<text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">{l2}</text></g>\n')
+    s += ('  <g class="st"><text x="68" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="508">initState corre una vez; build, cada vez que llega un estado.</text>'
+          '<text x="68" y="537" font-size="13" fill="#454C61" data-fit="508">Por eso el primer evento se lanza desde initState.</text></g>\n')
+    return s + tail(h, 'El BlocProvider ya está arriba cuando corre initState: por eso context.read encuentra el Bloc.')
+
+
+FIGS['bpInitState'] = bp_init_state
+
+
 def bp_context():
     fid, h = 'bpContext', 520
     s = head(fid, h, '<tspan class="mono">context.read</tspan> busca hacia arriba', 'context.read busca hacia arriba',
