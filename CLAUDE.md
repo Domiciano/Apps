@@ -176,6 +176,14 @@ python3 tools/bloc_figuras.py --inject    # reemplaza cada bloque svg de la lecc
 reglas de estilo (id único que prefija todo selector, fondo claro fijo, `viewBox` de 960)
 están en el `CLAUDE.md` de `SeminarioSoftware`, sección «Estilo de las lecciones».
 
+**Figuras animadas.** Tres de las de la 0089 (`bpInitState`, `bpRead`, `bbEstados`) se animan
+con CSS dentro del propio SVG, por pasos de duración fija. La raíz declara la línea de tiempo
+con `data-steps` y `data-step-seconds`, y con eso el visor (`SvgBlock.jsx`) les pone debajo
+los botones de anterior, reproducir/pausar y siguiente. Toda animación que siga los pasos
+tiene que durar exactamente `pasos × segundos`; los adornos que giran aparte (el indicador de
+carga) llevan su propia duración. Cada función acepta `freeze=N` para sacar el fotograma fijo
+del paso N y revisarlo, y con «reducir movimiento» la figura queda estática y sin botones.
+
 ### Darla de alta en `toc.md`
 
 ```
