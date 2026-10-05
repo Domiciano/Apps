@@ -201,84 +201,102 @@ def keyframes(name, spans):
 
 
 def bp_init_state(freeze=None):
-    """Animada: cinco pasos de 3 s. Con freeze=1..5 sale el fotograma fijo de ese paso, para revisarlo."""
-    fid, h = 'bpInitState', 616
+    """Animada: seis pasos de 3 s en tres columnas. Con freeze=1..6 sale el fotograma fijo de ese paso."""
+    fid, h = 'bpInitState', 600
     s = head(fid, h, 'El primer evento sale de <tspan class="mono">initState</tspan>', 'El primer evento sale de initState',
              'El ciclo de vida de ProductsScreen, paso a paso: initState corre una sola vez y ahí se le pide al Bloc la carga inicial.',
-             'Animación en cinco pasos del ciclo de vida de ProductsScreen. Uno: createState crea el State. Dos: initState corre una '
-             'sola vez y lanza LoadProductsEvent al ProductsBloc con context.read y add. Tres: build dibuja la pantalla con el estado '
-             'inicial. Cuatro: el Bloc emite un estado nuevo y BlocBuilder vuelve a ejecutar builder, ahora con los productos. '
-             'Cinco: dispose, cuando la pantalla sale del árbol.',
-             colors=('teal', 'green'))
-    steps = {1: [(0, 20)], 2: [(20, 40)], 3: [(40, 60)], 4: [(60, 80)], 5: [(80, 100)], 34: [(40, 80)]}
+             'Animación en seis pasos y tres columnas: lo que se ve, el ciclo de vida de ProductsScreen y la capa de Bloc. Uno: '
+             'createState crea el State. Dos: initState corre una sola vez y lanza LoadProductsEvent al ProductsBloc con context.read '
+             'y add. Tres: build dibuja la pantalla con el estado inicial. Cuatro: el Bloc consigue los datos con un HTTP GET a la '
+             'API. Cinco: el Bloc emite un estado nuevo y BlocBuilder vuelve a ejecutar builder, ahora con los productos. Seis: '
+             'dispose, cuando la pantalla sale del árbol.',
+             colors=('teal', 'green', 'amber'))
+    spans = {'a1': [(0, 17)], 'a2': [(17, 33)], 'a3': [(33, 50)], 'a4': [(50, 67)], 'a5': [(67, 83)], 'a6': [(83, 100)],
+             'a12': [(0, 33)], 'a34': [(33, 67)], 'a35': [(33, 50), (67, 83)], 'a45': [(50, 83)]}
     if freeze:
-        css = f'      #{fid} .an,#{fid} .st{{opacity:0}}\n      #{fid} .ls{{opacity:{1 if freeze == 4 else 0}}}\n'
-        css += f'      #{fid} .a{freeze}{{opacity:1}}\n'
-        if freeze in (3, 4):
-            css += f'      #{fid} .a34{{opacity:1}}\n'
-        css += f'      #{fid} .tk1{{transform:translate(152px,0)}}\n      #{fid} .tk2{{transform:translate(-200px,52px)}}\n'
-        css += f'      #{fid} .tk{1 if freeze == 2 else 2}{{opacity:{1 if freeze in (2, 4) else 0}}}\n'
+        on = {1: ['a1', 'a12'], 2: ['a2', 'a12', 'tk1'], 3: ['a3', 'a35', 'a34'], 4: ['a4', 'a45', 'a34', 'tkG'],
+              5: ['a5', 'a35', 'a45', 'tk2'], 6: ['a6']}[freeze]
+        css = f'      #{fid} .an,#{fid} .st,#{fid} .ls{{opacity:0}}\n' + ''.join(f'      #{fid} .{c}{{opacity:1}}\n' for c in on)
+        css += (f'      #{fid} .tk1{{transform:translate(119px,0)}}\n      #{fid} .tkG{{transform:translate(0,56px)}}\n'
+                f'      #{fid} .tk2{{transform:translate(-130px,48px)}}\n')
     else:
-        css = (f'      #{fid} .an{{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
-               f'      #{fid} .ls{{animation:{fid}-a4 15s linear infinite}}\n'
-               f'      #{fid} .st{{animation:{fid}-hide 15s linear infinite}}\n')
-        for k, spans in steps.items():
-            css += f'      #{fid} .a{k}{{animation-name:{fid}-a{k}}}\n' + keyframes(f'{fid}-a{k}', spans)
-        css += (f'      #{fid} .tk1{{animation-name:{fid}-tk1}}\n      #{fid} .tk2{{animation-name:{fid}-tk2}}\n'
-                f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
-                f'      @keyframes {fid}-tk1{{0%,23%{{opacity:0;transform:translate(0,0)}}25%{{opacity:1;transform:translate(0,0)}}'
-                f'36%{{opacity:1;transform:translate(304px,0)}}38%,100%{{opacity:0;transform:translate(304px,0)}}}}\n'
-                f'      @keyframes {fid}-tk2{{0%,62%{{opacity:0;transform:translate(0,0)}}64%{{opacity:1;transform:translate(0,0)}}'
-                f'67%{{opacity:1;transform:translate(0,52px)}}76%{{opacity:1;transform:translate(-424px,52px)}}'
-                f'78%,100%{{opacity:0;transform:translate(-424px,52px)}}}}\n'
+        css = (f'      #{fid} .an,#{fid} .ls,#{fid} .st{{animation-duration:18s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
+               f'      #{fid} .an{{opacity:0}}\n      #{fid} .st{{animation-name:{fid}-hide}}\n')
+        for k, sp in spans.items():
+            css += f'      #{fid} .{k}{{animation-name:{fid}-{k}}}\n' + keyframes(f'{fid}-{k}', sp)
+
+        def travel(name, t0, pts, t1):
+            first, last = pts[0][1], pts[-1][1]
+            body = f'0%,{t0}%{{opacity:0;transform:translate({first})}}'
+            body += ''.join(f'{t}%{{opacity:1;transform:translate({xy})}}' for t, xy in pts)
+            body += f'{t1}%,100%{{opacity:0;transform:translate({last})}}'
+            return f'      #{fid} .{name}{{animation-name:{fid}-{name}}}\n      @keyframes {fid}-{name}{{{body}}}\n'
+        css += travel('tk1', 18, [(20, '0,0'), (30, '238px,0')], 32)
+        css += travel('tkG', 51, [(52, '0,0'), (58, '0,112px')], 59)
+        css += travel('tkJ', 58, [(59, '0,0'), (65, '0,-112px')], 66)
+        css += travel('tk2', 68, [(69, '0,0'), (71, '0,48px')], 72).replace(
+            '71%{opacity:1;transform:translate(0,48px)}72%,100%{opacity:0;transform:translate(0,48px)}',
+            '71%{opacity:1;transform:translate(0,48px)}79%{opacity:1;transform:translate(-262px,48px)}'
+            '81%,100%{opacity:0;transform:translate(-262px,48px)}')
+        css += (f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
                 f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .ls,#{fid} .st{{animation:none}}}}\n')
     s = s.replace('    </style>', css + '    </style>', 1)
 
-    life = [(1, 152, 'slate', 'createState()', 'Flutter crea el State'),
-            (2, 232, 'teal', 'initState()', 'una sola vez'),
-            (3, 312, 'violet', 'build()', 'cada vez que hay que dibujar'),
-            (5, 416, 'slate', 'dispose()', 'al salir del árbol')]
-    s += f'  <text class="h" x="48" y="124" data-fit="288">CICLO DE VIDA DE PRODUCTSSCREEN</text>\n'
-    s += '  <path class="link" d="M212,204 V230"/><path class="link" d="M212,284 V310"/><path class="link" d="M212,364 V414"/>\n'
-    s += '  <text x="226" y="393" font-size="12" fill="#79809A" data-fit="200">mientras siga en el árbol</text>\n'
-    for n, y, color, label, sub in life:
-        s += '  ' + box(88, y, 248, 52, color, label, sub=sub, hero=(n == 2))
-        s += '  ' + chip(60, y + 26, n, color)
-    s += '  ' + note(624, 112, 288, 'teal', 'Por qué en initState', ['Corre una vez, al entrar al árbol.', 'build corre muchas: un add ahí', 'repetiría la carga con cada dibujo.'])
-    s += '  ' + box(640, 230, 240, 56, 'indigo', 'ProductsBloc', sub='guardado en el BlocProvider')
-    s += '  <path class="ar-teal" d="M336,258 H638"/>\n'
-    s += f'  <text class="mono" x="488" y="246" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">context.read&lt;ProductsBloc&gt;()</text>\n'
-    s += f'  <text class="mono" x="488" y="278" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">.add(LoadProductsEvent())</text>\n'
-    s += '  <path class="ar-green" d="M760,286 V338 H338"/>\n'
-    s += '  ' + chip(788, 312, 4, 'green')
-    s += '  <text class="mono" x="548" y="328" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3A8235" data-fit="280">emit(estado nuevo)</text>\n'
-    s += '  <text x="548" y="358" text-anchor="middle" font-size="12" fill="#454C61" data-fit="380">BlocBuilder vuelve a ejecutar builder</text>\n'
-    s += '  <text class="h" x="640" y="376" data-fit="240">LO QUE SE VE</text>\n'
-    s += '  ' + phone(640, 388, 240, 160, 'Catálogo')
-    s += '  <g class="an a3">' + ''.join(
-        f'<rect x="656" y="{440 + i*34}" width="208" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/>'
-        f'<rect x="668" y="{451 + i*34}" width="{w}" height="8" rx="4" fill="#C4CBD8"/>' for i, w in enumerate((96, 132, 72))) + '</g>\n'
-    s += '  <g class="ls">' + rows(656, 440, 208, PRODUCTS, gap=34).strip() + '</g>\n'
+    for x, w, label in ((48, 176, 'LO QUE SE VE'), (240, 248, 'CICLO DE VIDA'), (704, 208, 'CAPA DE BLOC')):
+        s += f'  <rect x="{x}" y="104" width="{w}" height="364" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+        s += f'  <text class="h" x="{x+16}" y="128" data-fit="{w-32}">{label}</text>\n'
 
-    for n, y, color, _, _ in life:
-        cls = 'a34' if n == 3 else f'a{n}'
-        s += f'  <rect class="an {cls}" x="82" y="{y-6}" width="260" height="64" rx="14" fill="none" stroke="{FAM[color][2]}" stroke-width="3"/>\n'
-    s += f'  <rect class="an a4" x="634" y="224" width="252" height="68" rx="14" fill="none" stroke="{FAM["indigo"][2]}" stroke-width="3"/>\n'
-    s += f'  <circle class="an tk1" cx="336" cy="258" r="8" fill="{FAM["teal"][2]}" stroke="#FFFFFF" stroke-width="2"/>\n'
-    s += f'  <circle class="an tk2" cx="760" cy="286" r="8" fill="{FAM["green"][2]}" stroke="#FFFFFF" stroke-width="2"/>\n'
+    s += '  ' + phone(60, 144, 152, 168, 'Catálogo')
+    s += '  <g class="an a34">' + ''.join(
+        f'<rect x="72" y="{196 + i*34}" width="128" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/>'
+        f'<rect x="82" y="{207 + i*34}" width="{w}" height="8" rx="4" fill="#C4CBD8"/>' for i, w in enumerate((64, 88, 48))) + '</g>\n'
+    s += '  <g class="ls a5">' + rows(72, 196, 128, PRODUCTS, gap=34).strip() + '</g>\n'
+    for cls, text in (('an a12', 'todavía no hay nada'), ('an a34', 'el estado inicial'), ('ls a5', 'los productos'), ('an a6', 'la pantalla se cerró')):
+        s += f'  <text class="{cls}" x="136" y="340" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="152">{text}</text>\n'
 
-    s += '  <rect x="48" y="492" width="544" height="64" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    life = [(1, 144, 'slate', 'createState()', 'Flutter crea el State', 'a1'),
+            (2, 220, 'teal', 'initState()', 'una sola vez', 'a2'),
+            (3, 296, 'violet', 'build()', 'cada vez que hay que dibujar', 'a35'),
+            (6, 396, 'slate', 'dispose()', 'al salir del árbol', 'a6')]
+    s += '  <path class="link" d="M380,196 V218"/><path class="link" d="M380,272 V294"/><path class="link" d="M380,348 V394"/>\n'
+    for n, y, color, label, sub, _ in life:
+        s += '  ' + box(284, y, 192, 52, color, label, sub=sub, hero=(n == 2))
+        s += '  ' + chip(260, y + 26, n, color)
+
+    s += '  ' + box(716, 218, 184, 56, 'indigo', 'ProductsBloc', sub='guardado en el BlocProvider')
+    s += '  ' + box(716, 388, 184, 48, 'amber', 'API', sub='fuera de la app')
+    s += '  <path class="ar-amber" d="M780,274 V386"/><path class="ar-amber" d="M836,388 V276"/>\n'
+    s += f'  <text class="mono" x="770" y="318" text-anchor="end" font-size="12" font-weight="600" fill="{FAM["amber"][2]}">GET</text>\n'
+    s += f'  <text class="mono" x="846" y="318" font-size="12" font-weight="600" fill="{FAM["amber"][2]}">JSON</text>\n'
+    s += '  ' + chip(808, 352, 4, 'amber')
+    s += '  <path class="ar-teal" d="M476,246 H714"/>\n'
+    s += f'  <text class="mono" x="596" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#0F8478" data-fit="212">context.read&lt;ProductsBloc&gt;()</text>\n'
+    s += f'  <text class="mono" x="596" y="264" text-anchor="middle" font-size="12" font-weight="600" fill="#0F8478" data-fit="212">.add(LoadProductsEvent())</text>\n'
+    s += '  <path class="ar-green" d="M740,274 V322 H478"/>\n'
+    s += '  ' + chip(684, 322, 5, 'green')
+    s += '  <text class="mono" x="584" y="312" text-anchor="middle" font-size="12" font-weight="600" fill="#3A8235" data-fit="170">emit(estado nuevo)</text>\n'
+    s += '  <text x="584" y="342" text-anchor="middle" font-size="12" fill="#454C61" data-fit="180">BlocBuilder vuelve a dibujar</text>\n'
+
+    for n, y, color, _, _, cls in life:
+        s += f'  <rect class="an {cls}" x="278" y="{y-6}" width="204" height="64" rx="14" fill="none" stroke="{FAM[color][2]}" stroke-width="3"/>\n'
+    s += f'  <rect class="an a45" x="710" y="212" width="196" height="68" rx="14" fill="none" stroke="{FAM["indigo"][2]}" stroke-width="3"/>\n'
+    s += f'  <rect class="an a4" x="710" y="382" width="196" height="60" rx="14" fill="none" stroke="{FAM["amber"][2]}" stroke-width="3"/>\n'
+    for cls, cx, cy, color in (('tk1', 476, 246, 'teal'), ('tkG', 780, 274, 'amber'), ('tkJ', 836, 388, 'amber'), ('tk2', 740, 274, 'green')):
+        s += f'  <circle class="an {cls}" cx="{cx}" cy="{cy}" r="8" fill="{FAM[color][2]}" stroke="#FFFFFF" stroke-width="2"/>\n'
+
+    s += '  <rect x="48" y="484" width="864" height="56" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
     caps = [(1, 'slate', 'Flutter crea el State de ProductsScreen.', 'Todavía no hay nada dibujado.'),
-            (2, 'teal', 'initState corre una sola vez y lanza', 'LoadProductsEvent al Bloc que tiene encima.'),
-            (3, 'violet', 'build dibuja la pantalla con el estado inicial,', 'el ProductsState() que recibió el Bloc en create.'),
-            (4, 'green', 'El Bloc emite un estado nuevo y la lista se dibuja', 'con los productos. initState no se repite.'),
-            (5, 'slate', 'Al salir de la pantalla corre dispose', 'y el State se descarta.')]
+            (2, 'teal', 'initState corre una sola vez y lanza LoadProductsEvent al Bloc.', 'Va aquí y no en build: build corre muchas veces y repetiría la carga.'),
+            (3, 'violet', 'build dibuja la pantalla con el estado inicial: el ProductsState() que recibió el Bloc en create.', 'El evento ya salió, pero la respuesta todavía no llega.'),
+            (4, 'amber', 'El Bloc atiende el evento y consigue los datos: hace un HTTP GET a la API.', 'La vista no se entera de esta parte: solo espera el estado.'),
+            (5, 'green', 'Con la respuesta, el Bloc emite un estado nuevo y BlocBuilder vuelve a dibujar, ahora con los productos.', 'initState no se repite.'),
+            (6, 'slate', 'Al salir de la pantalla corre dispose.', 'El State se descarta.')]
     for n, color, l1, l2 in caps:
-        s += (f'  <g class="an a{n}">' + chip(76, 524, n, color).strip() +
-              f'<text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">{l1}</text>'
-              f'<text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">{l2}</text></g>\n')
-    s += ('  <g class="st"><text x="68" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="508">initState corre una vez; build, cada vez que llega un estado.</text>'
-          '<text x="68" y="537" font-size="13" fill="#454C61" data-fit="508">Por eso el primer evento se lanza desde initState.</text></g>\n')
+        s += (f'  <g class="an a{n}">' + chip(76, 512, n, color).strip() +
+              f'<text x="100" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="790">{l1}</text>'
+              f'<text x="100" y="525" font-size="13" fill="#454C61" data-fit="790">{l2}</text></g>\n')
+    s += ('  <g class="st"><text x="68" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="820">initState corre una vez; build, cada vez que llega un estado.</text>'
+          '<text x="68" y="525" font-size="13" fill="#454C61" data-fit="820">Por eso el primer evento se lanza desde initState.</text></g>\n')
     return s + tail(h, 'El BlocProvider ya está arriba cuando corre initState: por eso context.read encuentra el Bloc.')
 
 

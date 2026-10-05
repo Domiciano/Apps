@@ -175,9 +175,9 @@ Widget build(BuildContext context) {
 ## La carga inicial: initState
 
 ```svg
-<svg id="bpInitState" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 616" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpInitState-ttl bpInitState-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="bpInitState" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpInitState-ttl bpInitState-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="bpInitState-ttl">El primer evento sale de initState</title>
-  <desc id="bpInitState-dsc">Animación en cinco pasos del ciclo de vida de ProductsScreen. Uno: createState crea el State. Dos: initState corre una sola vez y lanza LoadProductsEvent al ProductsBloc con context.read y add. Tres: build dibuja la pantalla con el estado inicial. Cuatro: el Bloc emite un estado nuevo y BlocBuilder vuelve a ejecutar builder, ahora con los productos. Cinco: dispose, cuando la pantalla sale del árbol.</desc>
+  <desc id="bpInitState-dsc">Animación en seis pasos y tres columnas: lo que se ve, el ciclo de vida de ProductsScreen y la capa de Bloc. Uno: createState crea el State. Dos: initState corre una sola vez y lanza LoadProductsEvent al ProductsBloc con context.read y add. Tres: build dibuja la pantalla con el estado inicial. Cuatro: el Bloc consigue los datos con un HTTP GET a la API. Cinco: el Bloc emite un estado nuevo y BlocBuilder vuelve a ejecutar builder, ahora con los productos. Seis: dispose, cuando la pantalla sale del árbol.</desc>
   <defs>
     <style>
       #bpInitState .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -189,26 +189,39 @@ Widget build(BuildContext context) {
       #bpInitState .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#bpInitState-arrow)}
       #bpInitState .ar-teal{fill:none;stroke:#0F8478;stroke-width:1.75;marker-end:url(#bpInitState-ar-teal)}
       #bpInitState .ar-green{fill:none;stroke:#3A8235;stroke-width:1.75;marker-end:url(#bpInitState-ar-green)}
-      #bpInitState .an{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}
-      #bpInitState .ls{animation:bpInitState-a4 15s linear infinite}
-      #bpInitState .st{animation:bpInitState-hide 15s linear infinite}
+      #bpInitState .ar-amber{fill:none;stroke:#A96C05;stroke-width:1.75;marker-end:url(#bpInitState-ar-amber)}
+      #bpInitState .an,#bpInitState .ls,#bpInitState .st{animation-duration:18s;animation-iteration-count:infinite;animation-timing-function:linear}
+      #bpInitState .an{opacity:0}
+      #bpInitState .st{animation-name:bpInitState-hide}
       #bpInitState .a1{animation-name:bpInitState-a1}
-      @keyframes bpInitState-a1{0%{opacity:0} 2%{opacity:1} 18%{opacity:1} 20%{opacity:0} 100%{opacity:0}}
+      @keyframes bpInitState-a1{0%{opacity:0} 2%{opacity:1} 15%{opacity:1} 17%{opacity:0} 100%{opacity:0}}
       #bpInitState .a2{animation-name:bpInitState-a2}
-      @keyframes bpInitState-a2{0%{opacity:0} 20%{opacity:0} 22%{opacity:1} 38%{opacity:1} 40%{opacity:0} 100%{opacity:0}}
+      @keyframes bpInitState-a2{0%{opacity:0} 17%{opacity:0} 19%{opacity:1} 31%{opacity:1} 33%{opacity:0} 100%{opacity:0}}
       #bpInitState .a3{animation-name:bpInitState-a3}
-      @keyframes bpInitState-a3{0%{opacity:0} 40%{opacity:0} 42%{opacity:1} 58%{opacity:1} 60%{opacity:0} 100%{opacity:0}}
+      @keyframes bpInitState-a3{0%{opacity:0} 33%{opacity:0} 35%{opacity:1} 48%{opacity:1} 50%{opacity:0} 100%{opacity:0}}
       #bpInitState .a4{animation-name:bpInitState-a4}
-      @keyframes bpInitState-a4{0%{opacity:0} 60%{opacity:0} 62%{opacity:1} 78%{opacity:1} 80%{opacity:0} 100%{opacity:0}}
+      @keyframes bpInitState-a4{0%{opacity:0} 50%{opacity:0} 52%{opacity:1} 65%{opacity:1} 67%{opacity:0} 100%{opacity:0}}
       #bpInitState .a5{animation-name:bpInitState-a5}
-      @keyframes bpInitState-a5{0%{opacity:0} 80%{opacity:0} 82%{opacity:1} 98%{opacity:1} 100%{opacity:0}}
+      @keyframes bpInitState-a5{0%{opacity:0} 67%{opacity:0} 69%{opacity:1} 81%{opacity:1} 83%{opacity:0} 100%{opacity:0}}
+      #bpInitState .a6{animation-name:bpInitState-a6}
+      @keyframes bpInitState-a6{0%{opacity:0} 83%{opacity:0} 85%{opacity:1} 98%{opacity:1} 100%{opacity:0}}
+      #bpInitState .a12{animation-name:bpInitState-a12}
+      @keyframes bpInitState-a12{0%{opacity:0} 2%{opacity:1} 31%{opacity:1} 33%{opacity:0} 100%{opacity:0}}
       #bpInitState .a34{animation-name:bpInitState-a34}
-      @keyframes bpInitState-a34{0%{opacity:0} 40%{opacity:0} 42%{opacity:1} 78%{opacity:1} 80%{opacity:0} 100%{opacity:0}}
+      @keyframes bpInitState-a34{0%{opacity:0} 33%{opacity:0} 35%{opacity:1} 65%{opacity:1} 67%{opacity:0} 100%{opacity:0}}
+      #bpInitState .a35{animation-name:bpInitState-a35}
+      @keyframes bpInitState-a35{0%{opacity:0} 33%{opacity:0} 35%{opacity:1} 48%{opacity:1} 50%{opacity:0} 67%{opacity:0} 69%{opacity:1} 81%{opacity:1} 83%{opacity:0} 100%{opacity:0}}
+      #bpInitState .a45{animation-name:bpInitState-a45}
+      @keyframes bpInitState-a45{0%{opacity:0} 50%{opacity:0} 52%{opacity:1} 81%{opacity:1} 83%{opacity:0} 100%{opacity:0}}
       #bpInitState .tk1{animation-name:bpInitState-tk1}
+      @keyframes bpInitState-tk1{0%,18%{opacity:0;transform:translate(0,0)}20%{opacity:1;transform:translate(0,0)}30%{opacity:1;transform:translate(238px,0)}32%,100%{opacity:0;transform:translate(238px,0)}}
+      #bpInitState .tkG{animation-name:bpInitState-tkG}
+      @keyframes bpInitState-tkG{0%,51%{opacity:0;transform:translate(0,0)}52%{opacity:1;transform:translate(0,0)}58%{opacity:1;transform:translate(0,112px)}59%,100%{opacity:0;transform:translate(0,112px)}}
+      #bpInitState .tkJ{animation-name:bpInitState-tkJ}
+      @keyframes bpInitState-tkJ{0%,58%{opacity:0;transform:translate(0,0)}59%{opacity:1;transform:translate(0,0)}65%{opacity:1;transform:translate(0,-112px)}66%,100%{opacity:0;transform:translate(0,-112px)}}
       #bpInitState .tk2{animation-name:bpInitState-tk2}
+      @keyframes bpInitState-tk2{0%,68%{opacity:0;transform:translate(0,0)}69%{opacity:1;transform:translate(0,0)}71%{opacity:1;transform:translate(0,48px)}79%{opacity:1;transform:translate(-262px,48px)}81%,100%{opacity:0;transform:translate(-262px,48px)}}
       @keyframes bpInitState-hide{from{opacity:0}to{opacity:0}}
-      @keyframes bpInitState-tk1{0%,23%{opacity:0;transform:translate(0,0)}25%{opacity:1;transform:translate(0,0)}36%{opacity:1;transform:translate(304px,0)}38%,100%{opacity:0;transform:translate(304px,0)}}
-      @keyframes bpInitState-tk2{0%,62%{opacity:0;transform:translate(0,0)}64%{opacity:1;transform:translate(0,0)}67%{opacity:1;transform:translate(0,52px)}76%{opacity:1;transform:translate(-424px,52px)}78%,100%{opacity:0;transform:translate(-424px,52px)}}
       @media (prefers-reduced-motion: reduce){#bpInitState .an,#bpInitState .ls,#bpInitState .st{animation:none}}
     </style>
     <marker id="bpInitState-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
@@ -216,49 +229,65 @@ Widget build(BuildContext context) {
     </marker>
     <marker id="bpInitState-ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#0F8478"/></marker>
     <marker id="bpInitState-ar-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#3A8235"/></marker>
+    <marker id="bpInitState-ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#A96C05"/></marker>
   </defs>
-  <rect width="960" height="616" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="600" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">El primer evento sale de <tspan class="mono">initState</tspan></text>
   <text class="sub" x="48" y="80" data-fit="860">El ciclo de vida de ProductsScreen, paso a paso: initState corre una sola vez y ahí se le pide al Bloc la carga inicial.</text>
-  <text class="h" x="48" y="124" data-fit="288">CICLO DE VIDA DE PRODUCTSSCREEN</text>
-  <path class="link" d="M212,204 V230"/><path class="link" d="M212,284 V310"/><path class="link" d="M212,364 V414"/>
-  <text x="226" y="393" font-size="12" fill="#79809A" data-fit="200">mientras siga en el árbol</text>
-  <rect x="88" y="152" width="248" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="212" y="169" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="232">createState()</text><text x="212" y="188" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="232">Flutter crea el State</text>
-  <circle cx="60" cy="178" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="60" y="178" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">1</text>
-  <rect x="88" y="232" width="248" height="52" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="2.5"/><text class="mono" x="212" y="249" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="232">initState()</text><text x="212" y="268" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="232">una sola vez</text>
-  <circle cx="60" cy="258" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="60" y="258" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">2</text>
-  <rect x="88" y="312" width="248" height="52" rx="10" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text class="mono" x="212" y="329" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7439B8" data-fit="232">build()</text><text x="212" y="348" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="232">cada vez que hay que dibujar</text>
-  <circle cx="60" cy="338" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="60" y="338" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">3</text>
-  <rect x="88" y="416" width="248" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="212" y="433" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="232">dispose()</text><text x="212" y="452" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="232">al salir del árbol</text>
-  <circle cx="60" cy="442" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="60" y="442" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">5</text>
-  <g transform="translate(624,112)"><rect width="288" height="94" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="260">Por qué en initState</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="260">Corre una vez, al entrar al árbol.</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="260">build corre muchas: un add ahí</text><text x="14" y="77" font-size="12.5" fill="#454C61" data-fit="260">repetiría la carga con cada dibujo.</text></g>
-  <rect x="640" y="230" width="240" height="56" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="760" y="249" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="224">ProductsBloc</text><text x="760" y="268" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="224">guardado en el BlocProvider</text>
-  <path class="ar-teal" d="M336,258 H638"/>
-  <text class="mono" x="488" y="246" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">context.read&lt;ProductsBloc&gt;()</text>
-  <text class="mono" x="488" y="278" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">.add(LoadProductsEvent())</text>
-  <path class="ar-green" d="M760,286 V338 H338"/>
-  <circle cx="788" cy="312" r="12" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="788" y="312" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235">4</text>
-  <text class="mono" x="548" y="328" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3A8235" data-fit="280">emit(estado nuevo)</text>
-  <text x="548" y="358" text-anchor="middle" font-size="12" fill="#454C61" data-fit="380">BlocBuilder vuelve a ejecutar builder</text>
-  <text class="h" x="640" y="376" data-fit="240">LO QUE SE VE</text>
-  <rect x="640" y="388" width="240" height="160" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="656" y="412" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Catálogo</text><path d="M642,430 H878" stroke="#D9DEE8" stroke-width="1.5"/>
-  <g class="an a3"><rect x="656" y="440" width="208" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/><rect x="668" y="451" width="96" height="8" rx="4" fill="#C4CBD8"/><rect x="656" y="474" width="208" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/><rect x="668" y="485" width="132" height="8" rx="4" fill="#C4CBD8"/><rect x="656" y="508" width="208" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/><rect x="668" y="519" width="72" height="8" rx="4" fill="#C4CBD8"/></g>
-  <g class="ls"><rect x="656" y="440" width="208" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="668" y="455" dy="0.35em" font-size="13" fill="#161A26" data-fit="188">Manzana</text><rect x="656" y="474" width="208" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="668" y="489" dy="0.35em" font-size="13" fill="#161A26" data-fit="188">Jugo de mora</text><rect x="656" y="508" width="208" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="668" y="523" dy="0.35em" font-size="13" fill="#161A26" data-fit="188">Leche</text></g>
-  <rect class="an a1" x="82" y="146" width="260" height="64" rx="14" fill="none" stroke="#556074" stroke-width="3"/>
-  <rect class="an a2" x="82" y="226" width="260" height="64" rx="14" fill="none" stroke="#0F8478" stroke-width="3"/>
-  <rect class="an a34" x="82" y="306" width="260" height="64" rx="14" fill="none" stroke="#7439B8" stroke-width="3"/>
-  <rect class="an a5" x="82" y="410" width="260" height="64" rx="14" fill="none" stroke="#556074" stroke-width="3"/>
-  <rect class="an a4" x="634" y="224" width="252" height="68" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
-  <circle class="an tk1" cx="336" cy="258" r="8" fill="#0F8478" stroke="#FFFFFF" stroke-width="2"/>
-  <circle class="an tk2" cx="760" cy="286" r="8" fill="#3A8235" stroke="#FFFFFF" stroke-width="2"/>
-  <rect x="48" y="492" width="544" height="64" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-  <g class="an a1"><circle cx="76" cy="524" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">1</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">Flutter crea el State de ProductsScreen.</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">Todavía no hay nada dibujado.</text></g>
-  <g class="an a2"><circle cx="76" cy="524" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">2</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">initState corre una sola vez y lanza</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">LoadProductsEvent al Bloc que tiene encima.</text></g>
-  <g class="an a3"><circle cx="76" cy="524" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">3</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">build dibuja la pantalla con el estado inicial,</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">el ProductsState() que recibió el Bloc en create.</text></g>
-  <g class="an a4"><circle cx="76" cy="524" r="12" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235">4</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">El Bloc emite un estado nuevo y la lista se dibuja</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">con los productos. initState no se repite.</text></g>
-  <g class="an a5"><circle cx="76" cy="524" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">5</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">Al salir de la pantalla corre dispose</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">y el State se descarta.</text></g>
-  <g class="st"><text x="68" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="508">initState corre una vez; build, cada vez que llega un estado.</text><text x="68" y="537" font-size="13" fill="#454C61" data-fit="508">Por eso el primer evento se lanza desde initState.</text></g>
-  <text class="foot" x="48" y="588" data-fit="860">El BlocProvider ya está arriba cuando corre initState: por eso context.read encuentra el Bloc.</text>
+  <rect x="48" y="104" width="176" height="364" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="64" y="128" data-fit="144">LO QUE SE VE</text>
+  <rect x="240" y="104" width="248" height="364" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="256" y="128" data-fit="216">CICLO DE VIDA</text>
+  <rect x="704" y="104" width="208" height="364" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="720" y="128" data-fit="176">CAPA DE BLOC</text>
+  <rect x="60" y="144" width="152" height="168" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="76" y="168" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Catálogo</text><path d="M62,186 H210" stroke="#D9DEE8" stroke-width="1.5"/>
+  <g class="an a34"><rect x="72" y="196" width="128" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/><rect x="82" y="207" width="64" height="8" rx="4" fill="#C4CBD8"/><rect x="72" y="230" width="128" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/><rect x="82" y="241" width="88" height="8" rx="4" fill="#C4CBD8"/><rect x="72" y="264" width="128" height="30" rx="7" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.25"/><rect x="82" y="275" width="48" height="8" rx="4" fill="#C4CBD8"/></g>
+  <g class="ls a5"><rect x="72" y="196" width="128" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="211" dy="0.35em" font-size="13" fill="#161A26" data-fit="108">Manzana</text><rect x="72" y="230" width="128" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="245" dy="0.35em" font-size="13" fill="#161A26" data-fit="108">Jugo de mora</text><rect x="72" y="264" width="128" height="30" rx="7" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="84" y="279" dy="0.35em" font-size="13" fill="#161A26" data-fit="108">Leche</text></g>
+  <text class="an a12" x="136" y="340" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="152">todavía no hay nada</text>
+  <text class="an a34" x="136" y="340" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="152">el estado inicial</text>
+  <text class="ls a5" x="136" y="340" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="152">los productos</text>
+  <text class="an a6" x="136" y="340" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="152">la pantalla se cerró</text>
+  <path class="link" d="M380,196 V218"/><path class="link" d="M380,272 V294"/><path class="link" d="M380,348 V394"/>
+  <rect x="284" y="144" width="192" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="380" y="161" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="176">createState()</text><text x="380" y="180" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="176">Flutter crea el State</text>
+  <circle cx="260" cy="170" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="260" y="170" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">1</text>
+  <rect x="284" y="220" width="192" height="52" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="2.5"/><text class="mono" x="380" y="237" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="176">initState()</text><text x="380" y="256" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="176">una sola vez</text>
+  <circle cx="260" cy="246" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="260" y="246" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">2</text>
+  <rect x="284" y="296" width="192" height="52" rx="10" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text class="mono" x="380" y="313" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7439B8" data-fit="176">build()</text><text x="380" y="332" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="176">cada vez que hay que dibujar</text>
+  <circle cx="260" cy="322" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="260" y="322" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">3</text>
+  <rect x="284" y="396" width="192" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="380" y="413" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="176">dispose()</text><text x="380" y="432" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="176">al salir del árbol</text>
+  <circle cx="260" cy="422" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="260" y="422" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">6</text>
+  <rect x="716" y="218" width="184" height="56" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="808" y="237" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="168">ProductsBloc</text><text x="808" y="256" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="168">guardado en el BlocProvider</text>
+  <rect x="716" y="388" width="184" height="48" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text class="mono" x="808" y="403" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="168">API</text><text x="808" y="422" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="168">fuera de la app</text>
+  <path class="ar-amber" d="M780,274 V386"/><path class="ar-amber" d="M836,388 V276"/>
+  <text class="mono" x="770" y="318" text-anchor="end" font-size="12" font-weight="600" fill="#A96C05">GET</text>
+  <text class="mono" x="846" y="318" font-size="12" font-weight="600" fill="#A96C05">JSON</text>
+  <circle cx="808" cy="352" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="808" y="352" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
+  <path class="ar-teal" d="M476,246 H714"/>
+  <text class="mono" x="596" y="234" text-anchor="middle" font-size="12" font-weight="600" fill="#0F8478" data-fit="212">context.read&lt;ProductsBloc&gt;()</text>
+  <text class="mono" x="596" y="264" text-anchor="middle" font-size="12" font-weight="600" fill="#0F8478" data-fit="212">.add(LoadProductsEvent())</text>
+  <path class="ar-green" d="M740,274 V322 H478"/>
+  <circle cx="684" cy="322" r="12" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="684" y="322" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235">5</text>
+  <text class="mono" x="584" y="312" text-anchor="middle" font-size="12" font-weight="600" fill="#3A8235" data-fit="170">emit(estado nuevo)</text>
+  <text x="584" y="342" text-anchor="middle" font-size="12" fill="#454C61" data-fit="180">BlocBuilder vuelve a dibujar</text>
+  <rect class="an a1" x="278" y="138" width="204" height="64" rx="14" fill="none" stroke="#556074" stroke-width="3"/>
+  <rect class="an a2" x="278" y="214" width="204" height="64" rx="14" fill="none" stroke="#0F8478" stroke-width="3"/>
+  <rect class="an a35" x="278" y="290" width="204" height="64" rx="14" fill="none" stroke="#7439B8" stroke-width="3"/>
+  <rect class="an a6" x="278" y="390" width="204" height="64" rx="14" fill="none" stroke="#556074" stroke-width="3"/>
+  <rect class="an a45" x="710" y="212" width="196" height="68" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <rect class="an a4" x="710" y="382" width="196" height="60" rx="14" fill="none" stroke="#A96C05" stroke-width="3"/>
+  <circle class="an tk1" cx="476" cy="246" r="8" fill="#0F8478" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tkG" cx="780" cy="274" r="8" fill="#A96C05" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tkJ" cx="836" cy="388" r="8" fill="#A96C05" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tk2" cx="740" cy="274" r="8" fill="#3A8235" stroke="#FFFFFF" stroke-width="2"/>
+  <rect x="48" y="484" width="864" height="56" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <g class="an a1"><circle cx="76" cy="512" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="76" y="512" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">1</text><text x="100" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="790">Flutter crea el State de ProductsScreen.</text><text x="100" y="525" font-size="13" fill="#454C61" data-fit="790">Todavía no hay nada dibujado.</text></g>
+  <g class="an a2"><circle cx="76" cy="512" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="512" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">2</text><text x="100" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="790">initState corre una sola vez y lanza LoadProductsEvent al Bloc.</text><text x="100" y="525" font-size="13" fill="#454C61" data-fit="790">Va aquí y no en build: build corre muchas veces y repetiría la carga.</text></g>
+  <g class="an a3"><circle cx="76" cy="512" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="76" y="512" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">3</text><text x="100" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="790">build dibuja la pantalla con el estado inicial: el ProductsState() que recibió el Bloc en create.</text><text x="100" y="525" font-size="13" fill="#454C61" data-fit="790">El evento ya salió, pero la respuesta todavía no llega.</text></g>
+  <g class="an a4"><circle cx="76" cy="512" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="76" y="512" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text><text x="100" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El Bloc atiende el evento y consigue los datos: hace un HTTP GET a la API.</text><text x="100" y="525" font-size="13" fill="#454C61" data-fit="790">La vista no se entera de esta parte: solo espera el estado.</text></g>
+  <g class="an a5"><circle cx="76" cy="512" r="12" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="76" y="512" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235">5</text><text x="100" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="790">Con la respuesta, el Bloc emite un estado nuevo y BlocBuilder vuelve a dibujar, ahora con los productos.</text><text x="100" y="525" font-size="13" fill="#454C61" data-fit="790">initState no se repite.</text></g>
+  <g class="an a6"><circle cx="76" cy="512" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="76" y="512" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">6</text><text x="100" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="790">Al salir de la pantalla corre dispose.</text><text x="100" y="525" font-size="13" fill="#454C61" data-fit="790">El State se descarta.</text></g>
+  <g class="st"><text x="68" y="507" font-size="13" font-weight="600" fill="#161A26" data-fit="820">initState corre una vez; build, cada vez que llega un estado.</text><text x="68" y="525" font-size="13" fill="#454C61" data-fit="820">Por eso el primer evento se lanza desde initState.</text></g>
+  <text class="foot" x="48" y="572" data-fit="860">El BlocProvider ya está arriba cuando corre initState: por eso context.read encuentra el Bloc.</text>
 </svg>
 ```
 
