@@ -609,7 +609,7 @@ Un botón en `LoginScreen` lleva a `/register`, y uno en `RegisterScreen` vuelve
 </svg>
 ```
 
-Es la tabla que creaste en *Configurando los servicios*, con su permiso y su regla de acceso. Comprueba en el `Table Editor` del dashboard que existe antes de seguir. Si falta, o si le falta el `grant`, el `insert` del siguiente paso falla con `permission denied for table profiles`.
+Es la tabla que creaste en *Configurando los servicios*, con su permiso. Comprueba en el `Table Editor` del dashboard que existe antes de seguir. Si falta, o si le falta el `grant`, el `insert` del siguiente paso falla con `permission denied for table profiles`.
 
 ## Paso 11 · El perfil
 

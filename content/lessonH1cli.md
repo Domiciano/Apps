@@ -2,7 +2,7 @@
 
 <!-- tags: npx supabase, supabase login, supabase link, supabase db push, supabase config push, tabla profiles,
      permission denied for table profiles, contraseña hasheada, UID del usuario, auth.users, Access token not provided,
-     grant y row level security -->
+     grant a authenticated -->
 
 En *Instalación de supabase* creaste la organización, el proyecto y copiaste la `publishable key`. Falta preparar los dos servicios que usa un registro de usuarios: el módulo de Auth y la base de datos. Primero, cómo se reparten el trabajo. Después se configuran desde la consola.
 
@@ -354,22 +354,12 @@ create table public.profiles (
 );
 
 grant select, insert, update on public.profiles to authenticated;
-
-alter table public.profiles enable row level security;
-
-create policy "cada usuario maneja su propio perfil"
-  on public.profiles
-  for all
-  to authenticated
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
 ```
 
-Son tres cosas, en orden:
+Son dos cosas, en orden:
 
 - **La tabla.** Su `id` es el UID de la cuenta, y si la cuenta se borra, el perfil se borra con ella.
 - **El permiso.** `grant` deja que los usuarios con sesión iniciada usen la tabla desde la app. Sin esa línea, Flutter recibe `permission denied for table profiles`.
-- **La regla.** Con `row level security`, cada usuario solo puede leer y escribir la fila cuyo `id` es su propio UID.
 
 Súbela:
 
