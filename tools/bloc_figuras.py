@@ -241,6 +241,7 @@ def bp_init_state(freeze=None):
         css += (f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
                 f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .ls,#{fid} .st{{animation:none}}}}\n')
     s = s.replace('    </style>', css + '    </style>', 1)
+    s = s.replace(f'<svg id="{fid}"', f'<svg id="{fid}" data-steps="6" data-step-seconds="3"', 1)
 
     for x, w, label in ((48, 176, 'LO QUE SE VE'), (240, 248, 'CICLO DE VIDA'), (704, 208, 'CAPA DE BLOC')):
         s += f'  <rect x="{x}" y="104" width="{w}" height="364" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
@@ -350,6 +351,7 @@ def bp_read(freeze=None):
         css += (f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
                 f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .ls,#{fid} .st,#{fid} .spin{{animation:none}}}}\n')
     s = s.replace('    </style>', css + '    </style>', 1)
+    s = s.replace(f'<svg id="{fid}"', f'<svg id="{fid}" data-steps="8" data-step-seconds="3"', 1)
     ind, teal, green, amber = (FAM[c][2] for c in ('indigo', 'teal', 'green', 'amber'))
 
     for x, w, label in ((48, 312, 'LO QUE SE VE'), (376, 256, 'VISTA · ÁRBOL DE WIDGETS'), (704, 208, 'CAPA DE BLOC')):
@@ -576,6 +578,7 @@ def bb_estados(freeze=None):
             f'      #{fid} .s{{fill:#A8D8A0}} #{fid} .n{{fill:#F2B880}} #{fid} .c{{fill:#7FD1E8}}\n'
             f'      #{fid} .p{{fill:#D5B8F5}} #{fid} .k{{fill:#F08FB0}}\n')
     s = s.replace('    </style>', css + '    </style>', 1)
+    s = s.replace(f'<svg id="{fid}"', f'<svg id="{fid}" data-steps="4" data-step-seconds="4"', 1)
 
     states = [('amber', 'ProductsLoadingState', 'CircularProgressIndicator()'),
               ('green', 'ProductsLoadedState', 'ListView(children: [...])'),

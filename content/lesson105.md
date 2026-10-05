@@ -175,7 +175,7 @@ Widget build(BuildContext context) {
 ## La carga inicial: initState
 
 ```svg
-<svg id="bpInitState" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpInitState-ttl bpInitState-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="bpInitState" data-steps="6" data-step-seconds="3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpInitState-ttl bpInitState-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="bpInitState-ttl">El primer evento sale de initState</title>
   <desc id="bpInitState-dsc">Animación en seis pasos y tres columnas: lo que se ve, el ciclo de vida de ProductsScreen y la capa de Bloc. Uno: createState crea el State. Dos: initState corre una sola vez y lanza LoadProductsEvent al ProductsBloc con context.read y add. Tres: build dibuja la pantalla con el estado inicial. Cuatro: el Bloc consigue los datos con un HTTP GET a la API. Cinco: el Bloc emite un estado nuevo y BlocBuilder vuelve a ejecutar builder, ahora con los productos. Seis: dispose, cuando la pantalla sale del árbol.</desc>
   <defs>
@@ -314,7 +314,7 @@ context.read<ProductsBloc>().add(LoadProductsEvent());
 `context.read<ProductsBloc>()` busca **hacia arriba** en el árbol, empezando en el widget dueño de ese `context`, hasta encontrar un `BlocProvider<ProductsBloc>`. Lo que devuelve es el `Bloc`, y sobre él se llama `add`.
 
 ```svg
-<svg id="bpRead" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 648" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpRead-ttl bpRead-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="bpRead" data-steps="8" data-step-seconds="3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 648" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpRead-ttl bpRead-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="bpRead-ttl">Del toque a la respuesta: context.read</title>
   <desc id="bpRead-dsc">Animación en ocho pasos y tres columnas: lo que se ve con el código que se ejecuta, el árbol de widgets y la capa de Bloc. Uno: el usuario toca el IconButton y corre su onPressed. Dos: el código usa el context de ProductsScreen. Tres: context.read de ProductsBloc sube por el árbol hasta el BlocProvider y devuelve el ProductsBloc que guarda. Cuatro: add le entrega LoadProductsEvent. Cinco: el Bloc lo atiende y emite ProductsLoadingState, y la pantalla muestra la carga. Seis: el Bloc hace un HTTP GET a la API. Siete: con la respuesta emite ProductsLoadedState. Ocho: BlocBuilder ejecuta builder y la pantalla muestra los productos nuevos.</desc>
   <defs>
@@ -683,7 +683,7 @@ BlocBuilder<ProductsBloc, ProductsState>(
 `builder` es una función de estado a widgets. No guarda nada entre una llamada y la siguiente: mira el estado que le llegó y decide qué devolver.
 
 ```svg
-<svg id="bbEstados" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 644" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bbEstados-ttl bbEstados-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="bbEstados" data-steps="4" data-step-seconds="4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 644" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bbEstados-ttl bbEstados-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="bbEstados-ttl">Un estado, un dibujo</title>
   <desc id="bbEstados-dsc">Animación con dos caminos. A la izquierda, el código de builder con un if por cada estado. A la derecha, el estado que llega y lo que ve el usuario. Camino feliz: llega ProductsLoadingState, se ejecuta el primer if y se ve un indicador de carga; después llega ProductsLoadedState, se ejecuta el segundo y se ve la lista de productos. Camino con error: llega ProductsLoadingState y se ve la carga; después llega ProductsErrorState, se ejecuta el tercer if y se ve Sin conexión.</desc>
   <defs>
