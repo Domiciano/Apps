@@ -14,7 +14,7 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from code_frame import frame  # noqa: E402
+from code_frame import frame, highlight  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 LESSONS = ['lesson105.md']
@@ -479,34 +479,97 @@ FIGS['bbAnatomia'] = lambda: frame(dict(
 ))
 
 
-def bb_estados():
-    fid, h = 'bbEstados', 548
+def bb_estados(freeze=None):
+    """Animada: dos caminos de dos pasos de 4 s (carga y lista, carga y error). Con freeze=1..4 sale el fotograma fijo de ese paso."""
+    fid, h = 'bbEstados', 644
     s = head(fid, h, 'Un estado, un dibujo', 'Un estado, un dibujo',
              'builder es una función: recibe el estado y devuelve los widgets que le corresponden. Mismo estado, misma pantalla.',
-             'Tres columnas. Con ProductsLoadingState el builder devuelve un indicador de progreso; con ProductsLoadedState, la lista de '
-             'tres productos; con ProductsErrorState, el mensaje de error que trae el estado.',
+             'Animación con dos caminos. A la izquierda, el código de builder con un if por cada estado. A la derecha, el estado que '
+             'llega y lo que ve el usuario. Camino feliz: llega ProductsLoadingState, se ejecuta el primer if y se ve un indicador de '
+             'carga; después llega ProductsLoadedState, se ejecuta el segundo y se ve la lista de productos. Camino con error: llega '
+             'ProductsLoadingState y se ve la carga; después llega ProductsErrorState, se ejecuta el tercer if y se ve Sin conexión.',
              colors=('amber', 'green', 'rose'))
-    cols = [
-        (192, 'amber', 'ProductsLoadingState', 'CircularProgressIndicator()'),
-        (480, 'green', 'ProductsLoadedState', 'ListView(children: [...])'),
-        (768, 'rose', 'ProductsErrorState', 'Text(state.message)'),
-    ]
-    for cx, color, state, code in cols:
-        s += '  <text class="h" x="{}" y="124" text-anchor="middle">LLEGA EL ESTADO</text>\n'.format(cx)
-        s += '  ' + box(cx - 116, 136, 232, 40, color, state)
-        s += f'  <path class="ar-{color}" d="M{cx},176 V222"/>\n'
-        s += f'  <rect x="{cx+10}" y="188" width="64" height="22" rx="6" fill="#FBFBFD"/>\n'
-        s += f'  <text class="mono" x="{cx+14}" y="199" dy="0.35em" font-size="12" font-weight="600" fill="{FAM[color][2]}">builder</text>\n'
-        s += '  ' + phone(cx - 92, 226, 184, 220, 'Catálogo')
-        if color == 'amber':
-            s += '  ' + spinner(cx, 352, 20)
-        elif color == 'green':
-            s += '  ' + rows(cx - 78, 282, 156, PRODUCTS, 'green', 42)
+    spans = {'aL': [(0, 25), (50, 75)], 'a2': [(25, 50)], 'a3': [(75, 100)], 'aH': [(0, 50)], 'aE': [(50, 100)],
+             'p1': [(0, 25)], 'p3': [(50, 75)]}
+    if freeze:
+        on = {1: ['aL', 'aH', 'p1'], 2: ['a2', 'aH'], 3: ['aL', 'aE', 'p3'], 4: ['a3', 'aE']}[freeze]
+        css = f'      #{fid} .an,#{fid} .ls{{opacity:0}}\n' + ''.join(f'      #{fid} .{c}{{opacity:1}}\n' for c in on)
+    else:
+        css = (f'      #{fid} .an,#{fid} .ls{{animation-duration:16s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
+               f'      #{fid} .an{{opacity:0}}\n'
+               f'      #{fid} .spin{{animation:{fid}-spin 1s linear infinite;transform-box:fill-box;transform-origin:center}}\n'
+               f'      @keyframes {fid}-spin{{to{{transform:rotate(360deg)}}}}\n')
+        for k, sp in spans.items():
+            css += f'      #{fid} .{k}{{animation-name:{fid}-{k}}}\n' + keyframes(f'{fid}-{k}', sp)
+        css += f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .ls,#{fid} .spin{{animation:none}}}}\n'
+    css += (f'      #{fid} .cl{{font-size:13px;fill:#C9CFDA}}\n'
+            f'      #{fid} .s{{fill:#A8D8A0}} #{fid} .n{{fill:#F2B880}} #{fid} .c{{fill:#7FD1E8}}\n'
+            f'      #{fid} .p{{fill:#D5B8F5}} #{fid} .k{{fill:#F08FB0}}\n')
+    s = s.replace('    </style>', css + '    </style>', 1)
+
+    states = [('amber', 'ProductsLoadingState', 'CircularProgressIndicator()'),
+              ('green', 'ProductsLoadedState', 'ListView(children: [...])'),
+              ('rose', 'ProductsErrorState', 'Text(state.message)')]
+    code = ['builder: (context, state) {']
+    for _, name, widget in states:
+        code += [f'  if (state is {name}) {{', f'    return {widget};', '  }']
+    code += ['  return SizedBox();', '}']
+
+    def vis(k):
+        return {1: 'an aL', 2: 'ls a2', 3: 'an a3'}[k]
+
+    s += '  <rect x="48" y="112" width="456" height="352" rx="12" fill="#1F2430"/>\n'
+    s += '  <path d="M48,124 A12,12 0 0 1 60,112 H492 A12,12 0 0 1 504,124 V144 H48 Z" fill="#2A3040"/>\n'
+    s += '  <circle cx="68" cy="128" r="5" fill="#F14C4C"/><circle cx="84" cy="128" r="5" fill="#E5C07B"/><circle cx="100" cy="128" r="5" fill="#6BCB77"/>\n'
+    s += '  <text class="mono" x="276" y="128" dy="0.35em" text-anchor="middle" fill="#9AA3B5" font-size="12" data-fit="316">lib/screens/products_screen.dart</text>\n'
+    for k, (color, _, _) in enumerate(states, 1):
+        y = 172 + (3*k - 2) * 24 - 17
+        s += (f'  <rect class="{vis(k)}" x="76" y="{y}" width="416" height="72" rx="6" fill="{FAM[color][1]}" fill-opacity=".18" '
+              f'stroke="{FAM[color][1]}" stroke-width="1.5"/>\n')
+    for i, line in enumerate(code):
+        indent = len(line) - len(line.lstrip())
+        text = line.strip()
+        s += (f'  <text class="cl mono" x="{68 + indent*7.8:.1f}" y="{172 + i*24}" textLength="{len(text)*7.8:.1f}" '
+              f'lengthAdjust="spacingAndGlyphs" data-fit="432">{highlight(text)}</text>\n')
+
+    s += '  <rect x="552" y="112" width="360" height="352" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    s += '  <text class="h" x="568" y="128" dy="0.35em" data-fit="150">LLEGA EL ESTADO</text>\n'
+    for cls, color, label in (('ls aH', 'green', 'CAMINO FELIZ'), ('an aE', 'rose', 'CAMINO CON ERROR')):
+        w = len(label) * 8.2 + 20
+        s += (f'  <g class="{cls}"><rect x="{900 - w:.0f}" y="118" width="{w:.0f}" height="20" rx="10" fill="{FAM[color][0]}" stroke="{FAM[color][1]}" stroke-width="1.5"/>'
+              f'<text x="{900 - w/2:.0f}" y="128" dy="0.35em" text-anchor="middle" font-size="11" font-weight="700" letter-spacing=".08em" fill="{FAM[color][2]}">{label}</text></g>\n')
+    s += '  <path d="M552,144 H912" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    s += '  <path class="link" d="M732,204 V236"/>\n'
+    s += '  <text x="746" y="222" dy="0.35em" font-size="12" font-weight="600" fill="#556074">lo que ve el usuario</text>\n'
+    s += '  ' + phone(632, 240, 200, 208, 'Catálogo')
+    for k, (color, name, _) in enumerate(states, 1):
+        yc = 172 + (3*k - 1) * 24 - 5
+        s += f'  <g class="{vis(k)}">' + box(612, 160, 240, 40, color, name).strip()
+        s += f'<path class="ar-{color}" d="M612,180 H528 V{yc} H494"/>'
+        if k == 1:
+            s += '<g class="spin">' + spinner(732, 360).strip() + '</g>'
+        elif k == 2:
+            s += rows(648, 296, 168, PRODUCTS, color='green').strip()
         else:
-            s += f'  <circle cx="{cx}" cy="330" r="18" fill="#FFEBEF" stroke="#C2354F" stroke-width="2"/>\n'
-            s += f'  <text x="{cx}" y="330" dy="0.35em" text-anchor="middle" font-size="20" font-weight="700" fill="#C2354F">!</text>\n'
-            s += f'  <text x="{cx}" y="374" dy="0.35em" text-anchor="middle" font-size="14" fill="#161A26" data-fit="156">Sin conexión</text>\n'
-        s += f'  <text class="mono" x="{cx}" y="472" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="250">{code}</text>\n'
+            s += ('<circle cx="732" cy="346" r="18" fill="#FFEBEF" stroke="#C2354F" stroke-width="2"/>'
+                  '<text x="732" y="346" dy="0.35em" text-anchor="middle" font-size="18" font-weight="700" fill="#C2354F">!</text>'
+                  '<text x="732" y="392" text-anchor="middle" font-size="13" fill="#161A26">Sin conexión</text>')
+        s += '</g>\n'
+
+    flows = [('green', 'CAMINO FELIZ', 'ls aH', [('amber', 0, 'an p1'), ('green', 1, 'ls a2')]),
+             ('rose', 'CAMINO CON ERROR', 'an aE', [('amber', 0, 'an p3'), ('rose', 2, 'an a3')])]
+    for n, (color, label, cls, pills) in enumerate(flows):
+        x = 48 + n * 440
+        s += (f'  <g transform="translate({x},488)"><rect width="424" height="88" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>'
+              f'<rect class="{cls}" x="-3" y="-3" width="430" height="94" rx="14" fill="none" stroke="{FAM[color][2]}" stroke-width="3"/>'
+              f'<text class="h" x="16" y="24" style="fill:{FAM[color][2]}" data-fit="392">{label}</text>'
+              f'<path class="link" d="M196,56 H226"/>')
+        for m, (pc, idx, pcls) in enumerate(pills):
+            px = 16 + m * 212
+            s += (f'<rect x="{px}" y="40" width="180" height="32" rx="8" fill="{FAM[pc][0]}" stroke="{FAM[pc][1]}" stroke-width="1.5"/>'
+                  f'<rect class="{pcls}" x="{px-3}" y="37" width="186" height="38" rx="10" fill="none" stroke="{FAM[pc][2]}" stroke-width="2.5"/>'
+                  f'<text class="mono" x="{px+90}" y="56" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="{FAM[pc][2]}" data-fit="168">{states[idx][1]}</text>')
+        s += '</g>\n'
     return s + tail(h, 'La pantalla no recuerda nada por su cuenta: si debe verse distinta, es porque llegó otro estado.')
 
 

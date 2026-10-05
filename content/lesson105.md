@@ -603,9 +603,9 @@ BlocBuilder<ProductsBloc, ProductsState>(
 `builder` es una función de estado a widgets. No guarda nada entre una llamada y la siguiente: mira el estado que le llegó y decide qué devolver.
 
 ```svg
-<svg id="bbEstados" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 548" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bbEstados-ttl bbEstados-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="bbEstados" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 644" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bbEstados-ttl bbEstados-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="bbEstados-ttl">Un estado, un dibujo</title>
-  <desc id="bbEstados-dsc">Tres columnas. Con ProductsLoadingState el builder devuelve un indicador de progreso; con ProductsLoadedState, la lista de tres productos; con ProductsErrorState, el mensaje de error que trae el estado.</desc>
+  <desc id="bbEstados-dsc">Animación con dos caminos. A la izquierda, el código de builder con un if por cada estado. A la derecha, el estado que llega y lo que ve el usuario. Camino feliz: llega ProductsLoadingState, se ejecuta el primer if y se ve un indicador de carga; después llega ProductsLoadedState, se ejecuta el segundo y se ve la lista de productos. Camino con error: llega ProductsLoadingState y se ve la carga; después llega ProductsErrorState, se ejecuta el tercer if y se ve Sin conexión.</desc>
   <defs>
     <style>
       #bbEstados .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -618,6 +618,28 @@ BlocBuilder<ProductsBloc, ProductsState>(
       #bbEstados .ar-amber{fill:none;stroke:#A96C05;stroke-width:1.75;marker-end:url(#bbEstados-ar-amber)}
       #bbEstados .ar-green{fill:none;stroke:#3A8235;stroke-width:1.75;marker-end:url(#bbEstados-ar-green)}
       #bbEstados .ar-rose{fill:none;stroke:#C2354F;stroke-width:1.75;marker-end:url(#bbEstados-ar-rose)}
+      #bbEstados .an,#bbEstados .ls{animation-duration:16s;animation-iteration-count:infinite;animation-timing-function:linear}
+      #bbEstados .an{opacity:0}
+      #bbEstados .spin{animation:bbEstados-spin 1s linear infinite;transform-box:fill-box;transform-origin:center}
+      @keyframes bbEstados-spin{to{transform:rotate(360deg)}}
+      #bbEstados .aL{animation-name:bbEstados-aL}
+      @keyframes bbEstados-aL{0%{opacity:0} 2%{opacity:1} 23%{opacity:1} 25%{opacity:0} 50%{opacity:0} 52%{opacity:1} 73%{opacity:1} 75%{opacity:0} 100%{opacity:0}}
+      #bbEstados .a2{animation-name:bbEstados-a2}
+      @keyframes bbEstados-a2{0%{opacity:0} 25%{opacity:0} 27%{opacity:1} 48%{opacity:1} 50%{opacity:0} 100%{opacity:0}}
+      #bbEstados .a3{animation-name:bbEstados-a3}
+      @keyframes bbEstados-a3{0%{opacity:0} 75%{opacity:0} 77%{opacity:1} 98%{opacity:1} 100%{opacity:0}}
+      #bbEstados .aH{animation-name:bbEstados-aH}
+      @keyframes bbEstados-aH{0%{opacity:0} 2%{opacity:1} 48%{opacity:1} 50%{opacity:0} 100%{opacity:0}}
+      #bbEstados .aE{animation-name:bbEstados-aE}
+      @keyframes bbEstados-aE{0%{opacity:0} 50%{opacity:0} 52%{opacity:1} 98%{opacity:1} 100%{opacity:0}}
+      #bbEstados .p1{animation-name:bbEstados-p1}
+      @keyframes bbEstados-p1{0%{opacity:0} 2%{opacity:1} 23%{opacity:1} 25%{opacity:0} 100%{opacity:0}}
+      #bbEstados .p3{animation-name:bbEstados-p3}
+      @keyframes bbEstados-p3{0%{opacity:0} 50%{opacity:0} 52%{opacity:1} 73%{opacity:1} 75%{opacity:0} 100%{opacity:0}}
+      @media (prefers-reduced-motion: reduce){#bbEstados .an,#bbEstados .ls,#bbEstados .spin{animation:none}}
+      #bbEstados .cl{font-size:13px;fill:#C9CFDA}
+      #bbEstados .s{fill:#A8D8A0} #bbEstados .n{fill:#F2B880} #bbEstados .c{fill:#7FD1E8}
+      #bbEstados .p{fill:#D5B8F5} #bbEstados .k{fill:#F08FB0}
     </style>
     <marker id="bbEstados-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
@@ -626,36 +648,42 @@ BlocBuilder<ProductsBloc, ProductsState>(
     <marker id="bbEstados-ar-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#3A8235"/></marker>
     <marker id="bbEstados-ar-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#C2354F"/></marker>
   </defs>
-  <rect width="960" height="548" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="644" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">Un estado, un dibujo</text>
   <text class="sub" x="48" y="80" data-fit="860">builder es una función: recibe el estado y devuelve los widgets que le corresponden. Mismo estado, misma pantalla.</text>
-  <text class="h" x="192" y="124" text-anchor="middle">LLEGA EL ESTADO</text>
-  <rect x="76" y="136" width="232" height="40" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text class="mono" x="192" y="156" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="216">ProductsLoadingState</text>
-  <path class="ar-amber" d="M192,176 V222"/>
-  <rect x="202" y="188" width="64" height="22" rx="6" fill="#FBFBFD"/>
-  <text class="mono" x="206" y="199" dy="0.35em" font-size="12" font-weight="600" fill="#A96C05">builder</text>
-  <rect x="100" y="226" width="184" height="220" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="116" y="250" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Catálogo</text><path d="M102,268 H282" stroke="#D9DEE8" stroke-width="1.5"/>
-  <circle cx="192" cy="352" r="20" fill="none" stroke="#FFF3DC" stroke-width="5"/><path d="M192,332 A20,20 0 0 1 212,352" fill="none" stroke="#A96C05" stroke-width="5" stroke-linecap="round"/>
-  <text class="mono" x="192" y="472" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="250">CircularProgressIndicator()</text>
-  <text class="h" x="480" y="124" text-anchor="middle">LLEGA EL ESTADO</text>
-  <rect x="364" y="136" width="232" height="40" rx="10" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text class="mono" x="480" y="156" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3A8235" data-fit="216">ProductsLoadedState</text>
-  <path class="ar-green" d="M480,176 V222"/>
-  <rect x="490" y="188" width="64" height="22" rx="6" fill="#FBFBFD"/>
-  <text class="mono" x="494" y="199" dy="0.35em" font-size="12" font-weight="600" fill="#3A8235">builder</text>
-  <rect x="388" y="226" width="184" height="220" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="404" y="250" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Catálogo</text><path d="M390,268 H570" stroke="#D9DEE8" stroke-width="1.5"/>
-  <rect x="402" y="282" width="156" height="30" rx="7" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.25"/><text x="414" y="297" dy="0.35em" font-size="13" fill="#161A26" data-fit="136">Manzana</text><rect x="402" y="324" width="156" height="30" rx="7" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.25"/><text x="414" y="339" dy="0.35em" font-size="13" fill="#161A26" data-fit="136">Jugo de mora</text><rect x="402" y="366" width="156" height="30" rx="7" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.25"/><text x="414" y="381" dy="0.35em" font-size="13" fill="#161A26" data-fit="136">Leche</text>
-  <text class="mono" x="480" y="472" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="250">ListView(children: [...])</text>
-  <text class="h" x="768" y="124" text-anchor="middle">LLEGA EL ESTADO</text>
-  <rect x="652" y="136" width="232" height="40" rx="10" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5"/><text class="mono" x="768" y="156" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#C2354F" data-fit="216">ProductsErrorState</text>
-  <path class="ar-rose" d="M768,176 V222"/>
-  <rect x="778" y="188" width="64" height="22" rx="6" fill="#FBFBFD"/>
-  <text class="mono" x="782" y="199" dy="0.35em" font-size="12" font-weight="600" fill="#C2354F">builder</text>
-  <rect x="676" y="226" width="184" height="220" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="692" y="250" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Catálogo</text><path d="M678,268 H858" stroke="#D9DEE8" stroke-width="1.5"/>
-  <circle cx="768" cy="330" r="18" fill="#FFEBEF" stroke="#C2354F" stroke-width="2"/>
-  <text x="768" y="330" dy="0.35em" text-anchor="middle" font-size="20" font-weight="700" fill="#C2354F">!</text>
-  <text x="768" y="374" dy="0.35em" text-anchor="middle" font-size="14" fill="#161A26" data-fit="156">Sin conexión</text>
-  <text class="mono" x="768" y="472" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="600" fill="#454C61" data-fit="250">Text(state.message)</text>
-  <text class="foot" x="48" y="520" data-fit="860">La pantalla no recuerda nada por su cuenta: si debe verse distinta, es porque llegó otro estado.</text>
+  <rect x="48" y="112" width="456" height="352" rx="12" fill="#1F2430"/>
+  <path d="M48,124 A12,12 0 0 1 60,112 H492 A12,12 0 0 1 504,124 V144 H48 Z" fill="#2A3040"/>
+  <circle cx="68" cy="128" r="5" fill="#F14C4C"/><circle cx="84" cy="128" r="5" fill="#E5C07B"/><circle cx="100" cy="128" r="5" fill="#6BCB77"/>
+  <text class="mono" x="276" y="128" dy="0.35em" text-anchor="middle" fill="#9AA3B5" font-size="12" data-fit="316">lib/screens/products_screen.dart</text>
+  <rect class="an aL" x="76" y="179" width="416" height="72" rx="6" fill="#F0C572" fill-opacity=".18" stroke="#F0C572" stroke-width="1.5"/>
+  <rect class="ls a2" x="76" y="251" width="416" height="72" rx="6" fill="#9FD68D" fill-opacity=".18" stroke="#9FD68D" stroke-width="1.5"/>
+  <rect class="an a3" x="76" y="323" width="416" height="72" rx="6" fill="#F3A3B2" fill-opacity=".18" stroke="#F3A3B2" stroke-width="1.5"/>
+  <text class="cl mono" x="68.0" y="172" textLength="210.6" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">builder</tspan>: (context, state) {</text>
+  <text class="cl mono" x="83.6" y="196" textLength="280.8" lengthAdjust="spacingAndGlyphs" data-fit="432">if (state is <tspan class="c">ProductsLoadingState</tspan>) {</text>
+  <text class="cl mono" x="99.2" y="220" textLength="273.0" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="k">return</tspan> <tspan class="c">CircularProgressIndicator</tspan>();</text>
+  <text class="cl mono" x="83.6" y="244" textLength="7.8" lengthAdjust="spacingAndGlyphs" data-fit="432">}</text>
+  <text class="cl mono" x="83.6" y="268" textLength="273.0" lengthAdjust="spacingAndGlyphs" data-fit="432">if (state is <tspan class="c">ProductsLoadedState</tspan>) {</text>
+  <text class="cl mono" x="99.2" y="292" textLength="257.4" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="k">return</tspan> <tspan class="c">ListView</tspan>(<tspan class="p">children</tspan>: [...]);</text>
+  <text class="cl mono" x="83.6" y="316" textLength="7.8" lengthAdjust="spacingAndGlyphs" data-fit="432">}</text>
+  <text class="cl mono" x="83.6" y="340" textLength="265.2" lengthAdjust="spacingAndGlyphs" data-fit="432">if (state is <tspan class="c">ProductsErrorState</tspan>) {</text>
+  <text class="cl mono" x="99.2" y="364" textLength="210.6" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="k">return</tspan> <tspan class="c">Text</tspan>(state.message);</text>
+  <text class="cl mono" x="83.6" y="388" textLength="7.8" lengthAdjust="spacingAndGlyphs" data-fit="432">}</text>
+  <text class="cl mono" x="83.6" y="412" textLength="140.4" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="k">return</tspan> <tspan class="c">SizedBox</tspan>();</text>
+  <text class="cl mono" x="68.0" y="436" textLength="7.8" lengthAdjust="spacingAndGlyphs" data-fit="432">}</text>
+  <rect x="552" y="112" width="360" height="352" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="568" y="128" dy="0.35em" data-fit="150">LLEGA EL ESTADO</text>
+  <g class="ls aH"><rect x="782" y="118" width="118" height="20" rx="10" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="841" y="128" dy="0.35em" text-anchor="middle" font-size="11" font-weight="700" letter-spacing=".08em" fill="#3A8235">CAMINO FELIZ</text></g>
+  <g class="an aE"><rect x="749" y="118" width="151" height="20" rx="10" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5"/><text x="824" y="128" dy="0.35em" text-anchor="middle" font-size="11" font-weight="700" letter-spacing=".08em" fill="#C2354F">CAMINO CON ERROR</text></g>
+  <path d="M552,144 H912" stroke="#D9DEE8" stroke-width="1.5"/>
+  <path class="link" d="M732,204 V236"/>
+  <text x="746" y="222" dy="0.35em" font-size="12" font-weight="600" fill="#556074">lo que ve el usuario</text>
+  <rect x="632" y="240" width="200" height="208" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="648" y="264" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Catálogo</text><path d="M634,282 H830" stroke="#D9DEE8" stroke-width="1.5"/>
+  <g class="an aL"><rect x="612" y="160" width="240" height="40" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text class="mono" x="732" y="180" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="224">ProductsLoadingState</text><path class="ar-amber" d="M612,180 H528 V215 H494"/><g class="spin"><circle cx="732" cy="360" r="18" fill="none" stroke="#FFF3DC" stroke-width="5"/><path d="M732,342 A18,18 0 0 1 750,360" fill="none" stroke="#A96C05" stroke-width="5" stroke-linecap="round"/></g></g>
+  <g class="ls a2"><rect x="612" y="160" width="240" height="40" rx="10" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text class="mono" x="732" y="180" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3A8235" data-fit="224">ProductsLoadedState</text><path class="ar-green" d="M612,180 H528 V287 H494"/><rect x="648" y="296" width="168" height="30" rx="7" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.25"/><text x="660" y="311" dy="0.35em" font-size="13" fill="#161A26" data-fit="148">Manzana</text><rect x="648" y="334" width="168" height="30" rx="7" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.25"/><text x="660" y="349" dy="0.35em" font-size="13" fill="#161A26" data-fit="148">Jugo de mora</text><rect x="648" y="372" width="168" height="30" rx="7" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.25"/><text x="660" y="387" dy="0.35em" font-size="13" fill="#161A26" data-fit="148">Leche</text></g>
+  <g class="an a3"><rect x="612" y="160" width="240" height="40" rx="10" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5"/><text class="mono" x="732" y="180" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#C2354F" data-fit="224">ProductsErrorState</text><path class="ar-rose" d="M612,180 H528 V359 H494"/><circle cx="732" cy="346" r="18" fill="#FFEBEF" stroke="#C2354F" stroke-width="2"/><text x="732" y="346" dy="0.35em" text-anchor="middle" font-size="18" font-weight="700" fill="#C2354F">!</text><text x="732" y="392" text-anchor="middle" font-size="13" fill="#161A26">Sin conexión</text></g>
+  <g transform="translate(48,488)"><rect width="424" height="88" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/><rect class="ls aH" x="-3" y="-3" width="430" height="94" rx="14" fill="none" stroke="#3A8235" stroke-width="3"/><text class="h" x="16" y="24" style="fill:#3A8235" data-fit="392">CAMINO FELIZ</text><path class="link" d="M196,56 H226"/><rect x="16" y="40" width="180" height="32" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><rect class="an p1" x="13" y="37" width="186" height="38" rx="10" fill="none" stroke="#A96C05" stroke-width="2.5"/><text class="mono" x="106" y="56" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#A96C05" data-fit="168">ProductsLoadingState</text><rect x="228" y="40" width="180" height="32" rx="8" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><rect class="ls a2" x="225" y="37" width="186" height="38" rx="10" fill="none" stroke="#3A8235" stroke-width="2.5"/><text class="mono" x="318" y="56" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#3A8235" data-fit="168">ProductsLoadedState</text></g>
+  <g transform="translate(488,488)"><rect width="424" height="88" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/><rect class="an aE" x="-3" y="-3" width="430" height="94" rx="14" fill="none" stroke="#C2354F" stroke-width="3"/><text class="h" x="16" y="24" style="fill:#C2354F" data-fit="392">CAMINO CON ERROR</text><path class="link" d="M196,56 H226"/><rect x="16" y="40" width="180" height="32" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><rect class="an p3" x="13" y="37" width="186" height="38" rx="10" fill="none" stroke="#A96C05" stroke-width="2.5"/><text class="mono" x="106" y="56" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#A96C05" data-fit="168">ProductsLoadingState</text><rect x="228" y="40" width="180" height="32" rx="8" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5"/><rect class="an a3" x="225" y="37" width="186" height="38" rx="10" fill="none" stroke="#C2354F" stroke-width="2.5"/><text class="mono" x="318" y="56" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#C2354F" data-fit="168">ProductsErrorState</text></g>
+  <text class="foot" x="48" y="616" data-fit="860">La pantalla no recuerda nada por su cuenta: si debe verse distinta, es porque llegó otro estado.</text>
 </svg>
 ```
 
@@ -665,15 +693,18 @@ BlocBuilder<ProductsBloc, ProductsState>(
     if (state is ProductsLoadingState) {
       return const Center(child: CircularProgressIndicator());
     }
+    if (state is ProductsLoadedState) {
+      return ListView(
+        children: [
+          for (final product in state.products)
+            ListTile(title: Text(product.name)),
+        ],
+      );
+    }
     if (state is ProductsErrorState) {
       return Center(child: Text(state.message));
     }
-    return ListView(
-      children: [
-        for (final product in state.products)
-          ListTile(title: Text(product.name)),
-      ],
-    );
+    return const SizedBox();
   },
 )
 ```
