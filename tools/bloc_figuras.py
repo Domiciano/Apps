@@ -166,7 +166,7 @@ FIGS['bpAnatomia'] = lambda: frame(dict(
     id='bpAnatomia',
     title='Las partes de un <tspan class="mono">BlocProvider</tspan>',
     title_plain='Las partes de un BlocProvider',
-    desc='Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc, con ProductState como estado inicial, y el '
+    desc='Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc, con ProductsState como estado inicial, y el '
          'provider lo guarda; child es ProductsScreen, la parte del árbol que queda con el Bloc a su alcance.',
     sub='Dos parámetros: create dice cómo se construye el Bloc y child dice quién lo va a poder usar.',
     file='lib/main.dart',
@@ -174,7 +174,7 @@ FIGS['bpAnatomia'] = lambda: frame(dict(
     min_h=296,
     code=[
         "BlocProvider<ProductsBloc>(",
-        "  create: (context) => ProductsBloc(ProductState()),",
+        "  create: (context) => ProductsBloc(ProductsState()),",
         "  child: const ProductsScreen(),",
         ")",
     ],
@@ -217,6 +217,7 @@ def bp_init_state(freeze=None):
         if freeze in (3, 4):
             css += f'      #{fid} .a34{{opacity:1}}\n'
         css += f'      #{fid} .tk1{{transform:translate(152px,0)}}\n      #{fid} .tk2{{transform:translate(-200px,52px)}}\n'
+        css += f'      #{fid} .tk{1 if freeze == 2 else 2}{{opacity:{1 if freeze in (2, 4) else 0}}}\n'
     else:
         css = (f'      #{fid} .an{{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
                f'      #{fid} .ls{{animation:{fid}-a4 15s linear infinite}}\n'
@@ -269,7 +270,7 @@ def bp_init_state(freeze=None):
     s += '  <rect x="48" y="492" width="544" height="64" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
     caps = [(1, 'slate', 'Flutter crea el State de ProductsScreen.', 'Todavía no hay nada dibujado.'),
             (2, 'teal', 'initState corre una sola vez y lanza', 'LoadProductsEvent al Bloc que tiene encima.'),
-            (3, 'violet', 'build dibuja la pantalla con el estado inicial,', 'el ProductState() que recibió el Bloc en create.'),
+            (3, 'violet', 'build dibuja la pantalla con el estado inicial,', 'el ProductsState() que recibió el Bloc en create.'),
             (4, 'green', 'El Bloc emite un estado nuevo y la lista se dibuja', 'con los productos. initState no se repite.'),
             (5, 'slate', 'Al salir de la pantalla corre dispose', 'y el State se descarta.')]
     for n, color, l1, l2 in caps:
@@ -282,6 +283,101 @@ def bp_init_state(freeze=None):
 
 
 FIGS['bpInitState'] = bp_init_state
+
+
+def bp_read(freeze=None):
+    """Animada: cinco pasos de 3 s, del toque al evento. Con freeze=1..5 sale el fotograma fijo de ese paso."""
+    fid, h = 'bpRead', 648
+    s = head(fid, h, 'Del toque al evento: <tspan class="mono">context.read</tspan>', 'Del toque al evento: context.read',
+             'Qué pasa al tocar el botón: el código usa context para subir por el árbol, encuentra el Bloc y le entrega el evento.',
+             'Animación en cinco pasos. Uno: el usuario toca el IconButton y corre su onPressed. Dos: el código usa el context de '
+             'ProductsScreen. Tres: context.read de ProductsBloc sube por el árbol hasta el BlocProvider y devuelve el ProductsBloc que '
+             'guarda. Cuatro: add le entrega LoadProductsEvent, que sale de la vista y entra a la capa de Bloc. Cinco: el Bloc lo atiende '
+             'en su manejador on de LoadProductsEvent.',
+             colors=('indigo', 'teal'))
+    steps = {1: [(0, 20)], 2: [(20, 40)], 3: [(40, 60)], 4: [(60, 80)], 5: [(80, 100)], 23: [(20, 60)], 33: [(50, 60)]}
+    if freeze:
+        on = {1: ['a1'], 2: ['a2', 'a23'], 3: ['a3', 'a23', 'a33'], 4: ['a4', 'tk2'], 5: ['a5']}[freeze]
+        css = f'      #{fid} .an,#{fid} .st{{opacity:0}}\n' + ''.join(f'      #{fid} .{c}{{opacity:1}}\n' for c in on)
+        css += f'      #{fid} .tk2{{transform:translate(432px,-90px)}}\n'
+    else:
+        css = (f'      #{fid} .an{{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}}\n'
+               f'      #{fid} .st{{animation:{fid}-hide 15s linear infinite}}\n')
+        for k, spans in steps.items():
+            css += f'      #{fid} .a{k}{{animation-name:{fid}-a{k}}}\n' + keyframes(f'{fid}-a{k}', spans)
+        css += (f'      #{fid} .tap{{animation-name:{fid}-tap;transform-box:fill-box;transform-origin:center}}\n'
+                f'      #{fid} .tk1{{animation-name:{fid}-tk1}}\n      #{fid} .tk2{{animation-name:{fid}-tk2}}\n'
+                f'      @keyframes {fid}-hide{{from{{opacity:0}}to{{opacity:0}}}}\n'
+                f'      @keyframes {fid}-tap{{0%,2%{{opacity:0;transform:scale(.3)}}4%{{opacity:.9;transform:scale(.3)}}'
+                f'10%{{opacity:0;transform:scale(1.5)}}11%{{opacity:.9;transform:scale(.3)}}17%,100%{{opacity:0;transform:scale(1.5)}}}}\n'
+                f'      @keyframes {fid}-tk1{{0%,41%{{opacity:0;transform:translate(0,0)}}43%{{opacity:1;transform:translate(0,0)}}'
+                f'45%{{opacity:1;transform:translate(-24px,0)}}49%{{opacity:1;transform:translate(-24px,-64px)}}'
+                f'51%{{opacity:1;transform:translate(0,-64px)}}53%,100%{{opacity:0;transform:translate(0,-64px)}}}}\n'
+                f'      @keyframes {fid}-tk2{{0%,62%{{opacity:0;transform:translate(0,0)}}64%{{opacity:1;transform:translate(0,0)}}'
+                f'72%{{opacity:1;transform:translate(432px,0)}}76%{{opacity:1;transform:translate(432px,-186px)}}'
+                f'78%,100%{{opacity:0;transform:translate(432px,-186px)}}}}\n'
+                f'      @media (prefers-reduced-motion: reduce){{#{fid} .an,#{fid} .st{{animation:none}}}}\n')
+    s = s.replace('    </style>', css + '    </style>', 1)
+    ind, teal = FAM['indigo'][2], FAM['teal'][2]
+
+    s += '  <rect x="48" y="104" width="312" height="416" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    s += '  <text class="h" x="64" y="126" data-fit="280">VISTA · ÁRBOL DE WIDGETS</text>\n'
+    s += '  <rect x="624" y="152" width="288" height="160" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    s += '  <text class="h" x="640" y="174" data-fit="256">CAPA DE BLOC</text>\n'
+    tree = [('MaterialApp', 'slate'), ('BlocProvider', 'amber'), ('ProductsScreen', 'slate'), ('Scaffold', 'slate'),
+            ('AppBar', 'slate'), ('IconButton', 'teal')]
+    s += '  <path class="tree" d="' + ' '.join(f'M216,{184 + i*64} V{208 + i*64}' for i in range(5)) + '"/>\n'
+    s += f'  <path d="M336,228 H648" stroke="{ind}" stroke-width="1.75" stroke-dasharray="4 4" fill="none"/>\n'
+    s += f'  <text x="492" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="{ind}">guarda</text>\n'
+    for i, (name, color) in enumerate(tree):
+        s += '  ' + box(96, 144 + i*64, 240, 40, color, name, hero=name == 'BlocProvider')
+    s += f'  <rect x="108" y="262" width="68" height="20" rx="10" fill="{ind}"/>\n'
+    s += '  <text class="mono" x="142" y="272" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">context</text>\n'
+    s += '  ' + box(648, 204, 240, 48, 'indigo', 'ProductsBloc', sub='la instancia que guarda el provider')
+    s += '  ' + box(672, 264, 192, 32, 'teal', 'on&lt;LoadProductsEvent&gt;', fs=12.5)
+    s += '  <path class="ar-indigo" d="M96,292 H72 V228 H94"/>\n'
+    s += '  <path class="ar-teal" d="M336,484 H768 V298"/>\n'
+    s += f'  <text class="mono" x="552" y="474" text-anchor="middle" font-size="12.5" font-weight="600" fill="{teal}" data-fit="280">.add(LoadProductsEvent())</text>\n'
+    s += f'  <text x="552" y="504" text-anchor="middle" font-size="12" fill="#454C61" data-fit="380">el evento sale de la vista y entra a la capa de Bloc</text>\n'
+    s += '  ' + chip(336, 464, 1, 'teal') + '  ' + chip(336, 272, 2, 'indigo') + '  ' + chip(72, 260, 3, 'indigo')
+    s += '  ' + chip(768, 400, 4, 'teal') + '  ' + chip(864, 264, 5, 'teal')
+
+    s += '  <text class="h" x="384" y="336" data-fit="336">EL CÓDIGO DEL BOTÓN</text>\n'
+    s += '  <rect x="384" y="348" width="336" height="100" rx="10" fill="#1F2430"/>\n'
+    hl = [('a1', 400, 357, 78, teal), ('a23', 532, 357, 62, ind), ('a23', 431, 381, 172, ind), ('a4', 431, 405, 203, teal)]
+    for cls, x, y, w, color in hl:
+        s += f'  <rect class="an {cls}" x="{x}" y="{y}" width="{w}" height="22" rx="5" fill="{color}" fill-opacity=".45" stroke="{color}" stroke-width="1.5"/>\n'
+    code = [(404, 'onPressed: () =&gt; context'), (435.2, '.read&lt;ProductsBloc&gt;()'), (435.2, '.add(LoadProductsEvent()),')]
+    for i, (x, line) in enumerate(code):
+        s += f'  <text class="mono" x="{x}" y="{373 + i*24}" font-size="13" fill="#E6EAF2" data-fit="300">{line}</text>\n'
+
+    s += f'  <rect class="an a1" x="90" y="458" width="252" height="52" rx="14" fill="none" stroke="{teal}" stroke-width="3"/>\n'
+    s += f'  <circle class="an tap" cx="216" cy="484" r="26" fill="{teal}" fill-opacity=".35" stroke="{teal}" stroke-width="2"/>\n'
+    s += f'  <rect class="an a2" x="90" y="254" width="252" height="64" rx="14" fill="none" stroke="{ind}" stroke-width="3"/>\n'
+    s += f'  <rect class="an a33" x="90" y="202" width="252" height="52" rx="14" fill="none" stroke="{FAM["amber"][2]}" stroke-width="3"/>\n'
+    s += f'  <path class="an a33" d="M342,228 H642" stroke="{ind}" stroke-width="3.5" fill="none"/>\n'
+    s += f'  <rect class="an a33" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="{ind}" stroke-width="3"/>\n'
+    s += f'  <rect class="an a5" x="666" y="258" width="204" height="44" rx="12" fill="none" stroke="{teal}" stroke-width="3"/>\n'
+    s += f'  <rect class="an a5" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="{ind}" stroke-width="3"/>\n'
+    s += f'  <circle class="an tk1" cx="96" cy="292" r="8" fill="{ind}" stroke="#FFFFFF" stroke-width="2"/>\n'
+    s += f'  <circle class="an tk2" cx="336" cy="484" r="8" fill="{teal}" stroke="#FFFFFF" stroke-width="2"/>\n'
+
+    s += '  <rect x="48" y="536" width="864" height="56" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+    caps = [(1, 'teal', 'El usuario toca el botón.', 'Se ejecuta el onPressed del IconButton.'),
+            (2, 'indigo', 'El código usa context.', 'Es el de ProductsScreen: el onPressed está escrito dentro de su build.'),
+            (3, 'indigo', 'context.read&lt;ProductsBloc&gt;() sube por el árbol desde ahí.', 'Encuentra el BlocProvider y devuelve el ProductsBloc que guarda.'),
+            (4, 'teal', '.add(LoadProductsEvent()) le entrega el evento a ese Bloc.', 'El evento sale de la vista y entra a la capa de Bloc.'),
+            (5, 'teal', 'El Bloc lo atiende en su on&lt;LoadProductsEvent&gt;.', 'La vista no hace nada más: espera el estado nuevo.')]
+    for n, color, l1, l2 in caps:
+        s += (f'  <g class="an a{n}">' + chip(76, 564, n, color).strip() +
+              f'<text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">{l1}</text>'
+              f'<text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">{l2}</text></g>\n')
+    s += ('  <g class="st"><text x="68" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="820">Una sola línea hace dos cosas: read busca el Bloc hacia arriba y add le entrega el evento.</text>'
+          '<text x="68" y="577" font-size="13" fill="#454C61" data-fit="820">Los números marcan el orden: toque, context, búsqueda, evento y manejador.</text></g>\n')
+    return s + tail(h, 'La vista nunca recibe el Bloc por constructor: lo alcanza a través del context cada vez que lo necesita.')
+
+
+FIGS['bpRead'] = bp_read
 
 
 def bp_context():

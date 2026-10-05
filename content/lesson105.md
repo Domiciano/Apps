@@ -61,7 +61,7 @@ Un `Bloc` es un objeto de Dart, no un widget. Alguien tiene que crearlo, guardar
 ```svg
 <svg id="bpAnatomia" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 585" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpAnatomia-ttl bpAnatomia-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="bpAnatomia-ttl">Las partes de un BlocProvider</title>
-  <desc id="bpAnatomia-dsc">Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc, con ProductState como estado inicial, y el provider lo guarda; child es ProductsScreen, la parte del árbol que queda con el Bloc a su alcance.</desc>
+  <desc id="bpAnatomia-dsc">Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc, con ProductsState como estado inicial, y el provider lo guarda; child es ProductsScreen, la parte del árbol que queda con el Bloc a su alcance.</desc>
   <defs>
     <style>
       #bpAnatomia .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -103,7 +103,7 @@ Un `Bloc` es un objeto de Dart, no un widget. Alguien tiene que crearlo, guardar
   <rect class="hl-indigo" x="79.6" y="180" width="54.8" height="22" rx="5"/>
   <rect class="hl-violet" x="79.6" y="204" width="47.0" height="22" rx="5"/>
   <text class="cl mono" font-size="13" x="68.0" y="172" textLength="210.6" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="c">BlocProvider</tspan>&lt;<tspan class="c">ProductsBloc</tspan>&gt;(</text>
-  <text class="cl mono" font-size="13" x="83.6" y="196" textLength="390.0" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">create</tspan>: (context) =&gt; <tspan class="c">ProductsBloc</tspan>(<tspan class="c">ProductState</tspan>()),</text>
+  <text class="cl mono" font-size="13" x="83.6" y="196" textLength="397.8" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">create</tspan>: (context) =&gt; <tspan class="c">ProductsBloc</tspan>(<tspan class="c">ProductsState</tspan>()),</text>
   <text class="cl mono" font-size="13" x="83.6" y="220" textLength="234.0" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">child</tspan>: <tspan class="k">const</tspan> <tspan class="c">ProductsScreen</tspan>(),</text>
   <text class="cl mono" font-size="13" x="68.0" y="244" textLength="7.8" lengthAdjust="spacingAndGlyphs" data-fit="432">)</text>
   <g transform="translate(552,144)">
@@ -113,7 +113,7 @@ Un `Bloc` es un objeto de Dart, no un widget. Alguien tiene que crearlo, guardar
   </g>
   <path class="ld-amber" d="M284.6,167 H504"/>
   <path class="ar-amber" d="M504,167 H532 V184 H592"/>
-  <path class="ld-indigo" d="M479.6,191 H504"/>
+  <path class="ld-indigo" d="M487.4,191 H504"/>
   <path class="ar-indigo" d="M504,191 H523 V236 H608"/>
   <path class="ld-violet" d="M323.6,215 H504"/>
   <path class="ar-violet" d="M504,215 H514 V344 H608"/>
@@ -146,12 +146,12 @@ Un `Bloc` es un objeto de Dart, no un widget. Alguien tiene que crearlo, guardar
 
 ```dart
 BlocProvider<ProductsBloc>(
-  create: (context) => ProductsBloc(ProductState()),
+  create: (context) => ProductsBloc(ProductsState()),
   child: const ProductsScreen(),
 )
 ```
 
-`ProductState()` es el estado inicial: con él arranca el `Bloc` antes de recibir cualquier evento.
+`ProductsState()` es el estado inicial: con él arranca el `Bloc` antes de recibir cualquier evento.
 
 En este curso el `BlocProvider` va en la tabla de rutas, envolviendo a la `Screen`:
 
@@ -164,7 +164,7 @@ Widget build(BuildContext context) {
     initialRoute: '/products',
     routes: {
       '/products': (context) => BlocProvider<ProductsBloc>(
-        create: (context) => ProductsBloc(ProductState()),
+        create: (context) => ProductsBloc(ProductsState()),
         child: const ProductsScreen(),
       ),
     },
@@ -254,7 +254,7 @@ Widget build(BuildContext context) {
   <rect x="48" y="492" width="544" height="64" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
   <g class="an a1"><circle cx="76" cy="524" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">1</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">Flutter crea el State de ProductsScreen.</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">Todavía no hay nada dibujado.</text></g>
   <g class="an a2"><circle cx="76" cy="524" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">2</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">initState corre una sola vez y lanza</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">LoadProductsEvent al Bloc que tiene encima.</text></g>
-  <g class="an a3"><circle cx="76" cy="524" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">3</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">build dibuja la pantalla con el estado inicial,</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">el ProductState() que recibió el Bloc en create.</text></g>
+  <g class="an a3"><circle cx="76" cy="524" r="12" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8">3</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">build dibuja la pantalla con el estado inicial,</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">el ProductsState() que recibió el Bloc en create.</text></g>
   <g class="an a4"><circle cx="76" cy="524" r="12" fill="#E8F6E3" stroke="#9FD68D" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235">4</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">El Bloc emite un estado nuevo y la lista se dibuja</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">con los productos. initState no se repite.</text></g>
   <g class="an a5"><circle cx="76" cy="524" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="76" y="524" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">5</text><text x="100" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="476">Al salir de la pantalla corre dispose</text><text x="100" y="537" font-size="13" fill="#454C61" data-fit="476">y el State se descarta.</text></g>
   <g class="st"><text x="68" y="519" font-size="13" font-weight="600" fill="#161A26" data-fit="508">initState corre una vez; build, cada vez que llega un estado.</text><text x="68" y="537" font-size="13" fill="#454C61" data-fit="508">Por eso el primer evento se lanza desde initState.</text></g>
@@ -283,6 +283,111 @@ context.read<ProductsBloc>().add(LoadProductsEvent());
 ```
 
 `context.read<ProductsBloc>()` busca **hacia arriba** en el árbol, empezando en el widget dueño de ese `context`, hasta encontrar un `BlocProvider<ProductsBloc>`. Lo que devuelve es el `Bloc`, y sobre él se llama `add`.
+
+```svg
+<svg id="bpRead" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 648" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpRead-ttl bpRead-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+  <title id="bpRead-ttl">Del toque al evento: context.read</title>
+  <desc id="bpRead-dsc">Animación en cinco pasos. Uno: el usuario toca el IconButton y corre su onPressed. Dos: el código usa el context de ProductsScreen. Tres: context.read de ProductsBloc sube por el árbol hasta el BlocProvider y devuelve el ProductsBloc que guarda. Cuatro: add le entrega LoadProductsEvent, que sale de la vista y entra a la capa de Bloc. Cinco: el Bloc lo atiende en su manejador on de LoadProductsEvent.</desc>
+  <defs>
+    <style>
+      #bpRead .title{fill:#161A26;font-size:22px;font-weight:700}
+      #bpRead .sub{fill:#79809A;font-size:13.5px}
+      #bpRead .h{font-size:12px;font-weight:700;letter-spacing:.08em;fill:#556074}
+      #bpRead .foot{fill:#79809A;font-size:12px}
+      #bpRead .mono{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace}
+      #bpRead .tree{fill:none;stroke:#C4CBD8;stroke-width:1.75}
+      #bpRead .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#bpRead-arrow)}
+      #bpRead .ar-indigo{fill:none;stroke:#4453C9;stroke-width:1.75;marker-end:url(#bpRead-ar-indigo)}
+      #bpRead .ar-teal{fill:none;stroke:#0F8478;stroke-width:1.75;marker-end:url(#bpRead-ar-teal)}
+      #bpRead .an{opacity:0;animation-duration:15s;animation-iteration-count:infinite;animation-timing-function:linear}
+      #bpRead .st{animation:bpRead-hide 15s linear infinite}
+      #bpRead .a1{animation-name:bpRead-a1}
+      @keyframes bpRead-a1{0%{opacity:0} 2%{opacity:1} 18%{opacity:1} 20%{opacity:0} 100%{opacity:0}}
+      #bpRead .a2{animation-name:bpRead-a2}
+      @keyframes bpRead-a2{0%{opacity:0} 20%{opacity:0} 22%{opacity:1} 38%{opacity:1} 40%{opacity:0} 100%{opacity:0}}
+      #bpRead .a3{animation-name:bpRead-a3}
+      @keyframes bpRead-a3{0%{opacity:0} 40%{opacity:0} 42%{opacity:1} 58%{opacity:1} 60%{opacity:0} 100%{opacity:0}}
+      #bpRead .a4{animation-name:bpRead-a4}
+      @keyframes bpRead-a4{0%{opacity:0} 60%{opacity:0} 62%{opacity:1} 78%{opacity:1} 80%{opacity:0} 100%{opacity:0}}
+      #bpRead .a5{animation-name:bpRead-a5}
+      @keyframes bpRead-a5{0%{opacity:0} 80%{opacity:0} 82%{opacity:1} 98%{opacity:1} 100%{opacity:0}}
+      #bpRead .a23{animation-name:bpRead-a23}
+      @keyframes bpRead-a23{0%{opacity:0} 20%{opacity:0} 22%{opacity:1} 58%{opacity:1} 60%{opacity:0} 100%{opacity:0}}
+      #bpRead .a33{animation-name:bpRead-a33}
+      @keyframes bpRead-a33{0%{opacity:0} 50%{opacity:0} 52%{opacity:1} 58%{opacity:1} 60%{opacity:0} 100%{opacity:0}}
+      #bpRead .tap{animation-name:bpRead-tap;transform-box:fill-box;transform-origin:center}
+      #bpRead .tk1{animation-name:bpRead-tk1}
+      #bpRead .tk2{animation-name:bpRead-tk2}
+      @keyframes bpRead-hide{from{opacity:0}to{opacity:0}}
+      @keyframes bpRead-tap{0%,2%{opacity:0;transform:scale(.3)}4%{opacity:.9;transform:scale(.3)}10%{opacity:0;transform:scale(1.5)}11%{opacity:.9;transform:scale(.3)}17%,100%{opacity:0;transform:scale(1.5)}}
+      @keyframes bpRead-tk1{0%,41%{opacity:0;transform:translate(0,0)}43%{opacity:1;transform:translate(0,0)}45%{opacity:1;transform:translate(-24px,0)}49%{opacity:1;transform:translate(-24px,-64px)}51%{opacity:1;transform:translate(0,-64px)}53%,100%{opacity:0;transform:translate(0,-64px)}}
+      @keyframes bpRead-tk2{0%,62%{opacity:0;transform:translate(0,0)}64%{opacity:1;transform:translate(0,0)}72%{opacity:1;transform:translate(432px,0)}76%{opacity:1;transform:translate(432px,-186px)}78%,100%{opacity:0;transform:translate(432px,-186px)}}
+      @media (prefers-reduced-motion: reduce){#bpRead .an,#bpRead .st{animation:none}}
+    </style>
+    <marker id="bpRead-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
+    </marker>
+    <marker id="bpRead-ar-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#4453C9"/></marker>
+    <marker id="bpRead-ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#0F8478"/></marker>
+  </defs>
+  <rect width="960" height="648" rx="16" fill="#FBFBFD"/>
+  <text class="title" x="48" y="56">Del toque al evento: <tspan class="mono">context.read</tspan></text>
+  <text class="sub" x="48" y="80" data-fit="860">Qué pasa al tocar el botón: el código usa context para subir por el árbol, encuentra el Bloc y le entrega el evento.</text>
+  <rect x="48" y="104" width="312" height="416" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="64" y="126" data-fit="280">VISTA · ÁRBOL DE WIDGETS</text>
+  <rect x="624" y="152" width="288" height="160" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <text class="h" x="640" y="174" data-fit="256">CAPA DE BLOC</text>
+  <path class="tree" d="M216,184 V208 M216,248 V272 M216,312 V336 M216,376 V400 M216,440 V464"/>
+  <path d="M336,228 H648" stroke="#4453C9" stroke-width="1.75" stroke-dasharray="4 4" fill="none"/>
+  <text x="492" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="#4453C9">guarda</text>
+  <rect x="96" y="144" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="164" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">MaterialApp</text>
+  <rect x="96" y="208" width="240" height="40" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="2.5"/><text class="mono" x="216" y="228" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="224">BlocProvider</text>
+  <rect x="96" y="272" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="292" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">ProductsScreen</text>
+  <rect x="96" y="336" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="356" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">Scaffold</text>
+  <rect x="96" y="400" width="240" height="40" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text class="mono" x="216" y="420" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="224">AppBar</text>
+  <rect x="96" y="464" width="240" height="40" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="216" y="484" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="224">IconButton</text>
+  <rect x="108" y="262" width="68" height="20" rx="10" fill="#4453C9"/>
+  <text class="mono" x="142" y="272" dy="0.35em" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF">context</text>
+  <rect x="648" y="204" width="240" height="48" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="768" y="219" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="224">ProductsBloc</text><text x="768" y="238" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="224">la instancia que guarda el provider</text>
+  <rect x="672" y="264" width="192" height="32" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="768" y="280" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="176">on&lt;LoadProductsEvent&gt;</text>
+  <path class="ar-indigo" d="M96,292 H72 V228 H94"/>
+  <path class="ar-teal" d="M336,484 H768 V298"/>
+  <text class="mono" x="552" y="474" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="280">.add(LoadProductsEvent())</text>
+  <text x="552" y="504" text-anchor="middle" font-size="12" fill="#454C61" data-fit="380">el evento sale de la vista y entra a la capa de Bloc</text>
+  <circle cx="336" cy="464" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="336" y="464" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">1</text>
+  <circle cx="336" cy="272" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="336" y="272" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">2</text>
+  <circle cx="72" cy="260" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="72" y="260" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text>
+  <circle cx="768" cy="400" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="768" y="400" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">4</text>
+  <circle cx="864" cy="264" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="864" y="264" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">5</text>
+  <text class="h" x="384" y="336" data-fit="336">EL CÓDIGO DEL BOTÓN</text>
+  <rect x="384" y="348" width="336" height="100" rx="10" fill="#1F2430"/>
+  <rect class="an a1" x="400" y="357" width="78" height="22" rx="5" fill="#0F8478" fill-opacity=".45" stroke="#0F8478" stroke-width="1.5"/>
+  <rect class="an a23" x="532" y="357" width="62" height="22" rx="5" fill="#4453C9" fill-opacity=".45" stroke="#4453C9" stroke-width="1.5"/>
+  <rect class="an a23" x="431" y="381" width="172" height="22" rx="5" fill="#4453C9" fill-opacity=".45" stroke="#4453C9" stroke-width="1.5"/>
+  <rect class="an a4" x="431" y="405" width="203" height="22" rx="5" fill="#0F8478" fill-opacity=".45" stroke="#0F8478" stroke-width="1.5"/>
+  <text class="mono" x="404" y="373" font-size="13" fill="#E6EAF2" data-fit="300">onPressed: () =&gt; context</text>
+  <text class="mono" x="435.2" y="397" font-size="13" fill="#E6EAF2" data-fit="300">.read&lt;ProductsBloc&gt;()</text>
+  <text class="mono" x="435.2" y="421" font-size="13" fill="#E6EAF2" data-fit="300">.add(LoadProductsEvent()),</text>
+  <rect class="an a1" x="90" y="458" width="252" height="52" rx="14" fill="none" stroke="#0F8478" stroke-width="3"/>
+  <circle class="an tap" cx="216" cy="484" r="26" fill="#0F8478" fill-opacity=".35" stroke="#0F8478" stroke-width="2"/>
+  <rect class="an a2" x="90" y="254" width="252" height="64" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <rect class="an a33" x="90" y="202" width="252" height="52" rx="14" fill="none" stroke="#A96C05" stroke-width="3"/>
+  <path class="an a33" d="M342,228 H642" stroke="#4453C9" stroke-width="3.5" fill="none"/>
+  <rect class="an a33" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <rect class="an a5" x="666" y="258" width="204" height="44" rx="12" fill="none" stroke="#0F8478" stroke-width="3"/>
+  <rect class="an a5" x="642" y="198" width="252" height="60" rx="14" fill="none" stroke="#4453C9" stroke-width="3"/>
+  <circle class="an tk1" cx="96" cy="292" r="8" fill="#4453C9" stroke="#FFFFFF" stroke-width="2"/>
+  <circle class="an tk2" cx="336" cy="484" r="8" fill="#0F8478" stroke="#FFFFFF" stroke-width="2"/>
+  <rect x="48" y="536" width="864" height="56" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <g class="an a1"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">1</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El usuario toca el botón.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">Se ejecuta el onPressed del IconButton.</text></g>
+  <g class="an a2"><circle cx="76" cy="564" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">2</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El código usa context.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">Es el de ProductsScreen: el onPressed está escrito dentro de su build.</text></g>
+  <g class="an a3"><circle cx="76" cy="564" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">context.read&lt;ProductsBloc&gt;() sube por el árbol desde ahí.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">Encuentra el BlocProvider y devuelve el ProductsBloc que guarda.</text></g>
+  <g class="an a4"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">4</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">.add(LoadProductsEvent()) le entrega el evento a ese Bloc.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">El evento sale de la vista y entra a la capa de Bloc.</text></g>
+  <g class="an a5"><circle cx="76" cy="564" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="76" y="564" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">5</text><text x="100" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="790">El Bloc lo atiende en su on&lt;LoadProductsEvent&gt;.</text><text x="100" y="577" font-size="13" fill="#454C61" data-fit="790">La vista no hace nada más: espera el estado nuevo.</text></g>
+  <g class="st"><text x="68" y="559" font-size="13" font-weight="600" fill="#161A26" data-fit="820">Una sola línea hace dos cosas: read busca el Bloc hacia arriba y add le entrega el evento.</text><text x="68" y="577" font-size="13" fill="#454C61" data-fit="820">Los números marcan el orden: toque, context, búsqueda, evento y manejador.</text></g>
+  <text class="foot" x="48" y="620" data-fit="860">La vista nunca recibe el Bloc por constructor: lo alcanza a través del context cada vez que lo necesita.</text>
+</svg>
+```
 
 La búsqueda sube y nunca baja. De ahí sale el error más común con `BlocProvider`:
 
@@ -359,7 +464,7 @@ class ProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ProductsBloc(ProductState()),
+      create: (context) => ProductsBloc(ProductsState()),
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () => context.read<ProductsBloc>().add(LoadProductsEvent()),
