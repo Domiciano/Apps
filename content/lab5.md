@@ -110,7 +110,7 @@ dependencies:
 ```
 
 ```svg
-<svg id="l5Carpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 890" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Carpetas-ttl l5Carpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="l5Carpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 924" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Carpetas-ttl l5Carpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="l5Carpetas-ttl">La estructura de carpetas</title>
   <desc id="l5Carpetas-dsc">Árbol de carpetas dentro de lib: main.dart y features. En features, auth con domain (entities, repository y usecases) y data (source y repository); login con ui (bloc y screens); register con ui (bloc y screens); y home con su pantalla. Cada archivo indica el paso del laboratorio en que se crea.</desc>
   <defs>
@@ -127,10 +127,10 @@ dependencies:
       <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
     </marker>
   </defs>
-  <rect width="960" height="890" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="924" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">La estructura de carpetas</text>
   <text class="sub" x="48" y="80" data-fit="860">auth/ guarda lo que se comparte. login/ y register/ solo tienen su pantalla y su Bloc.</text>
-  <rect x="48" y="96" width="864" height="734" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="48" y="96" width="864" height="768" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="38">lib/</text>
   <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
@@ -174,60 +174,65 @@ dependencies:
   <text class="mono" x="174" y="430" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="226">usecases/sign_up_usecase.dart</text>
   <text x="516" y="430" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Registrar</text>
   <circle cx="880" cy="430" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="430" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M126,239 V464 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="451" width="58" height="26" rx="8" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="46">data/</text>
-  <text x="516" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El único lugar que conoce a Supabase</text>
-  <path d="M150,477 V498 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="164" y="485" width="298" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="174" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="286">source/supabase_auth_data_source.dart</text>
-  <text x="516" y="498" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Las llamadas al SDK</text>
-  <circle cx="880" cy="498" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="498" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
-  <path d="M150,477 V532 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="164" y="519" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="174" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="278">repository/auth_repository_impl.dart</text>
-  <text x="516" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Cumple el contrato</text>
-  <circle cx="880" cy="532" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="532" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">5</text>
-  <path d="M150,477 V566 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="164" y="553" width="312" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="174" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="300">repository/profile_repository_impl.dart</text>
+  <path d="M150,273 V464 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="164" y="451" width="245" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="174" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="233">usecases/sign_out_usecase.dart</text>
+  <text x="516" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Cerrar sesión</text>
+  <circle cx="880" cy="464" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="464" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
+  <path d="M126,239 V498 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="485" width="58" height="26" rx="8" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="46">data/</text>
+  <text x="516" y="498" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El único lugar que conoce a Supabase</text>
+  <path d="M150,511 V532 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="164" y="519" width="298" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="174" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="286">source/supabase_auth_data_source.dart</text>
+  <text x="516" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Las llamadas al SDK</text>
+  <circle cx="880" cy="532" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="532" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
+  <path d="M150,511 V566 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="164" y="553" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="174" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="278">repository/auth_repository_impl.dart</text>
   <text x="516" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Cumple el contrato</text>
-  <circle cx="880" cy="566" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="566" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">11</text>
-  <path d="M102,205 V600 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="587" width="88" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="76">login/ui/</text>
-  <text x="516" y="600" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">La pantalla de login y su Bloc</text>
-  <path d="M126,613 V634 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="621" width="58" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="150" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="46">bloc/</text>
-  <text x="516" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">login_bloc · login_event · login_state</text>
-  <circle cx="880" cy="634" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="634" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">6</text>
-  <path d="M126,613 V668 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="655" width="208" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="150" y="668" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="196">screens/login_screen.dart</text>
-  <text x="516" y="668" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El formulario</text>
-  <circle cx="880" cy="668" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="668" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">7</text>
-  <path d="M102,205 V702 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="689" width="110" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="702" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="98">register/ui/</text>
-  <text x="516" y="702" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">La misma forma, para el registro</text>
-  <path d="M126,715 V736 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="723" width="58" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="150" y="736" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="46">bloc/</text>
-  <text x="516" y="736" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">register_bloc · register_event · register_state</text>
-  <circle cx="880" cy="736" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="736" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">8</text>
-  <path d="M126,715 V770 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="757" width="230" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="150" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="218">screens/register_screen.dart</text>
-  <text x="516" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El formulario</text>
+  <circle cx="880" cy="566" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="566" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">5</text>
+  <path d="M150,511 V600 H161" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="164" y="587" width="312" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="174" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="300">repository/profile_repository_impl.dart</text>
+  <text x="516" y="600" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Cumple el contrato</text>
+  <circle cx="880" cy="600" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="600" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">11</text>
+  <path d="M102,205 V634 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="621" width="88" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="76">login/ui/</text>
+  <text x="516" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">La pantalla de login y su Bloc</text>
+  <path d="M126,647 V668 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="655" width="58" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="150" y="668" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="46">bloc/</text>
+  <text x="516" y="668" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">login_bloc · login_event · login_state</text>
+  <circle cx="880" cy="668" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="668" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">6</text>
+  <path d="M126,647 V702 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="689" width="208" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="150" y="702" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="196">screens/login_screen.dart</text>
+  <text x="516" y="702" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El formulario</text>
+  <circle cx="880" cy="702" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="702" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">7</text>
+  <path d="M102,205 V736 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="723" width="110" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="736" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="98">register/ui/</text>
+  <text x="516" y="736" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">La misma forma, para el registro</text>
+  <path d="M126,749 V770 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="757" width="58" height="26" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="150" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="46">bloc/</text>
+  <text x="516" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">register_bloc · register_event · register_state</text>
   <circle cx="880" cy="770" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="770" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">8</text>
-  <path d="M102,205 V804 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="791" width="260" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="804" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="248">home/ui/screens/home_screen.dart</text>
-  <text x="516" y="804" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">A donde llega quien inicia sesión</text>
-  <circle cx="880" cy="804" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="804" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">7</text>
+  <path d="M126,749 V804 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="791" width="230" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="150" y="804" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="218">screens/register_screen.dart</text>
+  <text x="516" y="804" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El formulario</text>
+  <circle cx="880" cy="804" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="804" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">8</text>
+  <path d="M102,205 V838 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="825" width="260" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="838" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="248">home/ui/screens/home_screen.dart</text>
+  <text x="516" y="838" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">A donde llega quien inicia sesión</text>
+  <circle cx="880" cy="838" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="838" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">7</text>
   <text class="h" x="892" y="88" text-anchor="end">PASO</text>
-  <text class="foot" x="48" y="862" data-fit="860">Los nombres de archivo van en minúscula y con guion bajo.</text>
+  <text class="foot" x="48" y="896" data-fit="860">Los nombres de archivo van en minúscula y con guion bajo.</text>
 </svg>
 ```
 
@@ -266,7 +271,7 @@ abstract class AuthRepository {
 
 ## Paso 3 · Los UseCase
 
-`auth/domain/usecases/sign_in_usecase.dart` · `sign_up_usecase.dart`
+`auth/domain/usecases/sign_in_usecase.dart` · `sign_up_usecase.dart` · `sign_out_usecase.dart`
 
 Cada uno recibe el contrato por constructor y expone un método `call`.
 
@@ -276,6 +281,10 @@ class SignInUseCase {
 }
 
 class SignUpUseCase {
+  // TODO
+}
+
+class SignOutUseCase {
   // TODO
 }
 ```
@@ -555,6 +564,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
 `HomeScreen` hoy muestra datos de ejemplo. Haz que reciba el `AuthUser` como argumento de la ruta y muestre su email.
 
+Su botón `Cerrar sesión` hoy solo navega. Pásale un `SignOutUseCase` por constructor, armado en la tabla de rutas igual que el de login:
+
+```dart
+'/home': (_) => HomeScreen(
+      signOut: SignOutUseCase(
+        AuthRepositoryImpl(
+          SupabaseAuthDataSource(Supabase.instance.client),
+        ),
+      ),
+    ),
+```
+
+Y llámalo antes de navegar. Sin eso, la sesión sigue abierta en Supabase aunque la app muestre el login:
+
+```dart
+Future<void> _signOut(BuildContext context) async {
+  await signOut();
+  if (!context.mounted) return;
+  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+}
+```
+
 ## Paso 8 · El registro
 
 `register/ui/`
@@ -572,7 +603,7 @@ Los botones que llevan de `LoginScreen` a `/register` y de vuelta a `/login` ya 
 ```svg
 <svg id="l5Tabla" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 424" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Tabla-ttl l5Tabla-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="l5Tabla-ttl">La tabla profiles</title>
-  <desc id="l5Tabla-dsc">Dos tablas. auth.users la maneja Supabase Auth y tiene id y email. profiles la creas tú y tiene id y username. El id de profiles es llave primaria y a la vez referencia al id de auth.users: cada perfil lleva el mismo id de su cuenta.</desc>
+  <desc id="l5Tabla-dsc">Dos tablas. auth.users la maneja Supabase Auth y tiene id y email. profiles la creas tú y tiene id, username y full_name. El id de profiles es llave primaria y a la vez referencia al id de auth.users: cada perfil lleva el mismo id de su cuenta.</desc>
   <defs>
     <style>
       #l5Tabla .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -589,7 +620,7 @@ Los botones que llevan de `LoginScreen` a `/register` y de vuelta a `/login` ya 
   </defs>
   <rect width="960" height="424" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">La tabla <tspan class="mono">profiles</tspan></text>
-  <text class="sub" x="48" y="80" data-fit="860">Supabase Auth guarda la cuenta. El username va en una tabla tuya, unida a la cuenta por el mismo id.</text>
+  <text class="sub" x="48" y="80" data-fit="860">Supabase Auth guarda la cuenta. El username y el nombre van en una tabla tuya, unida a la cuenta por el mismo id.</text>
   <rect x="96" y="116" width="296" height="164" rx="12" fill="#FFFFFF" stroke="#C4CBD8" stroke-width="2"/>
   <path d="M96,160 V128 A12,12 0 0 1 108,116 H380 A12,12 0 0 1 392,128 V160 Z" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="2"/>
   <text class="mono" x="112" y="138" dy="0.35em" font-size="14" font-weight="700" fill="#556074">auth.users</text>
@@ -604,7 +635,7 @@ Los botones que llevan de `LoginScreen` a `/register` y de vuelta a `/login` ya 
   <path d="M97,240 H391" stroke="#E4E7EE" stroke-width="1.25"/>
   <text class="mono" x="112" y="260" dy="0.35em" font-size="13.5" font-weight="400" fill="#161A26">…</text>
   <text class="mono" x="226" y="260" dy="0.35em" font-size="12.5" fill="#79809A"></text>
-  <rect x="568" y="116" width="296" height="124" rx="12" fill="#FFFFFF" stroke="#A9B4F2" stroke-width="2"/>
+  <rect x="568" y="116" width="296" height="164" rx="12" fill="#FFFFFF" stroke="#A9B4F2" stroke-width="2"/>
   <path d="M568,160 V128 A12,12 0 0 1 580,116 H852 A12,12 0 0 1 864,128 V160 Z" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="2"/>
   <text class="mono" x="584" y="138" dy="0.35em" font-size="14" font-weight="700" fill="#4453C9">profiles</text>
   <text x="848" y="138" dy="0.35em" text-anchor="end" font-size="12" fill="#454C61" data-fit="150">la creaste tú</text>
@@ -615,20 +646,37 @@ Los botones que llevan de `LoginScreen` a `/register` y de vuelta a `/login` ya 
   <path d="M569,200 H863" stroke="#E4E7EE" stroke-width="1.25"/>
   <text class="mono" x="584" y="220" dy="0.35em" font-size="13.5" font-weight="400" fill="#161A26">username</text>
   <text class="mono" x="698" y="220" dy="0.35em" font-size="12.5" fill="#79809A">text</text>
+  <path d="M569,240 H863" stroke="#E4E7EE" stroke-width="1.25"/>
+  <text class="mono" x="584" y="260" dy="0.35em" font-size="13.5" font-weight="400" fill="#161A26">full_name</text>
+  <text class="mono" x="698" y="260" dy="0.35em" font-size="12.5" fill="#79809A">text</text>
   <path class="link" d="M568,180 H394"/>
   <text x="480" y="170" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">el mismo id</text>
   <text x="480" y="200" text-anchor="middle" font-size="12" fill="#454C61">references</text>
   <g transform="translate(96,300)"><rect width="296" height="60" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#556074" data-fit="268">Paso 1 del registro</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="268">signUp crea esta fila y devuelve su id.</text></g>
-  <g transform="translate(568,300)"><rect width="296" height="77" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="268">Paso 2 del registro</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="268">createProfile inserta aquí ese mismo id</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="268">junto con el username.</text></g>
+  <g transform="translate(568,300)"><rect width="296" height="77" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="268">Paso 2 del registro</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="268">createProfile inserta aquí ese mismo id</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="268">junto con username y full_name.</text></g>
   <text class="foot" x="48" y="396" data-fit="860">on delete cascade: si se borra la cuenta, su perfil se borra con ella.</text>
 </svg>
 ```
 
 Es la tabla que creaste en *Configurando los servicios*, con su permiso. Comprueba en el `Table Editor` del dashboard que existe antes de seguir. Si falta, o si le falta el `grant`, el `insert` del siguiente paso falla con `permission denied for table profiles`.
 
+La tabla tiene tres columnas: `id`, `username` y `full_name`. Si la creaste cuando todavía no tenía `full_name`, agrégala con otra migración:
+
+```shell
+npx supabase migration new add_full_name_to_profiles
+```
+
+```sql
+alter table public.profiles add column full_name text not null default '';
+```
+
+```shell
+npx supabase db push
+```
+
 ## Paso 11 · El perfil
 
-Agrega un campo `username` al registro. Ahora registrar son dos pasos, y quien los ordena es `SignUpUseCase`: primero `signUp` y, si sale bien, `createProfile` con el `id` que devolvió. La lección *Laboratorio 5 a nivel conceptual* muestra el flujo completo.
+`RegisterScreen` ya pide el nombre de usuario y el nombre completo: envíalos en `RegisterSubmitted`. Ahora registrar son dos pasos, y quien los ordena es `SignUpUseCase`: primero `signUp` y, si sale bien, `createProfile` con el `id` que devolvió. La lección *Laboratorio 5 a nivel conceptual* muestra el flujo completo.
 
 - Crea el contrato `ProfileRepository` con `createProfile`, y su `ProfileRepositoryImpl`.
 - Extiende `SupabaseAuthDataSource` con el `insert`.
@@ -638,5 +686,9 @@ Agrega un campo `username` al registro. Ahora registrar son dos pasos, y quien l
 El `insert` funciona porque después de `signUp` ya hay una sesión, y el `grant` de la tabla deja escribir a quien la inició.
 
 ```dart
-await _client.from('profiles').insert({'id': userId, 'username': username});
+await _client.from('profiles').insert({
+  'id': userId,
+  'username': username,
+  'full_name': fullName,
+});
 ```

@@ -48,12 +48,12 @@ def sv_dos():
              'Auth guarda lo necesario para saber quién eres. Todo lo demás sobre el usuario va en una tabla tuya.',
              'Dos registros lado a lado. A la izquierda, auth.users, que maneja el módulo de Auth: id, email, encrypted_password, '
              'email_confirmed_at y last_sign_in_at. A la derecha, profiles, una tabla que diseñas tú en la base de datos: id, username '
-             'y name. Auth responde quién eres; profiles guarda cómo te llamas y lo que la app necesite.')
+             'y full_name. Auth responde quién eres; profiles guarda cómo te llamas y lo que la app necesite.')
     s += record(48, 112, 416, 'amber', 'auth.users', 'MÓDULO DE AUTH', [
         ('id', UID, False), ('email', 'ana@icesi.edu.co', False), ('encrypted_password', HASH, False),
         ('email_confirmed_at', '2026-10-05 09:14', False), ('last_sign_in_at', '2026-10-05 09:15', False)], vx=190)
     s += record(496, 112, 416, 'indigo', 'profiles', 'TU BASE DE DATOS', [
-        ('id', UID, False), ('username', 'ana.dev', False), ('name', 'Ana Gómez', False)], vx=190)
+        ('id', UID, False), ('username', 'ana.dev', False), ('full_name', 'Ana Gómez', False)], vx=190)
     s += '  ' + note(496, 272, 416, 'indigo', 'La diseñas tú', ['Nombre, username, foto, carrera: lo que tu app necesite.', 'Auth no tiene columnas para eso.'])
     s += '  ' + note(48, 348, 416, 'amber', 'La maneja Supabase', ['Tu app nunca escribe aquí directamente:', 'usa signUp y signInWithPassword.'])
     s += '  ' + note(496, 365, 416, 'slate', 'La pregunta de cada una', ['Auth: ¿quién eres? · profiles: ¿qué sabemos de ti?'])

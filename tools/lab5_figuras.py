@@ -237,6 +237,7 @@ def l5_carpetas():
         (4, 'repository/profile_repository.dart', 'amber', 'El contrato del perfil', '11'),
         (4, 'usecases/sign_in_usecase.dart', 'amber', 'Iniciar sesión', '3'),
         (4, 'usecases/sign_up_usecase.dart', 'amber', 'Registrar', '3'),
+        (4, 'usecases/sign_out_usecase.dart', 'amber', 'Cerrar sesión', '3'),
         (3, 'data/', 'teal', 'El único lugar que conoce a Supabase', ''),
         (4, 'source/supabase_auth_data_source.dart', 'teal', 'Las llamadas al SDK', '4'),
         (4, 'repository/auth_repository_impl.dart', 'teal', 'Cumple el contrato', '5'),
@@ -330,8 +331,8 @@ FIGS['l5Estado'] = l5_estado
 def l5_tabla():
     fid, h = 'l5Tabla', 424
     s = head(fid, h, 'La tabla <tspan class="mono">profiles</tspan>', 'La tabla profiles',
-             'Supabase Auth guarda la cuenta. El username va en una tabla tuya, unida a la cuenta por el mismo id.',
-             'Dos tablas. auth.users la maneja Supabase Auth y tiene id y email. profiles la creas tú y tiene id y username. El id de '
+             'Supabase Auth guarda la cuenta. El username y el nombre van en una tabla tuya, unida a la cuenta por el mismo id.',
+             'Dos tablas. auth.users la maneja Supabase Auth y tiene id y email. profiles la creas tú y tiene id, username y full_name. El id de '
              'profiles es llave primaria y a la vez referencia al id de auth.users: cada perfil lleva el mismo id de su cuenta.')
 
     def table(x, color, name, who, cols):
@@ -352,12 +353,12 @@ def l5_tabla():
         return o
 
     s += table(96, 'slate', 'auth.users', 'la maneja Supabase Auth', [('id', 'uuid', 'PK'), ('email', 'text', ''), ('…', '', '')])
-    s += table(568, 'indigo', 'profiles', 'la creaste tú', [('id', 'uuid', 'PK · FK'), ('username', 'text', '')])
+    s += table(568, 'indigo', 'profiles', 'la creaste tú', [('id', 'uuid', 'PK · FK'), ('username', 'text', ''), ('full_name', 'text', '')])
     s += '  <path class="link" d="M568,180 H394"/>\n'
     s += '  <text x="480" y="170" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">el mismo id</text>\n'
     s += '  <text x="480" y="200" text-anchor="middle" font-size="12" fill="#454C61">references</text>\n'
     s += '  ' + note(96, 300, 296, 'slate', 'Paso 1 del registro', ['signUp crea esta fila y devuelve su id.'])
-    s += '  ' + note(568, 300, 296, 'indigo', 'Paso 2 del registro', ['createProfile inserta aquí ese mismo id', 'junto con el username.'])
+    s += '  ' + note(568, 300, 296, 'indigo', 'Paso 2 del registro', ['createProfile inserta aquí ese mismo id', 'junto con username y full_name.'])
     return s + tail(h, 'on delete cascade: si se borra la cuenta, su perfil se borra con ella.')
 
 

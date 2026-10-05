@@ -11,7 +11,7 @@ En *Instalación de supabase* creaste la organización, el proyecto y copiaste l
 ```svg
 <svg id="svDos" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 484" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="svDos-ttl svDos-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="svDos-ttl">Dos lugares para un mismo usuario</title>
-  <desc id="svDos-dsc">Dos registros lado a lado. A la izquierda, auth.users, que maneja el módulo de Auth: id, email, encrypted_password, email_confirmed_at y last_sign_in_at. A la derecha, profiles, una tabla que diseñas tú en la base de datos: id, username y name. Auth responde quién eres; profiles guarda cómo te llamas y lo que la app necesite.</desc>
+  <desc id="svDos-dsc">Dos registros lado a lado. A la izquierda, auth.users, que maneja el módulo de Auth: id, email, encrypted_password, email_confirmed_at y last_sign_in_at. A la derecha, profiles, una tabla que diseñas tú en la base de datos: id, username y full_name. Auth responde quién eres; profiles guarda cómo te llamas y lo que la app necesite.</desc>
   <defs>
     <style>
       #svDos .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -57,7 +57,7 @@ En *Instalación de supabase* creaste la organización, el proyecto y copiaste l
   <text class="mono" x="512" y="206" dy="0.35em" font-size="13" font-weight="400" fill="#161A26">username</text>
   <text class="mono" x="686" y="206" dy="0.35em" font-size="12.5" fill="#79809A" data-fit="212">ana.dev</text>
   <path d="M497,224 H911" stroke="#E4E7EE" stroke-width="1.25"/>
-  <text class="mono" x="512" y="242" dy="0.35em" font-size="13" font-weight="400" fill="#161A26">name</text>
+  <text class="mono" x="512" y="242" dy="0.35em" font-size="13" font-weight="400" fill="#161A26">full_name</text>
   <text class="mono" x="686" y="242" dy="0.35em" font-size="12.5" fill="#79809A" data-fit="212">Ana Gómez</text>
   <g transform="translate(496,272)"><rect width="416" height="77" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="388">La diseñas tú</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="388">Nombre, username, foto, carrera: lo que tu app necesite.</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="388">Auth no tiene columnas para eso.</text></g>
   <g transform="translate(48,348)"><rect width="416" height="77" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="388">La maneja Supabase</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="388">Tu app nunca escribe aquí directamente:</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="388">usa signUp y signInWithPassword.</text></g>
@@ -350,7 +350,8 @@ Abre el archivo que apareció en `supabase/migrations/` y escribe:
 ```sql
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  username text not null
+  username text not null,
+  full_name text not null
 );
 
 grant select, insert, update on public.profiles to authenticated;
