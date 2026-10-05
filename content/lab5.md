@@ -91,7 +91,17 @@ El dominio no sabe que existe Supabase. Si mañana cambia el proveedor, solo se 
 
 ## Preparación
 
-Necesitas el proyecto de Supabase de *Instalación de supabase*, con la tabla `profiles` y el Auth por email que dejaste listos en *Configurando los servicios*. Trabaja en el mismo proyecto de Flutter, `moviles_auth`.
+Necesitas el proyecto de Supabase de *Instalación de supabase*, con la tabla `profiles` y el Auth por email que dejaste listos en *Configurando los servicios*.
+
+El punto de partida es este proyecto de Flutter: [github.com/Domiciano/262App3](https://github.com/Domiciano/262App3). Trae las tres pantallas ya dibujadas, la navegación entre ellas y el tema. No tiene `Supabase` ni `Bloc` conectados: eso es lo que construyes aquí.
+
+```shell
+git clone https://github.com/Domiciano/262App3
+cd 262App3
+flutter pub get
+```
+
+Las dependencias ya vienen en su `pubspec.yaml`:
 
 ```yaml
 dependencies:
@@ -459,7 +469,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
 `main.dart`
 
-El `create` del `BlocProvider` es el único lugar donde se arma la cadena completa.
+El proyecto ya trae `App` con el tema y las tres rutas. Falta inicializar `Supabase` y envolver `/login` en su `BlocProvider`. El `create` es el único lugar donde se arma la cadena completa.
 
 ```dart
 Future<void> main() async {
@@ -474,6 +484,9 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Moviles Auth',
+      debugShowCheckedModeBanner: false,
+      theme: buildTheme(),
       initialRoute: '/login',
       routes: {
         '/login': (_) => BlocProvider(
@@ -486,7 +499,8 @@ class App extends StatelessWidget {
               ),
               child: const LoginScreen(),
             ),
-        // TODO: '/register' y '/home'
+        '/register': (_) => const RegisterScreen(),
+        '/home': (_) => const HomeScreen(),
       },
     );
   }
@@ -497,16 +511,11 @@ La `Project URL` y la `publishable key` se copian como en *Instalación de supab
 
 `login/ui/screens/login_screen.dart`
 
+La pantalla ya está dibujada. Hoy guarda `_isLoading` y `_errorMessage` con `setState`, y `_submit()` navega directo a `/home`. Reemplaza eso por el `Bloc`: `_submit()` lanza `LoginSubmitted`, y el formulario toma del estado el `isLoading` del `PrimaryButton` y el texto del `ErrorMessage`.
+
 `BlocBuilder` dibuja cada estado. `BlocListener` usa los mismos tipos, pero en lugar de dibujar ejecuta algo una vez por estado: aquí, navegar.
 
 ```dart
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -518,10 +527,14 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _submit() {
+    // TODO: lanzar LoginSubmitted con el correo y la contraseña
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: const Text('Iniciar sesión')),
       body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state.status == LoginStatus.success) {
@@ -530,8 +543,8 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         child: BlocBuilder<LoginBloc, LoginState>(
           builder: (context, state) {
-            // TODO: los dos campos, el botón que lanza LoginSubmitted,
-            // el indicador en loading y el mensaje en failure
+            // TODO: el formulario que ya existe, con el isLoading y el
+            // ErrorMessage tomados de state
           },
         ),
       ),
@@ -540,17 +553,19 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 ```
 
-`HomeScreen` recibe el `AuthUser` como argumento de la ruta y muestra su email.
+`HomeScreen` hoy muestra datos de ejemplo. Haz que reciba el `AuthUser` como argumento de la ruta y muestre su email.
 
 ## Paso 8 · El registro
 
 `register/ui/`
 
-Créalo desde cero con la misma forma del login: `RegisterSubmitted`, `RegisterState` con su `RegisterStatus` y `copyWith`, `RegisterBloc` con `SignUpUseCase`, y `RegisterScreen`. La pantalla pide la contraseña dos veces y solo lanza el evento si coinciden.
+`RegisterScreen` también está dibujada: pide la contraseña dos veces y solo sigue si coinciden. Falta lo de adentro, con la misma forma del login: `RegisterSubmitted`, `RegisterState` con su `RegisterStatus` y `copyWith`, y `RegisterBloc` con `SignUpUseCase`.
+
+Después conecta la pantalla igual que `LoginScreen`: `_submit()` lanza el evento en lugar de navegar, y la ruta `/register` queda envuelta en su propio `BlocProvider`. Los campos de nombre de usuario y nombre completo todavía no se envían: el perfil llega en el Paso 11.
 
 ## Paso 9 · La navegación
 
-Un botón en `LoginScreen` lleva a `/register`, y uno en `RegisterScreen` vuelve a `/login`. Cada ruta tiene su propio `BlocProvider`.
+Los botones que llevan de `LoginScreen` a `/register` y de vuelta a `/login` ya vienen en el proyecto. Comprueba que siguen funcionando ahora que cada ruta tiene su propio `BlocProvider`.
 
 ## Paso 10 · La tabla profiles
 
@@ -620,7 +635,7 @@ Agrega un campo `username` al registro. Ahora registrar son dos pasos, y quien l
 - Ni el `Bloc` ni el `DataSource` encadenan los dos pasos.
 - Si `createProfile` falla, `SignUpUseCase` atrapa la excepción y decide qué hacer.
 
-El `insert` funciona porque después de `signUp` ya hay una sesión, y la regla de la tabla solo deja escribir la fila cuyo `id` es el UID de quien la inició.
+El `insert` funciona porque después de `signUp` ya hay una sesión, y el `grant` de la tabla deja escribir a quien la inició.
 
 ```dart
 await _client.from('profiles').insert({'id': userId, 'username': username});
