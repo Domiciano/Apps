@@ -34,8 +34,8 @@ def l5_mapa():
              'Registrar un usuario son dos operaciones contra Supabase. Solo una pieza sabe que son dos y en qué orden van.',
              'Mapa de capas del registro. En presentación, RegisterScreen le manda un evento a RegisterBloc. RegisterBloc llama a '
              'SignUpUseCase, en el dominio, que usa dos contratos: primero AuthRepository y después ProfileRepository. En la capa de '
-             'datos, AuthRepositoryImpl y ProfileRepositoryImpl implementan esos contratos con SupabaseAuthDataSource, que habla con '
-             'Supabase Auth y con la tabla profiles.')
+             'datos, AuthRepositoryImpl usa SupabaseAuthDataSource, que habla con Supabase Auth, y ProfileRepositoryImpl usa '
+             'SupabaseProfileDataSource, que habla con la tabla profiles.')
     s += band(104, 96, 'violet', 'PRESENTACIÓN', 'Muestra y avisa')
     s += band(216, 176, 'amber', 'DOMINIO', 'Decide el orden')
     s += band(408, 168, 'teal', 'DATOS', 'Habla con Supabase')
@@ -60,7 +60,8 @@ def l5_mapa():
     s += '  <text x="748" y="279" font-size="12.5" font-weight="700" fill="#A96C05" data-fit="150">orden: 1 y luego 2.</text>\n'
     s += '  ' + box(232, 436, 200, 44, 'teal', 'AuthRepositoryImpl')
     s += '  ' + box(528, 436, 200, 44, 'teal', 'ProfileRepositoryImpl')
-    s += '  ' + box(280, 512, 400, 44, 'teal', 'SupabaseAuthDataSource')
+    s += '  ' + box(220, 512, 224, 44, 'teal', 'SupabaseAuthDataSource', fs=12.5)
+    s += '  ' + box(516, 512, 224, 44, 'teal', 'SupabaseProfileDataSource', fs=12.5)
     s += '  ' + box(232, 614, 200, 44, 'slate', 'Supabase Auth', mono=False)
     s += '  ' + box(528, 614, 200, 44, 'slate', 'tabla profiles', mono=False)
     return s + tail(h, 'Los dos contratos son del dominio. Quién los cumple, y con qué servicio, es asunto de la capa de datos.')
@@ -74,8 +75,8 @@ def l5_secuencia():
     s = head(fid, h, 'El <tspan class="mono">UseCase</tspan> pone el orden', 'El UseCase pone el orden',
              'Primero la cuenta, después el perfil. El segundo paso usa lo que devolvió el primero.',
              'Diagrama de secuencia. RegisterBloc le pide el registro a SignUpUseCase. Paso 1: el UseCase llama a signUp en '
-             'AuthRepository y recibe un AuthUser con su id. Paso 2: el UseCase llama a createProfile en ProfileRepository con ese id y '
-             'el username. Cuando el perfil queda guardado, el UseCase le devuelve el AuthUser a RegisterBloc.',
+             'AuthRepository y recibe un AuthUser con su id. Paso 2: con ese id arma un Profile y llama a createProfile en '
+             'ProfileRepository. Cuando el perfil queda guardado, el UseCase le devuelve el Profile a RegisterBloc.',
              colors=('green',))
     cols = [(144, 'violet', 'RegisterBloc', False), (368, 'amber', 'SignUpUseCase', True),
             (608, 'indigo', 'AuthRepository', False), (832, 'indigo', 'ProfileRepository', False)]
@@ -94,11 +95,11 @@ def l5_secuencia():
     s += msg(204, 144, 360, 'pide el registro', 253)
     s += msg(256, 374, 606, 'signUp(email, password)', 500, mono=True)
     s += msg(304, 608, 376, 'AuthUser, con su id', 492, dashed=True, color='#3A8235', bold=True)
-    s += msg(356, 374, 830, 'createProfile(id, username)', 720, mono=True)
+    s += msg(356, 374, 830, 'createProfile(profile)', 720, mono=True)
     s += msg(404, 832, 376, 'perfil guardado', 720, dashed=True, color='#3A8235', bold=True)
-    s += msg(452, 362, 146, 'AuthUser', 253, dashed=True, color='#3A8235', bold=True)
+    s += msg(452, 362, 146, 'Profile', 253, dashed=True, color='#3A8235', bold=True)
     s += '  ' + chip(398, 256, 1) + '  ' + chip(398, 356, 2)
-    s += '  ' + note(152, 292, 198, 'amber', 'El orden importa', ['El paso 2 necesita el id', 'que devuelve el paso 1.'])
+    s += '  ' + note(152, 292, 198, 'amber', 'El orden importa', ['El Profile se arma con el id', 'que devuelve el paso 1.'])
     return s + tail(h, 'RegisterBloc hace una sola llamada. No sabe que por dentro hay dos pasos.')
 
 
@@ -182,16 +183,16 @@ FIGS['l5Falla'] = l5_falla
 
 
 STEPS = {
-    1: 'Las dos entidades', 2: 'Los dos contratos', 3: 'SignUpUseCase', 4: 'Los datos de Auth', 5: 'Los datos del perfil',
-    6: 'RegisterBloc', 7: 'main.dart', 8: 'RegisterScreen', 9: 'HomeScreen y la prueba',
+    1: 'RegisterBloc', 2: 'RegisterScreen', 3: 'Las dos entidades', 4: 'Los dos contratos', 5: 'SignUpUseCase',
+    6: 'Los datos de Auth', 7: 'Los datos del perfil', 8: 'main.dart', 9: 'HomeScreen y la prueba',
 }
 NODES = [
-    (216, 140, 120, 'violet', 'HomeScreen', 9), (352, 140, 128, 'violet', 'RegisterScreen', 8),
-    (504, 140, 128, 'violet', 'RegisterBloc', 6), (768, 140, 128, 'violet', 'main.dart', 7),
-    (316, 256, 152, 'indigo', 'AuthUser', 1), (492, 256, 152, 'amber', 'SignUpUseCase', 3), (668, 256, 152, 'indigo', 'Profile', 1),
-    (304, 340, 176, 'indigo', 'AuthRepository', 2), (656, 340, 176, 'indigo', 'ProfileRepository', 2),
-    (304, 452, 176, 'teal', 'AuthRepositoryImpl', 4), (656, 452, 176, 'teal', 'ProfileRepositoryImpl', 5),
-    (288, 528, 208, 'teal', 'SupabaseAuthDataSource', 4), (636, 528, 216, 'teal', 'SupabaseProfileDataSource', 5),
+    (216, 140, 120, 'violet', 'HomeScreen', 9), (352, 140, 128, 'violet', 'RegisterScreen', 2),
+    (504, 140, 128, 'violet', 'RegisterBloc', 1), (768, 140, 128, 'violet', 'main.dart', 8),
+    (316, 256, 152, 'indigo', 'AuthUser', 3), (492, 256, 152, 'amber', 'SignUpUseCase', 5), (668, 256, 152, 'indigo', 'Profile', 3),
+    (304, 340, 176, 'indigo', 'AuthRepository', 4), (656, 340, 176, 'indigo', 'ProfileRepository', 4),
+    (304, 452, 176, 'teal', 'AuthRepositoryImpl', 6), (656, 452, 176, 'teal', 'ProfileRepositoryImpl', 7),
+    (288, 528, 208, 'teal', 'SupabaseAuthDataSource', 6), (636, 528, 216, 'teal', 'SupabaseProfileDataSource', 7),
 ]
 
 
@@ -201,11 +202,11 @@ def l5_ruta(step=None):
     if step is None:
         s = head(fid, h, 'El mapa del laboratorio', 'El mapa del laboratorio',
                  'Cada caja es una clase y el número dice en qué paso la construyes. A la izquierda, lo de Auth. A la derecha, lo del perfil.',
-                 'Mapa de capas de la Parte 1, con dos columnas: Auth a la izquierda y el perfil a la derecha. Dominio: AuthUser y Profile '
-                 'en el paso 1, AuthRepository y ProfileRepository en el 2, SignUpUseCase en el 3, que usa los dos contratos en orden. '
-                 'Datos: SupabaseAuthDataSource y AuthRepositoryImpl en el paso 4, SupabaseProfileDataSource y ProfileRepositoryImpl en '
-                 'el 5. Presentación: RegisterBloc en el paso 6, main.dart en el 7, RegisterScreen en el 8 y HomeScreen en el 9. Abajo, '
-                 'Supabase Auth y la tabla profiles.')
+                 'Mapa de capas de la Parte 1, con dos columnas: Auth a la izquierda y el perfil a la derecha. Presentación: RegisterBloc '
+                 'en el paso 1 y RegisterScreen en el 2. Dominio: AuthUser y Profile en el paso 3, AuthRepository y ProfileRepository en '
+                 'el 4, SignUpUseCase en el 5, que usa los dos contratos en orden. Datos: SupabaseAuthDataSource y AuthRepositoryImpl en '
+                 'el paso 6, SupabaseProfileDataSource y ProfileRepositoryImpl en el 7. De vuelta en presentación, main.dart en el 8 y '
+                 'HomeScreen en el 9. Abajo, Supabase Auth y la tabla profiles.')
     else:
         names = ', '.join(n[4] for n in NODES if n[5] == step)
         s = head(fid, h, f'Paso {step} · {STEPS[step]}', f'Paso {step} · {STEPS[step]}',
@@ -288,23 +289,23 @@ def l5_carpetas():
     fid = 'l5Carpetas'
     rows = [
         (0, 'lib/', 'slate', '', ''),
-        (1, 'main.dart', 'violet', 'Inicializa Supabase y arma las rutas', '7'),
+        (1, 'main.dart', 'violet', 'Inicializa Supabase y arma las rutas', '8'),
         (1, 'features/', 'slate', '', ''),
         (2, 'auth/', 'slate', 'Lo que comparten registro y login', ''),
         (3, 'domain/', 'amber', 'No importa nada de Flutter ni de Supabase', ''),
-        (4, 'entities/auth_user.dart', 'amber', 'Lo que devuelve Auth', '1'),
-        (4, 'entities/profile.dart', 'amber', 'Lo que guardas en tu tabla', '1'),
-        (4, 'repository/auth_repository.dart', 'amber', 'El contrato de autenticación', '2'),
-        (4, 'repository/profile_repository.dart', 'amber', 'El contrato del perfil', '2'),
-        (4, 'usecases/sign_up_usecase.dart', 'amber', 'Registrar: los dos pasos, en orden', '3'),
+        (4, 'entities/auth_user.dart', 'amber', 'Lo que devuelve Auth', '3'),
+        (4, 'entities/profile.dart', 'amber', 'Lo que guardas en tu tabla', '3'),
+        (4, 'repository/auth_repository.dart', 'amber', 'El contrato de autenticación', '4'),
+        (4, 'repository/profile_repository.dart', 'amber', 'El contrato del perfil', '4'),
+        (4, 'usecases/sign_up_usecase.dart', 'amber', 'Registrar: los dos pasos, en orden', '5'),
         (3, 'data/', 'teal', 'El único lugar que conoce a Supabase', ''),
-        (4, 'source/supabase_auth_data_source.dart', 'teal', 'Las llamadas a Auth', '4'),
-        (4, 'repository/auth_repository_impl.dart', 'teal', 'Cumple el contrato', '4'),
-        (4, 'source/supabase_profile_data_source.dart', 'teal', 'El insert en profiles', '5'),
-        (4, 'repository/profile_repository_impl.dart', 'teal', 'Cumple el contrato', '5'),
+        (4, 'source/supabase_auth_data_source.dart', 'teal', 'Las llamadas a Auth', '6'),
+        (4, 'repository/auth_repository_impl.dart', 'teal', 'Cumple el contrato', '6'),
+        (4, 'source/supabase_profile_data_source.dart', 'teal', 'El insert en profiles', '7'),
+        (4, 'repository/profile_repository_impl.dart', 'teal', 'Cumple el contrato', '7'),
         (2, 'register/ui/', 'violet', 'La pantalla de registro y su Bloc', ''),
-        (3, 'bloc/', 'violet', 'register_bloc · register_event · register_state', '6'),
-        (3, 'screens/register_screen.dart', 'violet', 'Ya viene dibujada: se conecta', '8'),
+        (3, 'bloc/', 'violet', 'register_bloc · register_event · register_state', '1'),
+        (3, 'screens/register_screen.dart', 'violet', 'Ya viene dibujada: se conecta', '2'),
         (2, 'home/ui/screens/home_screen.dart', 'violet', 'A donde llega quien se registra', '9'),
         (2, 'login/ui/', 'violet', 'La Parte 2, con la misma forma', ''),
     ]

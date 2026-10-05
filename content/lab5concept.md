@@ -3,14 +3,14 @@
 <!-- tags: SignUpUseCase, flujo de registro, quién llama a createProfile, AuthRepository, ProfileRepository,
      secuencia en el UseCase, cuenta creada sin perfil, tabla profiles, capa de dominio, excepción en el registro -->
 
-El Laboratorio 5 pide registrar un usuario y guardar su `username`. Eso son dos operaciones, y esta lección muestra, sin código, qué capa decide el orden entre ellas.
+El Laboratorio 5 pide registrar un usuario: crear su cuenta y guardar su perfil. Eso son dos operaciones, y esta lección muestra, sin código, qué capa decide el orden entre ellas.
 
 ## El registro son dos pasos
 
 ```svg
 <svg id="l5Mapa" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 736" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Mapa-ttl l5Mapa-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="l5Mapa-ttl">El registro, capa por capa</title>
-  <desc id="l5Mapa-dsc">Mapa de capas del registro. En presentación, RegisterScreen le manda un evento a RegisterBloc. RegisterBloc llama a SignUpUseCase, en el dominio, que usa dos contratos: primero AuthRepository y después ProfileRepository. En la capa de datos, AuthRepositoryImpl y ProfileRepositoryImpl implementan esos contratos con SupabaseAuthDataSource, que habla con Supabase Auth y con la tabla profiles.</desc>
+  <desc id="l5Mapa-dsc">Mapa de capas del registro. En presentación, RegisterScreen le manda un evento a RegisterBloc. RegisterBloc llama a SignUpUseCase, en el dominio, que usa dos contratos: primero AuthRepository y después ProfileRepository. En la capa de datos, AuthRepositoryImpl usa SupabaseAuthDataSource, que habla con Supabase Auth, y ProfileRepositoryImpl usa SupabaseProfileDataSource, que habla con la tabla profiles.</desc>
   <defs>
     <style>
       #l5Mapa .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -65,21 +65,22 @@ El Laboratorio 5 pide registrar un usuario y guardar su `username`. Eso son dos 
   <text x="748" y="279" font-size="12.5" font-weight="700" fill="#A96C05" data-fit="150">orden: 1 y luego 2.</text>
   <rect x="232" y="436" width="200" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="332" y="458" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="184">AuthRepositoryImpl</text>
   <rect x="528" y="436" width="200" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="628" y="458" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="184">ProfileRepositoryImpl</text>
-  <rect x="280" y="512" width="400" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="480" y="534" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0F8478" data-fit="384">SupabaseAuthDataSource</text>
+  <rect x="220" y="512" width="224" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="332" y="534" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="208">SupabaseAuthDataSource</text>
+  <rect x="516" y="512" width="224" height="44" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="628" y="534" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="208">SupabaseProfileDataSource</text>
   <rect x="232" y="614" width="200" height="44" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="332" y="636" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="184">Supabase Auth</text>
   <rect x="528" y="614" width="200" height="44" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="628" y="636" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#556074" data-fit="184">tabla profiles</text>
   <text class="foot" x="48" y="708" data-fit="860">Los dos contratos son del dominio. Quién los cumple, y con qué servicio, es asunto de la capa de datos.</text>
 </svg>
 ```
 
-Crear la cuenta le toca a Supabase Auth. Guardar el `username` le toca a la tabla `profiles`. Son dos servicios, y por eso el dominio tiene dos contratos: `AuthRepository` y `ProfileRepository`. La única pieza que conoce a los dos es `SignUpUseCase`.
+Crear la cuenta le toca a Supabase Auth. Guardar el perfil, con el `username` y el nombre, le toca a la tabla `profiles`. Son dos servicios, y por eso todo viene de a dos: dos entidades, `AuthUser` y `Profile`; dos contratos, `AuthRepository` y `ProfileRepository`; y dos data sources. La única pieza que conoce a los dos es `SignUpUseCase`.
 
 ## El UseCase pone el orden
 
 ```svg
 <svg id="l5Secuencia" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 548" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="l5Secuencia-ttl l5Secuencia-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="l5Secuencia-ttl">El UseCase pone el orden</title>
-  <desc id="l5Secuencia-dsc">Diagrama de secuencia. RegisterBloc le pide el registro a SignUpUseCase. Paso 1: el UseCase llama a signUp en AuthRepository y recibe un AuthUser con su id. Paso 2: el UseCase llama a createProfile en ProfileRepository con ese id y el username. Cuando el perfil queda guardado, el UseCase le devuelve el AuthUser a RegisterBloc.</desc>
+  <desc id="l5Secuencia-dsc">Diagrama de secuencia. RegisterBloc le pide el registro a SignUpUseCase. Paso 1: el UseCase llama a signUp en AuthRepository y recibe un AuthUser con su id. Paso 2: con ese id arma un Profile y llama a createProfile en ProfileRepository. Cuando el perfil queda guardado, el UseCase le devuelve el Profile a RegisterBloc.</desc>
   <defs>
     <style>
       #l5Secuencia .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -115,19 +116,19 @@ Crear la cuenta le toca a Supabase Auth. Guardar el `username` le toca a la tabl
   <path class="ar-green" stroke-dasharray="5 4" d="M608,304 H376"/>
   <text x="492" y="295" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235" data-fit="216">AuthUser, con su id</text>
   <path class="link" d="M374,356 H830"/>
-  <text class="mono" x="720" y="347" text-anchor="middle" font-size="12.5" font-weight="600" fill="#556074" data-fit="216">createProfile(id, username)</text>
+  <text class="mono" x="720" y="347" text-anchor="middle" font-size="12.5" font-weight="600" fill="#556074" data-fit="216">createProfile(profile)</text>
   <path class="ar-green" stroke-dasharray="5 4" d="M832,404 H376"/>
   <text x="720" y="395" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235" data-fit="216">perfil guardado</text>
   <path class="ar-green" stroke-dasharray="5 4" d="M362,452 H146"/>
-  <text x="253" y="443" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235" data-fit="216">AuthUser</text>
+  <text x="253" y="443" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A8235" data-fit="216">Profile</text>
   <circle cx="398" cy="256" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="398" y="256" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
   <circle cx="398" cy="356" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="398" y="356" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
-  <g transform="translate(152,292)"><rect width="198" height="77" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="170">El orden importa</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="170">El paso 2 necesita el id</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="170">que devuelve el paso 1.</text></g>
+  <g transform="translate(152,292)"><rect width="198" height="77" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="170">El orden importa</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="170">El Profile se arma con el id</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="170">que devuelve el paso 1.</text></g>
   <text class="foot" x="48" y="520" data-fit="860">RegisterBloc hace una sola llamada. No sabe que por dentro hay dos pasos.</text>
 </svg>
 ```
 
-El perfil se guarda con el `id` de la cuenta, así que la cuenta va primero. Ese orden es una regla del registro, no un detalle de Supabase. `SignUpUseCase` la escribe una sola vez: llama a `signUp`, espera el `AuthUser` y con su `id` llama a `createProfile`.
+El perfil se guarda con el `id` de la cuenta, así que la cuenta va primero. Ese orden es una regla del registro, no un detalle de Supabase. `SignUpUseCase` la escribe una sola vez: llama a `signUp`, espera el `AuthUser`, con su `id` arma el `Profile` y llama a `createProfile`.
 
 ## Por qué no en otra capa
 
@@ -201,7 +202,7 @@ El perfil se guarda con el `id` de la cuenta, así que la cuenta va primero. Ese
 </svg>
 ```
 
-El `Bloc` podría encadenar los dos pasos, y el `DataSource` también. En ambos casos la app funciona, pero la regla queda en el lugar equivocado: en la vista, donde se repite, o en el código de Supabase, donde se pierde al cambiar de proveedor.
+El `Bloc` podría encadenar los dos pasos, y la capa de datos también. En ambos casos la app funciona, pero la regla queda en el lugar equivocado: en la vista, donde se repite, o en el código de Supabase, donde se pierde al cambiar de proveedor.
 
 ## Si el segundo paso falla
 
