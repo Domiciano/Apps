@@ -153,14 +153,12 @@ FIGS['bpArbol'] = bp_arbol
 
 
 def bp_anatomia_result():
-    o = '<rect x="40" y="20" width="296" height="264" rx="12" fill="#FFF3DC" fill-opacity=".6" stroke="#F0C572" stroke-width="2"/>'
+    o = '<rect x="40" y="20" width="296" height="224" rx="12" fill="#FFF3DC" fill-opacity=".6" stroke="#F0C572" stroke-width="2"/>'
     o += f'<text class="mono" x="56" y="42" dy="0.35em" font-size="13.5" font-weight="700" fill="#A96C05">BlocProvider</text>'
     o += box(56, 68, 264, 48, 'indigo', 'ProductsBloc', sub='la instancia que se guarda')
-    o += box(56, 134, 200, 32, 'teal', 'LoadProductsEvent', fs=12.5)
-    o += '<path class="ar-teal" d="M256,150 H288 V118"/>'
-    o += '<text x="188" y="194" text-anchor="middle" font-size="12" font-weight="600" fill="#A96C05" data-fit="250">al alcance de todo lo que hay en child</text>'
-    o += '<path d="M188,202 V214" stroke="#A96C05" stroke-width="1.75" fill="none"/><path d="M182,210 L188,218 L194,210" stroke="#A96C05" stroke-width="1.75" fill="none"/>'
-    o += box(56, 222, 264, 44, 'violet', 'ProductsScreen', sub='y todos sus descendientes')
+    o += '<text x="188" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#A96C05" data-fit="250">al alcance de todo lo que hay en child</text>'
+    o += '<path d="M188,156 V168" stroke="#A96C05" stroke-width="1.75" fill="none"/><path d="M182,164 L188,172 L194,164" stroke="#A96C05" stroke-width="1.75" fill="none"/>'
+    o += box(56, 178, 264, 44, 'violet', 'ProductsScreen', sub='y todos sus descendientes')
     return o
 
 
@@ -168,32 +166,28 @@ FIGS['bpAnatomia'] = lambda: frame(dict(
     id='bpAnatomia',
     title='Las partes de un <tspan class="mono">BlocProvider</tspan>',
     title_plain='Las partes de un BlocProvider',
-    desc='Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc que el provider guarda, los dos puntos con add le '
-         'lanzan el primer evento LoadProductsEvent, y child es ProductsScreen, la parte del árbol que queda con el Bloc a su alcance.',
+    desc='Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc, con ProductState como estado inicial, y el '
+         'provider lo guarda; child es ProductsScreen, la parte del árbol que queda con el Bloc a su alcance.',
     sub='Dos parámetros: create dice cómo se construye el Bloc y child dice quién lo va a poder usar.',
     file='lib/main.dart',
     panel='LO QUE QUEDA ARMADO',
-    min_h=340,
+    min_h=296,
     code=[
         "BlocProvider<ProductsBloc>(",
-        "  create: (_) => ProductsBloc(",
-        "    ProductsRepository(),",
-        "  )..add(LoadProductsEvent()),",
+        "  create: (context) => ProductsBloc(ProductState()),",
         "  child: const ProductsScreen(),",
         ")",
     ],
     result=bp_anatomia_result(),
     arrows=[
-        dict(line=0, find='BlocProvider<ProductsBloc>', to=(40, 40), color='amber', lane=3),
-        dict(line=1, find='create', to=(56, 92), color='indigo', lane=2),
-        dict(line=3, find='..add(LoadProductsEvent())', to=(56, 150), color='teal', lane=1),
-        dict(line=4, find='child', to=(56, 244), color='violet', lane=0),
+        dict(line=0, find='BlocProvider<ProductsBloc>', to=(40, 40), color='amber', lane=2),
+        dict(line=1, find='create', to=(56, 92), color='indigo', lane=1),
+        dict(line=2, find='child', to=(56, 200), color='violet', lane=0),
     ],
     cards=[
-        ('amber', 'BlocProvider<T>', ['El tipo entre &lt; &gt; es la', 'etiqueta con la que', 'después se busca.']),
-        ('indigo', 'create', ['Una función que', 'construye el Bloc.', 'Se ejecuta una vez.']),
-        ('teal', '..add(...)', ['Opcional: el primer', 'evento, para que abra', 'cargando datos.']),
-        ('violet', 'child', ['La pantalla que queda', 'debajo. Solo ella y sus', 'hijos ven el Bloc.']),
+        ('amber', 'BlocProvider<T>', ['El tipo entre &lt; &gt; es la etiqueta', 'con la que después se busca', 'el Bloc desde un widget.']),
+        ('indigo', 'create', ['Una función que construye el', 'Bloc con su estado inicial.', 'Se ejecuta una sola vez.']),
+        ('violet', 'child', ['La pantalla que queda debajo.', 'Solo ella y sus hijos', 'ven el Bloc.']),
     ],
 ))
 

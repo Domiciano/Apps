@@ -59,9 +59,9 @@ Un `Bloc` es un objeto de Dart, no un widget. Alguien tiene que crearlo, guardar
 ## Las partes de un BlocProvider
 
 ```svg
-<svg id="bpAnatomia" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 629" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpAnatomia-ttl bpAnatomia-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="bpAnatomia" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 585" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="bpAnatomia-ttl bpAnatomia-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="bpAnatomia-ttl">Las partes de un BlocProvider</title>
-  <desc id="bpAnatomia-dsc">Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc que el provider guarda, los dos puntos con add le lanzan el primer evento LoadProductsEvent, y child es ProductsScreen, la parte del árbol que queda con el Bloc a su alcance.</desc>
+  <desc id="bpAnatomia-dsc">Un BlocProvider de ProductsBloc anotado: create construye el ProductsBloc, con ProductState como estado inicial, y el provider lo guarda; child es ProductsScreen, la parte del árbol que queda con el Bloc a su alcance.</desc>
   <defs>
     <style>
       #bpAnatomia .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -81,113 +81,106 @@ Un `Bloc` es un objeto de Dart, no un widget. Alguien tiene que crearlo, guardar
       #bpAnatomia .hl-indigo{fill:#A9B4F2;fill-opacity:.16;stroke:#A9B4F2;stroke-width:1.5}
       #bpAnatomia .ld-indigo{fill:none;stroke:#A9B4F2;stroke-width:1.5;stroke-dasharray:3 4}
       #bpAnatomia .ar-indigo{fill:none;stroke:#4453C9;stroke-width:1.75;marker-end:url(#bpAnatomia-ar-indigo)}
-      #bpAnatomia .hl-teal{fill:#86D3CA;fill-opacity:.16;stroke:#86D3CA;stroke-width:1.5}
-      #bpAnatomia .ld-teal{fill:none;stroke:#86D3CA;stroke-width:1.5;stroke-dasharray:3 4}
-      #bpAnatomia .ar-teal{fill:none;stroke:#0F8478;stroke-width:1.75;marker-end:url(#bpAnatomia-ar-teal)}
       #bpAnatomia .hl-violet{fill:#C9A6EE;fill-opacity:.16;stroke:#C9A6EE;stroke-width:1.5}
       #bpAnatomia .ld-violet{fill:none;stroke:#C9A6EE;stroke-width:1.5;stroke-dasharray:3 4}
       #bpAnatomia .ar-violet{fill:none;stroke:#7439B8;stroke-width:1.75;marker-end:url(#bpAnatomia-ar-violet)}
     </style>
     <marker id="bpAnatomia-ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#A96C05"/></marker>
     <marker id="bpAnatomia-ar-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#4453C9"/></marker>
-    <marker id="bpAnatomia-ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#0F8478"/></marker>
     <marker id="bpAnatomia-ar-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#7439B8"/></marker>
   </defs>
-  <rect width="960" height="629" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="585" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">Las partes de un <tspan class="mono">BlocProvider</tspan></text>
   <text class="sub" x="48" y="80" data-fit="860">Dos parámetros: create dice cómo se construye el Bloc y child dice quién lo va a poder usar.</text>
-  <rect x="48" y="112" width="456" height="340" rx="12" fill="#1F2430"/>
+  <rect x="48" y="112" width="456" height="296" rx="12" fill="#1F2430"/>
   <path d="M48,124 A12,12 0 0 1 60,112 H492 A12,12 0 0 1 504,124 V144 H48 Z" fill="#2A3040"/>
   <circle cx="68" cy="128" r="5" fill="#F14C4C"/><circle cx="84" cy="128" r="5" fill="#E5C07B"/><circle cx="100" cy="128" r="5" fill="#6BCB77"/>
   <text class="mono" x="276" y="128" dy="0.35em" text-anchor="middle" fill="#9AA3B5" font-size="12" data-fit="316">lib/main.dart</text>
-  <rect x="552" y="112" width="360" height="340" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="552" y="112" width="360" height="296" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
   <text class="h" x="568" y="128" dy="0.35em" data-fit="328">LO QUE QUEDA ARMADO</text>
   <path d="M552,144 H912" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect class="hl-amber" x="64.0" y="156" width="210.8" height="22" rx="5"/>
   <rect class="hl-indigo" x="79.6" y="180" width="54.8" height="22" rx="5"/>
-  <rect class="hl-teal" x="87.4" y="228" width="210.8" height="22" rx="5"/>
-  <rect class="hl-violet" x="79.6" y="252" width="47.0" height="22" rx="5"/>
+  <rect class="hl-violet" x="79.6" y="204" width="47.0" height="22" rx="5"/>
   <text class="cl mono" font-size="13" x="68.0" y="172" textLength="210.6" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="c">BlocProvider</tspan>&lt;<tspan class="c">ProductsBloc</tspan>&gt;(</text>
-  <text class="cl mono" font-size="13" x="83.6" y="196" textLength="218.4" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">create</tspan>: (_) =&gt; <tspan class="c">ProductsBloc</tspan>(</text>
-  <text class="cl mono" font-size="13" x="99.2" y="220" textLength="163.8" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="c">ProductsRepository</tspan>(),</text>
-  <text class="cl mono" font-size="13" x="83.6" y="244" textLength="218.4" lengthAdjust="spacingAndGlyphs" data-fit="432">)..add(<tspan class="c">LoadProductsEvent</tspan>()),</text>
-  <text class="cl mono" font-size="13" x="83.6" y="268" textLength="234.0" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">child</tspan>: <tspan class="k">const</tspan> <tspan class="c">ProductsScreen</tspan>(),</text>
-  <text class="cl mono" font-size="13" x="68.0" y="292" textLength="7.8" lengthAdjust="spacingAndGlyphs" data-fit="432">)</text>
+  <text class="cl mono" font-size="13" x="83.6" y="196" textLength="390.0" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">create</tspan>: (context) =&gt; <tspan class="c">ProductsBloc</tspan>(<tspan class="c">ProductState</tspan>()),</text>
+  <text class="cl mono" font-size="13" x="83.6" y="220" textLength="234.0" lengthAdjust="spacingAndGlyphs" data-fit="432"><tspan class="p">child</tspan>: <tspan class="k">const</tspan> <tspan class="c">ProductsScreen</tspan>(),</text>
+  <text class="cl mono" font-size="13" x="68.0" y="244" textLength="7.8" lengthAdjust="spacingAndGlyphs" data-fit="432">)</text>
   <g transform="translate(552,144)">
-<rect x="40" y="20" width="296" height="264" rx="12" fill="#FFF3DC" fill-opacity=".6" stroke="#F0C572" stroke-width="2"/><text class="mono" x="56" y="42" dy="0.35em" font-size="13.5" font-weight="700" fill="#A96C05">BlocProvider</text><rect x="56" y="68" width="264" height="48" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="188" y="83" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="248">ProductsBloc</text><text x="188" y="102" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="248">la instancia que se guarda</text>
-<rect x="56" y="134" width="200" height="32" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text class="mono" x="156" y="150" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="184">LoadProductsEvent</text>
-<path class="ar-teal" d="M256,150 H288 V118"/><text x="188" y="194" text-anchor="middle" font-size="12" font-weight="600" fill="#A96C05" data-fit="250">al alcance de todo lo que hay en child</text><path d="M188,202 V214" stroke="#A96C05" stroke-width="1.75" fill="none"/><path d="M182,210 L188,218 L194,210" stroke="#A96C05" stroke-width="1.75" fill="none"/><rect x="56" y="222" width="264" height="44" rx="10" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text class="mono" x="188" y="235" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7439B8" data-fit="248">ProductsScreen</text><text x="188" y="254" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="248">y todos sus descendientes</text>
+<rect x="40" y="20" width="296" height="224" rx="12" fill="#FFF3DC" fill-opacity=".6" stroke="#F0C572" stroke-width="2"/><text class="mono" x="56" y="42" dy="0.35em" font-size="13.5" font-weight="700" fill="#A96C05">BlocProvider</text><rect x="56" y="68" width="264" height="48" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text class="mono" x="188" y="83" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4453C9" data-fit="248">ProductsBloc</text><text x="188" y="102" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="248">la instancia que se guarda</text>
+<text x="188" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#A96C05" data-fit="250">al alcance de todo lo que hay en child</text><path d="M188,156 V168" stroke="#A96C05" stroke-width="1.75" fill="none"/><path d="M182,164 L188,172 L194,164" stroke="#A96C05" stroke-width="1.75" fill="none"/><rect x="56" y="178" width="264" height="44" rx="10" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/><text class="mono" x="188" y="191" dy="0.35em" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7439B8" data-fit="248">ProductsScreen</text><text x="188" y="210" dy="0.35em" text-anchor="middle" font-size="12" fill="#454C61" data-fit="248">y todos sus descendientes</text>
 
   </g>
   <path class="ld-amber" d="M284.6,167 H504"/>
-  <path class="ar-amber" d="M504,167 H541 V184 H592"/>
-  <path class="ld-indigo" d="M308.0,191 H504"/>
-  <path class="ar-indigo" d="M504,191 H532 V236 H608"/>
-  <path class="ld-teal" d="M308.0,239 H504"/>
-  <path class="ar-teal" d="M504,239 H523 V294 H608"/>
-  <path class="ld-violet" d="M323.6,263 H504"/>
-  <path class="ar-violet" d="M504,263 H514 V388 H608"/>
-  <g transform="translate(48.0,476)">
-    <rect width="204.0" height="121" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <path class="ar-amber" d="M504,167 H532 V184 H592"/>
+  <path class="ld-indigo" d="M479.6,191 H504"/>
+  <path class="ar-indigo" d="M504,191 H523 V236 H608"/>
+  <path class="ld-violet" d="M323.6,215 H504"/>
+  <path class="ar-violet" d="M504,215 H514 V344 H608"/>
+  <g transform="translate(48.0,432)">
+    <rect width="277.3" height="121" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
     <circle cx="24" cy="26" r="7" fill="#FFF3DC" stroke="#A96C05" stroke-width="2"/>
-    <text class="ct mono" x="42" y="26" dy="0.35em" data-fit="146">BlocProvider&lt;T&gt;</text>
-    <text class="cb" x="16" y="60" data-fit="172">El tipo entre &lt; &gt; es la</text>
-    <text class="cb" x="16" y="79" data-fit="172">etiqueta con la que</text>
-    <text class="cb" x="16" y="98" data-fit="172">después se busca.</text>
+    <text class="ct mono" x="42" y="26" dy="0.35em" data-fit="219">BlocProvider&lt;T&gt;</text>
+    <text class="cb" x="16" y="60" data-fit="245">El tipo entre &lt; &gt; es la etiqueta</text>
+    <text class="cb" x="16" y="79" data-fit="245">con la que después se busca</text>
+    <text class="cb" x="16" y="98" data-fit="245">el Bloc desde un widget.</text>
   </g>
-  <g transform="translate(268.0,476)">
-    <rect width="204.0" height="121" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <g transform="translate(341.3,432)">
+    <rect width="277.3" height="121" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
     <circle cx="24" cy="26" r="7" fill="#EEF1FF" stroke="#4453C9" stroke-width="2"/>
-    <text class="ct mono" x="42" y="26" dy="0.35em" data-fit="146">create</text>
-    <text class="cb" x="16" y="60" data-fit="172">Una función que</text>
-    <text class="cb" x="16" y="79" data-fit="172">construye el Bloc.</text>
-    <text class="cb" x="16" y="98" data-fit="172">Se ejecuta una vez.</text>
+    <text class="ct mono" x="42" y="26" dy="0.35em" data-fit="219">create</text>
+    <text class="cb" x="16" y="60" data-fit="245">Una función que construye el</text>
+    <text class="cb" x="16" y="79" data-fit="245">Bloc con su estado inicial.</text>
+    <text class="cb" x="16" y="98" data-fit="245">Se ejecuta una sola vez.</text>
   </g>
-  <g transform="translate(488.0,476)">
-    <rect width="204.0" height="121" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-    <circle cx="24" cy="26" r="7" fill="#E3F6F3" stroke="#0F8478" stroke-width="2"/>
-    <text class="ct mono" x="42" y="26" dy="0.35em" data-fit="146">..add(...)</text>
-    <text class="cb" x="16" y="60" data-fit="172">Opcional: el primer</text>
-    <text class="cb" x="16" y="79" data-fit="172">evento, para que abra</text>
-    <text class="cb" x="16" y="98" data-fit="172">cargando datos.</text>
-  </g>
-  <g transform="translate(708.0,476)">
-    <rect width="204.0" height="121" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <g transform="translate(634.7,432)">
+    <rect width="277.3" height="121" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
     <circle cx="24" cy="26" r="7" fill="#F4EBFF" stroke="#7439B8" stroke-width="2"/>
-    <text class="ct mono" x="42" y="26" dy="0.35em" data-fit="146">child</text>
-    <text class="cb" x="16" y="60" data-fit="172">La pantalla que queda</text>
-    <text class="cb" x="16" y="79" data-fit="172">debajo. Solo ella y sus</text>
-    <text class="cb" x="16" y="98" data-fit="172">hijos ven el Bloc.</text>
+    <text class="ct mono" x="42" y="26" dy="0.35em" data-fit="219">child</text>
+    <text class="cb" x="16" y="60" data-fit="245">La pantalla que queda debajo.</text>
+    <text class="cb" x="16" y="79" data-fit="245">Solo ella y sus hijos</text>
+    <text class="cb" x="16" y="98" data-fit="245">ven el Bloc.</text>
   </g>
 </svg>
 ```
 
 ```dart
 BlocProvider<ProductsBloc>(
-  create: (_) => ProductsBloc(
-    ProductsRepository(),
-  )..add(LoadProductsEvent()),
+  create: (context) => ProductsBloc(ProductState()),
   child: const ProductsScreen(),
 )
 ```
 
+`ProductState()` es el estado inicial: con él arranca el `Bloc` antes de recibir cualquier evento.
+
 En este curso el `BlocProvider` va en la tabla de rutas, envolviendo a la `Screen`:
 
 ```dart
-void main() {
-  runApp(
-    MaterialApp(
-      initialRoute: '/products',
-      routes: {
-        '/products': (_) => BlocProvider(
-              create: (_) => ProductsBloc(
-                ProductsRepository(),
-              )..add(LoadProductsEvent()),
-              child: const ProductsScreen(),
-            ),
-      },
-    ),
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    title: 'FakeStore',
+    theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
+    initialRoute: '/products',
+    routes: {
+      '/products': (context) => BlocProvider<ProductsBloc>(
+        create: (context) => ProductsBloc(ProductState()),
+        child: const ProductsScreen(),
+      ),
+    },
   );
+}
+```
+
+`create` solo construye el `Bloc`; no le lanza ningún evento. La carga inicial la pide la propia pantalla en su `initState`, que se ejecuta una sola vez, cuando `ProductsScreen` entra al árbol y ya tiene el `BlocProvider` encima:
+
+```dart
+class _ProductsScreenState extends State<ProductsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProductsBloc>().add(LoadProductsEvent());
+  }
 }
 ```
 
@@ -276,7 +269,7 @@ class ProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ProductsBloc(ProductsRepository()),
+      create: (context) => ProductsBloc(ProductState()),
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () => context.read<ProductsBloc>().add(LoadProductsEvent()),
@@ -492,7 +485,7 @@ BlocBuilder<ProductsBloc, ProductsState>(
 
 Dos cosas que `builder` **no** debe hacer:
 
-- **Lanzar eventos por su cuenta.** Un `add` dentro de `builder` produce un estado, que vuelve a ejecutar `builder`, que vuelve a lanzar el evento. Los eventos se lanzan desde un `onPressed`, un `onSubmitted` o el `create` del `BlocProvider`.
+- **Lanzar eventos por su cuenta.** Un `add` dentro de `builder` produce un estado, que vuelve a ejecutar `builder`, que vuelve a lanzar el evento. Los eventos se lanzan desde un `onPressed`, un `onSubmitted` o el `initState` de la pantalla.
 - **Navegar o mostrar un `SnackBar`.** `builder` solo devuelve widgets, y Flutter lo puede ejecutar más veces de las que crees.
 
 ## Qué se vuelve a dibujar
@@ -622,8 +615,19 @@ El recorrido completo de un toque en **Recargar**:
 La `Screen` completa. El `BlocProvider` no aparece aquí: está arriba, en la tabla de rutas.
 
 ```dart
-class ProductsScreen extends StatelessWidget {
+class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
+
+  @override
+  State<ProductsScreen> createState() => _ProductsScreenState();
+}
+
+class _ProductsScreenState extends State<ProductsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProductsBloc>().add(LoadProductsEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -659,4 +663,4 @@ class ProductsScreen extends StatelessWidget {
 }
 ```
 
-No hay `setState` ni `StatefulWidget`: la pantalla es un `StatelessWidget` porque el estado vive en el `Bloc`.
+No hay ningún `setState`: el estado vive en el `Bloc`. La pantalla es un `StatefulWidget` solo para tener `initState`, que es donde lanza el primer evento.
