@@ -140,7 +140,16 @@ npx supabase projects api-keys --project-ref TU_PROJECT_REF
 
 La que necesitas es la que empieza por `sb_publishable_`. Nunca copies a la app la que empieza por `sb_secret_`.
 
-Si en la lista no hay ninguna `sb_publishable_`, créala. Este comando usa un token personal, que se genera una vez en `Account > Access Tokens` del dashboard:
+Si la lista sale vacía, revisa primero que el proyecto no esté pausado: el plan gratuito pausa los proyectos que llevan tiempo sin uso, y un proyecto pausado puede no mostrar sus claves. Se reanuda desde el dashboard, con el botón de restaurar, o con este comando. Usa un token personal, que se genera una vez en `Account > Access Tokens` del dashboard:
+
+```shell
+curl -X POST "https://api.supabase.com/v1/projects/TU_PROJECT_REF/restore" \
+  -H "Authorization: Bearer TU_ACCESS_TOKEN"
+```
+
+La restauración tarda unos minutos. `npx supabase projects list` muestra cuándo el proyecto vuelve a estar activo.
+
+Si el proyecto está activo y en la lista no hay ninguna `sb_publishable_`, créala con el mismo token:
 
 ```shell
 curl -X POST "https://api.supabase.com/v1/projects/TU_PROJECT_REF/api-keys?reveal=true" \
