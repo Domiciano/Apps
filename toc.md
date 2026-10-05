@@ -75,7 +75,7 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH1.md | Instalación de supabase | 0051
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH1cli.md | Configurando los servicios | 0091
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH2.md | Inicio de Sesión con Supabase y Flutter | 0052
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab5.md | Laboratorio 5: Flujo de login | 0053
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab5.md | Laboratorio 5: Registro de usuarios | 0053
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lab5concept.md | Laboratorio 5 a nivel conceptual | 0090
 **[t] Autenticación
 **[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH15.md | Registro de Usuarios con Supabase | 0055
