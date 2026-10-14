@@ -9,16 +9,21 @@
   font-size: 0.95rem;
   color: #abb2bf;
   text-align: left;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .flutter-code pre {
   margin: 0;
-  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-word;
   background-color: #0B121A; /* Mismo color de fondo que .flutter-code */
 }
 
 .flutter-code code {
   display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .flutter-code .token.comment {

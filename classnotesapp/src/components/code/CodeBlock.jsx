@@ -53,13 +53,19 @@ const CodeBlock = ({ children, language, className = "", source = "lesson" }) =>
         position: "relative", 
         my: 0,
         maxWidth: '100%',
+        boxSizing: 'border-box',
+        overflowX: 'auto',
         '& pre': {
           border: 'none !important',
           boxShadow: 'none !important',
+          whiteSpace: 'pre-wrap !important',
+          wordBreak: 'break-word !important',
         },
         '& code': {
           border: 'none !important',
           boxShadow: 'none !important',
+          whiteSpace: 'pre-wrap !important',
+          wordBreak: 'break-word !important',
         },
       }}
     >
@@ -71,8 +77,8 @@ const CodeBlock = ({ children, language, className = "", source = "lesson" }) =>
       >
         <ContentCopyIcon fontSize="small" />
       </IconButton>
-      <pre style={{ margin: 0, marginBottom: 0, width: '100%', maxWidth: '100%', overflowX: 'auto', paddingBottom: 8, display: 'block', whiteSpace: 'pre' }}>
-        <code className={`language-${language}`} ref={codeRef} style={{ width: '100%', maxWidth: '100%', display: 'block' }}>
+      <pre style={{ margin: 0, marginBottom: 0, width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'auto', paddingBottom: 8, display: 'block', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+        <code className={`language-${language}`} ref={codeRef} style={{ width: '100%', maxWidth: '100%', display: 'block', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {children}
         </code>
       </pre>
