@@ -313,7 +313,8 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
 </svg>
 ```
 
-- **El registro y el inicio de sesión**, resueltos como en el Laboratorio 5. Cerrar sesión pasa por un `SessionBloc`, y `HomeScreen` vuelve a `/login` con un `BlocListener`.
+- **El registro y el inicio de sesión**, resueltos como en el Laboratorio 5.
+- **El perfil y cerrar sesión.** `FeedBloc` ya atiende `ProfileRequested` y `SignOutRequested`. El perfil no viaja entre pantallas: `GetMyProfileUseCase` toma el usuario de la sesión que Supabase guarda en el teléfono (`auth.currentUser`) y trae su fila de `profiles`.
 - **La entidad `Post`**, con el autor, el conteo de «me gusta», si te gusta a ti y su `copyWith`.
 - **Toda la interfaz del muro.** `HomeScreen`, `FeedPage`, `ProfilePage`, `PostCard` y `ComposeScreen` ya están dibujadas, y cada botón ya lanza su evento.
 - **Los estados.** `FeedState` y `ComposeState`, cada uno con su `status` y su `copyWith`.
@@ -477,7 +478,7 @@ Future<void> _onMoreRequested(
 }
 ```
 
-- **`_onStarted`** carga desde cero: la página `0` del muro y tus últimos tres posts. `HomeScreen` lanza `FeedStarted` en su `initState` y otra vez cuando vuelves de publicar.
+- **`_onStarted`** carga desde cero: la página `0` del muro y tus últimos tres posts. `HomeScreen` lanza `ProfileRequested` y `FeedStarted` en su `initState`, y otra vez `FeedStarted` cuando vuelves de publicar.
 - **`_onLikeToggled`** llama a `ToggleLikeUseCase` y reemplaza el post viejo por el que devuelve, en `posts` y en `myPosts`.
 
 ## Paso 5 · ComposeBloc
