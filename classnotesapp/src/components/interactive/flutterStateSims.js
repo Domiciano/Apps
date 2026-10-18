@@ -1616,8 +1616,11 @@ const REG_CSS = `
 .fsim .fr-db{display:flex;flex-wrap:wrap;gap:8px;width:100%}
 .fsim .fr-table{flex:1 1 150px;min-width:0;background:#fff;border:1px solid #C4CBD8;border-radius:8px;padding:6px 8px}
 .fsim .fr-table b{font-size:11.5px;font-family:'JetBrains Mono',Menlo,Consolas,monospace;color:#556074;display:block;margin-bottom:4px}
-.fsim .fr-rowdb{font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;padding:2px 4px;border-radius:4px;
-  overflow-wrap:anywhere;color:#161A26}
+.fsim .fr-rowdb{font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;padding:5px 8px;border-radius:6px;
+  overflow-wrap:anywhere;color:#245C21;background:#D9F2D0;border:1px solid #7CC56A;margin-top:4px;font-weight:600}
+.fsim .fr-rowdb.fs-flash{animation:frRowIn .9s ease-out}
+@keyframes frRowIn{0%{transform:scale(.94);box-shadow:0 0 0 0 rgba(58,130,53,.5)}
+  60%{transform:scale(1.03)}100%{transform:none;box-shadow:0 0 0 8px rgba(58,130,53,0)}}
 .fsim .fr-none{font-size:11px;color:#9AA1B2}
 .fsim .fr-later{font-size:11.5px;color:#79809A;border:1px dashed #C4CBD8;border-radius:8px;padding:4px 8px;text-align:center;margin-top:8px}
 `;
