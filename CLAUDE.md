@@ -200,10 +200,10 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
     y `HomeScreen` muestra sus valores por defecto.
   - `register-clean` («Aplicando arquitectura limpia»): cómo debería quedar. Presentación,
     dominio (`SignUpUseCase` y los contratos `AuthRepository` y `ProfileRepository`) y datos,
-    con una rama `Impl → DataSource` por servicio. Si falla el perfil, el UseCase cierra la
-    sesión y lanza `SignUpException`.
-  - Los dos enseñan éxito, correo repetido (`AuthApiException`) y *Falta el grant en
-    profiles* (cuenta sin perfil), y tienen modo *Paso a paso*. Si el laboratorio cambia,
+    con una rama `Impl → DataSource` por servicio.
+  - Los dos enseñan éxito, correo repetido (`AuthApiException`) y validación en la vista, y
+    tienen modo *Paso a paso*. Hubo un interruptor *Falta el grant en profiles* (cuenta sin
+    perfil); el profesor lo retiró el 2026-10-17 por innecesario. Si el laboratorio cambia,
     hay que actualizar el simulador que corresponda.
 - `flutterStateSims.js` ya **no es idéntico** al de Seminario: tiene además `register-layers`,
   `register-clean` y unas palabras más en el resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.

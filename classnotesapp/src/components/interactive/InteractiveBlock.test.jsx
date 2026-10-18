@@ -257,16 +257,6 @@ describe('register-layers', () => {
     expect(screen.getByTestId('register-phone').textContent).toContain('User already registered');
   });
 
-  it('leaves an account without profile when the grant is missing', () => {
-    renderBlock('register-layers');
-    fireEvent.click(screen.getByLabelText('Falta el grant en profiles'));
-    register();
-    runAll();
-    expect(screen.getByTestId('auth-users').textContent).toContain('ana@icesi.edu.co');
-    expect(screen.getByTestId('profiles-table').textContent).toContain('sin filas');
-    expect(screen.getByTestId('register-phone').textContent).toContain('permission denied for table profiles');
-  });
-
   it('waits for the next button in step mode', () => {
     renderBlock('register-layers');
     fireEvent.click(screen.getByLabelText('Paso a paso'));
@@ -303,15 +293,5 @@ describe('register-clean', () => {
     expect(screen.getByTestId('bloc-state').textContent).toBe('RegisterStatus.failure');
     expect(screen.getByText(/User already registered/)).toBeTruthy();
     expect(screen.getByText('Registrarme').disabled).toBe(false);
-  });
-
-  it('lets the use case catch the profile failure, sign out and raise a domain error', () => {
-    renderBlock('register-clean');
-    fireEvent.click(screen.getByLabelText('Falta el grant en profiles'));
-    register();
-    runAll();
-    expect(screen.getByTestId('profiles-table').textContent).toContain('sin filas');
-    expect(screen.getAllByText(/signOut\(\)/).length).toBeGreaterThan(0);
-    expect(screen.getByText('No se pudo guardar tu perfil')).toBeTruthy();
   });
 });

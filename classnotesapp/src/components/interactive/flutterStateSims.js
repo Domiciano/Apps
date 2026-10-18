@@ -1716,9 +1716,6 @@ const authFailure = (users, email, password) => {
   return null;
 };
 
-const NO_GRANT_ERROR =
-  'PostgrestException(message: permission denied for table profiles, code: 42501, details: Forbidden, hint: null)';
-
 // Shared shell of the two sign up simulators: the phone, the fake Supabase, the trace
 // and the step player. Each simulator brings its layers, its code files and its steps.
 const createRegisterSim = (root, config) => {
@@ -1946,7 +1943,6 @@ const createRegisterSim = (root, config) => {
       trace.print('Supabase vacío: sin cuentas ni perfiles.');
     },
   });
-  const grantSwitch = switchControl('Falta el grant en profiles', () => {});
   const manualSwitch = switchControl('Paso a paso', (checked) => {
     manual = checked;
     syncControls();
@@ -2034,7 +2030,7 @@ const createRegisterSim = (root, config) => {
     }
     trace.print(`Vista  _submit() con ${data.email}`);
     const failure = authFailure(db.users, data.email, data.password);
-    steps = config.buildSteps({ data, failure, noGrant: grantSwitch.input.checked });
+    steps = config.buildSteps({ data, failure });
     stepIndex = 0;
     running = true;
     formError = null;
@@ -2059,7 +2055,7 @@ const createRegisterSim = (root, config) => {
   }
 
   container.append(
-    el('div', { class: 'fs-col' }, screen.frame, el('div', { class: 'fs-controls' }, manualSwitch.node, grantSwitch.node), controls, note),
+    el('div', { class: 'fs-col' }, screen.frame, el('div', { class: 'fs-controls' }, manualSwitch.node), controls, note),
     el('div', { class: 'fs-side' }, layers),
     el('div', { class: 'fs-row2' }, code.box, trace.box)
   );
@@ -2121,7 +2117,7 @@ const mountRegisterLayers = (root) =>
         footer: 'Todavía no hay UseCase ni Repository: el Bloc llama directo al SDK.',
       };
     },
-    buildSteps: ({ data, failure, noGrant }) => {
+    buildSteps: ({ data, failure }) => {
       let user = null;
       const head = [
         {
@@ -2220,53 +2216,31 @@ const mountRegisterLayers = (root) =>
           file: 'bloc',
           lines: [11, 12, 13, 14, 15, 16, 17],
           gaps: [['se', 'down', 'POST /rest/v1/profiles']],
-          apply: (ctx) => {
-            if (noGrant) return;
-            ctx.renderProfiles(fakeProfile(ctx.db, user, data));
-          },
-          caption: noGrant
-            ? 'La petición llega a la tabla profiles, pero el rol authenticated no tiene permiso de insertar.'
-            : 'La fila llega a profiles con el mismo id de la cuenta. Así se unen las dos tablas.',
+          apply: (ctx) => ctx.renderProfiles(fakeProfile(ctx.db, user, data)),
+          caption: 'La fila llega a profiles con el mismo id de la cuenta. Así se unen las dos tablas.',
         },
-        ...(noGrant
-          ? [
-              {
-                hot: ['bloc'],
-                file: 'bloc',
-                lines: [19],
-                gaps: [
-                  ['se', 'fail', '403 · 42501'],
-                  ['bs', 'fail', 'lanza PostgrestException'],
-                ],
-                caption: 'La cuenta quedó creada en Auth y el perfil no. Mira las dos tablas: hay una cuenta sin perfil.',
-                warn: true,
-              },
-              emitError(NO_GRANT_ERROR),
-            ]
-          : [
-              {
-                hot: ['bloc'],
-                file: 'bloc',
-                lines: [18],
-                gaps: [
-                  ['se', 'up', '201 · Created'],
-                  ['vb', 'up', 'emit(RegisterSuccessState())'],
-                ],
-                apply: (ctx) => {
-                  ctx.setChip('bloc', 'RegisterSuccessState');
-                  ctx.setChip('sdk', '');
-                  ctx.renderBlank();
-                },
-                caption: 'Los dos pasos salieron bien. El Bloc emite Success y el BlocBuilder dibuja una caja vacía.',
-              },
-              {
-                hot: ['screen'],
-                file: 'screen',
-                lines: [18, 19, 20, 21],
-                apply: (ctx) => ctx.renderHome(null),
-                caption: 'El BlocListener escucha Success y navega a /home. HomeScreen aún muestra sus valores por defecto: nadie le pasa el perfil.',
-              },
-            ]),
+        {
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [18],
+          gaps: [
+            ['se', 'up', '201 · Created'],
+            ['vb', 'up', 'emit(RegisterSuccessState())'],
+          ],
+          apply: (ctx) => {
+            ctx.setChip('bloc', 'RegisterSuccessState');
+            ctx.setChip('sdk', '');
+            ctx.renderBlank();
+          },
+          caption: 'Los dos pasos salieron bien. El Bloc emite Success y el BlocBuilder dibuja una caja vacía.',
+        },
+        {
+          hot: ['screen'],
+          file: 'screen',
+          lines: [18, 19, 20, 21],
+          apply: (ctx) => ctx.renderHome(null),
+          caption: 'El BlocListener escucha Success y navega a /home. HomeScreen aún muestra sus valores por defecto: nadie le pasa el perfil.',
+        },
       ];
     },
   });
@@ -2360,8 +2334,6 @@ class SupabaseProfileDataSource {
   }
 }`;
 
-const SIGNUP_ERROR = 'No se pudo guardar tu perfil';
-
 // How Lab 5 should end up: presentation, domain and data, with one branch per service.
 const mountRegisterClean = (root) =>
   createRegisterSim(root, {
@@ -2436,7 +2408,7 @@ const mountRegisterClean = (root) =>
         footer: 'Los recuadros punteados son contratos: el dominio los declara y los datos los implementan.',
       };
     },
-    buildSteps: ({ data, failure, noGrant }) => {
+    buildSteps: ({ data, failure }) => {
       let user = null;
       const profileOf = () => ({ username: data.username, fullName: data.fullName, email: data.email });
       const emitFailure = (message, caption) => ({
@@ -2556,44 +2528,10 @@ const mountRegisterClean = (root) =>
           file: 'profile',
           lines: [8, 9, 10, 11, 12, 13],
           gaps: [['ds', 'down', 'POST /rest/v1/profiles', 'r']],
-          apply: (ctx) => {
-            if (noGrant) return;
-            ctx.renderProfiles(fakeProfile(ctx.db, user, data));
-          },
-          caption: noGrant
-            ? 'La petición llega a profiles, pero el rol authenticated no tiene permiso de insertar.'
-            : 'La fila llega a profiles con el mismo id de la cuenta.',
+          apply: (ctx) => ctx.renderProfiles(fakeProfile(ctx.db, user, data)),
+          caption: 'La fila llega a profiles con el mismo id de la cuenta.',
         },
       ];
-      if (noGrant) {
-        return [
-          ...head,
-          ...tail,
-          {
-            hot: ['usecase'],
-            file: 'usecase',
-            lines: [15],
-            gaps: [
-              ['ds', 'fail', '403 · 42501', 'r'],
-              ['dd', 'fail', 'lanza PostgrestException', 'r'],
-            ],
-            caption: 'Esta vez el UseCase sí atrapa la excepción: ya hay una cuenta y quedó sin perfil. Decide qué hacer.',
-            warn: true,
-          },
-          {
-            hot: ['usecase', 'authRepo', 'authImpl', 'authDs'],
-            file: 'usecase',
-            lines: [16, 17, 18],
-            gaps: [
-              ['dd', 'down', 'signOut()', 'l'],
-              ['bd', 'fail', 'SignUpException', 'c'],
-            ],
-            caption: 'Cierra la sesión que abrió signUp y lanza un error del dominio, con un mensaje para el usuario.',
-            warn: true,
-          },
-          emitFailure(SIGNUP_ERROR, 'El Bloc solo convierte el error en failure. La cuenta sigue en Auth: limpiarla sería otra decisión del UseCase.'),
-        ];
-      }
       return [
         ...head,
         ...tail,
