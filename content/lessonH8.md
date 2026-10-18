@@ -393,7 +393,9 @@ class SupabasePostDataSource {
       'likes(count), '
       'my_like:likes(profile_id)';
 
-  String get _uid => _client.auth.currentUser!.id;
+  String get _uid {
+    return _client.auth.currentUser!.id;
+  }
 
   Future<List<Post>> fetchFeed({required int page, required int size}) async {
     final from = page * size;
