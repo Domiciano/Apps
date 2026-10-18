@@ -314,7 +314,7 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
 </svg>
 ```
 
-- **El registro y el inicio de sesión**, resueltos como en el Laboratorio 5.
+- **El registro y el inicio de sesión**, resueltos como en el Laboratorio 5. Cerrar sesión pasa por un `SessionBloc`, y `HomeScreen` vuelve a `/login` con un `BlocListener`.
 - **La entidad `Post`**, con el autor, el conteo de «me gusta», si te gusta a ti y su `copyWith`.
 - **Toda la interfaz del muro.** `HomeScreen`, `FeedPage`, `ProfilePage`, `PostCard` y `ComposeScreen` ya están dibujadas, y cada botón ya lanza su evento.
 - **Los estados.** `FeedState` y `ComposeState`, cada uno con su `status` y su `copyWith`.
@@ -484,7 +484,7 @@ Future<void> _onMoreRequested(
 }
 ```
 
-- **`_onStarted`** carga desde cero: la página `0` del muro y tus últimos tres posts. Lo lanza la ruta `/home` al abrirse, y `HomeScreen` cuando vuelves de publicar.
+- **`_onStarted`** carga desde cero: la página `0` del muro y tus últimos tres posts. `HomeScreen` lanza `FeedStarted` en su `initState` y otra vez cuando vuelves de publicar.
 - **`_onLikeToggled`** llama a `ToggleLikeUseCase` y reemplaza el post viejo por el que devuelve, en `posts` y en `myPosts`.
 
 ## Paso 5 · ComposeBloc
@@ -495,7 +495,7 @@ Recibe un `PublishPostUseCase` y llena su único `on`: `loading`, y después `su
 
 ## Paso 6 · main.dart
 
-Hoy `/home` crea `FeedBloc()` y `/compose` crea `ComposeBloc()`, sin nada adentro. Arma el repositorio una sola vez, junto a los de auth, y pásale a cada `Bloc` sus casos de uso:
+Hoy `/home` crea `FeedBloc()` junto al `SessionBloc`, y `/compose` crea `ComposeBloc()`, sin nada adentro. Arma el repositorio una sola vez, junto a los de auth, y pásale a cada `Bloc` sus casos de uso:
 
 ```dart
 final postRepository = PostRepositoryImpl(SupabasePostDataSource(client));
@@ -506,7 +506,7 @@ create: (_) => FeedBloc(
   GetFeedUseCase(postRepository),
   GetMyPostsUseCase(postRepository),
   ToggleLikeUseCase(postRepository),
-)..add(FeedStarted()),
+),
 ```
 
 Corre la app de nuevo: el muro se llena, el corazón cambia y **Publicar** vuelve al muro con tu post arriba.
