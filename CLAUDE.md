@@ -193,8 +193,11 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
 
 - **Simuladores propios de Móviles**, los dos en la lección 0090, que tiene solo dos secciones.
   Comparten el teléfono con la pantalla de registro de `262App3`, un Supabase simulado
-  (`auth.users` y `profiles` persisten entre intentos), la traza y el reproductor de pasos
+  (`auth.users` y `profiles` persisten entre intentos), el panel de código y el reproductor de pasos
   (`createRegisterSim`). Cada uno aporta sus capas, sus archivos de código y sus pasos.
+  A la derecha del teléfono hay dos pestañas: *Capas* (los bloques) y *Código*, con una
+  franja abajo que marca la capa actual. En `register-clean` la franja sigue al archivo
+  resaltado (`fileLayer`); en `register-layers`, a la pieza iluminada (SDK, Supabase).
   - `register-layers` («Review del laboratorio 5»): **el código del laboratorio tal como está
     hoy**. Vista, `Bloc` y SDK de Supabase: el `Bloc` llama directo a `Supabase.instance.client`
     y `HomeScreen` muestra sus valores por defecto.

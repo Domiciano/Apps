@@ -272,6 +272,22 @@ describe('register-clean', () => {
   const runAll = () => act(() => vi.advanceTimersByTime(30000));
   const register = () => fireEvent.click(screen.getByText('Registrarme'));
 
+  it('switches to the code tab and marks the current layer in the strip', () => {
+    const { container } = renderBlock('register-clean');
+    expect(container.querySelector('.fr-strip').closest('[hidden]')).toBeTruthy();
+    fireEvent.click(screen.getByText('Código'));
+    expect(container.querySelector('.fr-strip').closest('[hidden]')).toBeNull();
+    fireEvent.click(screen.getByLabelText('Paso a paso'));
+    register();
+    fireEvent.click(screen.getByText('Siguiente paso'));
+    fireEvent.click(screen.getByText('Siguiente paso'));
+    expect(container.querySelector('.fr-st.fr-on').textContent).toBe('Bloc');
+    expect(screen.getByText('register_bloc.dart')).toBeTruthy();
+    fireEvent.click(screen.getByText('Siguiente paso'));
+    expect(container.querySelector('.fr-st.fr-on').textContent).toBe('Dominio');
+    expect(screen.getByText('sign_up_usecase.dart')).toBeTruthy();
+  });
+
   it('goes through the use case and both data branches, then shows the real profile', () => {
     renderBlock('register-clean');
     register();
@@ -280,7 +296,6 @@ describe('register-clean', () => {
     expect(screen.getByTestId('profiles-table').textContent).toContain('Ana Gómez');
     expect(screen.getByTestId('bloc-state').textContent).toBe('RegisterStatus.success');
     expect(screen.getByTestId('register-phone').textContent).toContain('@ana');
-    expect(screen.getAllByText(/_signUp\(username/).length).toBeGreaterThan(0);
   });
 
   it('keeps the form with the error message when the email already exists', () => {

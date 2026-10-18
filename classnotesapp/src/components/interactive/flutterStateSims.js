@@ -1583,6 +1583,15 @@ const REG_CSS = `
 .fsim .fr-colb .fr-node{max-width:100%;overflow-wrap:break-word;text-align:center}
 .fsim .fr-center-row{width:100%;display:flex;justify-content:center;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .fsim .fr-down{font-size:11px;color:#556074;line-height:1}
+.fsim .fr-strip{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 6px;margin-top:10px}
+.fsim .fr-st{--b:#C4CBD8;--bg:#EFF1F5;--ink:#556074;font-size:12px;padding:3px 10px;border-radius:12px;border:1px solid var(--b);
+  background:#fff;color:#9AA1B2;transition:background .3s,color .3s,box-shadow .3s}
+.fsim .fr-st.fr-view{--b:#C9A6EE;--bg:#F4EBFF;--ink:#7439B8}
+.fsim .fr-st.fr-bloc{--b:#9DB8F2;--bg:#E8EFFE;--ink:#2F5BC4}
+.fsim .fr-st.fr-sdk,.fsim .fr-st.fr-data{--b:#86D3CA;--bg:#E3F6F3;--ink:#0F8478}
+.fsim .fr-st.fr-dom{--b:#F0C572;--bg:#FFF3DC;--ink:#A96C05}
+.fsim .fr-st.fr-on{background:var(--bg);color:var(--ink);font-weight:700;box-shadow:0 0 0 2px #F2C069}
+.fsim .fr-st-sep{color:#C4CBD8;font-size:11px}
 @container (max-width:560px){.fsim .fr-node{font-size:11px;padding:3px 6px}.fsim .fr-msg{font-size:10.5px}}
 .fsim .fr-band-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
 .fsim .fr-band-name{font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--ink)}
@@ -1716,8 +1725,8 @@ const authFailure = (users, email, password) => {
   return null;
 };
 
-// Shared shell of the two sign up simulators: the phone, the fake Supabase, the trace
-// and the step player. Each simulator brings its layers, its code files and its steps.
+// Shared shell of the two sign up simulators: the phone, the fake Supabase, the code
+// panel and the step player. Each simulator brings its layers, its code files and its steps.
 const createRegisterSim = (root, config) => {
   ensureRegStyle();
   const container = card(root);
@@ -1758,7 +1767,9 @@ const createRegisterSim = (root, config) => {
     users: el('div', { class: 'fr-table' }, el('b', { text: 'Auth · auth.users' }), usersBox),
     profiles: el('div', { class: 'fr-table' }, el('b', { text: 'Tabla profiles' }), profilesBox),
   };
+  const kinds = {};
   const band = (key, kind, name, role, body, bodyClass = '') => {
+    kinds[key] = kind;
     const item = el(
       'div',
       { class: `fr-band fr-${kind}` },
@@ -1796,7 +1807,25 @@ const createRegisterSim = (root, config) => {
 
   const code = codePanel('');
   const codeTitle = code.box.querySelector('h4');
-  const trace = consolePanel('Traza');
+  const stripItems = config.strip.map(([key, label]) => [key, el('span', { class: `fr-st fr-${kinds[key]}`, text: label })]);
+  const strip = el(
+    'div',
+    { class: 'fr-strip', 'aria-label': 'Capa actual' },
+    ...stripItems.flatMap(([, item], index) => (index ? [el('span', { class: 'fr-st-sep', text: '›' }), item] : [item]))
+  );
+  const codeView = el('div', {}, code.box, strip);
+  const layersTab = el('button', { type: 'button', text: 'Capas', class: 'fs-sel' });
+  const codeTab = el('button', { type: 'button', text: 'Código' });
+  const showTab = (next) => {
+    layersTab.className = next === 'layers' ? 'fs-sel' : '';
+    codeTab.className = next === 'code' ? 'fs-sel' : '';
+    layers.hidden = next !== 'layers';
+    codeView.hidden = next !== 'code';
+  };
+  layersTab.addEventListener('click', () => showTab('layers'));
+  codeTab.addEventListener('click', () => showTab('code'));
+  const tabs = el('div', { class: 'fs-seg fs-view', role: 'group', 'aria-label': 'Vista' }, layersTab, codeTab);
+  codeView.hidden = true;
   const note = el('div', { class: 'fs-note' });
 
   let currentFile = null;
@@ -1909,6 +1938,7 @@ const createRegisterSim = (root, config) => {
       if (bands[key]) hotBands.add(key);
     });
     Object.entries(bands).forEach(([key, item]) => item.classList.toggle('fr-on', hotBands.has(key)));
+    return hotBands;
   };
   const showGaps = (list = []) => {
     Object.values(gaps).forEach((g) => g.idle());
@@ -1918,13 +1948,6 @@ const createRegisterSim = (root, config) => {
       slot.replaceChildren(
         el('span', { class: `fr-msg${dir === 'up' ? ' fr-up' : dir === 'fail' ? ' fr-fail' : ''}`, text: `${dir === 'down' ? '↓' : '↑'} ${text}` })
       );
-    });
-  };
-  const logGaps = (list = []) => {
-    list.forEach(([where, dir, text]) => {
-      const [top, bottom] = config.gapNames[where];
-      const route = dir === 'down' ? `${top} → ${bottom}` : `${bottom} → ${top}`;
-      trace.print(`${route}  ${text}`, dir === 'fail' ? 'err' : dir === 'up' ? 'ok' : undefined);
     });
   };
 
@@ -1940,7 +1963,8 @@ const createRegisterSim = (root, config) => {
       db.profiles = [];
       renderUsers();
       renderProfiles();
-      trace.print('Supabase vacío: sin cuentas ni perfiles.');
+      note.textContent = 'Supabase vacío: sin cuentas ni perfiles.';
+      note.classList.remove('fs-warn');
     },
   });
   const manualSwitch = switchControl('Paso a paso', (checked) => {
@@ -1968,12 +1992,15 @@ const createRegisterSim = (root, config) => {
     renderHome,
   };
 
+  const markStrip = (keys) => stripItems.forEach(([key, item]) => item.classList.toggle('fr-on', keys.has(key)));
+
   const runStep = (step) => {
-    highlight(step.hot);
+    const hotBands = highlight(step.hot);
+    const fileLayer = config.fileLayer && step.lines && step.lines.length ? config.fileLayer[step.file] : null;
+    markStrip(fileLayer ? new Set([fileLayer]) : hotBands);
     setFile(step.file);
     code.mark(...(step.lines || []));
     showGaps(step.gaps);
-    logGaps(step.gaps);
     if (step.apply) step.apply(ctx);
     note.textContent = step.caption;
     note.classList.toggle('fs-warn', Boolean(step.warn));
@@ -2007,7 +2034,7 @@ const createRegisterSim = (root, config) => {
       email: values.email.trim(),
       password: values.password,
     };
-    highlight(config.viewKeys);
+    markStrip(highlight(config.viewKeys));
     showGaps();
     const validation = config.validation;
     if (!data.username || !data.fullName || !data.email || !data.password) {
@@ -2023,12 +2050,10 @@ const createRegisterSim = (root, config) => {
     }
     if (formError) {
       renderForm();
-      trace.print(`Vista  _showError('${formError}')`, 'err');
       note.textContent = 'La vista detuvo el registro. Ningún evento salió hacia el Bloc.';
       note.classList.add('fs-warn');
       return;
     }
-    trace.print(`Vista  _submit() con ${data.email}`);
     const failure = authFailure(db.users, data.email, data.password);
     steps = config.buildSteps({ data, failure });
     stepIndex = 0;
@@ -2043,21 +2068,19 @@ const createRegisterSim = (root, config) => {
     if (running) return;
     timers.forEach(clearTimeout);
     formError = null;
-    highlight();
+    markStrip(highlight());
     showGaps();
     config.chipsReset(setChip);
     setFile(config.initialFile);
     code.mark();
     renderForm();
-    trace.print('Navigator → /register  BlocProvider crea un RegisterBloc nuevo');
     note.textContent = `Pantalla nueva y Bloc nuevo en ${config.idleState}. Lo que quedó en Supabase sigue ahí.`;
     note.classList.remove('fs-warn');
   }
 
   container.append(
     el('div', { class: 'fs-col' }, screen.frame, el('div', { class: 'fs-controls' }, manualSwitch.node), controls, note),
-    el('div', { class: 'fs-side' }, layers),
-    el('div', { class: 'fs-row2' }, code.box, trace.box)
+    el('div', { class: 'fs-side' }, tabs, layers, codeView)
   );
   setFile(config.initialFile);
   config.chipsReset(setChip);
@@ -2089,7 +2112,12 @@ const fakeProfile = (db, user, data) => {
 const mountRegisterLayers = (root) =>
   createRegisterSim(root, {
     order: ['view', 'vb', 'bloc', 'bs', 'sdk', 'se', 'ext'],
-    gapNames: { vb: ['Vista', 'Bloc'], bs: ['Bloc', 'SDK'], se: ['SDK', 'Supabase'] },
+    strip: [
+      ['view', 'Vista'],
+      ['bloc', 'Bloc'],
+      ['sdk', 'SDK'],
+      ['ext', 'Supabase'],
+    ],
     viewKeys: ['screen'],
     initialFile: 'bloc',
     idleState: 'RegisterIdleState',
@@ -2338,12 +2366,14 @@ class SupabaseProfileDataSource {
 const mountRegisterClean = (root) =>
   createRegisterSim(root, {
     order: ['view', 'vb', 'bloc', 'bd', 'dom', 'dd', 'data', 'ds', 'ext'],
-    gapNames: {
-      vb: ['Vista', 'Bloc'],
-      bd: ['Bloc', 'UseCase'],
-      dd: ['Dominio', 'Datos'],
-      ds: ['Datos', 'Supabase'],
-    },
+    strip: [
+      ['view', 'Vista'],
+      ['bloc', 'Bloc'],
+      ['dom', 'Dominio'],
+      ['data', 'Datos'],
+      ['ext', 'Supabase'],
+    ],
+    fileLayer: { bloc: 'bloc', usecase: 'dom', auth: 'data', profile: 'data' },
     viewKeys: ['screen'],
     initialFile: 'bloc',
     idleState: 'RegisterStatus.initial',
