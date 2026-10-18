@@ -1,9 +1,26 @@
 # Laboratorio 5 a nivel conceptual
 
 <!-- tags: SignUpUseCase, flujo de registro, quién llama a createProfile, AuthRepository, ProfileRepository,
-     secuencia en el UseCase, cuenta creada sin perfil, tabla profiles, capa de dominio, excepción en el registro -->
+     secuencia en el UseCase, cuenta creada sin perfil, tabla profiles, capa de dominio, excepción en el registro,
+     BlocListener, permission denied for table profiles -->
 
 El Laboratorio 5 pide registrar un usuario: crear su cuenta y guardar su perfil. Eso son dos operaciones, y esta lección muestra, sin código, qué capa decide el orden entre ellas.
+
+## Review del laboratorio 5
+
+Antes de mover nada, así funciona hoy el registro de `262App3`. A la izquierda está la pantalla; a la derecha, las capas por las que pasa la petición: la vista, el `Bloc` y el SDK de Supabase, que es el único que sale del teléfono.
+
+```interactive
+register-layers
+```
+
+Pulsa **Registrarme** y sigue los mensajes entre capas. Después prueba tres cosas:
+
+- **Registra dos veces el mismo correo.** Supabase Auth rechaza el segundo `signUp` y el `Bloc` termina en el `catch`.
+- **Activa «Falta el grant en profiles».** La cuenta se crea, el `insert` falla y queda una cuenta sin perfil.
+- **Pon contraseñas distintas.** La vista detiene el registro y el `Bloc` ni se entera.
+
+Fíjate en que el `Bloc` llama directo a `Supabase.instance.client`. El resto de la lección muestra a dónde se va esa responsabilidad.
 
 ## El registro son dos pasos
 

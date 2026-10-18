@@ -184,6 +184,24 @@ tiene que durar exactamente `pasos × segundos`; los adornos que giran aparte (e
 carga) llevan su propia duración. Cada función acepta `freeze=N` para sacar el fotograma fijo
 del paso N y revisarlo, y con «reducir movimiento» la figura queda estática y sin botones.
 
+### Diagramas interactivos
+
+Lo que se entiende tocando va en un bloque ` ```interactive `, cuyo cuerpo es `<id> [opciones]`.
+Se portó desde `SeminarioSoftware` el 2026-10-17 (copia literal de
+`classnotesapp/src/components/interactive/` y de la línea de `LessonParser.jsx`); las reglas
+completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivos».
+
+- **Simulador propio de Móviles: `register-layers`** (lección 0090, «Review del laboratorio 5»).
+  A la izquierda, la pantalla de registro de `262App3`; a la derecha, las capas que recorre la
+  petición: vista, `Bloc`, SDK de Supabase y Supabase (`auth.users` y `profiles`, que persisten
+  entre intentos). Enseña tres caminos: éxito, correo repetido (`AuthApiException`) y
+  *Falta el grant en profiles* (cuenta sin perfil). Tiene modo *Paso a paso*.
+- **Refleja el código del laboratorio tal como está hoy**: el `Bloc` llama directo a
+  `Supabase.instance.client` y `HomeScreen` muestra sus valores por defecto. Cuando el
+  laboratorio avance (UseCase, Repository), hay que actualizar el simulador.
+- `flutterStateSims.js` ya **no es idéntico** al de Seminario: tiene además `register-layers` y
+  unas palabras más en el resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
+
 ### Darla de alta en `toc.md`
 
 ```

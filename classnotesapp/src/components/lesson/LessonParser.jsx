@@ -20,6 +20,7 @@ import Typography from "@mui/material/Typography";
 import BeanVisualizer from "@/components/BeanVisualizer/BeanVisualizer";
 import MermaidBlock from "@/components/lesson/MermaidBlock";
 import SvgBlock from "@/components/lesson/SvgBlock";
+import InteractiveBlock from "@/components/interactive/InteractiveBlock";
 import remarkStripComments from "@/utils/remarkStripComments";
 import {
   LessonTable,
@@ -188,6 +189,7 @@ const LessonParser = ({ content }) => {
       if (lang === "mermaid") return <MermaidBlock chart={raw} />;
       if (lang === "beansim") return <BeanVisualizer initialCode={raw} />;
       if (lang === "svg") return <SvgBlock svg={raw} />;
+      if (lang === "interactive") return <InteractiveBlock spec={raw} />;
       if (lang === "dartpad") return <DartPadEmbed gistId={raw.trim()} />;
       if (lang === "youtube") {
         const [videoId, title] = raw.split("|").map((s) => s.trim());
