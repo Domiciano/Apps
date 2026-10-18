@@ -1592,6 +1592,15 @@ const REG_CSS = `
 .fsim .fr-st.fr-dom{--b:#F0C572;--bg:#FFF3DC;--ink:#A96C05}
 .fsim .fr-st.fr-on{background:var(--bg);color:var(--ink);font-weight:700;box-shadow:0 0 0 2px #F2C069}
 .fsim .fr-st-sep{color:#C4CBD8;font-size:11px}
+.fsim .fc-svg{width:100%;height:auto;display:block}
+.fsim .fc-node rect{transition:stroke .3s,stroke-width .3s}
+.fsim .fc-node.fc-hot > rect{stroke:#E0A43A;stroke-width:3.5}
+.fsim .fc-svg text{font-family:'JetBrains Mono',Menlo,Consolas,monospace}
+.fsim .fc-svg .fc-ring-label{font:700 10.5px Roboto,Arial,sans-serif;letter-spacing:.08em}
+.fsim .fc-svg .fc-chip{font-size:10px;fill:#454C61}
+.fsim .fc-svg .fc-banner{font-size:12.5px;font-weight:700}
+.fsim .fc-hop{animation:fcHop .45s ease-out}
+@keyframes fcHop{0%{stroke-dasharray:4 6}100%{stroke-dasharray:none}}
 @container (max-width:560px){.fsim .fr-node{font-size:11px;padding:3px 6px}.fsim .fr-msg{font-size:10.5px}}
 .fsim .fr-band-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
 .fsim .fr-band-name{font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--ink)}
@@ -1738,6 +1747,176 @@ const authFailure = (users, email, password) => {
   return null;
 };
 
+// The concentric Clean Architecture picture of the same pieces. It mirrors the layers
+// panel: same hot nodes, same hop (as an arrow plus a banner) and the same Supabase rows.
+const FC_KINDS = {
+  view: ['#F4EBFF', '#C9A6EE', '#7439B8'],
+  dom: ['#FFF3DC', '#F0C572', '#A96C05'],
+  contract: ['#FFFFFF', '#F0C572', '#A96C05'],
+  entity: ['#FFFFFF', '#E3B95A', '#8A5A04'],
+  data: ['#E3F6F3', '#86D3CA', '#0F8478'],
+};
+const FC_HOP_COLORS = { down: '#556074', up: '#1F9D68', fail: '#D64545' };
+let fcMarkerSeq = 0;
+
+const createCleanCircle = (spec) => {
+  const markerBase = `fc-arrow-${(fcMarkerSeq += 1)}`;
+  const svg = svgEl('svg', { viewBox: spec.viewBox, class: 'fc-svg', role: 'img', 'aria-label': spec.title });
+  const defs = svgEl('defs');
+  Object.entries(FC_HOP_COLORS).forEach(([dir, color]) => {
+    const marker = svgEl('marker', {
+      id: `${markerBase}-${dir}`,
+      viewBox: '0 0 10 10',
+      refX: '9',
+      refY: '5',
+      markerWidth: '7',
+      markerHeight: '7',
+      orient: 'auto-start-reverse',
+    });
+    marker.appendChild(svgEl('path', { d: 'M0,0 L10,5 L0,10 L2.4,5 Z', fill: color }));
+    defs.appendChild(marker);
+  });
+  svg.appendChild(defs);
+
+  const [cx, cy] = spec.center;
+  spec.rings.forEach(({ r, fill, stroke }) => svg.appendChild(svgEl('circle', { cx, cy, r, fill, stroke, 'stroke-width': '1.5' })));
+  spec.rings.forEach(({ label, labelY, ink }) => {
+    const text = svgEl('text', { x: cx, y: labelY, 'text-anchor': 'middle', class: 'fc-ring-label', fill: ink });
+    text.textContent = label;
+    svg.appendChild(text);
+  });
+
+  const boxes = {};
+  const nodeEls = {};
+  Object.entries(spec.nodes).forEach(([key, { x, y, text, kind }]) => {
+    const [fill, stroke, ink] = FC_KINDS[kind];
+    const w = text.length * 6.6 + 16;
+    const h = 22;
+    const g = svgEl('g', { class: 'fc-node' });
+    g.appendChild(svgEl('rect', {
+      x: x - w / 2,
+      y: y - h / 2,
+      width: w,
+      height: h,
+      rx: '7',
+      fill,
+      stroke,
+      'stroke-width': '1.5',
+      'stroke-dasharray': kind === 'contract' ? '4 3' : 'none',
+    }));
+    const label = svgEl('text', { x, y, dy: '0.35em', 'text-anchor': 'middle', 'font-size': '11', 'font-weight': '700', fill: ink });
+    label.textContent = text;
+    g.appendChild(label);
+    svg.appendChild(g);
+    boxes[key] = { x, y, w, h };
+    nodeEls[key] = g;
+  });
+
+  const chipEls = {};
+  Object.entries(spec.chips).forEach(([chipKey, nodeKey]) => {
+    const { x, y } = spec.nodes[nodeKey];
+    const text = svgEl('text', { x, y: y + 26, 'text-anchor': 'middle', class: 'fc-chip' });
+    svg.appendChild(text);
+    chipEls[chipKey] = text;
+  });
+
+  const tableEls = {};
+  Object.entries(spec.tables).forEach(([key, { x, y, title }]) => {
+    const g = svgEl('g', { class: 'fc-node fc-table' });
+    const frame = svgEl('rect', { x: x - 56, y, width: 112, height: 30, rx: '8', fill: '#FFFFFF', stroke: '#C4CBD8', 'stroke-width': '1.5' });
+    const head = svgEl('text', { x, y: y + 15, dy: '0.35em', 'text-anchor': 'middle', 'font-size': '10.5', 'font-weight': '700', fill: '#556074' });
+    head.textContent = title;
+    const rows = svgEl('g');
+    g.append(frame, head, rows);
+    svg.appendChild(g);
+    tableEls[key] = { g, frame, rows, x, y };
+    boxes[key] = { x, y: y + 15, w: 112, h: 30 };
+    nodeEls[key] = g;
+  });
+  if (spec.supabaseLabel) {
+    const [lx, ly] = spec.supabaseLabel;
+    const text = svgEl('text', { x: lx, y: ly, 'text-anchor': 'middle', class: 'fc-ring-label', fill: '#556074' });
+    text.textContent = 'SUPABASE';
+    svg.appendChild(text);
+  }
+
+  const hopLayer = svgEl('g');
+  svg.appendChild(hopLayer);
+  const banner = svgEl('text', { x: '12', y: '20', class: 'fc-banner' });
+  svg.appendChild(banner);
+
+  const edgePoint = (box, toward) => {
+    const dx = toward.x - box.x;
+    const dy = toward.y - box.y;
+    const t = Math.min(dx ? box.w / 2 / Math.abs(dx) : Infinity, dy ? box.h / 2 / Math.abs(dy) : Infinity);
+    return { x: box.x + dx * t, y: box.y + dy * t };
+  };
+
+  const highlight = (keys) => {
+    const hot = new Set(keys);
+    if (hot.has('ext')) Object.keys(spec.tables).forEach((key) => hot.add(key));
+    Object.entries(nodeEls).forEach(([key, g]) => g.classList.toggle('fc-hot', hot.has(key)));
+  };
+
+  const showGaps = (list = []) => {
+    hopLayer.replaceChildren();
+    banner.textContent = '';
+    list.forEach(([where, dir, text, side]) => {
+      const pair = spec.hops[side ? `${where}-${side === 'r' ? 'r' : 'l'}` : where] || spec.hops[where];
+      if (!pair) return;
+      const [topKey, bottomKey] = dir === 'down' ? pair : [pair[1], pair[0]];
+      const from = boxes[topKey];
+      const to = boxes[bottomKey];
+      const a = edgePoint(from, to);
+      const b = edgePoint(to, from);
+      hopLayer.appendChild(svgEl('line', {
+        x1: a.x,
+        y1: a.y,
+        x2: b.x,
+        y2: b.y,
+        stroke: FC_HOP_COLORS[dir],
+        'stroke-width': '2.5',
+        'marker-end': `url(#${markerBase}-${dir})`,
+        class: 'fc-hop',
+      }));
+      banner.textContent = `${dir === 'down' ? '↓' : '↑'} ${text}`;
+      banner.setAttribute('fill', FC_HOP_COLORS[dir]);
+    });
+  };
+
+  const renderRows = (key, items, labelOf, fresh) => {
+    const table = tableEls[key];
+    if (!table) return;
+    table.rows.replaceChildren();
+    const shown = items.slice(-3);
+    shown.forEach((item, index) => {
+      const top = table.y + 30 + index * 22;
+      const g = svgEl('g', { class: item === fresh ? 'fc-row fc-fresh' : 'fc-row' });
+      g.appendChild(svgEl('rect', { x: table.x - 50, y: top, width: 100, height: 18, rx: '5', fill: '#D9F2D0', stroke: '#7CC56A' }));
+      const text = svgEl('text', { x: table.x, y: top + 9, dy: '0.35em', 'text-anchor': 'middle', 'font-size': '9.5', 'font-weight': '600', fill: '#245C21' });
+      const label = labelOf(item);
+      text.textContent = label.length > 15 ? `${label.slice(0, 14)}…` : label;
+      g.appendChild(text);
+      table.rows.appendChild(g);
+    });
+    table.frame.setAttribute('height', 30 + shown.length * 22 + (shown.length ? 4 : 0));
+  };
+
+  const setChip = (key, text) => {
+    if (chipEls[key]) chipEls[key].textContent = text;
+  };
+
+  const node = el('div', { class: 'fs-panel fc-wrap' }, el('h4', { text: spec.title }), svg);
+  return {
+    node,
+    highlight,
+    showGaps,
+    setChip,
+    renderUsers: (users, fresh) => renderRows('users', users, (user) => user.email, fresh),
+    renderProfiles: (profiles, fresh) => renderRows('profiles', profiles, (profile) => `@${profile.username}`, fresh),
+  };
+};
+
 // Shared shell of the two sign up simulators: the phone, the fake Supabase, the code
 // panel and the step player. Each simulator brings its layers, its code files and its steps.
 const createRegisterSim = (root, config) => {
@@ -1827,18 +2006,21 @@ const createRegisterSim = (root, config) => {
     ...stripItems.flatMap(([, item], index) => (index ? [el('span', { class: 'fr-st-sep', text: '›' }), item] : [item]))
   );
   const codeView = el('div', {}, code.box, strip);
-  const layersTab = el('button', { type: 'button', text: 'Capas', class: 'fs-sel' });
-  const codeTab = el('button', { type: 'button', text: 'Código' });
+  const circle = config.circle ? createCleanCircle(config.circle) : null;
+  const views = [
+    ['layers', 'Capas', layers],
+    ...(circle ? [['clean', 'Clean', circle.node]] : []),
+    ['code', 'Código', codeView],
+  ].map(([key, label, view]) => [key, el('button', { type: 'button', text: label }), view]);
   const showTab = (next) => {
-    layersTab.className = next === 'layers' ? 'fs-sel' : '';
-    codeTab.className = next === 'code' ? 'fs-sel' : '';
-    layers.hidden = next !== 'layers';
-    codeView.hidden = next !== 'code';
+    views.forEach(([key, button, view]) => {
+      button.className = key === next ? 'fs-sel' : '';
+      view.hidden = key !== next;
+    });
   };
-  layersTab.addEventListener('click', () => showTab('layers'));
-  codeTab.addEventListener('click', () => showTab('code'));
-  const tabs = el('div', { class: 'fs-seg fs-view', role: 'group', 'aria-label': 'Vista' }, layersTab, codeTab);
-  codeView.hidden = true;
+  views.forEach(([key, button]) => button.addEventListener('click', () => showTab(key)));
+  const tabs = el('div', { class: 'fs-seg fs-view', role: 'group', 'aria-label': 'Vista' }, ...views.map(([, button]) => button));
+  showTab('layers');
   const note = el('div', { class: 'fs-note' });
 
   let currentFile = null;
@@ -1858,6 +2040,7 @@ const createRegisterSim = (root, config) => {
       usersBox.appendChild(row);
       if (user === fresh) flash(row);
     });
+    if (circle) circle.renderUsers(db.users, fresh);
   };
   const renderProfiles = (fresh) => {
     profilesBox.replaceChildren();
@@ -1867,9 +2050,11 @@ const createRegisterSim = (root, config) => {
       profilesBox.appendChild(row);
       if (profile === fresh) flash(row);
     });
+    if (circle) circle.renderProfiles(db.profiles, fresh);
   };
 
   const setChip = (key, text) => {
+    if (circle) circle.setChip(key, text);
     if (!chips[key]) return;
     chips[key].textContent = text;
     if (text) flash(chips[key]);
@@ -1941,6 +2126,7 @@ const createRegisterSim = (root, config) => {
   };
 
   const highlight = (keys = []) => {
+    if (circle) circle.highlight(keys);
     const hotBands = new Set();
     Object.entries(nodes).forEach(([key, item]) => {
       const hot = keys.includes(key);
@@ -1954,6 +2140,7 @@ const createRegisterSim = (root, config) => {
     return hotBands;
   };
   const showGaps = (list = []) => {
+    if (circle) circle.showGaps(list);
     Object.values(gaps).forEach((g) => g.idle());
     list.forEach(([where, dir, text, side]) => {
       const { slots } = gaps[where];
@@ -2093,7 +2280,7 @@ const createRegisterSim = (root, config) => {
 
   container.append(
     el('div', { class: 'fs-col' }, screen.frame, el('div', { class: 'fs-controls' }, manualSwitch.node), controls, note),
-    el('div', { class: 'fs-side' }, tabs, layers, codeView)
+    el('div', { class: 'fs-side' }, tabs, ...views.map(([, , view]) => view))
   );
   setFile(config.initialFile);
   config.chipsReset(setChip);
@@ -2174,7 +2361,7 @@ const mountRegisterLayers = (root) =>
           lines: [4],
           gaps: [['vb', 'up', 'emit(RegisterLoadingState())']],
           apply: (ctx) => ctx.setChip('bloc', 'RegisterLoadingState'),
-          caption: 'El Bloc recibe el evento y emite un estado nuevo: Loading viaja hacia la vista.',
+          caption: 'El evento llega al Bloc, que emite un estado nuevo: Loading viaja hacia la vista.',
         },
         {
           hot: ['screen'],
@@ -2184,7 +2371,13 @@ const mountRegisterLayers = (root) =>
           caption: 'El estado llega a la vista. El BlocBuilder se reconstruye y dibuja el indicador de carga.',
         },
         {
-          hot: ['sdk'],
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [5],
+          caption: 'Emitir no detiene al Bloc. Mientras la vista muestra la carga, register() sigue y entra al try.',
+        },
+        {
+          hot: ['bloc'],
           file: 'bloc',
           lines: [6, 7, 8, 9, 10],
           gaps: [['bs', 'down', 'auth.signUp(email, password)']],
@@ -2192,7 +2385,7 @@ const mountRegisterLayers = (root) =>
           caption: 'Paso 1, la cuenta. El Bloc no habla con internet: le pide al SDK que lo haga.',
         },
         {
-          hot: ['ext'],
+          hot: ['sdk'],
           file: 'bloc',
           lines: [6, 7, 8, 9, 10],
           gaps: [['se', 'down', 'POST /auth/v1/signup']],
@@ -2215,29 +2408,27 @@ const mountRegisterLayers = (root) =>
         return [
           ...head,
           {
+            hot: ['ext'],
+            gaps: [['se', 'fail', failure.status]],
+            caption: 'Supabase le responde al SDK con un error.',
+            warn: true,
+          },
+          {
             hot: ['sdk'],
             file: 'bloc',
             lines: [6, 7, 8, 9, 10],
-            gaps: [['se', 'fail', failure.status]],
-            caption: 'La respuesta vuelve al SDK con un error.',
-            warn: true,
-          },
-          {
-            hot: ['bloc'],
-            file: 'bloc',
-            lines: [19],
             gaps: [['bs', 'fail', 'lanza AuthException']],
             apply: (ctx) => ctx.setChip('sdk', ''),
-            caption: 'signUp no devuelve el error: lanza una excepción. El Bloc salta al catch y el insert nunca corre.',
+            caption: 'signUp no devuelve el error: lanza una excepción hacia el Bloc.',
             warn: true,
           },
           {
             hot: ['bloc'],
             file: 'bloc',
-            lines: [20, 21, 22],
+            lines: [19, 20, 21, 22],
             gaps: [['vb', 'fail', 'emit(RegisterErrorState(errorMessage))']],
             apply: (ctx) => ctx.setChip('bloc', 'RegisterErrorState'),
-            caption: 'El catch emite el estado de error hacia la vista.',
+            caption: 'El Bloc salta al catch, así que el insert nunca corre. Emite el estado de error hacia la vista.',
             warn: true,
           },
           {
@@ -2253,30 +2444,28 @@ const mountRegisterLayers = (root) =>
       return [
         ...head,
         {
-          hot: ['sdk'],
-          file: 'bloc',
-          lines: [6, 7, 8, 9, 10],
+          hot: ['ext'],
           gaps: [['se', 'up', '200 · usuario creado']],
-          caption: 'Supabase responde al SDK que la cuenta quedó creada.',
+          caption: 'Supabase le responde al SDK que la cuenta quedó creada.',
         },
         {
-          hot: ['bloc'],
+          hot: ['sdk'],
           file: 'bloc',
           lines: [6],
           gaps: [['bs', 'up', 'AuthResponse(user.id)']],
           apply: (ctx) => ctx.setChip('sdk', ''),
-          caption: 'El SDK le entrega la respuesta al Bloc, que guarda en response el id de la cuenta nueva.',
+          caption: 'El SDK le entrega la respuesta al Bloc.',
         },
         {
-          hot: ['sdk'],
+          hot: ['bloc'],
           file: 'bloc',
           lines: [11, 12, 13, 14, 15, 16, 17],
           gaps: [['bs', 'down', "from('profiles').insert({…})"]],
           apply: (ctx) => ctx.setChip('sdk', "from('profiles').insert(…)"),
-          caption: 'Paso 2, el perfil. Mismo SDK, otro servicio: ahora la base de datos.',
+          caption: 'Paso 2, el perfil. Con el id que trajo response, el Bloc le pide al SDK el insert.',
         },
         {
-          hot: ['ext'],
+          hot: ['sdk'],
           file: 'bloc',
           lines: [11, 12, 13, 14, 15, 16, 17],
           gaps: [['se', 'down', 'POST /rest/v1/profiles']],
@@ -2288,19 +2477,17 @@ const mountRegisterLayers = (root) =>
           caption: 'La fila llega a profiles con el mismo id de la cuenta. Así se unen las dos tablas.',
         },
         {
-          hot: ['sdk'],
-          file: 'bloc',
-          lines: [11, 12],
+          hot: ['ext'],
           gaps: [['se', 'up', '201 · Created']],
-          caption: 'Supabase confirma al SDK que guardó la fila.',
+          caption: 'Supabase le confirma al SDK que guardó la fila.',
         },
         {
-          hot: ['bloc'],
+          hot: ['sdk'],
           file: 'bloc',
           lines: [11, 12],
           gaps: [['bs', 'up', 'insert completo']],
           apply: (ctx) => ctx.setChip('sdk', ''),
-          caption: 'El await termina en el Bloc: los dos pasos salieron bien.',
+          caption: 'El SDK le avisa al Bloc que el insert terminó.',
         },
         {
           hot: ['bloc'],
@@ -2308,7 +2495,7 @@ const mountRegisterLayers = (root) =>
           lines: [18],
           gaps: [['vb', 'up', 'emit(RegisterSuccessState())']],
           apply: (ctx) => ctx.setChip('bloc', 'RegisterSuccessState'),
-          caption: 'El Bloc emite Success hacia la vista.',
+          caption: 'Los dos pasos salieron bien. El Bloc emite Success hacia la vista.',
         },
         {
           hot: ['screen'],
@@ -2422,6 +2609,44 @@ const mountRegisterClean = (root) =>
       ['ext', 'Supabase'],
     ],
     fileLayer: { bloc: 'bloc', usecase: 'dom', auth: 'data', profile: 'data' },
+    circle: {
+      title: 'El registro en el diagrama de arquitectura limpia',
+      viewBox: '0 0 660 620',
+      center: [300, 320],
+      rings: [
+        { r: 292, fill: '#F1F3F7', stroke: '#D5DAE3', label: 'FRAMEWORKS Y DRIVERS', labelY: 575, ink: '#556074' },
+        { r: 218, fill: '#E9F6F3', stroke: '#B5E0D9', label: 'ADAPTADORES', labelY: 501, ink: '#0F8478' },
+        { r: 145, fill: '#FFF6E3', stroke: '#F0D79A', label: 'CASOS DE USO', labelY: 428, ink: '#A96C05' },
+        { r: 72, fill: '#FFEBC2', stroke: '#F0C572', label: 'ENTIDADES', labelY: 366, ink: '#8A5A04' },
+      ],
+      nodes: {
+        screen: { x: 115, y: 180, text: 'RegisterScreen', kind: 'view' },
+        bloc: { x: 130, y: 320, text: 'RegisterBloc', kind: 'view' },
+        usecase: { x: 300, y: 210, text: 'SignUpUseCase', kind: 'dom' },
+        authRepo: { x: 400, y: 262, text: 'AuthRepository', kind: 'contract' },
+        profileRepo: { x: 400, y: 378, text: 'ProfileRepository', kind: 'contract' },
+        authUser: { x: 300, y: 290, text: 'AuthUser', kind: 'entity' },
+        profile: { x: 300, y: 318, text: 'Profile', kind: 'entity' },
+        authImpl: { x: 440, y: 180, text: 'AuthRepositoryImpl', kind: 'data' },
+        authDs: { x: 505, y: 230, text: 'SupabaseAuthDataSource', kind: 'data' },
+        profileImpl: { x: 440, y: 470, text: 'ProfileRepositoryImpl', kind: 'data' },
+        profileDs: { x: 505, y: 410, text: 'SupabaseProfileDataSource', kind: 'data' },
+      },
+      chips: { view: 'screen', bloc: 'bloc' },
+      tables: {
+        users: { x: 598, y: 120, title: 'auth.users' },
+        profiles: { x: 598, y: 430, title: 'profiles' },
+      },
+      supabaseLabel: [598, 108],
+      hops: {
+        vb: ['screen', 'bloc'],
+        bd: ['bloc', 'usecase'],
+        'dd-l': ['authRepo', 'authImpl'],
+        'dd-r': ['profileRepo', 'profileImpl'],
+        'ds-l': ['authDs', 'users'],
+        'ds-r': ['profileDs', 'profiles'],
+      },
+    },
     viewKeys: ['screen'],
     initialFile: 'bloc',
     idleState: 'RegisterStatus.initial',
@@ -2501,7 +2726,7 @@ const mountRegisterClean = (root) =>
           lines: [4, 5, 6],
           gaps: [['vb', 'up', 'status: loading']],
           apply: (ctx) => ctx.setChip('bloc', 'RegisterStatus.loading'),
-          caption: 'El Bloc recibe el evento y emite loading con copyWith. El estado viaja hacia la vista.',
+          caption: 'El evento llega al Bloc, que emite loading con copyWith. El estado viaja hacia la vista.',
         },
         {
           hot: ['screen'],
@@ -2509,7 +2734,13 @@ const mountRegisterClean = (root) =>
           caption: 'El estado llega a la vista y la pantalla muestra la carga.',
         },
         {
-          hot: ['usecase'],
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [7],
+          caption: 'Emitir no detiene al Bloc. Mientras la vista muestra la carga, _onSubmitted sigue y entra al try.',
+        },
+        {
+          hot: ['bloc'],
           file: 'bloc',
           lines: [8, 9, 10, 11, 12, 13],
           gaps: [['bd', 'down', '_signUp(username, fullName, email, password)']],
@@ -2522,17 +2753,17 @@ const mountRegisterClean = (root) =>
           caption: 'Paso 1, la cuenta. Dentro del dominio, el UseCase llama al contrato AuthRepository, no a Supabase.',
         },
         {
-          hot: ['authImpl'],
-          file: 'auth',
-          lines: [0, 1, 2, 3, 4],
+          hot: ['authRepo'],
+          file: 'usecase',
+          lines: [6, 7],
           gaps: [['dd', 'down', 'signUp(email, password)', 'l']],
-          caption: 'La llamada cruza a la capa de datos: AuthRepositoryImpl es quien cumple el contrato.',
+          caption: 'La llamada cruza a la capa de datos, donde vive quien cumple el contrato.',
         },
         {
           hot: ['authImpl', 'authDs'],
           file: 'auth',
-          lines: [5, 6],
-          caption: 'AuthRepositoryImpl delega en SupabaseAuthDataSource, el único que usa el SDK de Auth.',
+          lines: [0, 5, 6],
+          caption: 'AuthRepositoryImpl cumple el contrato y delega en SupabaseAuthDataSource, el único que usa el SDK de Auth.',
         },
         {
           hot: ['authDs'],
@@ -2558,36 +2789,34 @@ const mountRegisterClean = (root) =>
         return [
           ...head,
           {
+            hot: ['ext'],
+            gaps: [['ds', 'fail', failure.status, 'l']],
+            caption: 'Supabase le responde al data source con un error.',
+            warn: true,
+          },
+          {
             hot: ['authDs'],
             file: 'auth',
             lines: [15, 16],
-            gaps: [['ds', 'fail', failure.status, 'l']],
-            caption: 'La respuesta vuelve con un error y el SDK lanza una excepción en el data source.',
+            gaps: [['dd', 'fail', 'lanza AuthException', 'l']],
+            caption: 'El SDK lanza una excepción en el data source, y la excepción sube al dominio.',
             warn: true,
           },
           {
             hot: ['usecase', 'authRepo'],
             file: 'usecase',
             lines: [6, 7],
-            gaps: [['dd', 'fail', 'lanza AuthException', 'l']],
-            caption: 'La excepción sube al dominio. El UseCase no la atrapa: si no hay cuenta, el perfil ni se intenta.',
-            warn: true,
-          },
-          {
-            hot: ['bloc'],
-            file: 'bloc',
-            lines: [18],
             gaps: [['bd', 'fail', 'lanza AuthException']],
-            caption: 'La excepción sigue subiendo hasta el catch del Bloc.',
+            caption: 'El UseCase no la atrapa: si no hay cuenta, el perfil ni se intenta. La excepción sigue hacia el Bloc.',
             warn: true,
           },
           {
             hot: ['bloc'],
             file: 'bloc',
-            lines: [19, 20, 21, 22],
+            lines: [18, 19, 20, 21, 22],
             gaps: [['vb', 'fail', 'status: failure']],
             apply: (ctx) => ctx.setChip('bloc', 'RegisterStatus.failure'),
-            caption: 'El Bloc emite failure con el mensaje hacia la vista.',
+            caption: 'El catch del Bloc la recibe y emite failure con el mensaje hacia la vista.',
             warn: true,
           },
           {
@@ -2601,49 +2830,35 @@ const mountRegisterClean = (root) =>
       return [
         ...head,
         {
-          hot: ['authDs'],
-          file: 'auth',
-          lines: [15, 16],
+          hot: ['ext'],
           gaps: [['ds', 'up', '200 · usuario creado', 'l']],
-          caption: 'Supabase responde al data source que la cuenta quedó creada.',
+          caption: 'Supabase le responde al data source que la cuenta quedó creada.',
         },
         {
           hot: ['authDs'],
           file: 'auth',
           lines: [17, 18, 19],
-          caption: 'El data source convierte la respuesta en AuthUser. De aquí para arriba nadie ve una clase de Supabase.',
-        },
-        {
-          hot: ['usecase', 'authRepo'],
-          file: 'usecase',
-          lines: [6, 7],
           gaps: [['dd', 'up', 'AuthUser(id, email)', 'l']],
-          caption: 'El AuthUser sube al dominio y el UseCase lo recibe.',
+          caption: 'El data source convierte la respuesta en AuthUser y la devuelve. De aquí para arriba nadie ve una clase de Supabase.',
         },
         {
           hot: ['usecase'],
           file: 'usecase',
           lines: [8, 9, 10, 11, 12],
-          caption: 'La regla del registro: con el id de la cuenta se arma el Profile. Por eso la cuenta va primero.',
+          caption: 'El AuthUser llega al UseCase. La regla del registro: con su id se arma el Profile, por eso la cuenta va primero.',
         },
         {
           hot: ['usecase', 'profileRepo'],
           file: 'usecase',
           lines: [13, 14],
-          caption: 'Paso 2, el perfil. El UseCase usa el otro contrato, ProfileRepository.',
-        },
-        {
-          hot: ['profileImpl'],
-          file: 'profile',
-          lines: [0, 1, 2],
           gaps: [['dd', 'down', 'createProfile(profile)', 'r']],
-          caption: 'La llamada cruza a la otra rama de datos: ProfileRepositoryImpl cumple ese contrato.',
+          caption: 'Paso 2, el perfil. El UseCase usa el otro contrato, ProfileRepository, y la llamada baja a la otra rama de datos.',
         },
         {
           hot: ['profileImpl', 'profileDs'],
           file: 'profile',
-          lines: [3],
-          caption: 'ProfileRepositoryImpl delega en SupabaseProfileDataSource.',
+          lines: [0, 1, 2, 3],
+          caption: 'ProfileRepositoryImpl cumple ese contrato y delega en SupabaseProfileDataSource.',
         },
         {
           hot: ['profileDs'],
@@ -2658,21 +2873,19 @@ const mountRegisterClean = (root) =>
           caption: 'La fila llega a profiles con el mismo id de la cuenta.',
         },
         {
+          hot: ['ext'],
+          gaps: [['ds', 'up', '201 · Created', 'r']],
+          caption: 'Supabase le confirma al data source que guardó la fila.',
+        },
+        {
           hot: ['profileDs'],
           file: 'profile',
           lines: [9],
-          gaps: [['ds', 'up', '201 · Created', 'r']],
-          caption: 'Supabase confirma al data source que guardó la fila.',
-        },
-        {
-          hot: ['usecase', 'profileRepo'],
-          file: 'usecase',
-          lines: [14],
           gaps: [['dd', 'up', 'createProfile completo', 'r']],
-          caption: 'La confirmación sube al dominio: el await del UseCase termina.',
+          caption: 'El data source le avisa al dominio que el perfil quedó guardado.',
         },
         {
-          hot: ['bloc'],
+          hot: ['usecase'],
           file: 'usecase',
           lines: [20],
           gaps: [['bd', 'up', 'Profile']],
@@ -2684,7 +2897,7 @@ const mountRegisterClean = (root) =>
           lines: [14, 15, 16, 17],
           gaps: [['vb', 'up', 'status: success, profile']],
           apply: (ctx) => ctx.setChip('bloc', 'RegisterStatus.success'),
-          caption: 'El Bloc emite success, con el perfil dentro del estado, hacia la vista.',
+          caption: 'El Bloc recibe el Profile y emite success, con el perfil dentro del estado, hacia la vista.',
         },
         {
           hot: ['screen'],

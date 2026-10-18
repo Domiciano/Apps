@@ -195,8 +195,10 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   Comparten el teléfono con la pantalla de registro de `262App3`, un Supabase simulado
   (`auth.users` y `profiles` persisten entre intentos), el panel de código y el reproductor de pasos
   (`createRegisterSim`). Cada uno aporta sus capas, sus archivos de código y sus pasos.
-  A la derecha del teléfono hay dos pestañas: *Capas* (los bloques) y *Código*, con una
-  franja abajo que marca la capa actual. En `register-clean` la franja sigue al archivo
+  A la derecha del teléfono hay pestañas: *Capas* (los bloques), *Clean* (solo en
+  `register-clean`: el diagrama circular de anillos, con las mismas piezas, el salto actual como
+  flecha y los registros de Supabase; `createCleanCircle`) y *Código*, con una franja abajo que
+  marca la capa actual. En `register-clean` la franja sigue al archivo
   resaltado (`fileLayer`); en `register-layers`, a la pieza iluminada (SDK, Supabase).
   - `register-layers` («Review del laboratorio 5»): **el código del laboratorio tal como está
     hoy**. Vista, `Bloc` y SDK de Supabase: el `Bloc` llama directo a `Supabase.instance.client`
@@ -204,6 +206,10 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   - `register-clean` («Aplicando arquitectura limpia»): cómo debería quedar. Presentación,
     dominio (`SignUpUseCase` y los contratos `AuthRepository` y `ProfileRepository`) y datos,
     con una rama `Impl → DataSource` por servicio.
+  - **Reglas de los pasos**, cubiertas por pruebas: un solo mensaje entre capas por paso, la
+    reacción a su llegada en el paso siguiente, y continuidad (cada paso ocurre en la capa a la
+    que llegó el mensaje anterior o en una vecina; tras emitir un estado se vuelve al Bloc antes
+    de seguir hacia abajo).
   - Los dos enseñan éxito, correo repetido (`AuthApiException`) y validación en la vista, y
     tienen modo *Paso a paso*. Hubo un interruptor *Falta el grant en profiles* (cuenta sin
     perfil); el profesor lo retiró el 2026-10-17 por innecesario. Si el laboratorio cambia,

@@ -289,6 +289,8 @@ describe('register-clean', () => {
     expect(container.querySelector('.fr-st.fr-on').textContent).toBe('Bloc');
     expect(screen.getByText('register_bloc.dart')).toBeTruthy();
     fireEvent.click(screen.getByText('Siguiente paso'));
+    expect(container.querySelector('.fr-st.fr-on').textContent).toBe('Bloc');
+    fireEvent.click(screen.getByText('Siguiente paso'));
     expect(container.querySelector('.fr-st.fr-on').textContent).toBe('Dominio');
     expect(screen.getByText('sign_up_usecase.dart')).toBeTruthy();
   });
@@ -316,24 +318,65 @@ describe('register-clean', () => {
   });
 });
 
+describe('register-clean circle tab', () => {
+  it('only exists in the clean simulator and mirrors the saved rows', () => {
+    const { unmount } = renderBlock('register-layers');
+    expect(screen.queryByText('Clean')).toBeNull();
+    unmount();
+    const { container } = renderBlock('register-clean');
+    fireEvent.click(screen.getByText('Clean'));
+    expect(container.querySelector('.fc-wrap').hidden).toBe(false);
+    fireEvent.click(screen.getByText('Registrarme'));
+    act(() => vi.advanceTimersByTime(60000));
+    const circle = container.querySelector('.fc-svg').textContent;
+    expect(circle).toContain('ana@icesi.edu');
+    expect(circle).toContain('@ana');
+    expect(circle).toContain('RegisterStatus.success');
+  });
+});
+
 describe('register simulators step by step', () => {
-  const walk = (name) => {
+  const walk = (name, email) => {
     const { container } = renderBlock(name);
+    if (email) {
+      fireEvent.click(screen.getByText('Registrarme'));
+      act(() => vi.advanceTimersByTime(60000));
+      fireEvent.click(screen.getByText('Volver a /register'));
+    }
     fireEvent.click(screen.getByLabelText('Paso a paso'));
     fireEvent.click(screen.getByText('Registrarme'));
-    const counts = [container.querySelectorAll('.fr-msg').length];
+    const bands = [...container.querySelectorAll('.fr-band')];
+    const snapshot = () => ({
+      messages: container.querySelectorAll('.fr-msg').length,
+      layer: bands.findIndex((band) => band.classList.contains('fr-on')),
+    });
+    const steps = [snapshot()];
     while (screen.getByText('Siguiente paso').style.display !== 'none') {
       fireEvent.click(screen.getByText('Siguiente paso'));
-      counts.push(container.querySelectorAll('.fr-msg').length);
+      steps.push(snapshot());
     }
-    return counts;
+    return steps;
   };
 
-  ['register-layers', 'register-clean'].forEach((name) => {
-    it(`${name} shows at most one hop between layers per step`, () => {
-      const counts = walk(name);
-      expect(counts.length).toBeGreaterThan(10);
-      expect(Math.max(...counts)).toBe(1);
+  [
+    ['register-layers', false],
+    ['register-layers', true],
+    ['register-clean', false],
+    ['register-clean', true],
+  ].forEach(([name, repeated]) => {
+    const label = repeated ? 'with a repeated email' : 'on success';
+    it(`${name} shows at most one hop per step ${label}`, () => {
+      const steps = walk(name, repeated);
+      expect(steps.length).toBeGreaterThan(8);
+      expect(Math.max(...steps.map((step) => step.messages))).toBe(1);
+    });
+
+    it(`${name} never skips a layer between steps ${label}`, () => {
+      const steps = walk(name, repeated);
+      steps.forEach((step) => expect(step.layer).toBeGreaterThanOrEqual(0));
+      steps.slice(1).forEach((step, index) => {
+        expect(Math.abs(step.layer - steps[index].layer)).toBeLessThanOrEqual(1);
+      });
     });
   });
 });
