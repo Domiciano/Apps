@@ -1534,9 +1534,10 @@ const mountPlaylist = (root, args = []) => {
   };
 };
 
-// ───────────────────────── register-layers ─────────────────────────
+// ───────────────────────── register-layers / register-clean ─────────────────────────
 // Lab 5 (Móviles, 262App3): the sign up screen on the left and, on the right, the
-// layers the request goes through: view, Bloc, Supabase SDK and the Supabase cloud.
+// layers the request goes through. register-layers is the lab as it stands (view,
+// Bloc, Supabase SDK); register-clean is how it should end (presentation, domain, data).
 
 const REG_STYLE_ID = 'fsim-reg-style';
 
@@ -1572,6 +1573,17 @@ const REG_CSS = `
 .fsim .fr-band.fr-bloc{--b:#9DB8F2;--bg:#E8EFFE;--ink:#2F5BC4}
 .fsim .fr-band.fr-sdk{--b:#86D3CA;--bg:#E3F6F3;--ink:#0F8478}
 .fsim .fr-band.fr-ext{border-style:dashed}
+.fsim .fr-band.fr-dom{--b:#F0C572;--bg:#FFF3DC;--ink:#A96C05}
+.fsim .fr-band.fr-data{--b:#86D3CA;--bg:#E3F6F3;--ink:#0F8478}
+.fsim .fr-band-body.fr-stack{flex-direction:column;align-items:stretch}
+.fsim .fr-node.fr-hot{box-shadow:0 0 0 3px #F2C069}
+.fsim .fr-node.fr-contract{border-style:dashed}
+.fsim .fr-cols{display:flex;gap:8px;width:100%}
+.fsim .fr-colb{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.fsim .fr-colb .fr-node{max-width:100%;overflow-wrap:break-word;text-align:center}
+.fsim .fr-center-row{width:100%;display:flex;justify-content:center;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.fsim .fr-down{font-size:11px;color:#556074;line-height:1}
+@container (max-width:560px){.fsim .fr-node{font-size:11px;padding:3px 6px}.fsim .fr-msg{font-size:10.5px}}
 .fsim .fr-band-head{display:flex;justify-content:space-between;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
 .fsim .fr-band-name{font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--ink)}
 .fsim .fr-band-role{font-size:11.5px;color:#556074}
@@ -1581,8 +1593,9 @@ const REG_CSS = `
 .fsim .fr-chip{font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11.5px;padding:2px 8px;border-radius:10px;
   background:#fff;border:1px dashed var(--b);color:#454C61;overflow-wrap:anywhere}
 .fsim .fr-chip:empty{display:none}
-.fsim .fr-gap{min-height:34px;display:flex;align-items:center;justify-content:center;padding:4px 0;position:relative}
-.fsim .fr-gap::before{content:'';position:absolute;top:0;bottom:0;left:50%;border-left:1.5px dashed #C4CBD8}
+.fsim .fr-gap{display:flex;gap:8px}
+.fsim .fr-slot{flex:1 1 0;min-width:0;min-height:34px;display:flex;align-items:center;justify-content:center;padding:4px 0;position:relative}
+.fsim .fr-slot::before{content:'';position:absolute;top:0;bottom:0;left:50%;border-left:1.5px dashed #C4CBD8}
 .fsim .fr-gap-idle{position:relative;z-index:1;font-size:11px;color:#9AA1B2;background:#FBFBFD;padding:0 6px}
 .fsim .fr-msg{position:relative;z-index:1;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11.5px;
   background:#fff;border:1.5px solid #556074;color:#161A26;border-radius:12px;padding:2px 10px;max-width:94%;
@@ -1706,7 +1719,9 @@ const authFailure = (users, email, password) => {
 const NO_GRANT_ERROR =
   'PostgrestException(message: permission denied for table profiles, code: 42501, details: Forbidden, hint: null)';
 
-const mountRegisterLayers = (root) => {
+// Shared shell of the two sign up simulators: the phone, the fake Supabase, the trace
+// and the step player. Each simulator brings its layers, its code files and its steps.
+const createRegisterSim = (root, config) => {
   ensureRegStyle();
   const container = card(root);
   const timers = [];
@@ -1717,70 +1732,83 @@ const mountRegisterLayers = (root) => {
   let running = false;
   let manual = false;
   let formError = null;
+  let phoneView = 'form';
 
   const screen = phone('Crear cuenta');
   screen.frame.classList.add('fr-phone');
   screen.body.setAttribute('data-testid', 'register-phone');
 
-  const band = (kind, name, role, ...body) => {
-    const node = el(
+  const nodes = {};
+  const bandOf = {};
+  const bands = {};
+  const gaps = {};
+  const chips = {};
+
+  const node = (key, text, extra = '') => {
+    const words = text.split(/(?=[A-Z][a-z])/).flatMap((part, index) => (index ? [el('wbr'), part] : [part]));
+    const item = el('span', { class: `fr-node${extra ? ` ${extra}` : ''}` }, ...words);
+    nodes[key] = item;
+    return item;
+  };
+  const chip = (key, testId) => {
+    const item = el('span', { class: 'fr-chip', 'data-testid': testId });
+    chips[key] = item;
+    return item;
+  };
+  const usersBox = el('div', { 'data-testid': 'auth-users' });
+  const profilesBox = el('div', { 'data-testid': 'profiles-table' });
+  const tables = {
+    users: el('div', { class: 'fr-table' }, el('b', { text: 'Auth · auth.users' }), usersBox),
+    profiles: el('div', { class: 'fr-table' }, el('b', { text: 'Tabla profiles' }), profilesBox),
+  };
+  const band = (key, kind, name, role, body, bodyClass = '') => {
+    const item = el(
       'div',
       { class: `fr-band fr-${kind}` },
       el('div', { class: 'fr-band-head' }, el('span', { class: 'fr-band-name', text: name }), el('span', { class: 'fr-band-role', text: role })),
-      el('div', { class: 'fr-band-body' }, ...body)
+      el('div', { class: `fr-band-body${bodyClass ? ` ${bodyClass}` : ''}` }, ...body)
     );
-    return node;
+    bands[key] = item;
+    body.forEach((child) => {
+      if (!child || !child.querySelectorAll) return;
+      Object.entries(nodes).forEach(([nodeKey, nodeEl]) => {
+        if (child === nodeEl || child.contains(nodeEl)) bandOf[nodeKey] = key;
+      });
+    });
+    return item;
   };
-  const gap = (idleText) => {
-    const node = el('div', { class: 'fr-gap' });
-    const idle = () => node.replaceChildren(idleText ? el('span', { class: 'fr-gap-idle', text: idleText }) : '');
+  const gap = (key, slotCount = 1, idleText = '') => {
+    const slots = Array.from({ length: slotCount }, () => el('div', { class: 'fr-slot' }));
+    const item = el('div', { class: 'fr-gap' }, ...slots);
+    const idle = () =>
+      slots.forEach((slot) => slot.replaceChildren(idleText ? el('span', { class: 'fr-gap-idle', text: idleText }) : ''));
     idle();
-    return { node, idle };
+    gaps[key] = { item, slots, idle };
+    return item;
   };
 
-  const viewChip = el('span', { class: 'fr-chip' });
-  const blocChip = el('span', { class: 'fr-chip', 'data-testid': 'bloc-state' });
-  const sdkChip = el('span', { class: 'fr-chip' });
-  const usersBox = el('div', { 'data-testid': 'auth-users' });
-  const profilesBox = el('div', { 'data-testid': 'profiles-table' });
-
-  const bands = {
-    view: band('view', 'VISTA', 'Muestra y avisa', el('span', { class: 'fr-node', text: 'RegisterScreen' }), viewChip),
-    bloc: band('bloc', 'BLOC', 'Recibe eventos, emite estados', el('span', { class: 'fr-node', text: 'RegisterBloc' }), blocChip),
-    sdk: band('sdk', 'SDK DE SUPABASE', 'Traduce a HTTP', el('span', { class: 'fr-node', text: 'Supabase.instance.client' }), sdkChip),
-    ext: band(
-      'ext',
-      'EXTERIOR · SUPABASE',
-      'Fuera del teléfono',
-      el(
-        'div',
-        { class: 'fr-db' },
-        el('div', { class: 'fr-table' }, el('b', { text: 'Auth · auth.users' }), usersBox),
-        el('div', { class: 'fr-table' }, el('b', { text: 'Tabla profiles' }), profilesBox)
-      )
-    ),
-  };
-  const gaps = { vb: gap(''), bs: gap(''), se: gap('internet') };
-
+  const kit = { node, chip, band, gap, tables };
+  const { title, footer } = config.layers(kit);
   const layers = el(
     'div',
     { class: 'fs-panel' },
-    el('h4', { text: 'Capas que recorre el registro' }),
-    el('div', {}, bands.view, gaps.vb.node, bands.bloc, gaps.bs.node, bands.sdk, gaps.se.node, bands.ext),
-    el('div', { class: 'fr-later', text: 'Todavía no hay UseCase ni Repository: el Bloc llama directo al SDK.' })
+    el('h4', { text: title }),
+    el('div', {}, ...config.order.map((key) => bands[key] || gaps[key].item)),
+    footer ? el('div', { class: 'fr-later', text: footer }) : null
   );
 
-  const code = codePanel('register_bloc.dart');
+  const code = codePanel('');
   const codeTitle = code.box.querySelector('h4');
   const trace = consolePanel('Traza');
   const note = el('div', { class: 'fs-note' });
 
   let currentFile = null;
   const setFile = (file) => {
-    if (currentFile === file) return;
+    if (!file || currentFile === file) return;
     currentFile = file;
-    codeTitle.textContent = file === 'screen' ? 'register_screen.dart' : 'register_bloc.dart';
-    code.setCode(file === 'screen' ? REG_SCREEN_CODE : REG_BLOC_CODE);
+    const [name, source] = config.files[file];
+    codeTitle.textContent = name;
+    code.setCode(source);
   };
 
   const renderUsers = (fresh) => {
@@ -1802,14 +1830,16 @@ const mountRegisterLayers = (root) => {
     });
   };
 
-  const setBloc = (state) => {
-    blocChip.textContent = state;
-    flash(blocChip);
+  const setChip = (key, text) => {
+    if (!chips[key]) return;
+    chips[key].textContent = text;
+    if (text) flash(chips[key]);
   };
 
   const renderForm = () => {
+    phoneView = 'form';
     screen.setTitle('Crear cuenta');
-    viewChip.textContent = 'registerForm()';
+    setChip('view', 'registerForm()');
     const fields = REG_FIELDS.map(([key, label, kind]) => [
       el('div', { class: 'fs-label', text: label }),
       el('input', {
@@ -1818,6 +1848,7 @@ const mountRegisterLayers = (root) => {
         value: values[key],
         'aria-label': label,
         autocomplete: 'off',
+        disabled: running,
         oninput: (event) => {
           values[key] = event.target.value;
         },
@@ -1833,48 +1864,68 @@ const mountRegisterLayers = (root) => {
     );
   };
   const renderLoading = () => {
-    viewChip.textContent = 'cargando';
+    phoneView = 'loading';
+    setChip('view', 'cargando');
     screen.body.replaceChildren(el('div', { class: 'fr-center' }, el('div', { text: 'Espere mientras tanto' }), el('div', { class: 'fr-spin' })));
   };
   const renderBlank = () => {
-    viewChip.textContent = 'SizedBox.shrink()';
+    phoneView = 'blank';
+    setChip('view', 'SizedBox.shrink()');
     screen.body.replaceChildren();
   };
-  const renderError = (message) => {
-    viewChip.textContent = 'Text("Error …")';
+  const renderErrorText = (message) => {
+    phoneView = 'error';
+    setChip('view', 'Text("Error …")');
     screen.body.replaceChildren(el('div', { class: 'fr-errtext', text: `Error ${message}` }));
   };
-  const renderHome = () => {
+  const showFormError = (message) => {
+    formError = message;
+    renderForm();
+    setChip('view', 'registerForm() + ErrorMessage');
+    screen.body.scrollTop = screen.body.scrollHeight;
+  };
+  const renderHome = (profile) => {
+    phoneView = 'home';
     screen.setTitle('Perfil');
-    viewChip.textContent = "/home";
+    setChip('view', '/home');
+    const shown = profile || { username: 'usuario', fullName: 'Nombre Apellido', email: 'correo@ejemplo.com' };
     const field = (label, value) => el('div', { class: 'fr-pf' }, el('small', { text: label }), el('div', { text: value }));
     screen.body.replaceChildren(
-      el('div', { class: 'fr-avatar', text: 'N' }),
-      el('div', { class: 'fr-name', text: 'Nombre Apellido' }),
-      el('div', { class: 'fr-handle', text: '@usuario' }),
-      field('Nombre de usuario', 'usuario'),
-      field('Nombre completo', 'Nombre Apellido'),
-      field('Correo', 'correo@ejemplo.com'),
+      el('div', { class: 'fr-avatar', text: shown.fullName ? shown.fullName[0].toUpperCase() : '?' }),
+      el('div', { class: 'fr-name', text: shown.fullName }),
+      el('div', { class: 'fr-handle', text: `@${shown.username}` }),
+      field('Nombre de usuario', shown.username),
+      field('Nombre completo', shown.fullName),
+      field('Correo', shown.email),
       el('button', { class: 'fr-btn', type: 'button', text: 'Cerrar sesión', onclick: reopen })
     );
   };
 
-  const highlight = (layer) => {
-    Object.entries(bands).forEach(([key, node]) => node.classList.toggle('fr-on', key === layer));
+  const highlight = (keys = []) => {
+    const hotBands = new Set();
+    Object.entries(nodes).forEach(([key, item]) => {
+      const hot = keys.includes(key);
+      item.classList.toggle('fr-hot', hot);
+      if (hot) hotBands.add(bandOf[key]);
+    });
+    keys.forEach((key) => {
+      if (bands[key]) hotBands.add(key);
+    });
+    Object.entries(bands).forEach(([key, item]) => item.classList.toggle('fr-on', hotBands.has(key)));
   };
   const showGaps = (list = []) => {
     Object.values(gaps).forEach((g) => g.idle());
-    list.forEach(([where, dir, text]) => {
-      gaps[where].node.replaceChildren(
+    list.forEach(([where, dir, text, side]) => {
+      const { slots } = gaps[where];
+      const slot = slots[side === 'r' ? slots.length - 1 : 0];
+      slot.replaceChildren(
         el('span', { class: `fr-msg${dir === 'up' ? ' fr-up' : dir === 'fail' ? ' fr-fail' : ''}`, text: `${dir === 'down' ? '↓' : '↑'} ${text}` })
       );
     });
   };
-
-  const LAYER_NAMES = { vb: ['Vista', 'Bloc'], bs: ['Bloc', 'SDK'], se: ['SDK', 'Supabase'] };
   const logGaps = (list = []) => {
     list.forEach(([where, dir, text]) => {
-      const [top, bottom] = LAYER_NAMES[where];
+      const [top, bottom] = config.gapNames[where];
       const route = dir === 'down' ? `${top} → ${bottom}` : `${bottom} → ${top}`;
       trace.print(`${route}  ${text}`, dir === 'fail' ? 'err' : dir === 'up' ? 'ok' : undefined);
     });
@@ -1909,13 +1960,25 @@ const mountRegisterLayers = (root) => {
     wipeButton.disabled = running;
   };
 
+  const ctx = {
+    db,
+    setChip,
+    renderUsers,
+    renderProfiles,
+    renderLoading,
+    renderBlank,
+    renderErrorText,
+    showFormError,
+    renderHome,
+  };
+
   const runStep = (step) => {
-    highlight(step.layer);
+    highlight(step.hot);
     setFile(step.file);
     code.mark(...(step.lines || []));
     showGaps(step.gaps);
     logGaps(step.gaps);
-    if (step.apply) step.apply();
+    if (step.apply) step.apply(ctx);
     note.textContent = step.caption;
     note.classList.toggle('fs-warn', Boolean(step.warn));
   };
@@ -1923,6 +1986,7 @@ const mountRegisterLayers = (root) => {
   const finish = () => {
     running = false;
     syncControls();
+    if (phoneView === 'form') renderForm();
   };
 
   const advance = () => {
@@ -1939,164 +2003,6 @@ const mountRegisterLayers = (root) => {
     timers.push(setTimeout(advance, 1400));
   };
 
-  const buildSteps = (data) => {
-    const failure = authFailure(db.users, data.email, data.password);
-    const noGrant = grantSwitch.input.checked;
-    let user = null;
-    const head = [
-      {
-        layer: 'view',
-        file: 'screen',
-        lines: [10, 11, 12, 13, 14],
-        gaps: [['vb', 'down', 'add(OnRegisterSubmittedEvent)']],
-        caption: 'La vista validó los campos y le manda un evento al Bloc. No sabe que existe Supabase.',
-      },
-      {
-        layer: 'bloc',
-        file: 'bloc',
-        lines: [4],
-        gaps: [['vb', 'up', 'emit(RegisterLoadingState())']],
-        apply: () => {
-          setBloc('RegisterLoadingState');
-          renderLoading();
-        },
-        caption: 'El Bloc emite Loading y el BlocBuilder reconstruye la pantalla con el indicador de carga.',
-      },
-      {
-        layer: 'sdk',
-        file: 'bloc',
-        lines: [6, 7, 8, 9, 10],
-        gaps: [['bs', 'down', 'auth.signUp(email, password)']],
-        apply: () => {
-          sdkChip.textContent = 'auth.signUp(…)';
-        },
-        caption: 'Paso 1, la cuenta. El Bloc no habla con internet: le pide al SDK que lo haga.',
-      },
-      {
-        layer: 'ext',
-        file: 'bloc',
-        lines: [6, 7, 8, 9, 10],
-        gaps: [['se', 'down', 'POST /auth/v1/signup']],
-        apply: () => {
-          if (failure) return;
-          user = { id: fakeUuid(), email: data.email };
-          db.users.push(user);
-          renderUsers(user);
-        },
-        caption: failure
-          ? 'El SDK convierte la llamada en una petición HTTP. Supabase Auth la revisa y la rechaza.'
-          : 'El SDK convierte la llamada en una petición HTTP. Supabase Auth crea la cuenta y le asigna un id.',
-      },
-    ];
-    const emitError = (message) => ({
-      layer: 'view',
-      file: 'bloc',
-      lines: [20, 21, 22],
-      gaps: [['vb', 'fail', 'emit(RegisterErrorState(errorMessage))']],
-      apply: () => {
-        setBloc('RegisterErrorState');
-        sdkChip.textContent = '';
-        renderError(message);
-      },
-      caption: 'El catch emite el estado de error. La pantalla solo muestra el texto: ese estado no vuelve a dibujar el formulario.',
-      warn: true,
-    });
-    if (failure) {
-      return [
-        ...head,
-        {
-          layer: 'bloc',
-          file: 'bloc',
-          lines: [19],
-          gaps: [
-            ['se', 'fail', failure.status],
-            ['bs', 'fail', 'lanza AuthException'],
-          ],
-          caption: 'signUp no devuelve el error: lanza una excepción. La ejecución salta al catch y el insert nunca corre.',
-          warn: true,
-        },
-        emitError(failure.error),
-      ];
-    }
-    return [
-      ...head,
-      {
-        layer: 'bloc',
-        file: 'bloc',
-        lines: [6],
-        gaps: [
-          ['se', 'up', '200 · usuario creado'],
-          ['bs', 'up', 'AuthResponse(user.id)'],
-        ],
-        caption: 'La respuesta vuelve por el mismo camino. El Bloc guarda en response el id de la cuenta nueva.',
-      },
-      {
-        layer: 'sdk',
-        file: 'bloc',
-        lines: [11, 12, 13, 14, 15, 16, 17],
-        gaps: [['bs', 'down', "from('profiles').insert({…})"]],
-        apply: () => {
-          sdkChip.textContent = "from('profiles').insert(…)";
-        },
-        caption: 'Paso 2, el perfil. Mismo SDK, otro servicio: ahora la base de datos.',
-      },
-      {
-        layer: 'ext',
-        file: 'bloc',
-        lines: [11, 12, 13, 14, 15, 16, 17],
-        gaps: [['se', 'down', 'POST /rest/v1/profiles']],
-        apply: () => {
-          if (noGrant) return;
-          const profile = { id: user.id, username: data.username, full_name: data.fullName };
-          db.profiles.push(profile);
-          renderProfiles(profile);
-        },
-        caption: noGrant
-          ? 'La petición llega a la tabla profiles, pero el rol authenticated no tiene permiso de insertar.'
-          : 'La fila llega a profiles con el mismo id de la cuenta. Así se unen las dos tablas.',
-      },
-      ...(noGrant
-        ? [
-            {
-              layer: 'bloc',
-              file: 'bloc',
-              lines: [19],
-              gaps: [
-                ['se', 'fail', '403 · 42501'],
-                ['bs', 'fail', 'lanza PostgrestException'],
-              ],
-              caption: 'La cuenta quedó creada en Auth y el perfil no. Mira las dos tablas: hay una cuenta sin perfil.',
-              warn: true,
-            },
-            emitError(NO_GRANT_ERROR),
-          ]
-        : [
-            {
-              layer: 'bloc',
-              file: 'bloc',
-              lines: [18],
-              gaps: [
-                ['se', 'up', '201 · Created'],
-                ['vb', 'up', 'emit(RegisterSuccessState())'],
-              ],
-              apply: () => {
-                setBloc('RegisterSuccessState');
-                sdkChip.textContent = '';
-                renderBlank();
-              },
-              caption: 'Los dos pasos salieron bien. El Bloc emite Success y el BlocBuilder dibuja una caja vacía.',
-            },
-            {
-              layer: 'view',
-              file: 'screen',
-              lines: [18, 19, 20, 21],
-              apply: renderHome,
-              caption: 'El BlocListener escucha Success y navega a /home. HomeScreen aún muestra sus valores por defecto: nadie le pasa el perfil.',
-            },
-          ]),
-    ];
-  };
-
   function submit() {
     if (running) return;
     const data = {
@@ -2105,15 +2011,17 @@ const mountRegisterLayers = (root) => {
       email: values.email.trim(),
       password: values.password,
     };
-    highlight('view');
-    setFile('screen');
+    highlight(config.viewKeys);
     showGaps();
+    const validation = config.validation;
     if (!data.username || !data.fullName || !data.email || !data.password) {
       formError = 'Completa todos los campos';
-      code.mark(1, 2, 3, 4);
+      setFile(validation.file);
+      code.mark(...validation.empty);
     } else if (data.password !== values.confirm) {
       formError = 'Las contraseñas no coinciden';
-      code.mark(6, 7, 8, 9);
+      setFile(validation.file);
+      code.mark(...validation.mismatch);
     } else {
       formError = null;
     }
@@ -2125,10 +2033,13 @@ const mountRegisterLayers = (root) => {
       return;
     }
     trace.print(`Vista  _submit() con ${data.email}`);
-    steps = buildSteps(data);
+    const failure = authFailure(db.users, data.email, data.password);
+    steps = config.buildSteps({ data, failure, noGrant: grantSwitch.input.checked });
     stepIndex = 0;
     running = true;
+    formError = null;
     syncControls();
+    if (phoneView === 'form') renderForm();
     advance();
   }
 
@@ -2136,15 +2047,14 @@ const mountRegisterLayers = (root) => {
     if (running) return;
     timers.forEach(clearTimeout);
     formError = null;
-    highlight(null);
+    highlight();
     showGaps();
-    sdkChip.textContent = '';
-    setBloc('RegisterIdleState');
-    setFile('screen');
+    config.chipsReset(setChip);
+    setFile(config.initialFile);
     code.mark();
     renderForm();
     trace.print('Navigator → /register  BlocProvider crea un RegisterBloc nuevo');
-    note.textContent = 'Pantalla nueva y Bloc nuevo en RegisterIdleState. Lo que quedó en Supabase sigue ahí.';
+    note.textContent = `Pantalla nueva y Bloc nuevo en ${config.idleState}. Lo que quedó en Supabase sigue ahí.`;
     note.classList.remove('fs-warn');
   }
 
@@ -2153,19 +2063,570 @@ const mountRegisterLayers = (root) => {
     el('div', { class: 'fs-side' }, layers),
     el('div', { class: 'fs-row2' }, code.box, trace.box)
   );
-  setFile('bloc');
-  setBloc('RegisterIdleState');
+  setFile(config.initialFile);
+  config.chipsReset(setChip);
   renderUsers();
   renderProfiles();
   renderForm();
   syncControls();
-  note.textContent = 'Revisa los datos y pulsa Registrarme. Registrar dos veces el mismo correo también enseña algo.';
+  note.textContent = config.intro;
 
   return () => {
     timers.forEach(clearTimeout);
     root.replaceChildren();
   };
 };
+
+const fakeUser = (db, email) => {
+  const user = { id: fakeUuid(), email };
+  db.users.push(user);
+  return user;
+};
+
+const fakeProfile = (db, user, data) => {
+  const profile = { id: user.id, username: data.username, full_name: data.fullName };
+  db.profiles.push(profile);
+  return profile;
+};
+
+// The lab as it stands: the Bloc talks to the Supabase SDK directly.
+const mountRegisterLayers = (root) =>
+  createRegisterSim(root, {
+    order: ['view', 'vb', 'bloc', 'bs', 'sdk', 'se', 'ext'],
+    gapNames: { vb: ['Vista', 'Bloc'], bs: ['Bloc', 'SDK'], se: ['SDK', 'Supabase'] },
+    viewKeys: ['screen'],
+    initialFile: 'bloc',
+    idleState: 'RegisterIdleState',
+    files: {
+      screen: ['register_screen.dart', REG_SCREEN_CODE],
+      bloc: ['register_bloc.dart', REG_BLOC_CODE],
+    },
+    validation: { file: 'screen', empty: [1, 2, 3, 4], mismatch: [6, 7, 8, 9] },
+    intro: 'Revisa los datos y pulsa Registrarme. Registrar dos veces el mismo correo también enseña algo.',
+    chipsReset: (setChip) => {
+      setChip('bloc', 'RegisterIdleState');
+      setChip('sdk', '');
+    },
+    layers: ({ node, chip, band, gap, tables }) => {
+      const viewBody = [node('screen', 'RegisterScreen'), chip('view')];
+      band('view', 'view', 'VISTA', 'Muestra y avisa', viewBody);
+      band('bloc', 'bloc', 'BLOC', 'Recibe eventos, emite estados', [node('bloc', 'RegisterBloc'), chip('bloc', 'bloc-state')]);
+      band('sdk', 'sdk', 'SDK DE SUPABASE', 'Traduce a HTTP', [node('sdk', 'Supabase.instance.client'), chip('sdk')]);
+      band('ext', 'ext', 'EXTERIOR · SUPABASE', 'Fuera del teléfono', [el('div', { class: 'fr-db' }, tables.users, tables.profiles)]);
+      gap('vb');
+      gap('bs');
+      gap('se', 1, 'internet');
+      return {
+        title: 'Capas que recorre el registro',
+        footer: 'Todavía no hay UseCase ni Repository: el Bloc llama directo al SDK.',
+      };
+    },
+    buildSteps: ({ data, failure, noGrant }) => {
+      let user = null;
+      const head = [
+        {
+          hot: ['screen'],
+          file: 'screen',
+          lines: [10, 11, 12, 13, 14],
+          gaps: [['vb', 'down', 'add(OnRegisterSubmittedEvent)']],
+          caption: 'La vista validó los campos y le manda un evento al Bloc. No sabe que existe Supabase.',
+        },
+        {
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [4],
+          gaps: [['vb', 'up', 'emit(RegisterLoadingState())']],
+          apply: (ctx) => {
+            ctx.setChip('bloc', 'RegisterLoadingState');
+            ctx.renderLoading();
+          },
+          caption: 'El Bloc emite Loading y el BlocBuilder reconstruye la pantalla con el indicador de carga.',
+        },
+        {
+          hot: ['sdk'],
+          file: 'bloc',
+          lines: [6, 7, 8, 9, 10],
+          gaps: [['bs', 'down', 'auth.signUp(email, password)']],
+          apply: (ctx) => ctx.setChip('sdk', 'auth.signUp(…)'),
+          caption: 'Paso 1, la cuenta. El Bloc no habla con internet: le pide al SDK que lo haga.',
+        },
+        {
+          hot: ['ext'],
+          file: 'bloc',
+          lines: [6, 7, 8, 9, 10],
+          gaps: [['se', 'down', 'POST /auth/v1/signup']],
+          apply: (ctx) => {
+            if (failure) return;
+            user = fakeUser(ctx.db, data.email);
+            ctx.renderUsers(user);
+          },
+          caption: failure
+            ? 'El SDK convierte la llamada en una petición HTTP. Supabase Auth la revisa y la rechaza.'
+            : 'El SDK convierte la llamada en una petición HTTP. Supabase Auth crea la cuenta y le asigna un id.',
+        },
+      ];
+      const emitError = (message) => ({
+        hot: ['screen'],
+        file: 'bloc',
+        lines: [20, 21, 22],
+        gaps: [['vb', 'fail', 'emit(RegisterErrorState(errorMessage))']],
+        apply: (ctx) => {
+          ctx.setChip('bloc', 'RegisterErrorState');
+          ctx.setChip('sdk', '');
+          ctx.renderErrorText(message);
+        },
+        caption: 'El catch emite el estado de error. La pantalla solo muestra el texto: ese estado no vuelve a dibujar el formulario.',
+        warn: true,
+      });
+      if (failure) {
+        return [
+          ...head,
+          {
+            hot: ['bloc'],
+            file: 'bloc',
+            lines: [19],
+            gaps: [
+              ['se', 'fail', failure.status],
+              ['bs', 'fail', 'lanza AuthException'],
+            ],
+            caption: 'signUp no devuelve el error: lanza una excepción. La ejecución salta al catch y el insert nunca corre.',
+            warn: true,
+          },
+          emitError(failure.error),
+        ];
+      }
+      return [
+        ...head,
+        {
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [6],
+          gaps: [
+            ['se', 'up', '200 · usuario creado'],
+            ['bs', 'up', 'AuthResponse(user.id)'],
+          ],
+          caption: 'La respuesta vuelve por el mismo camino. El Bloc guarda en response el id de la cuenta nueva.',
+        },
+        {
+          hot: ['sdk'],
+          file: 'bloc',
+          lines: [11, 12, 13, 14, 15, 16, 17],
+          gaps: [['bs', 'down', "from('profiles').insert({…})"]],
+          apply: (ctx) => ctx.setChip('sdk', "from('profiles').insert(…)"),
+          caption: 'Paso 2, el perfil. Mismo SDK, otro servicio: ahora la base de datos.',
+        },
+        {
+          hot: ['ext'],
+          file: 'bloc',
+          lines: [11, 12, 13, 14, 15, 16, 17],
+          gaps: [['se', 'down', 'POST /rest/v1/profiles']],
+          apply: (ctx) => {
+            if (noGrant) return;
+            ctx.renderProfiles(fakeProfile(ctx.db, user, data));
+          },
+          caption: noGrant
+            ? 'La petición llega a la tabla profiles, pero el rol authenticated no tiene permiso de insertar.'
+            : 'La fila llega a profiles con el mismo id de la cuenta. Así se unen las dos tablas.',
+        },
+        ...(noGrant
+          ? [
+              {
+                hot: ['bloc'],
+                file: 'bloc',
+                lines: [19],
+                gaps: [
+                  ['se', 'fail', '403 · 42501'],
+                  ['bs', 'fail', 'lanza PostgrestException'],
+                ],
+                caption: 'La cuenta quedó creada en Auth y el perfil no. Mira las dos tablas: hay una cuenta sin perfil.',
+                warn: true,
+              },
+              emitError(NO_GRANT_ERROR),
+            ]
+          : [
+              {
+                hot: ['bloc'],
+                file: 'bloc',
+                lines: [18],
+                gaps: [
+                  ['se', 'up', '201 · Created'],
+                  ['vb', 'up', 'emit(RegisterSuccessState())'],
+                ],
+                apply: (ctx) => {
+                  ctx.setChip('bloc', 'RegisterSuccessState');
+                  ctx.setChip('sdk', '');
+                  ctx.renderBlank();
+                },
+                caption: 'Los dos pasos salieron bien. El Bloc emite Success y el BlocBuilder dibuja una caja vacía.',
+              },
+              {
+                hot: ['screen'],
+                file: 'screen',
+                lines: [18, 19, 20, 21],
+                apply: (ctx) => ctx.renderHome(null),
+                caption: 'El BlocListener escucha Success y navega a /home. HomeScreen aún muestra sus valores por defecto: nadie le pasa el perfil.',
+              },
+            ]),
+      ];
+    },
+  });
+
+const CLEAN_BLOC_CODE = `Future<void> _onSubmitted(
+  RegisterSubmitted event,
+  Emitter<RegisterState> emit,
+) async {
+  emit(state.copyWith(
+    status: RegisterStatus.loading,
+  ));
+  try {
+    final profile = await _signUp(
+      username: event.username,
+      fullName: event.fullName,
+      email: event.email,
+      password: event.password,
+    );
+    emit(state.copyWith(
+      status: RegisterStatus.success,
+      profile: profile,
+    ));
+  } on Exception catch (e) {
+    emit(state.copyWith(
+      status: RegisterStatus.failure,
+      errorMessage: '$e',
+    ));
+  }
+}`;
+
+const CLEAN_USECASE_CODE = `Future<Profile> call({
+  required String username,
+  required String fullName,
+  required String email,
+  required String password,
+}) async {
+  final user = await _auth.signUp(
+      email: email, password: password);
+  final profile = Profile(
+    id: user.id,
+    username: username,
+    fullName: fullName,
+  );
+  try {
+    await _profiles.createProfile(profile);
+  } on Exception {
+    await _auth.signOut();
+    throw SignUpException(
+        'No se pudo guardar tu perfil');
+  }
+  return profile;
+}`;
+
+const CLEAN_AUTH_CODE = `class AuthRepositoryImpl implements AuthRepository {
+  Future<AuthUser> signUp({
+    required String email,
+    required String password,
+  }) {
+    return _dataSource.signUp(
+        email: email, password: password);
+  }
+}
+
+class SupabaseAuthDataSource {
+  Future<AuthUser> signUp({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _client.auth.signUp(
+        email: email, password: password);
+    final user = response.user;
+    if (user == null) throw Exception('Sin usuario');
+    return AuthUser(id: user.id, email: email);
+  }
+}`;
+
+const CLEAN_PROFILE_CODE = `class ProfileRepositoryImpl
+    implements ProfileRepository {
+  Future<void> createProfile(Profile profile) {
+    return _dataSource.createProfile(profile);
+  }
+}
+
+class SupabaseProfileDataSource {
+  Future<void> createProfile(Profile profile) async {
+    await _client.from('profiles').insert({
+      'id': profile.id,
+      'username': profile.username,
+      'full_name': profile.fullName,
+    });
+  }
+}`;
+
+const SIGNUP_ERROR = 'No se pudo guardar tu perfil';
+
+// How Lab 5 should end up: presentation, domain and data, with one branch per service.
+const mountRegisterClean = (root) =>
+  createRegisterSim(root, {
+    order: ['view', 'vb', 'bloc', 'bd', 'dom', 'dd', 'data', 'ds', 'ext'],
+    gapNames: {
+      vb: ['Vista', 'Bloc'],
+      bd: ['Bloc', 'UseCase'],
+      dd: ['Dominio', 'Datos'],
+      ds: ['Datos', 'Supabase'],
+    },
+    viewKeys: ['screen'],
+    initialFile: 'bloc',
+    idleState: 'RegisterStatus.initial',
+    files: {
+      bloc: ['register_bloc.dart', CLEAN_BLOC_CODE],
+      usecase: ['sign_up_usecase.dart', CLEAN_USECASE_CODE],
+      auth: ['auth_repository_impl.dart · supabase_auth_data_source.dart', CLEAN_AUTH_CODE],
+      profile: ['profile_repository_impl.dart · supabase_profile_data_source.dart', CLEAN_PROFILE_CODE],
+    },
+    validation: { file: 'bloc', empty: [], mismatch: [] },
+    intro: 'El mismo formulario con arquitectura limpia. Pulsa Registrarme y mira cuántas piezas participan.',
+    chipsReset: (setChip) => setChip('bloc', 'RegisterStatus.initial'),
+    layers: ({ node, chip, band, gap, tables }) => {
+      const col = (...items) => el('div', { class: 'fr-colb' }, ...items);
+      band('view', 'view', 'PRESENTACIÓN · VISTA', 'Muestra y avisa', [node('screen', 'RegisterScreen'), chip('view')]);
+      band('bloc', 'view', 'PRESENTACIÓN · BLOC', 'Convierte resultados en estados', [
+        node('bloc', 'RegisterBloc'),
+        chip('bloc', 'bloc-state'),
+      ]);
+      band(
+        'dom',
+        'dom',
+        'DOMINIO',
+        'Decide el orden · no conoce Supabase',
+        [
+          el('div', { class: 'fr-center-row' }, node('usecase', 'SignUpUseCase')),
+          el(
+            'div',
+            { class: 'fr-cols' },
+            col(node('authRepo', 'AuthRepository', 'fr-contract'), el('span', { class: 'fr-chip', text: 'AuthUser' })),
+            col(node('profileRepo', 'ProfileRepository', 'fr-contract'), el('span', { class: 'fr-chip', text: 'Profile' }))
+          ),
+        ],
+        'fr-stack'
+      );
+      band(
+        'data',
+        'data',
+        'DATOS',
+        'Habla con Supabase',
+        [
+          el(
+            'div',
+            { class: 'fr-cols' },
+            col(node('authImpl', 'AuthRepositoryImpl'), el('span', { class: 'fr-down', text: '↓' }), node('authDs', 'SupabaseAuthDataSource')),
+            col(
+              node('profileImpl', 'ProfileRepositoryImpl'),
+              el('span', { class: 'fr-down', text: '↓' }),
+              node('profileDs', 'SupabaseProfileDataSource')
+            )
+          ),
+        ],
+        'fr-stack'
+      );
+      band('ext', 'ext', 'EXTERIOR · SUPABASE', 'Fuera del teléfono', [el('div', { class: 'fr-db' }, tables.users, tables.profiles)]);
+      gap('vb');
+      gap('bd');
+      gap('dd', 2);
+      gap('ds', 2, 'internet');
+      return {
+        title: 'El registro con arquitectura limpia',
+        footer: 'Los recuadros punteados son contratos: el dominio los declara y los datos los implementan.',
+      };
+    },
+    buildSteps: ({ data, failure, noGrant }) => {
+      let user = null;
+      const profileOf = () => ({ username: data.username, fullName: data.fullName, email: data.email });
+      const emitFailure = (message, caption) => ({
+        hot: ['bloc', 'screen'],
+        file: 'bloc',
+        lines: [19, 20, 21, 22],
+        gaps: [['vb', 'fail', 'status: failure']],
+        apply: (ctx) => {
+          ctx.setChip('bloc', 'RegisterStatus.failure');
+          ctx.showFormError(message);
+        },
+        caption,
+        warn: true,
+      });
+      const head = [
+        {
+          hot: ['screen'],
+          file: 'bloc',
+          gaps: [['vb', 'down', 'add(RegisterSubmitted)']],
+          caption: 'La vista valida los campos y manda el evento. Esta parte no cambia.',
+        },
+        {
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [4, 5, 6],
+          gaps: [['vb', 'up', 'status: loading']],
+          apply: (ctx) => {
+            ctx.setChip('bloc', 'RegisterStatus.loading');
+            ctx.renderLoading();
+          },
+          caption: 'El Bloc emite loading con copyWith y la pantalla muestra la carga.',
+        },
+        {
+          hot: ['usecase'],
+          file: 'bloc',
+          lines: [8, 9, 10, 11, 12, 13],
+          gaps: [['bd', 'down', '_signUp(username, fullName, email, password)']],
+          caption: 'El Bloc hace una sola llamada. No sabe que registrar son dos pasos ni que existe Supabase.',
+        },
+        {
+          hot: ['usecase', 'authRepo'],
+          file: 'usecase',
+          lines: [6, 7],
+          caption: 'Paso 1, la cuenta. El UseCase llama al contrato AuthRepository, no a Supabase.',
+        },
+        {
+          hot: ['authImpl', 'authDs'],
+          file: 'auth',
+          lines: [0, 5, 6, 10, 15, 16],
+          gaps: [['dd', 'down', 'signUp(email, password)', 'l']],
+          caption: 'AuthRepositoryImpl cumple el contrato y delega en el data source, el único que usa el SDK de Auth.',
+        },
+        {
+          hot: ['authDs'],
+          file: 'auth',
+          lines: [15, 16],
+          gaps: [['ds', 'down', 'POST /auth/v1/signup', 'l']],
+          apply: (ctx) => {
+            if (failure) return;
+            user = fakeUser(ctx.db, data.email);
+            ctx.renderUsers(user);
+          },
+          caption: failure
+            ? 'La petición sale del teléfono. Supabase Auth la revisa y la rechaza.'
+            : 'La petición sale del teléfono. Supabase Auth crea la cuenta y le asigna un id.',
+        },
+      ];
+      if (failure) {
+        return [
+          ...head,
+          {
+            hot: ['usecase'],
+            file: 'usecase',
+            lines: [6, 7],
+            gaps: [
+              ['ds', 'fail', failure.status, 'l'],
+              ['dd', 'fail', 'lanza AuthException', 'l'],
+            ],
+            caption: 'signUp lanza una excepción que sube sin que nadie la atrape: si no hay cuenta, el perfil ni se intenta.',
+            warn: true,
+          },
+          emitFailure(failure.error, 'La excepción llega al catch del Bloc, que emite failure. El formulario vuelve, con el mensaje debajo.'),
+        ];
+      }
+      const tail = [
+        {
+          hot: ['usecase', 'authRepo'],
+          file: 'auth',
+          lines: [17, 18, 19],
+          gaps: [
+            ['ds', 'up', '200 · usuario creado', 'l'],
+            ['dd', 'up', 'AuthUser(id, email)', 'l'],
+          ],
+          caption: 'El data source convierte la respuesta en AuthUser. De aquí para arriba nadie ve una clase de Supabase.',
+        },
+        {
+          hot: ['usecase'],
+          file: 'usecase',
+          lines: [8, 9, 10, 11, 12],
+          caption: 'La regla del registro: con el id de la cuenta se arma el Profile. Por eso la cuenta va primero.',
+        },
+        {
+          hot: ['usecase', 'profileRepo'],
+          file: 'usecase',
+          lines: [13, 14],
+          caption: 'Paso 2, el perfil. El UseCase usa el otro contrato, ProfileRepository.',
+        },
+        {
+          hot: ['profileImpl', 'profileDs'],
+          file: 'profile',
+          lines: [0, 1, 2, 3, 7, 8],
+          gaps: [['dd', 'down', 'createProfile(profile)', 'r']],
+          caption: 'Otra rama de la capa de datos, con su propio Impl y su propio data source.',
+        },
+        {
+          hot: ['profileDs'],
+          file: 'profile',
+          lines: [8, 9, 10, 11, 12, 13],
+          gaps: [['ds', 'down', 'POST /rest/v1/profiles', 'r']],
+          apply: (ctx) => {
+            if (noGrant) return;
+            ctx.renderProfiles(fakeProfile(ctx.db, user, data));
+          },
+          caption: noGrant
+            ? 'La petición llega a profiles, pero el rol authenticated no tiene permiso de insertar.'
+            : 'La fila llega a profiles con el mismo id de la cuenta.',
+        },
+      ];
+      if (noGrant) {
+        return [
+          ...head,
+          ...tail,
+          {
+            hot: ['usecase'],
+            file: 'usecase',
+            lines: [15],
+            gaps: [
+              ['ds', 'fail', '403 · 42501', 'r'],
+              ['dd', 'fail', 'lanza PostgrestException', 'r'],
+            ],
+            caption: 'Esta vez el UseCase sí atrapa la excepción: ya hay una cuenta y quedó sin perfil. Decide qué hacer.',
+            warn: true,
+          },
+          {
+            hot: ['usecase', 'authRepo', 'authImpl', 'authDs'],
+            file: 'usecase',
+            lines: [16, 17, 18],
+            gaps: [
+              ['dd', 'down', 'signOut()', 'l'],
+              ['bd', 'fail', 'SignUpException', 'c'],
+            ],
+            caption: 'Cierra la sesión que abrió signUp y lanza un error del dominio, con un mensaje para el usuario.',
+            warn: true,
+          },
+          emitFailure(SIGNUP_ERROR, 'El Bloc solo convierte el error en failure. La cuenta sigue en Auth: limpiarla sería otra decisión del UseCase.'),
+        ];
+      }
+      return [
+        ...head,
+        ...tail,
+        {
+          hot: ['usecase'],
+          file: 'usecase',
+          lines: [20],
+          gaps: [
+            ['ds', 'up', '201 · Created', 'r'],
+            ['bd', 'up', 'Profile', 'c'],
+          ],
+          caption: 'Los dos pasos salieron bien. El UseCase devuelve el Profile que armó.',
+        },
+        {
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [14, 15, 16, 17],
+          gaps: [['vb', 'up', 'status: success, profile']],
+          apply: (ctx) => {
+            ctx.setChip('bloc', 'RegisterStatus.success');
+            ctx.renderBlank();
+          },
+          caption: 'El Bloc emite success con el perfil dentro del estado.',
+        },
+        {
+          hot: ['screen'],
+          file: 'bloc',
+          apply: (ctx) => ctx.renderHome(profileOf()),
+          caption: 'La vista navega a /home con state.profile: ahora sí aparecen los datos de quien se registró.',
+        },
+      ];
+    },
+  });
 
 export const SIMS = Object.freeze({
   'state-counter': mountCounter,
@@ -2174,6 +2635,7 @@ export const SIMS = Object.freeze({
   'state-lifecycle': mountLifecycle,
   playlist: mountPlaylist,
   'register-layers': mountRegisterLayers,
+  'register-clean': mountRegisterClean,
 });
 
 export const parseSpec = (spec) => {

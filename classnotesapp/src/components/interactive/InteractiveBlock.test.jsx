@@ -277,3 +277,41 @@ describe('register-layers', () => {
     expect(screen.getByTestId('bloc-state').textContent).toBe('RegisterLoadingState');
   });
 });
+
+describe('register-clean', () => {
+  const runAll = () => act(() => vi.advanceTimersByTime(30000));
+  const register = () => fireEvent.click(screen.getByText('Registrarme'));
+
+  it('goes through the use case and both data branches, then shows the real profile', () => {
+    renderBlock('register-clean');
+    register();
+    runAll();
+    expect(screen.getByTestId('auth-users').textContent).toContain('ana@icesi.edu.co');
+    expect(screen.getByTestId('profiles-table').textContent).toContain('Ana Gómez');
+    expect(screen.getByTestId('bloc-state').textContent).toBe('RegisterStatus.success');
+    expect(screen.getByTestId('register-phone').textContent).toContain('@ana');
+    expect(screen.getAllByText(/_signUp\(username/).length).toBeGreaterThan(0);
+  });
+
+  it('keeps the form with the error message when the email already exists', () => {
+    renderBlock('register-clean');
+    register();
+    runAll();
+    fireEvent.click(screen.getByText('Volver a /register'));
+    register();
+    runAll();
+    expect(screen.getByTestId('bloc-state').textContent).toBe('RegisterStatus.failure');
+    expect(screen.getByText(/User already registered/)).toBeTruthy();
+    expect(screen.getByText('Registrarme').disabled).toBe(false);
+  });
+
+  it('lets the use case catch the profile failure, sign out and raise a domain error', () => {
+    renderBlock('register-clean');
+    fireEvent.click(screen.getByLabelText('Falta el grant en profiles'));
+    register();
+    runAll();
+    expect(screen.getByTestId('profiles-table').textContent).toContain('sin filas');
+    expect(screen.getAllByText(/signOut\(\)/).length).toBeGreaterThan(0);
+    expect(screen.getByText('No se pudo guardar tu perfil')).toBeTruthy();
+  });
+});
