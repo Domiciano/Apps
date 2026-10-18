@@ -1656,7 +1656,17 @@ BlocListener<RegisterBloc, RegisterState>(
       Navigator.pushReplacementNamed(context, '/home');
     }
   },
-  child: BlocBuilder<RegisterBloc, RegisterState>(...),
+  child: BlocBuilder<RegisterBloc, RegisterState>(
+    builder: (context, state) {
+      if (state is RegisterIdleState) return registerForm();
+      if (state is RegisterLoadingState) return Column(...);
+      if (state is RegisterSuccessState) return SizedBox.shrink();
+      if (state is RegisterErrorState) {
+        return Text('Error \${state.errorMessage}');
+      }
+      return registerForm();
+    },
+  ),
 )`;
 
 const REG_BLOC_CODE = `Future<void> register(
@@ -2163,11 +2173,15 @@ const mountRegisterLayers = (root) =>
           file: 'bloc',
           lines: [4],
           gaps: [['vb', 'up', 'emit(RegisterLoadingState())']],
-          apply: (ctx) => {
-            ctx.setChip('bloc', 'RegisterLoadingState');
-            ctx.renderLoading();
-          },
-          caption: 'El Bloc emite Loading y el BlocBuilder reconstruye la pantalla con el indicador de carga.',
+          apply: (ctx) => ctx.setChip('bloc', 'RegisterLoadingState'),
+          caption: 'El Bloc recibe el evento y emite un estado nuevo: Loading viaja hacia la vista.',
+        },
+        {
+          hot: ['screen'],
+          file: 'screen',
+          lines: [26],
+          apply: (ctx) => ctx.renderLoading(),
+          caption: 'El estado llega a la vista. El BlocBuilder se reconstruye y dibuja el indicador de carga.',
         },
         {
           hot: ['sdk'],
@@ -2182,57 +2196,76 @@ const mountRegisterLayers = (root) =>
           file: 'bloc',
           lines: [6, 7, 8, 9, 10],
           gaps: [['se', 'down', 'POST /auth/v1/signup']],
+          caption: 'El SDK convierte la llamada en una petición HTTP. Esto ya sale del teléfono.',
+        },
+        {
+          hot: ['ext'],
           apply: (ctx) => {
             if (failure) return;
             user = fakeUser(ctx.db, data.email);
             ctx.renderUsers(user);
           },
           caption: failure
-            ? 'El SDK convierte la llamada en una petición HTTP. Supabase Auth la revisa y la rechaza.'
-            : 'El SDK convierte la llamada en una petición HTTP. Supabase Auth crea la cuenta y le asigna un id.',
+            ? 'Supabase Auth revisa la petición y la rechaza. No crea ninguna cuenta.'
+            : 'Supabase Auth crea la cuenta y le asigna un id.',
+          warn: Boolean(failure),
         },
       ];
-      const emitError = (message) => ({
-        hot: ['screen'],
-        file: 'bloc',
-        lines: [20, 21, 22],
-        gaps: [['vb', 'fail', 'emit(RegisterErrorState(errorMessage))']],
-        apply: (ctx) => {
-          ctx.setChip('bloc', 'RegisterErrorState');
-          ctx.setChip('sdk', '');
-          ctx.renderErrorText(message);
-        },
-        caption: 'El catch emite el estado de error. La pantalla solo muestra el texto: ese estado no vuelve a dibujar el formulario.',
-        warn: true,
-      });
       if (failure) {
         return [
           ...head,
           {
+            hot: ['sdk'],
+            file: 'bloc',
+            lines: [6, 7, 8, 9, 10],
+            gaps: [['se', 'fail', failure.status]],
+            caption: 'La respuesta vuelve al SDK con un error.',
+            warn: true,
+          },
+          {
             hot: ['bloc'],
             file: 'bloc',
             lines: [19],
-            gaps: [
-              ['se', 'fail', failure.status],
-              ['bs', 'fail', 'lanza AuthException'],
-            ],
-            caption: 'signUp no devuelve el error: lanza una excepción. La ejecución salta al catch y el insert nunca corre.',
+            gaps: [['bs', 'fail', 'lanza AuthException']],
+            apply: (ctx) => ctx.setChip('sdk', ''),
+            caption: 'signUp no devuelve el error: lanza una excepción. El Bloc salta al catch y el insert nunca corre.',
             warn: true,
           },
-          emitError(failure.error),
+          {
+            hot: ['bloc'],
+            file: 'bloc',
+            lines: [20, 21, 22],
+            gaps: [['vb', 'fail', 'emit(RegisterErrorState(errorMessage))']],
+            apply: (ctx) => ctx.setChip('bloc', 'RegisterErrorState'),
+            caption: 'El catch emite el estado de error hacia la vista.',
+            warn: true,
+          },
+          {
+            hot: ['screen'],
+            file: 'screen',
+            lines: [28, 29, 30],
+            apply: (ctx) => ctx.renderErrorText(failure.error),
+            caption: 'La vista solo muestra el texto del error: ese estado no vuelve a dibujar el formulario.',
+            warn: true,
+          },
         ];
       }
       return [
         ...head,
         {
+          hot: ['sdk'],
+          file: 'bloc',
+          lines: [6, 7, 8, 9, 10],
+          gaps: [['se', 'up', '200 · usuario creado']],
+          caption: 'Supabase responde al SDK que la cuenta quedó creada.',
+        },
+        {
           hot: ['bloc'],
           file: 'bloc',
           lines: [6],
-          gaps: [
-            ['se', 'up', '200 · usuario creado'],
-            ['bs', 'up', 'AuthResponse(user.id)'],
-          ],
-          caption: 'La respuesta vuelve por el mismo camino. El Bloc guarda en response el id de la cuenta nueva.',
+          gaps: [['bs', 'up', 'AuthResponse(user.id)']],
+          apply: (ctx) => ctx.setChip('sdk', ''),
+          caption: 'El SDK le entrega la respuesta al Bloc, que guarda en response el id de la cuenta nueva.',
         },
         {
           hot: ['sdk'],
@@ -2247,30 +2280,42 @@ const mountRegisterLayers = (root) =>
           file: 'bloc',
           lines: [11, 12, 13, 14, 15, 16, 17],
           gaps: [['se', 'down', 'POST /rest/v1/profiles']],
+          caption: 'Otra petición HTTP sale del teléfono, esta vez hacia la tabla profiles.',
+        },
+        {
+          hot: ['ext'],
           apply: (ctx) => ctx.renderProfiles(fakeProfile(ctx.db, user, data)),
           caption: 'La fila llega a profiles con el mismo id de la cuenta. Así se unen las dos tablas.',
+        },
+        {
+          hot: ['sdk'],
+          file: 'bloc',
+          lines: [11, 12],
+          gaps: [['se', 'up', '201 · Created']],
+          caption: 'Supabase confirma al SDK que guardó la fila.',
+        },
+        {
+          hot: ['bloc'],
+          file: 'bloc',
+          lines: [11, 12],
+          gaps: [['bs', 'up', 'insert completo']],
+          apply: (ctx) => ctx.setChip('sdk', ''),
+          caption: 'El await termina en el Bloc: los dos pasos salieron bien.',
         },
         {
           hot: ['bloc'],
           file: 'bloc',
           lines: [18],
-          gaps: [
-            ['se', 'up', '201 · Created'],
-            ['vb', 'up', 'emit(RegisterSuccessState())'],
-          ],
-          apply: (ctx) => {
-            ctx.setChip('bloc', 'RegisterSuccessState');
-            ctx.setChip('sdk', '');
-            ctx.renderBlank();
-          },
-          caption: 'Los dos pasos salieron bien. El Bloc emite Success y el BlocBuilder dibuja una caja vacía.',
+          gaps: [['vb', 'up', 'emit(RegisterSuccessState())']],
+          apply: (ctx) => ctx.setChip('bloc', 'RegisterSuccessState'),
+          caption: 'El Bloc emite Success hacia la vista.',
         },
         {
           hot: ['screen'],
           file: 'screen',
           lines: [18, 19, 20, 21],
           apply: (ctx) => ctx.renderHome(null),
-          caption: 'El BlocListener escucha Success y navega a /home. HomeScreen aún muestra sus valores por defecto: nadie le pasa el perfil.',
+          caption: 'Success llega a la vista y el BlocListener navega a /home. HomeScreen aún muestra sus valores por defecto: nadie le pasa el perfil.',
         },
       ];
     },
@@ -2444,98 +2489,136 @@ const mountRegisterClean = (root) =>
     buildSteps: ({ data, failure }) => {
       let user = null;
       const profileOf = () => ({ username: data.username, fullName: data.fullName, email: data.email });
-      const emitFailure = (message, caption) => ({
-        hot: ['bloc', 'screen'],
-        file: 'bloc',
-        lines: [19, 20, 21, 22],
-        gaps: [['vb', 'fail', 'status: failure']],
-        apply: (ctx) => {
-          ctx.setChip('bloc', 'RegisterStatus.failure');
-          ctx.showFormError(message);
-        },
-        caption,
-        warn: true,
-      });
       const head = [
         {
           hot: ['screen'],
-          file: 'bloc',
           gaps: [['vb', 'down', 'add(RegisterSubmitted)']],
-          caption: 'La vista valida los campos y manda el evento. Esta parte no cambia.',
+          caption: 'La vista valida los campos y manda el evento al Bloc. Esta parte no cambia.',
         },
         {
           hot: ['bloc'],
           file: 'bloc',
           lines: [4, 5, 6],
           gaps: [['vb', 'up', 'status: loading']],
-          apply: (ctx) => {
-            ctx.setChip('bloc', 'RegisterStatus.loading');
-            ctx.renderLoading();
-          },
-          caption: 'El Bloc emite loading con copyWith y la pantalla muestra la carga.',
+          apply: (ctx) => ctx.setChip('bloc', 'RegisterStatus.loading'),
+          caption: 'El Bloc recibe el evento y emite loading con copyWith. El estado viaja hacia la vista.',
+        },
+        {
+          hot: ['screen'],
+          apply: (ctx) => ctx.renderLoading(),
+          caption: 'El estado llega a la vista y la pantalla muestra la carga.',
         },
         {
           hot: ['usecase'],
           file: 'bloc',
           lines: [8, 9, 10, 11, 12, 13],
           gaps: [['bd', 'down', '_signUp(username, fullName, email, password)']],
-          caption: 'El Bloc hace una sola llamada. No sabe que registrar son dos pasos ni que existe Supabase.',
+          caption: 'El Bloc hace una sola llamada al UseCase. No sabe que registrar son dos pasos ni que existe Supabase.',
         },
         {
           hot: ['usecase', 'authRepo'],
           file: 'usecase',
           lines: [6, 7],
-          caption: 'Paso 1, la cuenta. El UseCase llama al contrato AuthRepository, no a Supabase.',
+          caption: 'Paso 1, la cuenta. Dentro del dominio, el UseCase llama al contrato AuthRepository, no a Supabase.',
+        },
+        {
+          hot: ['authImpl'],
+          file: 'auth',
+          lines: [0, 1, 2, 3, 4],
+          gaps: [['dd', 'down', 'signUp(email, password)', 'l']],
+          caption: 'La llamada cruza a la capa de datos: AuthRepositoryImpl es quien cumple el contrato.',
         },
         {
           hot: ['authImpl', 'authDs'],
           file: 'auth',
-          lines: [0, 5, 6, 10, 15, 16],
-          gaps: [['dd', 'down', 'signUp(email, password)', 'l']],
-          caption: 'AuthRepositoryImpl cumple el contrato y delega en el data source, el único que usa el SDK de Auth.',
+          lines: [5, 6],
+          caption: 'AuthRepositoryImpl delega en SupabaseAuthDataSource, el único que usa el SDK de Auth.',
         },
         {
           hot: ['authDs'],
           file: 'auth',
           lines: [15, 16],
           gaps: [['ds', 'down', 'POST /auth/v1/signup', 'l']],
+          caption: 'El data source llama al SDK y la petición sale del teléfono.',
+        },
+        {
+          hot: ['ext'],
           apply: (ctx) => {
             if (failure) return;
             user = fakeUser(ctx.db, data.email);
             ctx.renderUsers(user);
           },
           caption: failure
-            ? 'La petición sale del teléfono. Supabase Auth la revisa y la rechaza.'
-            : 'La petición sale del teléfono. Supabase Auth crea la cuenta y le asigna un id.',
+            ? 'Supabase Auth revisa la petición y la rechaza. No crea ninguna cuenta.'
+            : 'Supabase Auth crea la cuenta y le asigna un id.',
+          warn: Boolean(failure),
         },
       ];
       if (failure) {
         return [
           ...head,
           {
-            hot: ['usecase'],
-            file: 'usecase',
-            lines: [6, 7],
-            gaps: [
-              ['ds', 'fail', failure.status, 'l'],
-              ['dd', 'fail', 'lanza AuthException', 'l'],
-            ],
-            caption: 'signUp lanza una excepción que sube sin que nadie la atrape: si no hay cuenta, el perfil ni se intenta.',
+            hot: ['authDs'],
+            file: 'auth',
+            lines: [15, 16],
+            gaps: [['ds', 'fail', failure.status, 'l']],
+            caption: 'La respuesta vuelve con un error y el SDK lanza una excepción en el data source.',
             warn: true,
           },
-          emitFailure(failure.error, 'La excepción llega al catch del Bloc, que emite failure. El formulario vuelve, con el mensaje debajo.'),
+          {
+            hot: ['usecase', 'authRepo'],
+            file: 'usecase',
+            lines: [6, 7],
+            gaps: [['dd', 'fail', 'lanza AuthException', 'l']],
+            caption: 'La excepción sube al dominio. El UseCase no la atrapa: si no hay cuenta, el perfil ni se intenta.',
+            warn: true,
+          },
+          {
+            hot: ['bloc'],
+            file: 'bloc',
+            lines: [18],
+            gaps: [['bd', 'fail', 'lanza AuthException']],
+            caption: 'La excepción sigue subiendo hasta el catch del Bloc.',
+            warn: true,
+          },
+          {
+            hot: ['bloc'],
+            file: 'bloc',
+            lines: [19, 20, 21, 22],
+            gaps: [['vb', 'fail', 'status: failure']],
+            apply: (ctx) => ctx.setChip('bloc', 'RegisterStatus.failure'),
+            caption: 'El Bloc emite failure con el mensaje hacia la vista.',
+            warn: true,
+          },
+          {
+            hot: ['screen'],
+            apply: (ctx) => ctx.showFormError(failure.error),
+            caption: 'La vista vuelve a mostrar el formulario, con el mensaje debajo.',
+            warn: true,
+          },
         ];
       }
-      const tail = [
+      return [
+        ...head,
         {
-          hot: ['usecase', 'authRepo'],
+          hot: ['authDs'],
+          file: 'auth',
+          lines: [15, 16],
+          gaps: [['ds', 'up', '200 · usuario creado', 'l']],
+          caption: 'Supabase responde al data source que la cuenta quedó creada.',
+        },
+        {
+          hot: ['authDs'],
           file: 'auth',
           lines: [17, 18, 19],
-          gaps: [
-            ['ds', 'up', '200 · usuario creado', 'l'],
-            ['dd', 'up', 'AuthUser(id, email)', 'l'],
-          ],
           caption: 'El data source convierte la respuesta en AuthUser. De aquí para arriba nadie ve una clase de Supabase.',
+        },
+        {
+          hot: ['usecase', 'authRepo'],
+          file: 'usecase',
+          lines: [6, 7],
+          gaps: [['dd', 'up', 'AuthUser(id, email)', 'l']],
+          caption: 'El AuthUser sube al dominio y el UseCase lo recibe.',
         },
         {
           hot: ['usecase'],
@@ -2550,50 +2633,63 @@ const mountRegisterClean = (root) =>
           caption: 'Paso 2, el perfil. El UseCase usa el otro contrato, ProfileRepository.',
         },
         {
+          hot: ['profileImpl'],
+          file: 'profile',
+          lines: [0, 1, 2],
+          gaps: [['dd', 'down', 'createProfile(profile)', 'r']],
+          caption: 'La llamada cruza a la otra rama de datos: ProfileRepositoryImpl cumple ese contrato.',
+        },
+        {
           hot: ['profileImpl', 'profileDs'],
           file: 'profile',
-          lines: [0, 1, 2, 3, 7, 8],
-          gaps: [['dd', 'down', 'createProfile(profile)', 'r']],
-          caption: 'Otra rama de la capa de datos, con su propio Impl y su propio data source.',
+          lines: [3],
+          caption: 'ProfileRepositoryImpl delega en SupabaseProfileDataSource.',
         },
         {
           hot: ['profileDs'],
           file: 'profile',
-          lines: [8, 9, 10, 11, 12, 13],
+          lines: [9, 10, 11, 12, 13],
           gaps: [['ds', 'down', 'POST /rest/v1/profiles', 'r']],
+          caption: 'El data source hace el insert y la petición sale del teléfono.',
+        },
+        {
+          hot: ['ext'],
           apply: (ctx) => ctx.renderProfiles(fakeProfile(ctx.db, user, data)),
           caption: 'La fila llega a profiles con el mismo id de la cuenta.',
         },
-      ];
-      return [
-        ...head,
-        ...tail,
         {
-          hot: ['usecase'],
+          hot: ['profileDs'],
+          file: 'profile',
+          lines: [9],
+          gaps: [['ds', 'up', '201 · Created', 'r']],
+          caption: 'Supabase confirma al data source que guardó la fila.',
+        },
+        {
+          hot: ['usecase', 'profileRepo'],
+          file: 'usecase',
+          lines: [14],
+          gaps: [['dd', 'up', 'createProfile completo', 'r']],
+          caption: 'La confirmación sube al dominio: el await del UseCase termina.',
+        },
+        {
+          hot: ['bloc'],
           file: 'usecase',
           lines: [20],
-          gaps: [
-            ['ds', 'up', '201 · Created', 'r'],
-            ['bd', 'up', 'Profile', 'c'],
-          ],
-          caption: 'Los dos pasos salieron bien. El UseCase devuelve el Profile que armó.',
+          gaps: [['bd', 'up', 'Profile']],
+          caption: 'Los dos pasos salieron bien. El UseCase le devuelve el Profile al Bloc.',
         },
         {
           hot: ['bloc'],
           file: 'bloc',
           lines: [14, 15, 16, 17],
           gaps: [['vb', 'up', 'status: success, profile']],
-          apply: (ctx) => {
-            ctx.setChip('bloc', 'RegisterStatus.success');
-            ctx.renderBlank();
-          },
-          caption: 'El Bloc emite success con el perfil dentro del estado.',
+          apply: (ctx) => ctx.setChip('bloc', 'RegisterStatus.success'),
+          caption: 'El Bloc emite success, con el perfil dentro del estado, hacia la vista.',
         },
         {
           hot: ['screen'],
-          file: 'bloc',
           apply: (ctx) => ctx.renderHome(profileOf()),
-          caption: 'La vista navega a /home con state.profile: ahora sí aparecen los datos de quien se registró.',
+          caption: 'El estado llega a la vista, que navega a /home con state.profile: ahora sí aparecen los datos de quien se registró.',
         },
       ];
     },

@@ -222,12 +222,15 @@ describe('playlist', () => {
 });
 
 describe('register-layers', () => {
-  const runAll = () => act(() => vi.advanceTimersByTime(20000));
+  const runAll = () => act(() => vi.advanceTimersByTime(60000));
   const register = () => fireEvent.click(screen.getByText('Registrarme'));
 
   it('creates the account and the profile, then navigates to /home', () => {
     renderBlock('register-layers');
     register();
+    act(() => vi.advanceTimersByTime(1400));
+    expect(screen.getByTestId('bloc-state').textContent).toBe('RegisterLoadingState');
+    expect(screen.queryByText(/Espere mientras tanto/)).toBeNull();
     act(() => vi.advanceTimersByTime(1400));
     expect(screen.getByText(/Espere mientras tanto/)).toBeTruthy();
     runAll();
@@ -269,7 +272,7 @@ describe('register-layers', () => {
 });
 
 describe('register-clean', () => {
-  const runAll = () => act(() => vi.advanceTimersByTime(30000));
+  const runAll = () => act(() => vi.advanceTimersByTime(60000));
   const register = () => fireEvent.click(screen.getByText('Registrarme'));
 
   it('switches to the code tab and marks the current layer in the strip', () => {
@@ -280,6 +283,8 @@ describe('register-clean', () => {
     fireEvent.click(screen.getByLabelText('Paso a paso'));
     register();
     fireEvent.click(screen.getByText('Siguiente paso'));
+    fireEvent.click(screen.getByText('Siguiente paso'));
+    expect(container.querySelector('.fr-st.fr-on').textContent).toBe('Vista');
     fireEvent.click(screen.getByText('Siguiente paso'));
     expect(container.querySelector('.fr-st.fr-on').textContent).toBe('Bloc');
     expect(screen.getByText('register_bloc.dart')).toBeTruthy();
@@ -308,5 +313,27 @@ describe('register-clean', () => {
     expect(screen.getByTestId('bloc-state').textContent).toBe('RegisterStatus.failure');
     expect(screen.getByText(/User already registered/)).toBeTruthy();
     expect(screen.getByText('Registrarme').disabled).toBe(false);
+  });
+});
+
+describe('register simulators step by step', () => {
+  const walk = (name) => {
+    const { container } = renderBlock(name);
+    fireEvent.click(screen.getByLabelText('Paso a paso'));
+    fireEvent.click(screen.getByText('Registrarme'));
+    const counts = [container.querySelectorAll('.fr-msg').length];
+    while (screen.getByText('Siguiente paso').style.display !== 'none') {
+      fireEvent.click(screen.getByText('Siguiente paso'));
+      counts.push(container.querySelectorAll('.fr-msg').length);
+    }
+    return counts;
+  };
+
+  ['register-layers', 'register-clean'].forEach((name) => {
+    it(`${name} shows at most one hop between layers per step`, () => {
+      const counts = walk(name);
+      expect(counts.length).toBeGreaterThan(10);
+      expect(Math.max(...counts)).toBe(1);
+    });
   });
 });
