@@ -1596,7 +1596,7 @@ const REG_CSS = `
 .fsim .fc-node rect{transition:stroke .3s,stroke-width .3s}
 .fsim .fc-node.fc-hot > rect{stroke:#E0A43A;stroke-width:3.5}
 .fsim .fc-svg text{font-family:'JetBrains Mono',Menlo,Consolas,monospace}
-.fsim .fc-svg .fc-ring-label{font:700 10.5px Roboto,Arial,sans-serif;letter-spacing:.08em}
+.fsim .fc-svg .fc-ring-label{font:700 17px Roboto,Arial,sans-serif;letter-spacing:.02em}
 .fsim .fc-svg .fc-chip{font-size:10px;fill:#454C61}
 .fsim .fc-svg .fc-banner{font-size:12.5px;font-weight:700}
 .fsim .fc-hop{animation:fcHop .45s ease-out}
@@ -1776,14 +1776,52 @@ const createCleanCircle = (spec) => {
     marker.appendChild(svgEl('path', { d: 'M0,0 L10,5 L0,10 L2.4,5 Z', fill: color }));
     defs.appendChild(marker);
   });
+  const depMarker = svgEl('marker', {
+    id: `${markerBase}-dep`,
+    viewBox: '0 0 10 10',
+    refX: '9',
+    refY: '5',
+    markerWidth: '5',
+    markerHeight: '5',
+    orient: 'auto',
+  });
+  depMarker.appendChild(svgEl('path', { d: 'M0,0 L10,5 L0,10 Z', fill: '#161A26' }));
+  defs.appendChild(depMarker);
   svg.appendChild(defs);
 
   const [cx, cy] = spec.center;
-  spec.rings.forEach(({ r, fill, stroke }) => svg.appendChild(svgEl('circle', { cx, cy, r, fill, stroke, 'stroke-width': '1.5' })));
-  spec.rings.forEach(({ label, labelY, ink }) => {
-    const text = svgEl('text', { x: cx, y: labelY, 'text-anchor': 'middle', class: 'fc-ring-label', fill: ink });
-    text.textContent = label;
-    svg.appendChild(text);
+  const polar = (r, deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy + r * Math.sin((deg * Math.PI) / 180)];
+  spec.rings.forEach(({ r, fill }) => svg.appendChild(svgEl('circle', { cx, cy, r, fill, stroke: '#FFFFFF', 'stroke-width': '2' })));
+  spec.labels.forEach(({ text, r, from, to, ink }, index) => {
+    const [x1, y1] = polar(r, from);
+    const [x2, y2] = polar(r, to);
+    const id = `${markerBase}-arc-${index}`;
+    const sweep = to > from ? 1 : 0;
+    defs.appendChild(svgEl('path', { id, d: `M${x1},${y1} A${r},${r} 0 0 ${sweep} ${x2},${y2}` }));
+    const label = svgEl('text', { class: 'fc-ring-label', fill: ink });
+    const path = svgEl('textPath', { href: `#${id}`, startOffset: '50%', 'text-anchor': 'middle' });
+    path.textContent = text;
+    label.appendChild(path);
+    svg.appendChild(label);
+  });
+  if (spec.centerLabel) {
+    const [text, y, ink] = spec.centerLabel;
+    const label = svgEl('text', { x: cx, y, 'text-anchor': 'middle', class: 'fc-ring-label', fill: ink });
+    label.textContent = text;
+    svg.appendChild(label);
+  }
+  spec.dependencyArrows.forEach(([deg, r1, r2]) => {
+    const [x1, y1] = polar(r1, deg);
+    const [x2, y2] = polar(r2, deg);
+    svg.appendChild(svgEl('line', {
+      x1,
+      y1,
+      x2,
+      y2,
+      stroke: '#161A26',
+      'stroke-width': '3',
+      'marker-end': `url(#${markerBase}-dep)`,
+    }));
   });
 
   const boxes = {};
@@ -1833,12 +1871,6 @@ const createCleanCircle = (spec) => {
     boxes[key] = { x, y: y + 15, w: 112, h: 30 };
     nodeEls[key] = g;
   });
-  if (spec.supabaseLabel) {
-    const [lx, ly] = spec.supabaseLabel;
-    const text = svgEl('text', { x: lx, y: ly, 'text-anchor': 'middle', class: 'fc-ring-label', fill: '#556074' });
-    text.textContent = 'SUPABASE';
-    svg.appendChild(text);
-  }
 
   const hopLayer = svgEl('g');
   svg.appendChild(hopLayer);
@@ -2611,33 +2643,49 @@ const mountRegisterClean = (root) =>
     fileLayer: { bloc: 'bloc', usecase: 'dom', auth: 'data', profile: 'data' },
     circle: {
       title: 'El registro en el diagrama de arquitectura limpia',
-      viewBox: '0 0 660 620',
-      center: [300, 320],
+      viewBox: '0 0 720 720',
+      center: [360, 360],
       rings: [
-        { r: 292, fill: '#F1F3F7', stroke: '#D5DAE3', label: 'FRAMEWORKS Y DRIVERS', labelY: 575, ink: '#556074' },
-        { r: 218, fill: '#E9F6F3', stroke: '#B5E0D9', label: 'ADAPTADORES', labelY: 501, ink: '#0F8478' },
-        { r: 145, fill: '#FFF6E3', stroke: '#F0D79A', label: 'CASOS DE USO', labelY: 428, ink: '#A96C05' },
-        { r: 72, fill: '#FFEBC2', stroke: '#F0C572', label: 'ENTIDADES', labelY: 366, ink: '#8A5A04' },
+        { r: 352, fill: '#6E93EC' },
+        { r: 258, fill: '#6EE98A' },
+        { r: 168, fill: '#EE7070' },
+        { r: 86, fill: '#ECEE72' },
+      ],
+      labels: [
+        { text: 'Devices', r: 322, from: -150, to: -115, ink: '#1E2A55' },
+        { text: 'Web', r: 322, from: -62, to: -40, ink: '#1E2A55' },
+        { text: 'UI', r: 304, from: 20, to: 8, ink: '#1E2A55' },
+        { text: 'DB', r: 304, from: 176, to: 164, ink: '#1E2A55' },
+        { text: 'External interfaces', r: 330, from: 106, to: 62, ink: '#1E2A55' },
+        { text: 'Controllers', r: 230, from: -122, to: -58, ink: '#1B4D2A' },
+        { text: 'Presenters', r: 244, from: 34, to: 0, ink: '#1B4D2A' },
+        { text: 'Gateways', r: 244, from: 192, to: 160, ink: '#1B4D2A' },
+        { text: 'Use Cases', r: 140, from: -128, to: -52, ink: '#5A1A1A' },
+      ],
+      centerLabel: ['Entities', 322, '#4F4F14'],
+      dependencyArrows: [
+        [-145, 345, 300],
+        [-145, 252, 205],
+        [-145, 162, 118],
       ],
       nodes: {
-        screen: { x: 115, y: 180, text: 'RegisterScreen', kind: 'view' },
-        bloc: { x: 130, y: 320, text: 'RegisterBloc', kind: 'view' },
-        usecase: { x: 300, y: 210, text: 'SignUpUseCase', kind: 'dom' },
-        authRepo: { x: 400, y: 262, text: 'AuthRepository', kind: 'contract' },
-        profileRepo: { x: 400, y: 378, text: 'ProfileRepository', kind: 'contract' },
-        authUser: { x: 300, y: 290, text: 'AuthUser', kind: 'entity' },
-        profile: { x: 300, y: 318, text: 'Profile', kind: 'entity' },
-        authImpl: { x: 440, y: 180, text: 'AuthRepositoryImpl', kind: 'data' },
-        authDs: { x: 505, y: 230, text: 'SupabaseAuthDataSource', kind: 'data' },
-        profileImpl: { x: 440, y: 470, text: 'ProfileRepositoryImpl', kind: 'data' },
-        profileDs: { x: 505, y: 410, text: 'SupabaseProfileDataSource', kind: 'data' },
+        screen: { x: 590, y: 553, text: 'RegisterScreen', kind: 'view' },
+        bloc: { x: 478, y: 500, text: 'RegisterBloc', kind: 'view' },
+        usecase: { x: 360, y: 252, text: 'SignUpUseCase', kind: 'dom' },
+        authRepo: { x: 268, y: 330, text: 'AuthRepository', kind: 'contract' },
+        profileRepo: { x: 300, y: 455, text: 'ProfileRepository', kind: 'contract' },
+        authUser: { x: 360, y: 348, text: 'AuthUser', kind: 'entity' },
+        profile: { x: 360, y: 378, text: 'Profile', kind: 'entity' },
+        authImpl: { x: 228, y: 491, text: 'AuthRepositoryImpl', kind: 'data' },
+        authDs: { x: 242, y: 526, text: 'SupabaseAuthDataSource', kind: 'data' },
+        profileImpl: { x: 345, y: 556, text: 'ProfileRepositoryImpl', kind: 'data' },
+        profileDs: { x: 345, y: 594, text: 'SupabaseProfileDataSource', kind: 'data' },
       },
       chips: { view: 'screen', bloc: 'bloc' },
       tables: {
-        users: { x: 598, y: 120, title: 'auth.users' },
-        profiles: { x: 598, y: 430, title: 'profiles' },
+        users: { x: 100, y: 470, title: 'auth.users' },
+        profiles: { x: 190, y: 606, title: 'profiles' },
       },
-      supabaseLabel: [598, 108],
       hops: {
         vb: ['screen', 'bloc'],
         bd: ['bloc', 'usecase'],

@@ -196,8 +196,12 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   (`auth.users` y `profiles` persisten entre intentos), el panel de código y el reproductor de pasos
   (`createRegisterSim`). Cada uno aporta sus capas, sus archivos de código y sus pasos.
   A la derecha del teléfono hay pestañas: *Capas* (los bloques), *Clean* (solo en
-  `register-clean`: el diagrama circular de anillos, con las mismas piezas, el salto actual como
-  flecha y los registros de Supabase; `createCleanCircle`) y *Código*, con una franja abajo que
+  `register-clean`: el diagrama circular de arquitectura limpia con la convención que pidió el
+  profesor —anillos azul, verde, rojo y amarillo; nombres curvos en inglés (Devices, Web, UI, DB,
+  External interfaces · Controllers, Presenters, Gateways · Use Cases · Entities) y las flechas de
+  la regla de dependencia hacia el centro—, con `RegisterScreen` en UI, el Bloc en Presenters, los
+  `Impl` y `DataSource` en Gateways y las tablas en DB; refleja el salto actual como flecha y los
+  registros de Supabase; `createCleanCircle`) y *Código*, con una franja abajo que
   marca la capa actual. En `register-clean` la franja sigue al archivo
   resaltado (`fileLayer`); en `register-layers`, a la pieza iluminada (SDK, Supabase).
   - `register-layers` («Review del laboratorio 5»): **el código del laboratorio tal como está
