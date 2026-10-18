@@ -393,7 +393,7 @@ def db_muro_carpetas():
     fid = 'dbMuroCarpetas'
     rows = [
         (0, 'lib/', 'slate', '', ''),
-        (1, 'main.dart', 'violet', 'Conecta las capas en /home y /compose', '6'),
+        (1, 'main.dart', 'slate', 'Ya viene: solo crea cada Bloc', ''),
         (1, 'features/', 'slate', '', ''),
         (2, 'auth/ · login/ · register/', 'slate', 'Ya viene: el Laboratorio 5 resuelto', ''),
         (2, 'posts/', 'slate', 'Todo lo del muro que no es pantalla', ''),
@@ -415,8 +415,8 @@ def db_muro_carpetas():
              'En gris lo que ya viene hecho. Con número, lo que te toca y en qué paso.',
              'Árbol de carpetas del proyecto 262AppsLab6. Ya vienen hechos auth, login y register del '
              'Laboratorio 5, la entidad Post, las pantallas, las Pages y PostCard. Están vacíos y numerados por paso: el contrato '
-             'PostRepository (1), los casos de uso (2), el data source y la implementación del repositorio (3), los on de FeedBloc (4) '
-             'y de ComposeBloc (5), y la conexión de las capas en main.dart (6).')
+             'PostRepository (1), los casos de uso (2), el data source y la implementación del repositorio (3), y los on de FeedBloc (4) '
+             'y de ComposeBloc (5). main.dart ya viene hecho: solo crea cada Bloc.')
     s += f'  <rect x="48" y="96" width="864" height="{rh*len(rows)+20}" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
     last = {}
     for i, (lvl, name, color, text, step) in enumerate(rows):

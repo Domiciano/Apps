@@ -224,7 +224,7 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
 ```svg
 <svg id="dbMuroCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="dbMuroCarpetas-ttl dbMuroCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="dbMuroCarpetas-ttl">La estructura de carpetas</title>
-  <desc id="dbMuroCarpetas-dsc">Árbol de carpetas del proyecto 262AppsLab6. Ya vienen hechos auth, login y register del Laboratorio 5, la entidad Post, las pantallas, las Pages y PostCard. Están vacíos y numerados por paso: el contrato PostRepository (1), los casos de uso (2), el data source y la implementación del repositorio (3), los on de FeedBloc (4) y de ComposeBloc (5), y la conexión de las capas en main.dart (6).</desc>
+  <desc id="dbMuroCarpetas-dsc">Árbol de carpetas del proyecto 262AppsLab6. Ya vienen hechos auth, login y register del Laboratorio 5, la entidad Post, las pantallas, las Pages y PostCard. Están vacíos y numerados por paso: el contrato PostRepository (1), los casos de uso (2), el data source y la implementación del repositorio (3), y los on de FeedBloc (4) y de ComposeBloc (5). main.dart ya viene hecho: solo crea cada Bloc.</desc>
   <defs>
     <style>
       #dbMuroCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -246,10 +246,9 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
   <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="38">lib/</text>
   <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="145" width="88" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="102" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="76">main.dart</text>
-  <text x="540" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Conecta las capas en /home y /compose</text>
-  <circle cx="880" cy="158" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="158" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">6</text>
+  <rect x="92" y="145" width="88" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="76">main.dart</text>
+  <text x="540" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: solo crea cada Bloc</text>
   <path d="M78,137 V192 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="92" y="179" width="88" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="76">features/</text>
