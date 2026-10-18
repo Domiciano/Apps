@@ -394,7 +394,6 @@ def db_muro_carpetas():
     rows = [
         (0, 'lib/', 'slate', '', ''),
         (1, 'main.dart', 'violet', 'Conecta las capas en /home y /compose', '6'),
-        (1, 'app_bloc_observer.dart', 'slate', 'Ya viene: imprime eventos y estados', ''),
         (1, 'features/', 'slate', '', ''),
         (2, 'auth/ · login/ · register/', 'slate', 'Ya viene: el Laboratorio 5 resuelto', ''),
         (2, 'posts/', 'slate', 'Todo lo del muro que no es pantalla', ''),
@@ -404,17 +403,17 @@ def db_muro_carpetas():
         (3, 'data/source/supabase_post_data_source.dart', 'teal', 'Las consultas a Supabase · vacío', '3'),
         (3, 'data/repository/post_repository_impl.dart', 'teal', 'Cumple el contrato · vacío', '3'),
         (2, 'home/ui/', 'slate', '', ''),
-        (3, 'bloc/feed_bloc.dart', 'violet', 'Eventos y estado listos · on vacíos', '4'),
+        (3, 'bloc/feed_bloc.dart', 'violet', 'Eventos y estado listos · on solo imprimen', '4'),
         (3, 'screens/ · pages/ · components/', 'slate', 'Ya viene: HomeScreen, las Pages y PostCard', ''),
         (2, 'compose/ui/', 'slate', '', ''),
-        (3, 'bloc/compose_bloc.dart', 'violet', 'Eventos y estado listos · on vacío', '5'),
+        (3, 'bloc/compose_bloc.dart', 'violet', 'Eventos y estado listos · on solo imprime', '5'),
         (3, 'screens/compose_screen.dart', 'slate', 'Ya viene', ''),
     ]
     y0, rh = 112, 34
     h = y0 + rh * len(rows) + 64
     s = head(fid, h, 'La estructura de carpetas', 'La estructura de carpetas',
              'En gris lo que ya viene hecho. Con número, lo que te toca y en qué paso.',
-             'Árbol de carpetas del proyecto 262AppsLab6. Ya vienen hechos el observador de Blocs, auth, login y register del '
+             'Árbol de carpetas del proyecto 262AppsLab6. Ya vienen hechos auth, login y register del '
              'Laboratorio 5, la entidad Post, las pantallas, las Pages y PostCard. Están vacíos y numerados por paso: el contrato '
              'PostRepository (1), los casos de uso (2), el data source y la implementación del repositorio (3), los on de FeedBloc (4) '
              'y de ComposeBloc (5), y la conexión de las capas en main.dart (6).')

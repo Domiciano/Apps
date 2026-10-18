@@ -1,7 +1,7 @@
 # Laboratorio 6 · Muro
 
 <!-- tags: FeedBloc, BottomNavigationBar, select anidado, range, likes(count), upsert onConflict,
-     Mostrar más, BlocObserver, copyWith, permission denied for table likes,
+     Mostrar más, debugPrint, copyWith, permission denied for table likes,
      duplicate key value violates unique constraint, qué va en cada capa -->
 
 Vas a construir un muro al estilo de Twitter. Cada usuario publica textos cortos y ve los de todos, del más reciente al más antiguo. Puede dar «me gusta» y, en su perfil, ve sus tres últimas publicaciones. No hay imágenes, porque Storage todavía no lo hemos visto.
@@ -222,9 +222,9 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
 ## Lo que ya viene
 
 ```svg
-<svg id="dbMuroCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 754" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="dbMuroCarpetas-ttl dbMuroCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="dbMuroCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="dbMuroCarpetas-ttl dbMuroCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="dbMuroCarpetas-ttl">La estructura de carpetas</title>
-  <desc id="dbMuroCarpetas-dsc">Árbol de carpetas del proyecto 262AppsLab6. Ya vienen hechos el observador de Blocs, auth, login y register del Laboratorio 5, la entidad Post, las pantallas, las Pages y PostCard. Están vacíos y numerados por paso: el contrato PostRepository (1), los casos de uso (2), el data source y la implementación del repositorio (3), los on de FeedBloc (4) y de ComposeBloc (5), y la conexión de las capas en main.dart (6).</desc>
+  <desc id="dbMuroCarpetas-dsc">Árbol de carpetas del proyecto 262AppsLab6. Ya vienen hechos auth, login y register del Laboratorio 5, la entidad Post, las pantallas, las Pages y PostCard. Están vacíos y numerados por paso: el contrato PostRepository (1), los casos de uso (2), el data source y la implementación del repositorio (3), los on de FeedBloc (4) y de ComposeBloc (5), y la conexión de las capas en main.dart (6).</desc>
   <defs>
     <style>
       #dbMuroCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -239,10 +239,10 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
       <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
     </marker>
   </defs>
-  <rect width="960" height="754" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="720" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">La estructura de carpetas</text>
   <text class="sub" x="48" y="80" data-fit="860">En gris lo que ya viene hecho. Con número, lo que te toca y en qué paso.</text>
-  <rect x="48" y="96" width="864" height="598" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="48" y="96" width="864" height="564" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="38">lib/</text>
   <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
@@ -251,70 +251,66 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
   <text x="540" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Conecta las capas en /home y /compose</text>
   <circle cx="880" cy="158" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="158" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">6</text>
   <path d="M78,137 V192 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="179" width="185" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="173">app_bloc_observer.dart</text>
-  <text x="540" y="192" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: imprime eventos y estados</text>
-  <path d="M78,137 V226 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="213" width="88" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="226" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="76">features/</text>
-  <path d="M102,239 V260 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="247" width="215" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="260" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="203">auth/ · login/ · register/</text>
-  <text x="540" y="260" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: el Laboratorio 5 resuelto</text>
-  <path d="M102,239 V294 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="281" width="65" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="294" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="53">posts/</text>
-  <text x="540" y="294" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Todo lo del muro que no es pantalla</text>
-  <path d="M126,307 V328 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="315" width="208" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="150" y="328" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="196">domain/entities/post.dart</text>
-  <text x="540" y="328" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: el post con su copyWith</text>
-  <path d="M126,307 V362 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="349" width="305" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="150" y="362" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="293">domain/repository/post_repository.dart</text>
-  <text x="540" y="362" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El contrato · vacío</text>
-  <circle cx="880" cy="362" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="362" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
-  <path d="M126,307 V396 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="383" width="140" height="26" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="150" y="396" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="128">domain/usecases/</text>
-  <text x="540" y="396" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Uno por acción · vacíos</text>
-  <circle cx="880" cy="396" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="396" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
-  <path d="M126,307 V430 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="417" width="335" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="430" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="323">data/source/supabase_post_data_source.dart</text>
-  <text x="540" y="430" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Las consultas a Supabase · vacío</text>
+  <rect x="92" y="179" width="88" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="76">features/</text>
+  <path d="M102,205 V226 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="213" width="215" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="226" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="203">auth/ · login/ · register/</text>
+  <text x="540" y="226" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: el Laboratorio 5 resuelto</text>
+  <path d="M102,205 V260 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="247" width="65" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="260" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="53">posts/</text>
+  <text x="540" y="260" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Todo lo del muro que no es pantalla</text>
+  <path d="M126,273 V294 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="281" width="208" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="150" y="294" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="196">domain/entities/post.dart</text>
+  <text x="540" y="294" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: el post con su copyWith</text>
+  <path d="M126,273 V328 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="315" width="305" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="150" y="328" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="293">domain/repository/post_repository.dart</text>
+  <text x="540" y="328" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">El contrato · vacío</text>
+  <circle cx="880" cy="328" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="328" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M126,273 V362 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="349" width="140" height="26" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="150" y="362" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="128">domain/usecases/</text>
+  <text x="540" y="362" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Uno por acción · vacíos</text>
+  <circle cx="880" cy="362" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="362" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M126,273 V396 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="383" width="335" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="396" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="323">data/source/supabase_post_data_source.dart</text>
+  <text x="540" y="396" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Las consultas a Supabase · vacío</text>
+  <circle cx="880" cy="396" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="396" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
+  <path d="M126,273 V430 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="417" width="328" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="430" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="316">data/repository/post_repository_impl.dart</text>
+  <text x="540" y="430" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Cumple el contrato · vacío</text>
   <circle cx="880" cy="430" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="430" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M126,307 V464 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="451" width="328" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="316">data/repository/post_repository_impl.dart</text>
-  <text x="540" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Cumple el contrato · vacío</text>
-  <circle cx="880" cy="464" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="464" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M102,239 V498 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="485" width="80" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="68">home/ui/</text>
-  <path d="M126,511 V532 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="519" width="162" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="150" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="150">bloc/feed_bloc.dart</text>
-  <text x="540" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Eventos y estado listos · on vacíos</text>
-  <circle cx="880" cy="532" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="532" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
-  <path d="M126,511 V566 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="553" width="252" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="150" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="240">screens/ · pages/ · components/</text>
-  <text x="540" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: HomeScreen, las Pages y PostCard</text>
-  <path d="M102,239 V600 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="587" width="102" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="90">compose/ui/</text>
-  <path d="M126,613 V634 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="621" width="185" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="150" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="173">bloc/compose_bloc.dart</text>
-  <text x="540" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Eventos y estado listos · on vacío</text>
-  <circle cx="880" cy="634" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="634" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">5</text>
-  <path d="M126,613 V668 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="655" width="222" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="150" y="668" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="210">screens/compose_screen.dart</text>
-  <text x="540" y="668" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene</text>
+  <path d="M102,205 V464 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="451" width="80" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="68">home/ui/</text>
+  <path d="M126,477 V498 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="485" width="162" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="150" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="150">bloc/feed_bloc.dart</text>
+  <text x="540" y="498" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Eventos y estado listos · on solo imprimen</text>
+  <circle cx="880" cy="498" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="498" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
+  <path d="M126,477 V532 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="519" width="252" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="150" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="240">screens/ · pages/ · components/</text>
+  <text x="540" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene: HomeScreen, las Pages y PostCard</text>
+  <path d="M102,205 V566 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="553" width="102" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="90">compose/ui/</text>
+  <path d="M126,579 V600 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="587" width="185" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="150" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="173">bloc/compose_bloc.dart</text>
+  <text x="540" y="600" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Eventos y estado listos · on solo imprime</text>
+  <circle cx="880" cy="600" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="880" y="600" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">5</text>
+  <path d="M126,579 V634 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="621" width="222" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="150" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="210">screens/compose_screen.dart</text>
+  <text x="540" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">Ya viene</text>
   <text class="h" x="892" y="88" text-anchor="end">PASO</text>
-  <text class="foot" x="48" y="726" data-fit="860">Los nombres de archivo van en minúscula y con guion bajo, igual que en el Laboratorio 5.</text>
+  <text class="foot" x="48" y="692" data-fit="860">Los nombres de archivo van en minúscula y con guion bajo, igual que en el Laboratorio 5.</text>
 </svg>
 ```
 
@@ -322,17 +318,17 @@ La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona n
 - **La entidad `Post`**, con el autor, el conteo de «me gusta», si te gusta a ti y su `copyWith`.
 - **Toda la interfaz del muro.** `HomeScreen`, `FeedPage`, `ProfilePage`, `PostCard` y `ComposeScreen` ya están dibujadas, y cada botón ya lanza su evento.
 - **Los estados.** `FeedState` y `ComposeState`, cada uno con su `status` y su `copyWith`.
-- **La consola.** `AppBlocObserver` imprime cada evento y cada estado nuevo de cada `Bloc`.
+- **Los eventos ya llegan.** Cada método `on` de `FeedBloc` y `ComposeBloc` solo tiene un `debugPrint` del evento que recibió.
 
-Corre la app, entra con tu cuenta, toca un corazón y pulsa **Publicar**. Los eventos aparecen en la consola, pero ningún estado los sigue:
+Corre la app, entra con tu cuenta, toca un corazón y pulsa **Publicar**. Los eventos aparecen en la consola, pero la pantalla no cambia:
 
 ```text
-[FeedBloc] evento → FeedStarted()
-[FeedBloc] evento → FeedLikeToggled(Post(9b1e…, @ana.dev, likes: 0))
-[ComposeBloc] evento → ComposeSubmitted('Hola muro')
+FeedBloc recibió FeedStarted()
+FeedBloc recibió FeedLikeToggled(Post(9b1e…, @ana.dev, likes: 0))
+ComposeBloc recibió ComposeSubmitted('Hola muro')
 ```
 
-Los métodos `on` de `FeedBloc` y `ComposeBloc` están vacíos. Las clases de `posts/domain` y `posts/data` existen, pero no tienen nada adentro ni se conocen entre sí. Ese es tu trabajo, de adentro hacia afuera.
+La interfaz ya habla con sus `Bloc`, pero ningún `on` emite un estado. Las clases de `posts/domain` y `posts/data` existen, pero no tienen nada adentro ni se conocen entre sí. Ese es tu trabajo, de adentro hacia afuera.
 
 ## Paso 1 · El contrato
 
@@ -465,7 +461,7 @@ class SupabasePostDataSource {
 
 `home/ui/bloc/feed_bloc.dart`
 
-Los eventos y el estado ya están. Al `Bloc` le faltan sus tres casos de uso por constructor y el cuerpo de sus tres `on`. `page` es la última página que ya cargaste, y `pageSize` vale 10. La página siguiente se pide así:
+Los eventos y el estado ya están. Al `Bloc` le faltan sus tres casos de uso por constructor, y en cada `on` el `debugPrint` se reemplaza por la lógica que emite estados. `page` es la última página que ya cargaste, y `pageSize` vale 10. La página siguiente se pide así:
 
 ```dart
 Future<void> _onMoreRequested(
@@ -513,13 +509,7 @@ create: (_) => FeedBloc(
 )..add(FeedStarted()),
 ```
 
-Ahora cada evento de la consola va seguido de sus estados:
-
-```text
-[FeedBloc] evento → FeedStarted()
-[FeedBloc] estado → FeedState(status: loading, posts: 0, ...)
-[FeedBloc] estado → FeedState(status: success, posts: 10, ...)
-```
+Corre la app de nuevo: el muro se llena, el corazón cambia y **Publicar** vuelve al muro con tu post arriba.
 
 ## La prueba
 
