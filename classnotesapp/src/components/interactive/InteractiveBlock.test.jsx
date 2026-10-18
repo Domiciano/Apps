@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ThemeProvider } from '@/theme/ThemeContext';
 import InteractiveBlock from './InteractiveBlock';
-import { SIMS, parseSpec } from './flutterStateSims';
+import { SIMS, parseSpec, runQuery, queryCode } from './flutterStateSims';
 
 const renderBlock = (spec) => render(<ThemeProvider><InteractiveBlock spec={spec} /></ThemeProvider>);
 
@@ -396,5 +396,71 @@ describe('register simulators step by step', () => {
         expect(Math.abs(step.layer - steps[index].layer)).toBeLessThanOrEqual(1);
       });
     });
+  });
+});
+
+describe('query-builder', () => {
+  it('chains filters as AND and keeps the order of the query', () => {
+    expect(runQuery({ filter1: 'flutter' }).ordered).toEqual(['p10', 'p8', 'p4', 'p2']);
+    expect(runQuery({ filter1: 'flutter', filter2: 'mine' }).ordered).toEqual(['p10', 'p4']);
+    expect(runQuery({ filter1: 'recent', order: 'oldest' }).ordered).toEqual(['p6', 'p7', 'p8', 'p9', 'p10']);
+  });
+
+  it('treats both ends of range as inclusive', () => {
+    expect(runQuery({ page: 'r0' }).kept).toEqual(['p10', 'p9', 'p8']);
+    expect(runQuery({ page: 'r1' }).kept).toEqual(['p7', 'p6', 'p5']);
+    expect(runQuery({ page: 'limit3' }).kept).toEqual(runQuery({ page: 'r0' }).kept);
+    expect(runQuery({ filter1: 'flutter', page: 'r1' }).kept).toEqual(['p2']);
+  });
+
+  it('projects the selected columns, with the author nested', () => {
+    expect(runQuery({ columns: 'some', filter1: 'one' }).result).toEqual([{ id: 'p7', content: 'Ya entiendo single()' }]);
+    expect(runQuery({ columns: 'author', filter1: 'one', end: 'single' }).result).toEqual({
+      id: 'p7',
+      content: 'Ya entiendo single()',
+      author: { username: 'ana.dev' },
+    });
+  });
+
+  it('makes single() demand exactly one row and maybeSingle() accept none', () => {
+    expect(runQuery({ filter1: 'one', end: 'single' }).error).toBeNull();
+    expect(runQuery({ filter1: 'missing', end: 'single' }).error.code).toBe('PGRST116');
+    expect(runQuery({ filter1: 'flutter', end: 'single' }).error.details).toBe('The result contains 4 rows');
+    const none = runQuery({ filter1: 'missing', end: 'maybe' });
+    expect(none.error).toBeNull();
+    expect(none.result).toBeNull();
+    expect(runQuery({ end: 'maybe' }).error.code).toBe('PGRST116');
+  });
+
+  it('writes the Dart chain in the order the SDK expects', () => {
+    expect(queryCode({ filter1: 'flutter', page: 'r1' })).toBe(
+      [
+        'final rows = await _client',
+        "    .from('posts')",
+        '    .select()',
+        "    .ilike('content', '%flutter%')",
+        "    .order('created_at', ascending: false)",
+        '    .range(3, 5);',
+      ].join('\n')
+    );
+    expect(queryCode({ order: 'none', end: 'maybe' })).toBe(
+      ["final row = await _client", "    .from('posts')", '    .select()', '    .maybeSingle();'].join('\n')
+    );
+  });
+
+  it('updates the rows, the code and the result as the student changes the query', () => {
+    renderBlock('query-builder');
+    fireEvent.change(screen.getByLabelText('Filtro'), { target: { value: 'flutter' } });
+    fireEvent.change(screen.getByLabelText('Recorte'), { target: { value: 'r0' } });
+    const statuses = [...screen.getByTestId('qb-rows').children].map((row) => row.dataset.status);
+    expect(statuses.filter((s) => s === 'in')).toHaveLength(3);
+    expect(statuses.filter((s) => s === 'skip')).toHaveLength(1);
+    expect(statuses.filter((s) => s === 'out')).toHaveLength(6);
+    expect(document.querySelector('.fs-dark').textContent).toContain('.range(0, 2);');
+    expect(screen.getByTestId('qb-summary').textContent).toMatch(/4 de 10 filas pasan el filtro/);
+
+    fireEvent.change(screen.getByLabelText('Terminador'), { target: { value: 'single' } });
+    expect(screen.getByTestId('qb-result').textContent).toMatch(/Cannot coerce the result to a single JSON object/);
+    expect(screen.getByTestId('qb-summary').textContent).toMatch(/llegaron 3: lanza PostgrestException/);
   });
 });

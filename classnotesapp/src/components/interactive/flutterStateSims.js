@@ -1,5 +1,5 @@
 // Interactive simulators for Flutter state (StatefulWidget, setState, lifecycle) and,
-// in Móviles, the sign up flow of Lab 5 across its layers.
+// in Móviles, the sign up flow of Lab 5 across its layers and a Supabase query builder.
 // Plain DOM, no React: the same file is copied into the session decks, so it must
 // not import anything. Every simulator is `mount(element, args) => destroy`.
 
@@ -3028,6 +3028,268 @@ const mountRegisterClean = (root) =>
     },
   });
 
+// ───────────────────────── query-builder (Móviles, «Leer de la base de datos») ─────────────────────────
+
+const QB_STYLE_ID = 'fsim-qb-style';
+
+const QB_CSS = `
+.fsim .qb-form{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;align-items:center;font-size:13px}
+.fsim .qb-form label{color:var(--fs-muted)}
+.fsim .qb-form select{width:100%;min-width:0;border:1px solid #79747E;border-radius:6px;padding:5px 6px;background:#fff;
+  font:12.5px 'JetBrains Mono',Menlo,Consolas,monospace;color:var(--fs-ink)}
+.fsim .qb-rows{display:flex;flex-direction:column;gap:4px}
+.fsim .qb-row{display:grid;grid-template-columns:26px 34px 70px minmax(0,1fr) 50px;gap:6px;align-items:center;padding:4px 6px;
+  border:1px solid var(--fs-line);border-radius:8px;font-size:12px;background:#fff;transition:opacity .3s,background .3s}
+.fsim .qb-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsim .qb-row .qb-mono{font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11.5px}
+.fsim .qb-pos{font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;text-align:center;border-radius:10px;
+  background:#EFF1F5;color:#556074}
+.fsim .qb-row.qb-in{background:#E8F6E3;border-color:#9FD68D}
+.fsim .qb-row.qb-in .qb-pos{background:#3A8235;color:#fff}
+.fsim .qb-row.qb-skip{opacity:.6;border-style:dashed}
+.fsim .qb-row.qb-out{opacity:.35;background:#F5F6FA}
+.fsim .qb-row.qb-out span:nth-child(4){text-decoration:line-through}
+.fsim .qb-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--fs-muted)}
+.fsim .qb-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.fsim .qb-json{white-space:pre;padding:0 12px;max-height:220px;overflow:auto;color:#CDD6F4}
+.fsim .qb-json.qb-err{color:#F38BA8;white-space:pre-wrap}
+.fsim .qb-summary{font-size:13px;color:var(--fs-ink);min-height:36px}
+@container (max-width:520px){.fsim .qb-row{grid-template-columns:22px 30px minmax(0,1fr) 44px}.fsim .qb-row span:nth-child(3){display:none}}
+`;
+
+const ensureQbStyle = () => {
+  if (typeof document === 'undefined' || document.getElementById(QB_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = QB_STYLE_ID;
+  style.textContent = QB_CSS;
+  document.head.appendChild(style);
+};
+
+const QB_AUTHORS = {
+  'u-ana': { username: 'ana.dev', full_name: 'Ana Gómez' },
+  'u-juan': { username: 'juanpa', full_name: 'Juan Pablo' },
+  'u-lu': { username: 'lu.mora', full_name: 'Lucía Mora' },
+};
+
+export const QB_POSTS = Object.freeze([
+  { id: 'p1', profile_id: 'u-ana', content: 'Mi primer post', created_at: '2026-10-01' },
+  { id: 'p2', profile_id: 'u-juan', content: 'Hoy vimos Flutter en clase', created_at: '2026-10-02' },
+  { id: 'p3', profile_id: 'u-lu', content: '¿Alguien entendió range?', created_at: '2026-10-03' },
+  { id: 'p4', profile_id: 'u-ana', content: 'FLUTTER + Supabase = muro', created_at: '2026-10-05' },
+  { id: 'p5', profile_id: 'u-juan', content: 'Mañana no hay clase', created_at: '2026-10-06' },
+  { id: 'p6', profile_id: 'u-lu', content: 'Mi widget favorito: ListView', created_at: '2026-10-08' },
+  { id: 'p7', profile_id: 'u-ana', content: 'Ya entiendo single()', created_at: '2026-10-09' },
+  { id: 'p8', profile_id: 'u-juan', content: 'flutter pub get y listo', created_at: '2026-10-11' },
+  { id: 'p9', profile_id: 'u-lu', content: 'El insert en lote es rapidísimo', created_at: '2026-10-12' },
+  { id: 'p10', profile_id: 'u-ana', content: 'Paginando el muro con Flutter', created_at: '2026-10-14' },
+]);
+
+const QB_COLUMNS = {
+  all: {
+    label: 'select()',
+    code: '.select()',
+    pick: (r) => ({ id: r.id, profile_id: r.profile_id, content: r.content, created_at: r.created_at }),
+  },
+  some: { label: "select('id, content')", code: ".select('id, content')", pick: (r) => ({ id: r.id, content: r.content }) },
+  author: {
+    label: "select('…, author:profiles(…)')",
+    code: ".select('id, content, author:profiles(username)')",
+    pick: (r) => ({ id: r.id, content: r.content, author: { username: QB_AUTHORS[r.profile_id].username } }),
+  },
+};
+
+const QB_FILTERS = {
+  none: { label: 'ninguno', code: '' },
+  mine: { label: "eq('profile_id', ana)", code: ".eq('profile_id', anaId)", test: (r) => r.profile_id === 'u-ana' },
+  flutter: { label: "ilike('content', '%flutter%')", code: ".ilike('content', '%flutter%')", test: (r) => /flutter/i.test(r.content) },
+  recent: { label: "gte('created_at', '2026-10-08')", code: ".gte('created_at', '2026-10-08')", test: (r) => r.created_at >= '2026-10-08' },
+  one: { label: "eq('id', 'p7')", code: ".eq('id', 'p7')", test: (r) => r.id === 'p7' },
+  missing: { label: "eq('id', 'p99')", code: ".eq('id', 'p99')", test: (r) => r.id === 'p99' },
+};
+
+const QB_ORDERS = {
+  none: { label: 'sin orden', code: '' },
+  newest: {
+    label: 'created_at, más reciente primero',
+    code: ".order('created_at', ascending: false)",
+    cmp: (a, b) => b.created_at.localeCompare(a.created_at),
+  },
+  oldest: { label: 'created_at, más antiguo primero', code: ".order('created_at')", cmp: (a, b) => a.created_at.localeCompare(b.created_at) },
+  content: { label: 'content, alfabético', code: ".order('content')", cmp: (a, b) => a.content.localeCompare(b.content, 'es') },
+};
+
+const QB_PAGES = {
+  none: { label: 'todas', code: '' },
+  limit3: { label: 'limit(3)', code: '.limit(3)', from: 0, to: 2 },
+  r0: { label: 'range(0, 2) · página 0', code: '.range(0, 2)', from: 0, to: 2 },
+  r1: { label: 'range(3, 5) · página 1', code: '.range(3, 5)', from: 3, to: 5 },
+  r2: { label: 'range(6, 8) · página 2', code: '.range(6, 8)', from: 6, to: 8 },
+};
+
+const QB_ENDS = {
+  list: { label: 'lista (nada)', code: '' },
+  single: { label: '.single()', code: '.single()' },
+  maybe: { label: '.maybeSingle()', code: '.maybeSingle()' },
+};
+
+export const QB_DEFAULT = Object.freeze({
+  columns: 'all',
+  filter1: 'none',
+  filter2: 'none',
+  order: 'newest',
+  page: 'none',
+  end: 'list',
+});
+
+export const runQuery = (query, rows = QB_POSTS) => {
+  const q = { ...QB_DEFAULT, ...query };
+  const filters = [q.filter1, q.filter2].map((key) => QB_FILTERS[key]).filter((f) => f.test);
+  const filtered = rows.filter((row) => filters.every((f) => f.test(row)));
+  const order = QB_ORDERS[q.order];
+  const ordered = order.cmp ? [...filtered].sort(order.cmp) : filtered;
+  const page = QB_PAGES[q.page];
+  const kept = page.code ? ordered.slice(page.from, page.to + 1) : ordered;
+  const data = kept.map(QB_COLUMNS[q.columns].pick);
+  const base = { ordered: ordered.map((r) => r.id), kept: kept.map((r) => r.id), count: kept.length, error: null };
+  if (q.end === 'list') return { ...base, result: data };
+  if (kept.length === 1) return { ...base, result: data[0] };
+  if (kept.length === 0 && q.end === 'maybe') return { ...base, result: null };
+  return {
+    ...base,
+    result: undefined,
+    error: {
+      code: 'PGRST116',
+      message: 'Cannot coerce the result to a single JSON object',
+      details: `The result contains ${kept.length} rows`,
+    },
+  };
+};
+
+export const queryCode = (query) => {
+  const q = { ...QB_DEFAULT, ...query };
+  const parts = [
+    ".from('posts')",
+    QB_COLUMNS[q.columns].code,
+    QB_FILTERS[q.filter1].code,
+    QB_FILTERS[q.filter2].code,
+    QB_ORDERS[q.order].code,
+    QB_PAGES[q.page].code,
+    QB_ENDS[q.end].code,
+  ].filter(Boolean);
+  const name = q.end === 'list' ? 'rows' : 'row';
+  return [`final ${name} = await _client`, ...parts.map((p, i) => `    ${p}${i === parts.length - 1 ? ';' : ''}`)].join('\n');
+};
+
+const qbSummary = (q, run) => {
+  const filters = [q.filter1, q.filter2].filter((k) => k !== 'none');
+  const page = QB_PAGES[q.page];
+  const total = QB_POSTS.length;
+  let text = filters.length
+    ? `${run.ordered.length} de ${total} filas pasan ${filters.length > 1 ? 'los dos filtros (AND)' : 'el filtro'}.`
+    : `Sin filtros: pasan las ${total} filas.`;
+  if (q.order === 'none' && page.code) text += ' Sin order, la base de datos no garantiza qué filas caen en cada página.';
+  if (page.code) text += ` ${page.code.slice(1)} toma las posiciones ${page.from} a ${page.to}: ${run.count === 1 ? 'queda 1 fila' : `quedan ${run.count} filas`}.`;
+  if (q.end === 'list') return `${text} El await devuelve una List con ${run.count} ${run.count === 1 ? 'mapa' : 'mapas'}.`;
+  if (run.error) return `${text} ${QB_ENDS[q.end].code} exige ${q.end === 'single' ? 'exactamente una fila' : 'cero o una fila'} y ${run.count === 0 ? 'no llegó ninguna' : `llegaron ${run.count}`}: lanza PostgrestException.`;
+  if (run.result === null) return `${text} maybeSingle() no encontró ninguna fila y devuelve null.`;
+  return `${text} Llegó exactamente una fila: el await devuelve un solo Map.`;
+};
+
+const qbSelect = (label, options, value, onChange) => {
+  const select = el('select', { 'aria-label': label, onchange: (e) => onChange(e.target.value) });
+  Object.entries(options).forEach(([key, option]) => {
+    select.appendChild(el('option', { value: key, text: option.label, selected: key === value }));
+  });
+  return [el('label', { text: label }), select];
+};
+
+const mountQueryBuilder = (root) => {
+  ensureQbStyle();
+  const container = card(root);
+  const query = { ...QB_DEFAULT };
+
+  const code = codePanel('supabase_post_data_source.dart');
+  const rowsBox = el('div', { class: 'qb-rows', 'data-testid': 'qb-rows' });
+  const summary = el('div', { class: 'qb-summary', 'data-testid': 'qb-summary', 'aria-live': 'polite' });
+  const json = el('div', { class: 'qb-json', 'data-testid': 'qb-result' });
+  const resultTitle = el('h4');
+
+  const form = el(
+    'div',
+    { class: 'qb-form' },
+    qbSelect('Columnas', QB_COLUMNS, query.columns, (v) => update({ columns: v })),
+    qbSelect('Filtro', QB_FILTERS, query.filter1, (v) => update({ filter1: v })),
+    qbSelect('Otro filtro', QB_FILTERS, query.filter2, (v) => update({ filter2: v })),
+    qbSelect('Orden', QB_ORDERS, query.order, (v) => update({ order: v })),
+    qbSelect('Recorte', QB_PAGES, query.page, (v) => update({ page: v })),
+    qbSelect('Terminador', QB_ENDS, query.end, (v) => update({ end: v }))
+  );
+
+  const legend = el(
+    'div',
+    { class: 'qb-legend' },
+    el('span', {}, el('i', { style: 'background:#9FD68D' }), 'llega en el resultado'),
+    el('span', {}, el('i', { style: 'background:#fff;border:1px dashed #9E9AA7' }), 'pasa el filtro, fuera del recorte'),
+    el('span', {}, el('i', { style: 'background:#E3E3EA' }), 'no pasa el filtro')
+  );
+
+  const renderRows = (run) => {
+    const byId = new Map(QB_POSTS.map((r) => [r.id, r]));
+    const out = QB_POSTS.filter((r) => !run.ordered.includes(r.id));
+    rowsBox.replaceChildren();
+    [...run.ordered.map((id, pos) => ({ row: byId.get(id), pos })), ...out.map((row) => ({ row, pos: null }))].forEach(({ row, pos }) => {
+      const status = pos === null ? 'qb-out' : run.kept.includes(row.id) ? 'qb-in' : 'qb-skip';
+      rowsBox.appendChild(
+        el(
+          'div',
+          { class: `qb-row ${status}`, 'data-id': row.id, 'data-status': status.slice(3) },
+          el('span', { class: 'qb-pos', text: pos === null ? '–' : String(pos) }),
+          el('span', { class: 'qb-mono', text: row.id }),
+          el('span', { class: 'qb-mono', text: `@${QB_AUTHORS[row.profile_id].username}` }),
+          el('span', { text: row.content }),
+          el('span', { class: 'qb-mono', text: row.created_at.slice(5) })
+        )
+      );
+    });
+  };
+
+  const update = (changes = {}) => {
+    Object.assign(query, changes);
+    const run = runQuery(query);
+    code.setCode(queryCode(query));
+    renderRows(run);
+    summary.textContent = qbSummary(query, run);
+    if (run.error) {
+      resultTitle.textContent = 'Excepción';
+      json.className = 'qb-json qb-err';
+      json.textContent = `PostgrestException(\n  message: ${run.error.message},\n  code: ${run.error.code},\n  details: ${run.error.details}\n)`;
+    } else {
+      resultTitle.textContent = query.end === 'list' ? 'Lo que devuelve el await · List<Map>' : 'Lo que devuelve el await · Map?';
+      json.className = 'qb-json';
+      json.textContent = JSON.stringify(run.result, null, 2);
+    }
+    flash(json);
+  };
+
+  container.append(
+    el(
+      'div',
+      { class: 'fs-side' },
+      el('div', { class: 'fs-panel' }, el('h4', { text: 'Arma la consulta' }), form),
+      code.box
+    ),
+    el(
+      'div',
+      { class: 'fs-side' },
+      el('div', { class: 'fs-panel' }, el('h4', { text: 'Tabla posts · en el orden de la consulta' }), rowsBox, el('div', { style: 'height:8px' }), legend),
+      summary,
+      el('div', { class: 'fs-dark' }, resultTitle, json)
+    )
+  );
+  update();
+  return () => root.replaceChildren();
+};
+
 export const SIMS = Object.freeze({
   'state-counter': mountCounter,
   'hot-reload': (root, args = []) => mountCounter(root, ['reload', ...args]),
@@ -3036,6 +3298,7 @@ export const SIMS = Object.freeze({
   playlist: mountPlaylist,
   'register-layers': mountRegisterLayers,
   'register-clean': mountRegisterClean,
+  'query-builder': mountQueryBuilder,
 });
 
 export const parseSpec = (spec) => {

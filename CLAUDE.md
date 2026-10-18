@@ -166,6 +166,8 @@ ciclos) se generan con un script en `tools/`, igual que en `SeminarioSoftware`:
 siete de «Entendiendo BlocProvider y BlocBuilder» (0089). `tools/lab5_figuras.py` trae las cuatro
 de «Laboratorio 5 a nivel conceptual» (0090), se usa igual y reutiliza los ayudantes del anterior.
 `tools/supabase_cli_figuras.py` trae las cinco de «Configurando los servicios» (0091).
+`tools/database_figuras.py` trae las ocho de la sección Database: «Escribir en la base de datos» (0059),
+«Leer de la base de datos» (0060) y «Laboratorio 6 · Muro» (0061).
 
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
@@ -225,8 +227,13 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
     tienen modo *Paso a paso*. Hubo un interruptor *Falta el grant en profiles* (cuenta sin
     perfil); el profesor lo retiró el 2026-10-17 por innecesario. Si el laboratorio cambia,
     hay que actualizar el simulador que corresponda.
+- `query-builder` («Leer de la base de datos», 0060): el estudiante arma una consulta del SDK
+  (columnas, dos filtros encadenados, `order`, `limit`/`range`, `single`/`maybeSingle`) sobre una
+  tabla `posts` de diez filas y ve qué filas pasan el filtro, cuáles caen en el recorte, el código
+  Dart y lo que devuelve el `await` (o la `PostgrestException` de `single`). La lógica es pura y
+  exportada (`runQuery`, `queryCode`), con pruebas en `InteractiveBlock.test.jsx`.
 - `flutterStateSims.js` ya **no es idéntico** al de Seminario: tiene además `register-layers`,
-  `register-clean` y unas palabras más en el resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
+  `register-clean`, `query-builder` y unas palabras más en el resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
 
 ### Darla de alta en `toc.md`
 

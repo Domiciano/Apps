@@ -82,14 +82,12 @@
 **[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH5.md | Clean Architecure | 0056
 **[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH6.md | Laboratorio 5 · Flujo de Registro | 0057
 [t] Database
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH4.md | Auth y DB | 0058
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH3.md | Enviar datos a base de datos | 0059
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH7.md | Relaciones y obtención de datos anidados | 0060
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH3.md | Escribir en la base de datos | 0059
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH7.md | Leer de la base de datos | 0060
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH8.md | Laboratorio 6 · Muro | 0061
 [t] Realtime
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI1.md | Datos en Tiempo Real con Supabase | 0062
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2.md | Programación Reactiva y Supabase Streams | 0063
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI3.md | Consultas Anidadas | 0064
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH10.md | Laboratorio 7: Chat App | 0065
 [t] Storage
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ1.md | Acceso a Galería y Cámara | 0066
