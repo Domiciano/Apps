@@ -1776,17 +1776,6 @@ const createCleanCircle = (spec) => {
     marker.appendChild(svgEl('path', { d: 'M0,0 L10,5 L0,10 L2.4,5 Z', fill: color }));
     defs.appendChild(marker);
   });
-  const depMarker = svgEl('marker', {
-    id: `${markerBase}-dep`,
-    viewBox: '0 0 10 10',
-    refX: '9',
-    refY: '5',
-    markerWidth: '5',
-    markerHeight: '5',
-    orient: 'auto',
-  });
-  depMarker.appendChild(svgEl('path', { d: 'M0,0 L10,5 L0,10 Z', fill: '#161A26' }));
-  defs.appendChild(depMarker);
   svg.appendChild(defs);
 
   const [cx, cy] = spec.center;
@@ -1810,19 +1799,6 @@ const createCleanCircle = (spec) => {
     label.textContent = text;
     svg.appendChild(label);
   }
-  spec.dependencyArrows.forEach(([deg, r1, r2]) => {
-    const [x1, y1] = polar(r1, deg);
-    const [x2, y2] = polar(r2, deg);
-    svg.appendChild(svgEl('line', {
-      x1,
-      y1,
-      x2,
-      y2,
-      stroke: '#161A26',
-      'stroke-width': '3',
-      'marker-end': `url(#${markerBase}-dep)`,
-    }));
-  });
 
   const boxes = {};
   const nodeEls = {};
@@ -1852,8 +1828,8 @@ const createCleanCircle = (spec) => {
 
   const chipEls = {};
   Object.entries(spec.chips).forEach(([chipKey, nodeKey]) => {
-    const { x, y } = spec.nodes[nodeKey];
-    const text = svgEl('text', { x, y: y + 26, 'text-anchor': 'middle', class: 'fc-chip' });
+    const { x, y, text: name } = spec.nodes[nodeKey];
+    const text = svgEl('text', { x: x + (name.length * 6.6 + 16) / 2 + 8, y, dy: '0.35em', class: 'fc-chip' });
     svg.appendChild(text);
     chipEls[chipKey] = text;
   });
@@ -1874,7 +1850,8 @@ const createCleanCircle = (spec) => {
 
   const hopLayer = svgEl('g');
   svg.appendChild(hopLayer);
-  const banner = svgEl('text', { x: '12', y: '20', class: 'fc-banner' });
+  const [bannerX, bannerY] = spec.banner;
+  const banner = svgEl('text', { x: bannerX, y: bannerY, class: 'fc-banner' });
   svg.appendChild(banner);
 
   const edgePoint = (box, toward) => {
@@ -2643,8 +2620,9 @@ const mountRegisterClean = (root) =>
     fileLayer: { bloc: 'bloc', usecase: 'dom', auth: 'data', profile: 'data' },
     circle: {
       title: 'El registro en el diagrama de arquitectura limpia',
-      viewBox: '0 0 720 720',
+      viewBox: '0 -34 720 754',
       center: [360, 360],
+      banner: [12, -12],
       rings: [
         { r: 352, fill: '#6E93EC' },
         { r: 258, fill: '#6EE98A' },
@@ -2652,39 +2630,34 @@ const mountRegisterClean = (root) =>
         { r: 86, fill: '#ECEE72' },
       ],
       labels: [
-        { text: 'Devices', r: 322, from: -150, to: -115, ink: '#1E2A55' },
-        { text: 'Web', r: 322, from: -62, to: -40, ink: '#1E2A55' },
-        { text: 'UI', r: 304, from: 20, to: 8, ink: '#1E2A55' },
-        { text: 'DB', r: 304, from: 176, to: 164, ink: '#1E2A55' },
-        { text: 'External interfaces', r: 330, from: 106, to: 62, ink: '#1E2A55' },
-        { text: 'Controllers', r: 230, from: -122, to: -58, ink: '#1B4D2A' },
-        { text: 'Presenters', r: 244, from: 34, to: 0, ink: '#1B4D2A' },
-        { text: 'Gateways', r: 244, from: 192, to: 160, ink: '#1B4D2A' },
-        { text: 'Use Cases', r: 140, from: -128, to: -52, ink: '#5A1A1A' },
+        { text: 'Devices', r: 322, from: -168, to: -146, ink: '#1E2A55' },
+        { text: 'Web', r: 322, from: -40, to: -20, ink: '#1E2A55' },
+        { text: 'UI', r: 322, from: -117, to: -103, ink: '#1E2A55' },
+        { text: 'DB', r: 322, from: 178, to: 162, ink: '#1E2A55' },
+        { text: 'External interfaces', r: 330, from: 106, to: 74, ink: '#1E2A55' },
+        { text: 'Controllers', r: 230, from: -22, to: 22, ink: '#1B4D2A' },
+        { text: 'Presenters', r: 240, from: -150, to: -118, ink: '#1B4D2A' },
+        { text: 'Gateways', r: 240, from: 102, to: 78, ink: '#1B4D2A' },
+        { text: 'Use Cases', r: 150, from: -168, to: -118, ink: '#5A1A1A' },
       ],
       centerLabel: ['Entities', 322, '#4F4F14'],
-      dependencyArrows: [
-        [-145, 345, 300],
-        [-145, 252, 205],
-        [-145, 162, 118],
-      ],
       nodes: {
-        screen: { x: 590, y: 553, text: 'RegisterScreen', kind: 'view' },
-        bloc: { x: 478, y: 500, text: 'RegisterBloc', kind: 'view' },
-        usecase: { x: 360, y: 252, text: 'SignUpUseCase', kind: 'dom' },
-        authRepo: { x: 268, y: 330, text: 'AuthRepository', kind: 'contract' },
-        profileRepo: { x: 300, y: 455, text: 'ProfileRepository', kind: 'contract' },
+        screen: { x: 360, y: 55, text: 'RegisterScreen', kind: 'view' },
+        bloc: { x: 360, y: 147, text: 'RegisterBloc', kind: 'view' },
+        usecase: { x: 360, y: 245, text: 'SignUpUseCase', kind: 'dom' },
         authUser: { x: 360, y: 348, text: 'AuthUser', kind: 'entity' },
         profile: { x: 360, y: 378, text: 'Profile', kind: 'entity' },
-        authImpl: { x: 228, y: 491, text: 'AuthRepositoryImpl', kind: 'data' },
-        authDs: { x: 242, y: 526, text: 'SupabaseAuthDataSource', kind: 'data' },
-        profileImpl: { x: 345, y: 556, text: 'ProfileRepositoryImpl', kind: 'data' },
-        profileDs: { x: 345, y: 594, text: 'SupabaseProfileDataSource', kind: 'data' },
+        authRepo: { x: 296, y: 470, text: 'AuthRepository', kind: 'contract' },
+        authImpl: { x: 254, y: 544, text: 'AuthRepositoryImpl', kind: 'data' },
+        authDs: { x: 212, y: 615, text: 'SupabaseAuthDataSource', kind: 'data' },
+        profileRepo: { x: 424, y: 470, text: 'ProfileRepository', kind: 'contract' },
+        profileImpl: { x: 467, y: 544, text: 'ProfileRepositoryImpl', kind: 'data' },
+        profileDs: { x: 508, y: 615, text: 'SupabaseProfileDataSource', kind: 'data' },
       },
       chips: { view: 'screen', bloc: 'bloc' },
       tables: {
-        users: { x: 100, y: 470, title: 'auth.users' },
-        profiles: { x: 190, y: 606, title: 'profiles' },
+        users: { x: 100, y: 495, title: 'auth.users' },
+        profiles: { x: 620, y: 495, title: 'profiles' },
       },
       hops: {
         vb: ['screen', 'bloc'],
