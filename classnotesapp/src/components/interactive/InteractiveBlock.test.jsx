@@ -335,6 +335,22 @@ describe('register-clean circle tab', () => {
   });
 });
 
+describe('register-clean arrows inside a layer', () => {
+  it('draws the use case call to each contract in the Clean tab', () => {
+    const { container } = renderBlock('register-clean');
+    fireEvent.click(screen.getByLabelText('Paso a paso'));
+    fireEvent.click(screen.getByText('Registrarme'));
+    const banners = [];
+    while (screen.getByText('Siguiente paso').style.display !== 'none') {
+      fireEvent.click(screen.getByText('Siguiente paso'));
+      if (container.querySelector('.fc-hop')) banners.push(container.querySelector('.fc-banner').textContent);
+    }
+    expect(banners).toContain('↓ _auth.signUp(email, password)');
+    expect(banners).toContain('↓ _profiles.createProfile(profile)');
+    expect(banners).toContain('↓ _dataSource.signUp(email, password)');
+  });
+});
+
 describe('register simulators step by step', () => {
   const walk = (name, email) => {
     const { container } = renderBlock(name);
@@ -348,6 +364,7 @@ describe('register simulators step by step', () => {
     const bands = [...container.querySelectorAll('.fr-band')];
     const snapshot = () => ({
       messages: container.querySelectorAll('.fr-msg').length,
+      arrows: container.querySelectorAll('.fc-hop').length,
       layer: bands.findIndex((band) => band.classList.contains('fr-on')),
     });
     const steps = [snapshot()];
@@ -369,6 +386,7 @@ describe('register simulators step by step', () => {
       const steps = walk(name, repeated);
       expect(steps.length).toBeGreaterThan(8);
       expect(Math.max(...steps.map((step) => step.messages))).toBe(1);
+      expect(Math.max(...steps.map((step) => step.arrows))).toBeLessThanOrEqual(1);
     });
 
     it(`${name} never skips a layer between steps ${label}`, () => {

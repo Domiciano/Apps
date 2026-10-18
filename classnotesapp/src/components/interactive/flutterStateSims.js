@@ -1598,6 +1598,7 @@ const REG_CSS = `
 .fsim .fc-svg text{font-family:'JetBrains Mono',Menlo,Consolas,monospace}
 .fsim .fc-svg .fc-ring-label{font:700 17px Roboto,Arial,sans-serif;letter-spacing:.02em}
 .fsim .fc-svg .fc-chip{font-size:10px;fill:#454C61}
+.fsim .fc-svg .fc-external{font:700 12px Roboto,Arial,sans-serif;letter-spacing:.08em;fill:#556074}
 .fsim .fc-svg .fc-banner{font-size:12.5px;font-weight:700}
 .fsim .fc-hop{animation:fcHop .45s ease-out}
 @keyframes fcHop{0%{stroke-dasharray:4 6}100%{stroke-dasharray:none}}
@@ -1780,7 +1781,17 @@ const createCleanCircle = (spec) => {
 
   const [cx, cy] = spec.center;
   const polar = (r, deg) => [cx + r * Math.cos((deg * Math.PI) / 180), cy + r * Math.sin((deg * Math.PI) / 180)];
-  spec.rings.forEach(({ r, fill }) => svg.appendChild(svgEl('circle', { cx, cy, r, fill, stroke: '#FFFFFF', 'stroke-width': '2' })));
+  spec.rings.forEach(({ r, fill }) => {
+    svg.appendChild(svgEl('circle', { cx, cy, r, fill: '#FFFFFF' }));
+    svg.appendChild(svgEl('circle', { cx, cy, r, fill, 'fill-opacity': '0.42', stroke: '#FFFFFF', 'stroke-width': '2' }));
+  });
+  if (spec.external) {
+    const { x, y, w, h, label } = spec.external;
+    svg.appendChild(svgEl('rect', { x, y, width: w, height: h, rx: '14', fill: '#F4F5F8', stroke: '#9AA1B2', 'stroke-width': '1.5', 'stroke-dasharray': '6 4' }));
+    const title = svgEl('text', { x: x + w / 2, y: y + h - 14, 'text-anchor': 'middle', class: 'fc-external' });
+    title.textContent = label;
+    svg.appendChild(title);
+  }
   spec.labels.forEach(({ text, r, from, to, ink }, index) => {
     const [x1, y1] = polar(r, from);
     const [x2, y2] = polar(r, to);
@@ -1867,29 +1878,64 @@ const createCleanCircle = (spec) => {
     Object.entries(nodeEls).forEach(([key, g]) => g.classList.toggle('fc-hot', hot.has(key)));
   };
 
-  const showGaps = (list = []) => {
+  const drawArc = (from, to, dir) => {
+    const angleOf = (box) => Math.atan2(box.y - cy, box.x - cx);
+    const r = (Math.hypot(from.x - cx, from.y - cy) + Math.hypot(to.x - cx, to.y - cy)) / 2;
+    let delta = angleOf(to) - angleOf(from);
+    if (delta > Math.PI) delta -= 2 * Math.PI;
+    if (delta < -Math.PI) delta += 2 * Math.PI;
+    const sign = Math.sign(delta);
+    const start = angleOf(from) + (sign * (from.w / 2 + 6)) / r;
+    const end = angleOf(to) - (sign * (to.w / 2 + 10)) / r;
+    const point = (angle) => [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+    const [x1, y1] = point(start);
+    const [x2, y2] = point(end);
+    hopLayer.appendChild(svgEl('path', {
+      d: `M${x1},${y1} A${r},${r} 0 0 ${sign > 0 ? 1 : 0} ${x2},${y2}`,
+      fill: 'none',
+      stroke: FC_HOP_COLORS[dir],
+      'stroke-width': '2.5',
+      'marker-end': `url(#${markerBase}-${dir})`,
+      class: 'fc-hop',
+    }));
+  };
+
+  const drawArrow = (fromKey, toKey, dir, text, curved) => {
+    const from = boxes[fromKey];
+    const to = boxes[toKey];
+    if (!from || !to) return;
+    banner.textContent = `${dir === 'down' ? '↓' : '↑'} ${text}`;
+    banner.setAttribute('fill', FC_HOP_COLORS[dir]);
+    if (curved) {
+      drawArc(from, to, dir);
+      return;
+    }
+    const a = edgePoint(from, to);
+    const b = edgePoint(to, from);
+    hopLayer.appendChild(svgEl('line', {
+      x1: a.x,
+      y1: a.y,
+      x2: b.x,
+      y2: b.y,
+      stroke: FC_HOP_COLORS[dir],
+      'stroke-width': '2.5',
+      'marker-end': `url(#${markerBase}-${dir})`,
+      class: 'fc-hop',
+    }));
+  };
+
+  const showGaps = (list = [], links = []) => {
     hopLayer.replaceChildren();
     banner.textContent = '';
     list.forEach(([where, dir, text, side]) => {
       const pair = spec.hops[side ? `${where}-${side === 'r' ? 'r' : 'l'}` : where] || spec.hops[where];
       if (!pair) return;
-      const [topKey, bottomKey] = dir === 'down' ? pair : [pair[1], pair[0]];
-      const from = boxes[topKey];
-      const to = boxes[bottomKey];
-      const a = edgePoint(from, to);
-      const b = edgePoint(to, from);
-      hopLayer.appendChild(svgEl('line', {
-        x1: a.x,
-        y1: a.y,
-        x2: b.x,
-        y2: b.y,
-        stroke: FC_HOP_COLORS[dir],
-        'stroke-width': '2.5',
-        'marker-end': `url(#${markerBase}-${dir})`,
-        class: 'fc-hop',
-      }));
-      banner.textContent = `${dir === 'down' ? '↓' : '↑'} ${text}`;
-      banner.setAttribute('fill', FC_HOP_COLORS[dir]);
+      const [fromKey, toKey] = dir === 'down' ? pair : [pair[1], pair[0]];
+      drawArrow(fromKey, toKey, dir, text);
+    });
+    links.forEach(([fromKey, toKey, dir, text]) => {
+      const sameRing = (spec.curvedPairs || []).some(([a, b]) => (a === fromKey && b === toKey) || (a === toKey && b === fromKey));
+      drawArrow(fromKey, toKey, dir, text, sameRing);
     });
   };
 
@@ -2148,8 +2194,8 @@ const createRegisterSim = (root, config) => {
     Object.entries(bands).forEach(([key, item]) => item.classList.toggle('fr-on', hotBands.has(key)));
     return hotBands;
   };
-  const showGaps = (list = []) => {
-    if (circle) circle.showGaps(list);
+  const showGaps = (list = [], links = []) => {
+    if (circle) circle.showGaps(list, links);
     Object.values(gaps).forEach((g) => g.idle());
     list.forEach(([where, dir, text, side]) => {
       const { slots } = gaps[where];
@@ -2209,7 +2255,7 @@ const createRegisterSim = (root, config) => {
     markStrip(fileLayer ? new Set([fileLayer]) : hotBands);
     setFile(step.file);
     code.mark(...(step.lines || []));
-    showGaps(step.gaps);
+    showGaps(step.gaps, step.links);
     if (step.apply) step.apply(ctx);
     note.textContent = step.caption;
     note.classList.toggle('fs-warn', Boolean(step.warn));
@@ -2620,7 +2666,7 @@ const mountRegisterClean = (root) =>
     fileLayer: { bloc: 'bloc', usecase: 'dom', auth: 'data', profile: 'data' },
     circle: {
       title: 'El registro en el diagrama de arquitectura limpia',
-      viewBox: '0 -34 720 754',
+      viewBox: '0 -34 720 920',
       center: [360, 360],
       banner: [12, -12],
       rings: [
@@ -2633,7 +2679,7 @@ const mountRegisterClean = (root) =>
         { text: 'Devices', r: 322, from: -168, to: -146, ink: '#1E2A55' },
         { text: 'Web', r: 322, from: -40, to: -20, ink: '#1E2A55' },
         { text: 'UI', r: 322, from: -117, to: -103, ink: '#1E2A55' },
-        { text: 'DB', r: 322, from: 178, to: 162, ink: '#1E2A55' },
+        { text: 'DB', r: 326, from: 162, to: 146, ink: '#1E2A55' },
         { text: 'External interfaces', r: 330, from: 106, to: 74, ink: '#1E2A55' },
         { text: 'Controllers', r: 230, from: -22, to: 22, ink: '#1B4D2A' },
         { text: 'Presenters', r: 240, from: -150, to: -118, ink: '#1B4D2A' },
@@ -2656,9 +2702,14 @@ const mountRegisterClean = (root) =>
       },
       chips: { view: 'screen', bloc: 'bloc' },
       tables: {
-        users: { x: 100, y: 495, title: 'auth.users' },
-        profiles: { x: 620, y: 495, title: 'profiles' },
+        users: { x: 250, y: 762, title: 'auth.users' },
+        profiles: { x: 470, y: 762, title: 'profiles' },
       },
+      external: { x: 150, y: 728, w: 420, h: 140, label: 'SUPABASE · FUERA DE LA APP' },
+      curvedPairs: [
+        ['usecase', 'authRepo'],
+        ['usecase', 'profileRepo'],
+      ],
       hops: {
         vb: ['screen', 'bloc'],
         bd: ['bloc', 'usecase'],
@@ -2771,6 +2822,7 @@ const mountRegisterClean = (root) =>
           hot: ['usecase', 'authRepo'],
           file: 'usecase',
           lines: [6, 7],
+          links: [['usecase', 'authRepo', 'down', '_auth.signUp(email, password)']],
           caption: 'Paso 1, la cuenta. Dentro del dominio, el UseCase llama al contrato AuthRepository, no a Supabase.',
         },
         {
@@ -2784,6 +2836,7 @@ const mountRegisterClean = (root) =>
           hot: ['authImpl', 'authDs'],
           file: 'auth',
           lines: [0, 5, 6],
+          links: [['authImpl', 'authDs', 'down', '_dataSource.signUp(email, password)']],
           caption: 'AuthRepositoryImpl cumple el contrato y delega en SupabaseAuthDataSource, el único que usa el SDK de Auth.',
         },
         {
@@ -2819,16 +2872,32 @@ const mountRegisterClean = (root) =>
             hot: ['authDs'],
             file: 'auth',
             lines: [15, 16],
-            gaps: [['dd', 'fail', 'lanza AuthException', 'l']],
-            caption: 'El SDK lanza una excepción en el data source, y la excepción sube al dominio.',
+            links: [['authDs', 'authImpl', 'fail', 'lanza AuthException']],
+            caption: 'El SDK lanza una excepción en el data source, que sube al Impl.',
             warn: true,
           },
           {
-            hot: ['usecase', 'authRepo'],
+            hot: ['authImpl'],
+            file: 'auth',
+            lines: [5, 6],
+            gaps: [['dd', 'fail', 'lanza AuthException', 'l']],
+            caption: 'El Impl no la atrapa: sube por el contrato hacia el dominio.',
+            warn: true,
+          },
+          {
+            hot: ['usecase'],
+            file: 'usecase',
+            lines: [6, 7],
+            links: [['authRepo', 'usecase', 'fail', 'lanza AuthException']],
+            caption: 'El UseCase tampoco la atrapa: si no hay cuenta, el perfil ni se intenta.',
+            warn: true,
+          },
+          {
+            hot: ['usecase'],
             file: 'usecase',
             lines: [6, 7],
             gaps: [['bd', 'fail', 'lanza AuthException']],
-            caption: 'El UseCase no la atrapa: si no hay cuenta, el perfil ni se intenta. La excepción sigue hacia el Bloc.',
+            caption: 'La excepción sigue subiendo hacia el Bloc.',
             warn: true,
           },
           {
@@ -2859,26 +2928,42 @@ const mountRegisterClean = (root) =>
           hot: ['authDs'],
           file: 'auth',
           lines: [17, 18, 19],
+          links: [['authDs', 'authImpl', 'up', 'AuthUser(id, email)']],
+          caption: 'El data source convierte la respuesta en AuthUser y se la devuelve al Impl. De aquí para arriba nadie ve una clase de Supabase.',
+        },
+        {
+          hot: ['authImpl'],
+          file: 'auth',
+          lines: [5, 6],
           gaps: [['dd', 'up', 'AuthUser(id, email)', 'l']],
-          caption: 'El data source convierte la respuesta en AuthUser y la devuelve. De aquí para arriba nadie ve una clase de Supabase.',
+          caption: 'El Impl la devuelve por el contrato: el AuthUser sube al dominio.',
         },
         {
           hot: ['usecase'],
           file: 'usecase',
           lines: [8, 9, 10, 11, 12],
+          links: [['authRepo', 'usecase', 'up', 'AuthUser(id, email)']],
           caption: 'El AuthUser llega al UseCase. La regla del registro: con su id se arma el Profile, por eso la cuenta va primero.',
         },
         {
           hot: ['usecase', 'profileRepo'],
           file: 'usecase',
           lines: [13, 14],
+          links: [['usecase', 'profileRepo', 'down', '_profiles.createProfile(profile)']],
+          caption: 'Paso 2, el perfil. El UseCase usa el otro contrato, ProfileRepository.',
+        },
+        {
+          hot: ['profileRepo'],
+          file: 'usecase',
+          lines: [13, 14],
           gaps: [['dd', 'down', 'createProfile(profile)', 'r']],
-          caption: 'Paso 2, el perfil. El UseCase usa el otro contrato, ProfileRepository, y la llamada baja a la otra rama de datos.',
+          caption: 'La llamada baja a la otra rama de datos.',
         },
         {
           hot: ['profileImpl', 'profileDs'],
           file: 'profile',
           lines: [0, 1, 2, 3],
+          links: [['profileImpl', 'profileDs', 'down', '_dataSource.createProfile(profile)']],
           caption: 'ProfileRepositoryImpl cumple ese contrato y delega en SupabaseProfileDataSource.',
         },
         {
@@ -2902,8 +2987,22 @@ const mountRegisterClean = (root) =>
           hot: ['profileDs'],
           file: 'profile',
           lines: [9],
+          links: [['profileDs', 'profileImpl', 'up', 'insert completo']],
+          caption: 'El data source le avisa al Impl que el insert terminó.',
+        },
+        {
+          hot: ['profileImpl'],
+          file: 'profile',
+          lines: [3],
           gaps: [['dd', 'up', 'createProfile completo', 'r']],
-          caption: 'El data source le avisa al dominio que el perfil quedó guardado.',
+          caption: 'El Impl devuelve el control por el contrato, hacia el dominio.',
+        },
+        {
+          hot: ['usecase'],
+          file: 'usecase',
+          lines: [14],
+          links: [['profileRepo', 'usecase', 'up', 'createProfile completo']],
+          caption: 'El await de createProfile termina en el UseCase.',
         },
         {
           hot: ['usecase'],

@@ -201,8 +201,13 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   External interfaces · Controllers, Presenters, Gateways · Use Cases · Entities), sin flechas de
   dependencia—. `RegisterScreen` (UI), el Bloc (Presenters) y el UseCase van en un mismo rayo
   vertical; cada rama de datos baja por su propio rayo: contrato (Use Cases) → `Impl` (Gateways)
-  → `DataSource` en el **anillo externo**, junto a su tabla en DB, porque es el que habla con el
-  SDK. (En la pestaña Capas los DataSource siguen en la banda «Datos».) Refleja el salto actual como flecha y los
+  → `DataSource` en el **anillo externo** (DB), porque es el que habla con el SDK. Las tablas de
+  Supabase van **fuera del círculo**, en un recuadro «Supabase · fuera de la app»: el círculo es
+  solo el código de la app móvil. Los anillos usan los colores de la convención con
+  transparencia para que las flechas resalten. Las llamadas dentro de una misma capa (UseCase →
+  contrato, `Impl` → `DataSource` y sus regresos) tienen su propio paso con flecha (`links` en el
+  paso; las del anillo rojo, curvas). (En la pestaña Capas los DataSource siguen en la banda
+  «Datos».) Refleja el salto actual como flecha y los
   registros de Supabase; `createCleanCircle`) y *Código*, con una franja abajo que
   marca la capa actual. En `register-clean` la franja sigue al archivo
   resaltado (`fileLayer`); en `register-layers`, a la pieza iluminada (SDK, Supabase).
