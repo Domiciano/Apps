@@ -216,9 +216,7 @@ El `id` y el `created_at` los pone la base de datos. Tú solo mandas quién escr
 
 ```dart
 class SupabasePostDataSource {
-  final SupabaseClient _client;
-
-  SupabasePostDataSource(this._client);
+  final SupabaseClient _client = Supabase.instance.client;
 
   Future<void> create(String content) async {
     await _client.from('posts').insert({

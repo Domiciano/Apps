@@ -350,13 +350,11 @@ abstract class PostRepository {
 
 `posts/domain/usecases/`
 
-Uno por acción: `GetFeedUseCase`, `GetMyPostsUseCase`, `PublishPostUseCase` y `ToggleLikeUseCase`. Cada uno recibe el `PostRepository` por constructor. Casi todos solo delegan; los dos que deciden algo son estos:
+Uno por acción: `GetFeedUseCase`, `GetMyPostsUseCase`, `PublishPostUseCase` y `ToggleLikeUseCase`. Cada capa crea directamente la que necesita, igual que en `features/auth`: el caso de uso crea su repositorio como un campo. Casi todos solo delegan; los dos que deciden algo son estos:
 
 ```dart
 class PublishPostUseCase {
-  final PostRepository _posts;
-
-  PublishPostUseCase(this._posts);
+  final PostRepository _posts = PostRepositoryImpl();
 
   Future<void> call(String content) async {
     final text = content.trim();
@@ -369,9 +367,7 @@ class PublishPostUseCase {
 
 ```dart
 class ToggleLikeUseCase {
-  final PostRepository _posts;
-
-  ToggleLikeUseCase(this._posts);
+  final PostRepository _posts = PostRepositoryImpl();
 
   Future<Post> call(Post post) async {
     // TODO: like o unlike según post.likedByMe, y devolver el post
@@ -390,9 +386,7 @@ Es el único archivo que habla con Supabase, y el que usa lo de las dos leccione
 
 ```dart
 class SupabasePostDataSource {
-  final SupabaseClient _client;
-
-  SupabasePostDataSource(this._client);
+  final SupabaseClient _client = Supabase.instance.client;
 
   static const _columns = 'id, content, created_at, '
       'author:profiles(username, full_name), '
@@ -455,13 +449,13 @@ class SupabasePostDataSource {
 
 `posts/data/repository/post_repository_impl.dart`
 
-`PostRepositoryImpl` recibe el data source por constructor y cumple el contrato delegando en él, igual que en el Laboratorio 5.
+`PostRepositoryImpl` crea su data source como un campo, `final SupabasePostDataSource _dataSource = SupabasePostDataSource();`, y cumple el contrato delegando en él.
 
 ## Paso 4 · FeedBloc
 
 `home/ui/bloc/feed_bloc.dart`
 
-Los eventos y el estado ya están. Al `Bloc` le faltan sus tres casos de uso por constructor, y en cada `on` el `debugPrint` se reemplaza por la lógica que emite estados. `page` es la última página que ya cargaste, y `pageSize` vale 10. La página siguiente se pide así:
+Los eventos y el estado ya están. Al `Bloc` le faltan sus tres casos de uso, que crea como campos (`final GetFeedUseCase _getFeed = GetFeedUseCase();`), y en cada `on` el `debugPrint` se reemplaza por la lógica que emite estados. `page` es la última página que ya cargaste, y `pageSize` vale 10. La página siguiente se pide así:
 
 ```dart
 Future<void> _onMoreRequested(
@@ -491,23 +485,9 @@ Future<void> _onMoreRequested(
 
 `compose/ui/bloc/compose_bloc.dart`
 
-Recibe un `PublishPostUseCase` y llena su único `on`: `loading`, y después `success` o `failure` con el mensaje del caso de uso. `ComposeScreen` ya vuelve al muro cuando el estado llega a `success`.
+Crea un `PublishPostUseCase` como campo y llena su único `on`: `loading`, y después `success` o `failure` con el mensaje del caso de uso. `ComposeScreen` ya vuelve al muro cuando el estado llega a `success`.
 
-## Paso 6 · main.dart
-
-Hoy `/home` crea `FeedBloc()` junto al `SessionBloc`, y `/compose` crea `ComposeBloc()`, sin nada adentro. Arma el repositorio una sola vez, junto a los de auth, y pásale a cada `Bloc` sus casos de uso:
-
-```dart
-final postRepository = PostRepositoryImpl(SupabasePostDataSource(client));
-```
-
-```dart
-create: (_) => FeedBloc(
-  GetFeedUseCase(postRepository),
-  GetMyPostsUseCase(postRepository),
-  ToggleLikeUseCase(postRepository),
-),
-```
+`main.dart` no cambia: como cada capa crea la siguiente, las rutas solo crean `FeedBloc()` y `ComposeBloc()`.
 
 Corre la app de nuevo: el muro se llena, el corazón cambia y **Publicar** vuelve al muro con tu post arriba.
 
