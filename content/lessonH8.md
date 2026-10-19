@@ -118,46 +118,7 @@ flutter pub get
 
 Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de Supabase. Después copia en la raíz la carpeta `supabase/` de tu proyecto del Laboratorio 5, que ya trae tu `link` y tu migración de `profiles`.
 
-Faltan dos tablas, en este orden: `likes` apunta a `posts`, así que `posts` tiene que existir primero. Crea las dos migraciones:
-
-```shell
-npx supabase migration new create_posts
-npx supabase migration new create_likes
-```
-
-En el archivo que termina en `create_posts.sql`:
-
-```sql
-create table public.posts (
-  id uuid primary key default gen_random_uuid(),
-  profile_id uuid not null references public.profiles(id) on delete cascade,
-  content text not null check (char_length(content) <= 280),
-  created_at timestamptz not null default now()
-);
-
-grant select, insert, update, delete on public.posts to authenticated;
-```
-
-En el que termina en `create_likes.sql`:
-
-```sql
-create table public.likes (
-  post_id uuid not null references public.posts(id) on delete cascade,
-  profile_id uuid not null references public.profiles(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  primary key (post_id, profile_id)
-);
-
-grant select, insert, update, delete on public.likes to authenticated;
-```
-
-Súbelas las dos juntas. Como el nombre de cada archivo empieza por la fecha en que lo creaste, `db push` las aplica en orden:
-
-```shell
-npx supabase db push
-```
-
-Si ya habías creado `posts` en *Escribir en la base de datos*, no la repitas: crea solo `create_likes`.
+## El modelo de datos
 
 ```svg
 <svg id="dbMuroModelo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 452" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="dbMuroModelo-ttl dbMuroModelo-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
@@ -238,6 +199,46 @@ Si ya habías creado `posts` en *Escribir en la base de datos*, no la repitas: c
   <g transform="translate(492,340)"><rect width="420" height="77" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#556074" data-fit="392">likes(count) en el select</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="392">Cuenta las filas de likes de cada post sin descargarlas.</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="392">Llega como [{"count": 3}].</text></g>
 </svg>
 ```
+
+Partes solo con `profiles`. Faltan `posts` y `likes`, en ese orden: `likes` apunta a `posts`, así que `posts` tiene que existir primero. Crea las dos migraciones:
+
+```shell
+npx supabase migration new create_posts
+npx supabase migration new create_likes
+```
+
+En el archivo que termina en `create_posts.sql`:
+
+```sql
+create table public.posts (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  content text not null check (char_length(content) <= 280),
+  created_at timestamptz not null default now()
+);
+
+grant select, insert, update, delete on public.posts to authenticated;
+```
+
+En el que termina en `create_likes.sql`:
+
+```sql
+create table public.likes (
+  post_id uuid not null references public.posts(id) on delete cascade,
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (post_id, profile_id)
+);
+
+grant select, insert, update, delete on public.likes to authenticated;
+```
+
+Súbelas las dos juntas. Como el nombre de cada archivo empieza por la fecha en que lo creaste, `db push` las aplica en orden:
+
+```shell
+npx supabase db push
+```
+
 
 La llave primaria de `likes` es la pareja `(post_id, profile_id)`: una persona no puede dar dos veces «me gusta» al mismo post. Si lo intentas con `insert`, falla con `duplicate key value violates unique constraint`. Por eso se usa `upsert`.
 
