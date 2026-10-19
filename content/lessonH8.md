@@ -116,11 +116,29 @@ cd 262AppsLab6
 flutter pub get
 ```
 
-Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de Supabase. Después copia en la raíz la carpeta `supabase/` de tu proyecto del Laboratorio 5, que ya trae tu `link` y tu migración de `profiles`. Si todavía no creaste `posts`, hazlo como en *Escribir en la base de datos*. Después crea `likes`:
+Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de Supabase. Después copia en la raíz la carpeta `supabase/` de tu proyecto del Laboratorio 5, que ya trae tu `link` y tu migración de `profiles`.
+
+Faltan dos tablas, en este orden: `likes` apunta a `posts`, así que `posts` tiene que existir primero. Crea las dos migraciones:
 
 ```shell
+npx supabase migration new create_posts
 npx supabase migration new create_likes
 ```
+
+En el archivo que termina en `create_posts.sql`:
+
+```sql
+create table public.posts (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  content text not null check (char_length(content) <= 280),
+  created_at timestamptz not null default now()
+);
+
+grant select, insert, update, delete on public.posts to authenticated;
+```
+
+En el que termina en `create_likes.sql`:
 
 ```sql
 create table public.likes (
@@ -133,9 +151,13 @@ create table public.likes (
 grant select, insert, update, delete on public.likes to authenticated;
 ```
 
+Súbelas las dos juntas. Como el nombre de cada archivo empieza por la fecha en que lo creaste, `db push` las aplica en orden:
+
 ```shell
 npx supabase db push
 ```
+
+Si ya habías creado `posts` en *Escribir en la base de datos*, no la repitas: crea solo `create_likes`.
 
 ```svg
 <svg id="dbMuroModelo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 452" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="dbMuroModelo-ttl dbMuroModelo-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
