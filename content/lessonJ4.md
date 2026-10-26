@@ -1,12 +1,15 @@
-# Laboratorio 7 · Foto de perfil
+# Laboratorio 7 · Fotos en el muro
 
-<!-- tags: ChangeAvatarUseCase, avatar_path, uploadBinary, getPublicUrl, nombre aleatorio uuid,
-     AvatarChangeRequested, image_picker, new row violates row-level security policy,
-     la foto no se actualiza, PGRST201 more than one relationship, qué va en cada capa -->
+<!-- tags: ChangeAvatarUseCase, createSignedUrlsResult, seed buckets --linked, bucket privado,
+     avatar_path, image_path, UnimplementedError, PublishPostUseCase con foto,
+     Object not found, new row violates row-level security policy, qué va en cada capa -->
 
-El muro del Laboratorio 6 ya funciona, pero todos aparecen con una letra en vez de una cara. Vas a dejar que cada persona suba su foto de perfil desde la galería o la cámara. La foto se guarda en Storage con un nombre que nunca se repite, su path queda apuntado en `profiles` y aparece en el perfil y junto a cada post.
+El muro del Laboratorio 6 funciona, pero todos aparecen con una letra en vez de una cara, y los posts solo tienen texto. Este laboratorio tiene dos partes:
 
-La interfaz ya está hecha. Lo que falta es lo de adentro, igual que en el muro.
+- **Parte 1 · Foto de perfil.** Cada persona sube su foto desde la galería o la cámara. La foto aparece en su perfil y junto a cada post suyo.
+- **Parte 2 · Posts con imagen (avanzada).** El composer deja adjuntar una foto al post.
+
+Las fotos van en **buckets privados**: solo quien inició sesión las ve, y la app las muestra con URLs firmadas.
 
 ## Lo que vas a construir
 
@@ -121,7 +124,7 @@ La interfaz ya está hecha. Lo que falta es lo de adentro, igual que en el muro.
 
 ## Preparación
 
-El punto de partida es este proyecto: [github.com/Domiciano/262AppsLab7](https://github.com/Domiciano/262AppsLab7). Es el Laboratorio 6 resuelto, más la interfaz de la foto.
+El punto de partida es este proyecto: [github.com/Domiciano/262AppsLab7](https://github.com/Domiciano/262AppsLab7). Es el Laboratorio 6 resuelto, más toda la interfaz de las fotos.
 
 ```shell
 git clone https://github.com/Domiciano/262AppsLab7
@@ -129,14 +132,146 @@ cd 262AppsLab7
 flutter pub get
 ```
 
-Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de Supabase. Después copia en la raíz la carpeta `supabase/` de tu Laboratorio 6, que ya trae tu `link` y las migraciones de `profiles`, `posts` y `likes`.
+Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de Supabase. Después copia en la raíz la carpeta `supabase/` de tu Laboratorio 6, que ya trae tu `link`, tu `config.toml` y las migraciones de `profiles`, `posts` y `likes`.
 
-## El modelo de datos
+## Lo que ya viene
+
+```svg
+<svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 856" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+  <title id="stLabCarpetas-ttl">La estructura de carpetas</title>
+  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto 262AppsLab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts y FeedBloc. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts y ComposeBloc.</desc>
+  <defs>
+    <style>
+      #stLabCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}
+      #stLabCarpetas .sub{fill:#79809A;font-size:13.5px}
+      #stLabCarpetas .h{font-size:12px;font-weight:700;letter-spacing:.08em;fill:#556074}
+      #stLabCarpetas .foot{fill:#79809A;font-size:12px}
+      #stLabCarpetas .mono{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace}
+      #stLabCarpetas .tree{fill:none;stroke:#C4CBD8;stroke-width:1.75}
+      #stLabCarpetas .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#stLabCarpetas-arrow)}
+    </style>
+    <marker id="stLabCarpetas-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
+    </marker>
+  </defs>
+  <rect width="960" height="856" rx="16" fill="#FBFBFD"/>
+  <text class="title" x="48" y="56">La estructura de carpetas</text>
+  <text class="sub" x="48" y="80" data-fit="860">En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.</text>
+  <rect x="48" y="96" width="864" height="700" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="36">lib/</text>
+  <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="145" width="102" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="88">components/</text>
+  <text x="568" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: Avatar y PhotoSourceSheet</text>
+  <path d="M78,137 V192 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="179" width="88" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="74">features/</text>
+  <path d="M102,205 V226 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="213" width="125" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="226" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="111">avatar/domain/</text>
+  <text x="568" y="226" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: entidades y AvatarRepository</text>
+  <path d="M126,239 V260 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="247" width="282" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="150" y="260" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="268">usecases/change_avatar_usecase.dart</text>
+  <text x="568" y="260" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">call · vacío</text>
+  <circle cx="886" cy="260" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="260" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M102,205 V294 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="281" width="110" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="294" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="96">avatar/data/</text>
+  <path d="M126,307 V328 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="315" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="328" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="276">source/device_photo_data_source.dart</text>
+  <text x="568" y="328" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">pick · vacío</text>
+  <circle cx="886" cy="328" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="328" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M126,307 V362 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="349" width="312" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="362" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="298">source/supabase_avatar_data_source.dart</text>
+  <text x="568" y="362" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">upload y remove · vacíos</text>
+  <circle cx="886" cy="362" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="362" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M126,307 V396 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="383" width="305" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="396" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="291">repository/avatar_repository_impl.dart</text>
+  <text x="568" y="396" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">los tres · vacíos</text>
+  <circle cx="886" cy="396" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="396" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M102,205 V430 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="417" width="95" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="430" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="81">auth/data/</text>
+  <text x="568" y="430" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: el Laboratorio 5</text>
+  <path d="M126,443 V464 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="451" width="320" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="306">source/supabase_profile_data_source.dart</text>
+  <text x="568" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">updateAvatarPath vacío · URL firmada</text>
+  <circle cx="886" cy="464" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="464" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M102,205 V498 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="485" width="185" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="171">posts/domain/usecases/</text>
+  <path d="M126,511 V532 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="519" width="230" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="150" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="216">pick_post_image_usecase.dart</text>
+  <text x="568" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">call · vacío</text>
+  <circle cx="886" cy="532" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="532" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M126,511 V566 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="553" width="208" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="150" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="194">publish_post_usecase.dart</text>
+  <text x="568" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Del Lab 6 · subir la foto</text>
+  <circle cx="886" cy="566" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="566" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M102,205 V600 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="587" width="102" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="88">posts/data/</text>
+  <path d="M126,613 V634 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="621" width="298" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="284">source/supabase_post_data_source.dart</text>
+  <text x="568" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">URLs firmadas e image_path</text>
+  <rect x="846" y="623" width="52" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="872" y="634" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2</text>
+  <path d="M126,613 V668 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="655" width="342" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="668" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="328">source/supabase_post_image_data_source.dart</text>
+  <text x="568" y="668" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">upload · vacío</text>
+  <circle cx="886" cy="668" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="668" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M126,613 V702 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="689" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="702" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="276">repository/post_repository_impl.dart</text>
+  <text x="568" y="702" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">pickImage y uploadImage · vacíos</text>
+  <circle cx="886" cy="702" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="702" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M102,205 V736 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="723" width="222" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="736" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="208">home/ui/bloc/feed_bloc.dart</text>
+  <text x="568" y="736" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">el on de la foto solo imprime</text>
+  <circle cx="886" cy="736" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="736" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M102,205 V770 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="757" width="268" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="254">compose/ui/bloc/compose_bloc.dart</text>
+  <text x="568" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">los on de la foto solo imprimen</text>
+  <circle cx="886" cy="770" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="770" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <text class="h" x="898" y="88" text-anchor="end">PARTE</text>
+  <text class="foot" x="48" y="828" data-fit="860">main.dart no cambia: cada Bloc crea sus casos de uso, y cada capa crea la siguiente.</text>
+</svg>
+```
+
+- **La interfaz completa.** `Avatar` pinta la foto, o la inicial si no hay. `PhotoSourceSheet` es la hoja con *Elegir de la galería* y *Tomar una foto*. `ProfilePage` tiene el botón de cámara, `ComposeScreen` la vista previa con *Quitar foto* y `PostCard` la imagen del post.
+- **Las entidades y los contratos.** `PhotoSource`, `PickedPhoto`, `Profile` con `avatarPath` y `avatarUrl`, `Post` con `authorAvatarUrl` e `imageUrl`. `AvatarRepository`, `ProfileRepository` y `PostRepository` ya declaran todo lo que el laboratorio necesita.
+- **Los eventos y los estados.** `AvatarChangeRequested`, `ComposePhotoRequested`, `ComposePhotoRemoved`, `FeedState.avatarStatus` y `ComposeState.photo`.
+- **Los métodos vacíos.** Cada método nuevo de cada capa ya existe con su firma, pero su cuerpo es `throw UnimplementedError()`. Los `on` nuevos de los Bloc solo imprimen el evento.
+
+Corre la app, toca la cámara del perfil y elige una opción. En la consola aparece:
+
+```text
+FeedBloc recibió AvatarChangeRequested(gallery)
+```
+
+Tu trabajo es reemplazar cada `throw UnimplementedError()` por su código, de afuera hacia adentro.
+
+## Parte 1 · Foto de perfil
+
+Del paso 1 al 9. Al terminar, cada persona tiene su foto en el perfil y en sus posts.
+
+## Paso 1 · El bucket avatars
 
 ```svg
 <svg id="stLabModelo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 432" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabModelo-ttl stLabModelo-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
-  <title id="stLabModelo-ttl">Lo que agrega la migración</title>
-  <desc id="stLabModelo-dsc">A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket avatars: público, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP. Debajo del bucket, tres políticas para usuarios con sesión: insert, select y delete, todas sobre la carpeta propia.</desc>
+  <title id="stLabModelo-ttl">Lo que agrega la parte 1</title>
+  <desc id="stLabModelo-dsc">A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket avatars declarado en config.toml: privado, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo crea npx supabase seed buckets --linked. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.</desc>
   <defs>
     <style>
       #stLabModelo .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -154,8 +289,8 @@ Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de
     <marker id="stLabModelo-ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#A96C05"/></marker>
   </defs>
   <rect width="960" height="432" rx="16" fill="#FBFBFD"/>
-  <text class="title" x="48" y="56">Lo que agrega la migración</text>
-  <text class="sub" x="48" y="80" data-fit="860">Una columna en profiles, un bucket público y tres políticas sobre storage.objects.</text>
+  <text class="title" x="48" y="56">Lo que agrega la parte 1</text>
+  <text class="sub" x="48" y="80" data-fit="860">El bucket se declara en config.toml. La columna y la regla van en una migración.</text>
   <rect x="48" y="112" width="360" height="176" rx="12" fill="#FFFFFF" stroke="#A9B4F2" stroke-width="2"/>
   <path d="M48,152 V124 A12,12 0 0 1 60,112 H396 A12,12 0 0 1 408,124 V152 Z" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="2"/>
   <text class="mono" x="62" y="132" dy="0.35em" font-size="14" font-weight="700" fill="#4453C9">profiles</text>
@@ -172,205 +307,132 @@ Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de
   <rect x="456" y="112" width="456" height="168" rx="12" fill="#FFFFFF" stroke="#86D3CA" stroke-width="2"/>
   <path d="M456,152 V124 A12,12 0 0 1 468,112 H900 A12,12 0 0 1 912,124 V152 Z" fill="#E3F6F3" stroke="#86D3CA" stroke-width="2"/>
   <text x="472" y="132" dy="0.35em" font-size="14.5" font-weight="700" fill="#0F8478" data-fit="424">bucket avatars</text>
-  <rect x="472" y="165" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="176" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">public</text>
-  <text x="620" y="176" dy="0.35em" font-size="12.5" fill="#454C61">cualquiera lee por URL</text>
-  <rect x="472" y="197" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="208" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">2 MB</text>
+  <text class="mono" x="896" y="132" dy="0.35em" text-anchor="end" font-size="11.5" fill="#454C61">config.toml</text>
+  <rect x="472" y="165" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="176" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">privado</text>
+  <text x="620" y="176" dy="0.35em" font-size="12.5" fill="#454C61">solo con URL firmada</text>
+  <rect x="472" y="197" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="208" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">2 MiB</text>
   <text x="620" y="208" dy="0.35em" font-size="12.5" fill="#454C61">tamaño máximo por archivo</text>
   <rect x="472" y="229" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="240" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">jpeg · png · webp</text>
   <text x="620" y="240" dy="0.35em" font-size="12.5" fill="#454C61">los únicos tipos que acepta</text>
   <path class="ar-amber" d="M408,271 H432 V196 H454"/>
-  <text class="h" x="456" y="314">POLÍTICAS EN STORAGE.OBJECTS · ROL AUTHENTICATED</text>
-  <rect x="456" y="328" width="144" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="470" y="348" font-size="13" font-weight="700" fill="#556074">insert</text>
-  <text x="470" y="368" font-size="12" fill="#454C61">subir en su carpeta</text>
-  <rect x="612" y="328" width="144" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="626" y="348" font-size="13" font-weight="700" fill="#556074">select</text>
-  <text x="626" y="368" font-size="12" fill="#454C61">ver en su carpeta</text>
-  <rect x="768" y="328" width="144" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="782" y="348" font-size="13" font-weight="700" fill="#556074">delete</text>
-  <text x="782" y="368" font-size="12" fill="#454C61">borrar en su carpeta</text>
+  <text class="h" x="456" y="314">LA MIGRACIÓN · UNA SOLA POLÍTICA</text>
+  <rect x="456" y="328" width="456" height="40" rx="8" fill="#1F2430"/>
+  <text class="mono" x="470" y="348" dy="0.35em" font-size="12.5" fill="#C9CFDA" data-fit="428">for all to authenticated · bucket_id = 'avatars'</text>
   <g transform="translate(48,310)"><rect width="360" height="77" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="332">avatar_path empieza en null</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="332">Quien no ha subido foto no tiene path:</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="332">la app muestra la inicial del nombre.</text></g>
-  <text class="foot" x="48" y="404" data-fit="860">El orden importa: la columna y el bucket existen antes que las políticas que los nombran.</text>
+  <text class="foot" x="48" y="404" data-fit="860">La parte 2 repite lo mismo con un bucket post-images y una columna image_path en posts.</text>
 </svg>
 ```
 
-Es la migración que viste en *Subir y mostrar archivos*. Créala:
+Al final de `supabase/config.toml`:
+
+```toml
+[storage]
+enabled = true
+
+[storage.buckets.avatars]
+public = false
+file_size_limit = "2MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+```
+
+Créalo en tu proyecto:
+
+```shell
+npx supabase seed buckets --linked
+```
+
+En el dashboard, `Storage` muestra `avatars` sin la etiqueta *Public*.
+
+## Paso 2 · La columna y la regla
 
 ```shell
 npx supabase migration new create_avatars
 ```
 
-En el archivo que termina en `create_avatars.sql`:
-
 ```sql
 alter table public.profiles add column avatar_path text;
 
-insert into storage.buckets
-  (id, name, public, file_size_limit, allowed_mime_types)
-values
-  ('avatars', 'avatars', true, 2097152,
-   array['image/jpeg', 'image/png', 'image/webp']);
-
-create policy "avatars: subir a la carpeta propia"
-on storage.objects for insert to authenticated
-with check (
-  bucket_id = 'avatars'
-  and (storage.foldername(name))[1] = (select auth.uid()::text)
-);
-
-create policy "avatars: ver la carpeta propia"
-on storage.objects for select to authenticated
-using (
-  bucket_id = 'avatars'
-  and (storage.foldername(name))[1] = (select auth.uid()::text)
-);
-
-create policy "avatars: borrar de la carpeta propia"
-on storage.objects for delete to authenticated
-using (
-  bucket_id = 'avatars'
-  and (storage.foldername(name))[1] = (select auth.uid()::text)
-);
+create policy "avatars: usuarios autenticados"
+on storage.objects for all to authenticated
+using (bucket_id = 'avatars')
+with check (bucket_id = 'avatars');
 ```
 
 ```shell
 npx supabase db push
 ```
 
-En el dashboard, `Storage` muestra el bucket `avatars`, marcado como público.
+Una sola política abre el bucket a quien inició sesión: subir, ver, firmar y borrar.
 
-## Lo que ya viene
+## Paso 3 · Elegir la foto
 
-```svg
-<svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
-  <title id="stLabCarpetas-ttl">La estructura de carpetas</title>
-  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto 262AppsLab7. Ya vienen el componente Avatar, las entidades PhotoSource y PickedPhoto, Profile con avatarPath y avatarUrl, y toda la interfaz. Están vacíos o incompletos y numerados por paso: el contrato AvatarRepository y la operación nueva de ProfileRepository (1), ChangeAvatarUseCase (2), los dos data sources de la foto y AvatarRepositoryImpl (3), leer avatar_path en los data sources de perfiles y de posts (4) y el on de FeedBloc (5).</desc>
-  <defs>
-    <style>
-      #stLabCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}
-      #stLabCarpetas .sub{fill:#79809A;font-size:13.5px}
-      #stLabCarpetas .h{font-size:12px;font-weight:700;letter-spacing:.08em;fill:#556074}
-      #stLabCarpetas .foot{fill:#79809A;font-size:12px}
-      #stLabCarpetas .mono{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace}
-      #stLabCarpetas .tree{fill:none;stroke:#C4CBD8;stroke-width:1.75}
-      #stLabCarpetas .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#stLabCarpetas-arrow)}
-    </style>
-    <marker id="stLabCarpetas-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
-    </marker>
-  </defs>
-  <rect width="960" height="720" rx="16" fill="#FBFBFD"/>
-  <text class="title" x="48" y="56">La estructura de carpetas</text>
-  <text class="sub" x="48" y="80" data-fit="860">En gris lo que ya viene hecho. Con número, lo que te toca y en qué paso.</text>
-  <rect x="48" y="96" width="864" height="564" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-  <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="36">lib/</text>
-  <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="145" width="185" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="171">components/avatar.dart</text>
-  <text x="568" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: la foto redonda o la inicial</text>
-  <path d="M78,137 V192 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="179" width="88" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="74">features/</text>
-  <path d="M102,205 V226 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="213" width="72" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="226" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="58">avatar/</text>
-  <text x="568" y="226" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Todo lo de la foto que no es pantalla</text>
-  <path d="M126,239 V260 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="247" width="140" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="150" y="260" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="126">domain/entities/</text>
-  <text x="568" y="260" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: PhotoSource y PickedPhoto</text>
-  <path d="M126,239 V294 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="281" width="320" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="150" y="294" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="306">domain/repository/avatar_repository.dart</text>
-  <text x="568" y="294" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">El contrato · vacío</text>
-  <circle cx="886" cy="294" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="294" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
-  <path d="M126,239 V328 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="315" width="335" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="150" y="328" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="321">domain/usecases/change_avatar_usecase.dart</text>
-  <text x="568" y="328" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">El caso de uso · vacío</text>
-  <circle cx="886" cy="328" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="328" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
-  <path d="M126,239 V362 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="349" width="328" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="362" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="314">data/source/device_photo_data_source.dart</text>
-  <text x="568" y="362" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">La galería y la cámara · vacío</text>
-  <circle cx="886" cy="362" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="362" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M126,239 V396 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="383" width="350" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="396" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="336">data/source/supabase_avatar_data_source.dart</text>
-  <text x="568" y="396" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">El bucket · vacío</text>
-  <circle cx="886" cy="396" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="396" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M126,239 V430 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="417" width="342" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="430" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="328">data/repository/avatar_repository_impl.dart</text>
-  <text x="568" y="430" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Cumple el contrato · vacío</text>
-  <circle cx="886" cy="430" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="430" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M102,205 V464 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="451" width="58" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="44">auth/</text>
-  <text x="568" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Profile ya trae avatarPath y avatarUrl</text>
-  <path d="M126,477 V498 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="485" width="328" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="150" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="314">domain/repository/profile_repository.dart</text>
-  <text x="568" y="498" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Le falta una operación</text>
-  <circle cx="886" cy="498" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="498" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
-  <path d="M126,477 V532 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="519" width="358" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="344">data/source/supabase_profile_data_source.dart</text>
-  <text x="568" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Leer y guardar avatar_path</text>
-  <circle cx="886" cy="532" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="532" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
-  <path d="M102,205 V566 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="553" width="380" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="126" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="366">posts/data/source/supabase_post_data_source.dart</text>
-  <text x="568" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">La foto del autor</text>
-  <circle cx="886" cy="566" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="566" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">4</text>
-  <path d="M102,205 V600 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="587" width="80" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="66">home/ui/</text>
-  <text x="568" y="600" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: ProfilePage, la hoja y PostCard</text>
-  <path d="M126,613 V634 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="621" width="162" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="150" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="148">bloc/feed_bloc.dart</text>
-  <text x="568" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Evento y estado listos · el on solo imprime</text>
-  <circle cx="886" cy="634" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="634" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">5</text>
-  <text class="h" x="898" y="88" text-anchor="end">PASO</text>
-  <text class="foot" x="48" y="692" data-fit="860">main.dart no cambia: FeedBloc crea su caso de uso, y cada capa crea la siguiente.</text>
-</svg>
-```
-
-- **Todo el Laboratorio 6.** El muro, los «me gusta», publicar y el perfil.
-- **`image_picker` y `uuid`** en el `pubspec.yaml`, con los permisos de iOS y macOS ya declarados.
-- **Las entidades.** `PhotoSource` (`gallery` o `camera`), `PickedPhoto` (los bytes y la extensión), `Profile` con `avatarPath` y `avatarUrl`, y `Post` con `authorAvatarUrl`. Todos los campos de la foto pueden ser `null`.
-- **Toda la interfaz.** El componente `Avatar` pinta la foto, o la inicial si la URL es `null`. `ProfilePage` tiene el botón de cámara, `HomeScreen` abre la hoja con las dos opciones y `PostCard` ya muestra la foto del autor.
-- **El estado.** `FeedState` trae `avatarStatus`: `idle`, `uploading` o `failure`. `HomeScreen` muestra un `SnackBar` con `errorMessage` cuando llega `failure`.
-
-Corre la app, entra al perfil, toca la cámara y elige una opción. El evento aparece en la consola, pero la foto no cambia:
-
-```text
-FeedBloc recibió AvatarChangeRequested(gallery)
-```
-
-## Paso 1 · Los contratos
-
-`avatar/domain/repository/avatar_repository.dart`
+`avatar/data/source/device_photo_data_source.dart` es el único archivo que importa `image_picker`. Traduce `PhotoSource` a `ImageSource`, y `XFile` a `PickedPhoto`:
 
 ```dart
-abstract class AvatarRepository {
-  Future<PickedPhoto?> pick(PhotoSource source);
-  Future<String> upload(PickedPhoto photo);
-  Future<void> remove(String path);
+final ImagePicker _picker = ImagePicker();
+
+Future<PickedPhoto?> pick(PhotoSource source) async {
+  final file = await _picker.pickImage(
+    source: source == PhotoSource.camera
+        ? ImageSource.camera
+        : ImageSource.gallery,
+    maxWidth: 512,
+    maxHeight: 512,
+    imageQuality: 80,
+  );
+  if (file == null) return null;
+  return PickedPhoto(
+    bytes: await file.readAsBytes(),
+    extension: file.name.split('.').last.toLowerCase(),
+  );
 }
 ```
 
-`upload` devuelve el path con el que quedó guardada la foto. Al contrato de perfiles, en `auth/domain/repository/profile_repository.dart`, le falta una operación:
+## Paso 4 · Subir y borrar en Storage
+
+`avatar/data/source/supabase_avatar_data_source.dart` es el único archivo que usa el bucket `avatars`. Agrega los campos y completa `upload`:
 
 ```dart
-Future<void> updateAvatarPath(String id, String path);
+final SupabaseClient _client = Supabase.instance.client;
+final Uuid _uuid = const Uuid();
+
+String get _uid {
+  return _client.auth.currentUser!.id;
+}
+
+Future<String> upload(PickedPhoto photo) async {
+  final path = '$_uid/${_uuid.v4()}.${photo.extension}';
+  final type = photo.extension == 'jpg' ? 'jpeg' : photo.extension;
+  try {
+    await _client.storage.from(bucket).uploadBinary(
+      path,
+      photo.bytes,
+      fileOptions: FileOptions(
+        contentType: 'image/$type',
+        cacheControl: '31536000',
+      ),
+    );
+    return path;
+  } on StorageException catch (e) {
+    throw Exception(e.message);
+  }
+}
 ```
 
-## Paso 2 · El caso de uso
+`remove` es más corto: `_client.storage.from(bucket).remove([path])` dentro del mismo `try`. El nombre es un UUID nuevo en cada subida, así la foto nueva nunca se confunde con la vieja en ninguna caché.
 
-`avatar/domain/usecases/change_avatar_usecase.dart`
+## Paso 5 · El repositorio
+
+`avatar/data/repository/avatar_repository_impl.dart` crea los dos data sources como campos y delega en ellos:
+
+```dart
+final DevicePhotoDataSource _device = DevicePhotoDataSource();
+final SupabaseAvatarDataSource _storage = SupabaseAvatarDataSource();
+```
+
+`pick` va a `_device`. `upload` y `remove` van a `_storage`. Cada método queda de una línea, con `return`.
+
+## Paso 6 · El caso de uso
 
 ```svg
 <svg id="stLabCaso" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCaso-ttl stLabCaso-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
@@ -433,150 +495,330 @@ Future<void> updateAvatarPath(String id, String path);
 </svg>
 ```
 
-```dart
-class ChangeAvatarUseCase {
-  static const maxBytes = 2 * 1024 * 1024;
-  final AuthRepository _auth = AuthRepositoryImpl();
-  final ProfileRepository _profiles = ProfileRepositoryImpl();
-  final AvatarRepository _avatars = AvatarRepositoryImpl();
+`avatar/domain/usecases/change_avatar_usecase.dart`:
 
-  Future<Profile?> call(PhotoSource source) async {
-    final user = _auth.currentUser();
-    if (user == null) throw Exception('No hay una sesión iniciada');
-    final photo = await _avatars.pick(source);
-    if (photo == null) return null;
-    if (photo.bytes.length > maxBytes) {
-      throw Exception('La foto pesa más de 2 MB');
-    }
-    final before = await _profiles.getProfile(user.id);
-    // TODO: subir la foto, guardar su path en el perfil,
-    // borrar before.avatarPath si no es null
-    // y devolver el perfil leído de nuevo
+```dart
+static const maxBytes = 2 * 1024 * 1024;
+final AuthRepository _auth = AuthRepositoryImpl();
+final ProfileRepository _profiles = ProfileRepositoryImpl();
+final AvatarRepository _avatars = AvatarRepositoryImpl();
+
+Future<Profile?> call(PhotoSource source) async {
+  final user = _auth.currentUser();
+  if (user == null) throw Exception('No hay una sesión iniciada');
+  final photo = await _avatars.pick(source);
+  if (photo == null) return null;
+  if (photo.bytes.length > maxBytes) {
+    throw Exception('La foto pesa más de 2 MB');
+  }
+  final before = await _profiles.getProfile(user.id);
+  final path = await _avatars.upload(photo);
+  await _profiles.updateAvatarPath(user.id, path);
+  final oldPath = before.avatarPath;
+  if (oldPath != null) await _avatars.remove(oldPath);
+  return _profiles.getProfile(user.id);
+}
+```
+
+El orden importa: primero sube, después apunta y al final borra. Si algo falla a mitad, sobra un archivo, pero el perfil nunca apunta a una foto que no existe.
+
+## Paso 7 · El perfil
+
+En `auth/data/source/supabase_profile_data_source.dart`, completa `updateAvatarPath`:
+
+```dart
+Future<void> updateAvatarPath(String id, String path) async {
+  try {
+    await _client
+        .from('profiles')
+        .update({'avatar_path': path})
+        .eq('id', id);
+  } on PostgrestException catch (e) {
+    throw Exception(e.message);
   }
 }
 ```
 
-El orden importa. Si la subida falla, nada cambió. Si falla al borrar, sobra un archivo, pero el perfil nunca apunta a una foto que no existe.
-
-## Paso 3 · Los data sources de la foto
-
-`avatar/data/source/device_photo_data_source.dart` es el único archivo que usa `image_picker`. Su `pick` abre la galería o la cámara según el `PhotoSource`, con `maxWidth: 512`, `maxHeight: 512` e `imageQuality: 80`, como en *Acceso a galería y cámara*. Devuelve `null` si la persona cancela. Si no cancela, devuelve un `PickedPhoto` con `readAsBytes()` y la extensión del nombre del archivo, en minúscula.
-
-`avatar/data/source/supabase_avatar_data_source.dart` es el único archivo que usa `_client.storage`:
-
-```dart
-class SupabaseAvatarDataSource {
-  static const bucket = 'avatars';
-  final SupabaseClient _client = Supabase.instance.client;
-  final Uuid _uuid = const Uuid();
-
-  String get _uid {
-    return _client.auth.currentUser!.id;
-  }
-
-  Future<String> upload(PickedPhoto photo) async {
-    final path = '$_uid/${_uuid.v4()}.${photo.extension}';
-    final type = photo.extension == 'jpg' ? 'jpeg' : photo.extension;
-    try {
-      await _client.storage.from(bucket).uploadBinary(
-        path,
-        photo.bytes,
-        fileOptions: FileOptions(
-          contentType: 'image/$type',
-          cacheControl: '31536000',
-        ),
-      );
-      return path;
-    } on StorageException catch (e) {
-      throw Exception(e.message);
-    }
-  }
-
-  Future<void> remove(String path) async {
-    // TODO: remove con una lista de un solo path,
-    // y StorageException convertida en Exception
-  }
-}
-```
-
-- La primera carpeta es `_uid`: sin ella, la política rechaza la subida con `new row violates row-level security policy`.
-- El nombre es un UUID nuevo en cada subida. Es lo que evita que la app siga mostrando la foto vieja.
-
-`avatar/data/repository/avatar_repository_impl.dart` crea los dos data sources como campos y cumple el contrato delegando: `pick` en el del teléfono, `upload` y `remove` en el de Storage.
-
-## Paso 4 · Del path a la URL
-
-En `auth/data/source/supabase_profile_data_source.dart`, `getProfile` lee `avatar_path` y arma la URL:
+En `getProfile`, lee `avatar_path` y fírmalo. Agrega estos dos campos al `Profile` que ya devuelve, y un `on StorageException` al `try`:
 
 ```dart
 final path = row['avatar_path'] as String?;
-return Profile(
-  id: row['id'] as String,
-  username: row['username'] as String,
-  fullName: row['full_name'] as String,
-  avatarPath: path,
-  avatarUrl: path == null
-      ? null
-      : _client.storage.from('avatars').getPublicUrl(path),
-);
 ```
 
-Agrega también `updateAvatarPath`, un `update` de `avatar_path` filtrado por `id`, y complétalo en `ProfileRepositoryImpl`.
+```dart
+avatarPath: path,
+avatarUrl: path == null
+    ? null
+    : await _client.storage.from('avatars').createSignedUrl(path, 3600),
+```
 
-En `posts/data/source/supabase_post_data_source.dart`, agrega `avatar_path` a las columnas del autor:
+En `auth/data/repository/profile_repository_impl.dart`, `updateAvatarPath` delega en el data source.
+
+## Paso 8 · Las fotos del muro
+
+El muro trae varios posts a la vez. Firmar una foto por post serían muchas peticiones, así que se firman todas juntas. En `posts/data/source/supabase_post_data_source.dart`, primero pide `avatar_path` en las columnas del autor:
 
 ```dart
 'author:profiles!profile_id(username, full_name, avatar_path), '
 ```
 
-Luego, en `_toPost`, arma `authorAvatarUrl` igual que en el perfil. El `!profile_id` ya venía del Laboratorio 6: `likes` también une posts con perfiles, y sin esa pista la consulta falla con `PGRST201`.
-
-## Paso 5 · FeedBloc
-
-`home/ui/bloc/feed_bloc.dart`
-
-Crea el caso de uso como campo, `final ChangeAvatarUseCase _changeAvatar = ChangeAvatarUseCase();`, y reemplaza el `debugPrint` del `on`:
+Luego agrega un método que firma una lista de paths en una sola petición y devuelve el mapa path → URL:
 
 ```dart
-Future<void> _onAvatarChangeRequested(
-  AvatarChangeRequested event,
-  Emitter<FeedState> emit,
+Future<Map<String, String>> _sign(
+  String bucket,
+  List<String?> paths,
 ) async {
-  emit(state.copyWith(avatarStatus: AvatarStatus.uploading));
+  final unique = paths.whereType<String>().toSet().toList();
+  if (unique.isEmpty) return {};
   try {
-    final profile = await _changeAvatar(event.source);
-    if (profile == null) {
-      emit(state.copyWith(avatarStatus: AvatarStatus.idle));
-      return;
-    }
-    emit(state.copyWith(profile: profile, avatarStatus: AvatarStatus.idle));
-    add(FeedStarted());
+    final results = await _client.storage
+        .from(bucket)
+        .createSignedUrlsResult(unique, 3600);
+    return {
+      for (final result in results)
+        if (result is SignedUrlSuccess) result.path: result.signedUrl,
+    };
+  } on StorageException catch (e) {
+    throw Exception(e.message);
+  }
+}
+```
+
+`_toPosts` ya existe y es por donde pasan todas las filas. Haz que firme los avatares antes de convertirlas:
+
+```dart
+Future<List<Post>> _toPosts(List<Map<String, dynamic>> rows) async {
+  final avatars = await _sign('avatars', [
+    for (final row in rows) row['author']['avatar_path'] as String?,
+  ]);
+  return [for (final row in rows) _toPost(row, avatars)];
+}
+```
+
+`_toPost` recibe el mapa y saca de ahí la URL de su autor: `authorAvatarUrl: avatars[author['avatar_path']]`. Si el autor no tiene foto, la búsqueda da `null` y `Avatar` muestra la inicial.
+
+## Paso 9 · FeedBloc
+
+En `home/ui/bloc/feed_bloc.dart`, crea el caso de uso como campo, `final ChangeAvatarUseCase _changeAvatar = ChangeAvatarUseCase();`, y reemplaza el `debugPrint`:
+
+```dart
+emit(state.copyWith(avatarStatus: AvatarStatus.uploading));
+try {
+  final profile = await _changeAvatar(event.source);
+  if (profile == null) {
+    emit(state.copyWith(avatarStatus: AvatarStatus.idle));
+    return;
+  }
+  emit(state.copyWith(profile: profile, avatarStatus: AvatarStatus.idle));
+  add(FeedStarted());
+} on Exception catch (e) {
+  emit(state.copyWith(
+    avatarStatus: AvatarStatus.failure,
+    errorMessage: _message(e),
+  ));
+}
+```
+
+`add(FeedStarted())` recarga el muro para que tus posts muestren la foto nueva.
+
+## La prueba de la parte 1
+
+- Sube una foto. En `Storage > avatars` aparece una carpeta con tu id y un archivo con nombre de UUID. En `profiles`, `avatar_path` tiene ese path.
+- Cambia la foto dos veces. La app muestra la última y en tu carpeta queda un solo archivo.
+- Desde otra cuenta, tus posts muestran tu foto. Los de quien no tiene foto, su inicial.
+- Toca la cámara y cancela: no pasa nada.
+
+## Parte 2 · Posts con imagen (avanzada)
+
+```svg
+<svg id="stLabComposer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabComposer-ttl stLabComposer-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+  <title id="stLabComposer-ttl">Parte 2 · Un post con imagen</title>
+  <desc id="stLabComposer-dsc">Dos teléfonos y una lista. El primero es ComposeScreen con el texto escrito, la vista previa de la foto con un botón para quitarla y el botón Publicar. El segundo es el muro con el post publicado: autor, texto y la imagen debajo. A la derecha, lo que hace PublishPostUseCase en orden: valida que haya texto o foto, sube la foto al bucket post-images y recibe su path, y crea el post con content e image_path.</desc>
+  <defs>
+    <style>
+      #stLabComposer .title{fill:#161A26;font-size:22px;font-weight:700}
+      #stLabComposer .sub{fill:#79809A;font-size:13.5px}
+      #stLabComposer .h{font-size:12px;font-weight:700;letter-spacing:.08em;fill:#556074}
+      #stLabComposer .foot{fill:#79809A;font-size:12px}
+      #stLabComposer .mono{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace}
+      #stLabComposer .tree{fill:none;stroke:#C4CBD8;stroke-width:1.75}
+      #stLabComposer .link{fill:none;stroke:#556074;stroke-width:1.75;marker-end:url(#stLabComposer-arrow)}
+      #stLabComposer .ar-violet{fill:none;stroke:#7439B8;stroke-width:1.75;marker-end:url(#stLabComposer-ar-violet)}
+    </style>
+    <marker id="stLabComposer-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
+    </marker>
+    <marker id="stLabComposer-ar-violet" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" markerUnits="strokeWidth" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#7439B8"/></marker>
+  </defs>
+  <rect width="960" height="600" rx="16" fill="#FBFBFD"/>
+  <text class="title" x="48" y="56">Parte 2 · Un post con imagen</text>
+  <text class="sub" x="48" y="80" data-fit="860">El composer adjunta la foto y la muestra antes de publicar. Al publicar, primero sube la foto y después crea el post.</text>
+  <text class="mono" x="164" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">ComposeScreen</text>
+  <text class="mono" x="432" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">HomeScreen <tspan fill="#0F8478">· FeedPage</tspan></text>
+  <rect x="48" y="132" width="232" height="420" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="64" y="156" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Nuevo post</text><path d="M50,174 H278" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="64" y="190" width="200" height="70" rx="8" fill="#F5F6FA" stroke="#4453C9" stroke-width="1.5"/>
+  <text x="74" y="210" dy="0.35em" font-size="12" fill="#161A26">Atardecer desde la U</text>
+  <rect x="64" y="274" width="200" height="140" rx="10" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
+  <circle cx="134" cy="328" r="18" fill="#F5A35C"/>
+  <path d="M72,404 L138,346 L178,378 L218,338 L256,404 Z" fill="#C2571A" fill-opacity=".55"/>
+  <circle cx="244" cy="294" r="13" fill="#FFFFFF" stroke="#C2571A" stroke-width="1.5"/>
+  <text x="244" y="294" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#C2571A">×</text>
+  <rect x="64" y="432" width="200" height="34" rx="17" fill="#1F9D68"/>
+  <text x="164" y="449" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#FFFFFF">Publicar</text>
+  <text x="164" y="488" dy="0.35em" text-anchor="middle" font-size="11.5" fill="#79809A">sin foto: botón Agregar foto</text>
+  <rect x="316" y="132" width="232" height="420" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="332" y="156" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Muro</text><path d="M318,174 H546" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="332" y="190" width="200" height="236" rx="8" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.25"/>
+  <rect x="340" y="198" width="28" height="28" rx="5" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
+  <circle cx="354.0" cy="209.2" r="4.8" fill="#C2571A"/>
+  <path d="M345.6,222.1 C346.7,214.8 361.3,214.8 362.4,222.1 Z" fill="#C2571A"/>
+  <text x="364.0" y="210" text-anchor="end" font-size="10" font-weight="700" fill="#C2571A">2</text>
+  <text x="376" y="212" dy="0.35em" font-size="11" font-weight="700" fill="#161A26">@ana.dev</text>
+  <text x="344" y="244" dy="0.35em" font-size="11.5" fill="#454C61">Atardecer desde la U</text>
+  <rect x="344" y="260" width="176" height="130" rx="10" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.25"/>
+  <circle cx="406" cy="308" r="16" fill="#F5A35C"/>
+  <path d="M350,382 L408,328 L444,358 L480,322 L514,382 Z" fill="#C2571A" fill-opacity=".55"/>
+  <text x="344" y="410" dy="0.35em" font-size="11" fill="#C2354F">♥ 0</text>
+  <path class="ar-violet" d="M284,449 H310"/>
+  <text class="h" x="588" y="146">PUBLISHPOSTUSECASE, EN ORDEN</text>
+<circle cx="600" cy="196" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="600" y="196" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">1</text>
+  <rect x="622" y="166" width="290" height="60" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text x="636" y="188" dy="0.35em" font-size="12.5" font-weight="700" fill="#556074" data-fit="264">Valida</text>
+  <text x="636" y="208" dy="0.35em" font-size="12" fill="#454C61" data-fit="264">texto o foto · máximo 280</text>
+<circle cx="600" cy="292" r="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/><text x="600" y="292" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478">2</text>
+  <rect x="622" y="262" width="290" height="60" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="636" y="284" dy="0.35em" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="264">uploadImage(photo)</text>
+  <text x="636" y="304" dy="0.35em" font-size="12" fill="#454C61" data-fit="264">sube a post-images · path</text>
+  <path class="link" d="M767,228 V260"/>
+<circle cx="600" cy="388" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="600" y="388" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text>
+  <rect x="622" y="358" width="290" height="60" rx="10" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/>
+  <text class="mono" x="636" y="380" dy="0.35em" font-size="12.5" font-weight="700" fill="#4453C9" data-fit="264">create(text, imagePath: path)</text>
+  <text x="636" y="400" dy="0.35em" font-size="12" fill="#454C61" data-fit="264">inserta en posts</text>
+  <path class="link" d="M767,324 V356"/>
+  <g transform="translate(588,462)"><rect width="324" height="77" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="296">La foto sube primero</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="296">Si sube y el insert falla, sobra un archivo.</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="296">Al revés quedaría un post sin su imagen.</text></g>
+</svg>
+```
+
+Del paso 10 al 13. Reutiliza todo lo de la parte 1: el mismo data source del teléfono, el mismo patrón de subida y la misma firma en lote.
+
+## Paso 10 · El bucket post-images
+
+Al final de `supabase/config.toml`:
+
+```toml
+[storage.buckets.post-images]
+public = false
+file_size_limit = "2MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+```
+
+```shell
+npx supabase seed buckets --linked
+npx supabase migration new create_post_images
+```
+
+```sql
+alter table public.posts add column image_path text;
+
+create policy "post-images: usuarios autenticados"
+on storage.objects for all to authenticated
+using (bucket_id = 'post-images')
+with check (bucket_id = 'post-images');
+```
+
+```shell
+npx supabase db push
+```
+
+## Paso 11 · Los datos
+
+`posts/data/source/supabase_post_image_data_source.dart` es igual al `upload` del paso 4, con `bucket = 'post-images'`.
+
+En `posts/data/repository/post_repository_impl.dart`, crea dos campos más y delega en ellos. El data source del teléfono es el mismo de la parte 1:
+
+```dart
+final DevicePhotoDataSource _device = DevicePhotoDataSource();
+final SupabasePostImageDataSource _images =
+    SupabasePostImageDataSource();
+```
+
+`pickImage` va a `_device.pick`, y `uploadImage` a `_images.upload`.
+
+En `posts/data/source/supabase_post_data_source.dart`, tres cambios:
+
+- `create` agrega `'image_path': imagePath` al `insert`.
+- Las columnas piden `image_path`: `'id, content, image_path, created_at, '`.
+- `_toPosts` firma también las imágenes, con `_sign('post-images', …)` sobre `row['image_path']`, y `_toPost` recibe ese segundo mapa para llenar `imageUrl`.
+
+## Paso 12 · Los casos de uso
+
+`posts/domain/usecases/pick_post_image_usecase.dart` pide la foto y revisa su peso:
+
+```dart
+static const maxBytes = 2 * 1024 * 1024;
+final PostRepository _posts = PostRepositoryImpl();
+
+Future<PickedPhoto?> call(PhotoSource source) async {
+  final photo = await _posts.pickImage(source);
+  if (photo == null) return null;
+  if (photo.bytes.length > maxBytes) {
+    throw Exception('La foto pesa más de 2 MB');
+  }
+  return photo;
+}
+```
+
+`posts/domain/usecases/publish_post_usecase.dart` ya trae la validación del Laboratorio 6. Cámbiala para que un post pueda ser solo una foto, y sube la foto antes de crear el post:
+
+```dart
+Future<void> call(String content, {PickedPhoto? photo}) async {
+  final text = content.trim();
+  if (text.isEmpty && photo == null) {
+    throw Exception('Escribe algo o agrega una foto');
+  }
+  if (text.length > maxLength) {
+    throw Exception('Máximo $maxLength caracteres');
+  }
+  final imagePath =
+      photo == null ? null : await _posts.uploadImage(photo);
+  await _posts.create(text, imagePath: imagePath);
+}
+```
+
+## Paso 13 · ComposeBloc
+
+En `compose/ui/bloc/compose_bloc.dart`, crea `final PickPostImageUseCase _pickImage = PickPostImageUseCase();` y completa los dos `on` de la foto:
+
+```dart
+Future<void> _onPhotoRequested(
+  ComposePhotoRequested event,
+  Emitter<ComposeState> emit,
+) async {
+  try {
+    final photo = await _pickImage(event.source);
+    if (photo == null) return;
+    emit(state.copyWith(status: ComposeStatus.initial, photo: photo));
   } on Exception catch (e) {
     emit(state.copyWith(
-      avatarStatus: AvatarStatus.failure,
-      errorMessage: _message(e),
+      status: ComposeStatus.failure,
+      errorMessage: e.toString().replaceFirst('Exception: ', ''),
     ));
   }
 }
 ```
 
-`add(FeedStarted())` vuelve a cargar el muro, porque tus posts siguen con la URL de la foto anterior.
+`_onPhotoRemoved` emite `state.copyWith(removePhoto: true)`: un `copyWith` normal no puede volver `null` un campo, por eso el estado trae esa bandera. En `_onSubmitted`, pasa la foto al publicar: `await _publish(event.content, photo: state.photo);`.
 
-Corre la app de nuevo: la foto aparece en el perfil y en tus posts.
+## La prueba de la parte 2
 
-## La prueba
-
-Con dos cuentas, en dos emuladores o una después de la otra:
-
-- Sube una foto desde la galería. En `Storage > avatars` aparece una carpeta con tu id y, adentro, un archivo con nombre de UUID. En `Table Editor > profiles`, `avatar_path` tiene ese mismo path.
-- Cambia la foto dos veces. La app muestra siempre la última. En tu carpeta queda **un solo archivo**, y su nombre es distinto cada vez.
-- Desde la otra cuenta, abre el muro: tus posts muestran tu foto. Los de quien no tiene foto muestran su inicial.
-- Abre la URL de tu foto en el navegador, sin sesión: se ve, porque el bucket es público.
-- Toca la cámara y cancela: no aparece ningún error y la foto no cambia.
+- Adjunta una foto, quítala y adjunta otra. La vista previa sigue lo que haces.
+- Publica con texto y foto, y luego solo con foto. Los dos aparecen en el muro con su imagen.
+- Publica sin texto y sin foto: aparece *Escribe algo o agrega una foto*.
+- En `Storage > post-images` hay una carpeta con tu id. En `posts`, `image_path` tiene el path.
 
 ## Retos
 
-- **Quitar la foto.** Una opción más en la hoja que borra el archivo y deja `avatar_path` en `null`.
-- **Fotos privadas.** Pasa el bucket a privado, agrega a la política de `select` a cualquier usuario con sesión y usa `createSignedUrlsResult` para firmar todas las fotos de una página del muro en una sola petición.
-- **Caché en disco.** Cambia `Image.network` por `cached_network_image` en `Avatar` y comprueba que, al reabrir la app sin red, las fotos siguen ahí.
-- **Una foto por post.** Una columna `image_path` en `posts`, un bucket `post-images` y la foto debajo del texto en `PostCard`.
+- **Cada quien en su carpeta.** Con la regla mínima, cualquiera con sesión puede borrar la foto de otra persona. Cambia la política para que borrar solo se permita si `(storage.foldername(name))[1] = (select auth.uid()::text)`.
+- **Quitar la foto de perfil.** Una opción más en la hoja que borra el archivo y deja `avatar_path` en `null`.
+- **Caché en disco.** Cambia `Image.network` por `cached_network_image`. ¿Sirve de algo con URLs firmadas que cambian cada vez?
+- **Borrar un post con imagen.** Al borrar el post, borra también su archivo del bucket.

@@ -182,10 +182,10 @@ def st_publico_privado():
     for i, (color, title, call, net, url, tag, lines) in enumerate([
         ('teal', 'Bucket público', "getPublicUrl(path)", 'en el teléfono, sin red',
          '…/object/public/avatars/{path}', 'siempre la misma',
-         ['Cualquiera con la URL ve el archivo.', 'La URL no cambia: se puede guardar en caché.', 'Para fotos de perfil, portadas o productos.']),
+         ['Cualquiera con la URL ve el archivo.', 'La URL no cambia: se puede guardar en caché.', 'Para logos, portadas o fotos de productos.']),
         ('violet', 'Bucket privado', "await createSignedUrl(path, 3600)", 'Storage revisa la política',
          '…/object/sign/documents/{path}?token=…', 'vence en 3600 s',
-         ['Solo quien pasa la política obtiene la URL.', 'Cada firma es distinta y deja de servir al vencer.', 'Para recibos, documentos o fotos de un chat.']),
+         ['Solo quien pasa la política obtiene la URL.', 'Cada firma es distinta y deja de servir al vencer.', 'Para fotos de perfil, recibos o documentos.']),
     ]):
         soft, border, strong = FAM[color]
         x, w = 48 + i * 444, 420
@@ -415,11 +415,11 @@ FIGS['stPermisos'] = st_permisos
 def st_subida():
     fid, h = 'stSubida', 556
     s = head(fid, h, 'Cambiar la foto: subir, apuntar, borrar', 'Cambiar la foto: subir, apuntar, borrar',
-             'Tres operaciones contra dos servicios, en este orden. Mostrarla no necesita red para la URL.',
+             'Tres operaciones para cambiarla, en este orden, y una más para mostrarla: firmar su URL.',
              'Tres columnas: la app, el bucket avatars de Storage y la tabla profiles de Postgres. Paso 1: uploadBinary sube '
              'la foto nueva con un nombre aleatorio y aparece en el bucket. Paso 2: update cambia avatar_path de la fila al '
-             'path nuevo. Paso 3: remove borra el archivo anterior del bucket. Paso 4: getPublicUrl arma la URL en el teléfono '
-             'e Image.network la descarga.',
+             'path nuevo. Paso 3: remove borra el archivo anterior del bucket. Paso 4: createSignedUrl pide a Storage una URL '
+             'firmada que vence en una hora, y con ella Image.network descarga la foto.',
              colors=('green', 'amber', 'rose', 'indigo'))
     s += '  <text class="h" x="48" y="118">LA APP</text>\n'
     s += '  <text class="h" x="560" y="118">STORAGE · avatars</text>\n'
@@ -430,7 +430,7 @@ def st_subida():
         ('green', '1', f"uploadBinary('{UID}/{NEW}.jpg', bytes)", 'storage'),
         ('amber', '2', f"update({{'avatar_path': '{UID}/{NEW}.jpg'}})", 'db'),
         ('rose', '3', f"remove(['{UID}/{OLD}.jpg'])", 'storage'),
-        ('indigo', '4', 'getPublicUrl(path) → Image.network(url)', 'local'),
+        ('indigo', '4', 'await createSignedUrl(path, 3600)', 'storage'),
     ]
     for k, (color, n, code, where) in enumerate(rows):
         soft, border, strong = FAM[color]
@@ -446,6 +446,8 @@ def st_subida():
             s += f'  <text x="512" y="{y+18}" dy="0.35em" font-size="12" fill="#4453C9">en el teléfono</text>\n'
     s += file_icon(566, 136, 'green', f'{NEW}….jpg', 'nuevo', w=170)
     s += file_icon(566, 292, 'rose', f'{OLD}….jpg', 'borrado', w=170, crossed=True)
+    s += f'  <text class="mono" x="566" y="392" font-size="11.5" font-weight="700" fill="#4453C9">…/sign/avatars/…?token</text>\n'
+    s += f'  <text x="566" y="410" font-size="11.5" fill="#454C61">URL que vence en una hora</text>\n'
     s += f'  <rect x="760" y="214" width="152" height="36" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>\n'
     s += f'  <text class="mono" x="770" y="226" dy="0.35em" font-size="11" fill="#79809A">avatar_path</text>\n'
     s += f'  <text class="mono" x="770" y="241" dy="0.35em" font-size="11.5" font-weight="700" fill="#A96C05">{UID}/{NEW}…</text>\n'
@@ -457,45 +459,43 @@ def st_subida():
 FIGS['stSubida'] = st_subida
 
 
-def st_politicas():
-    fid, h = 'stPoliticas', 504
-    s = head(fid, h, 'Cada quien en su carpeta', 'Cada quien en su carpeta',
-             'Cada archivo es una fila de storage.objects. La política compara la primera carpeta del nombre con quien pide.',
-             'Arriba, la fila de storage.objects que crea un upload: bucket_id avatars y name con la carpeta y el archivo. '
-             'storage.foldername(name) parte el nombre en carpetas y el índice 1 es la primera: el id de la persona. La política '
-             'la compara con auth.uid(). Ana sube a su carpeta: coinciden y el upload pasa. Beto intenta subir a la carpeta de '
-             'Ana: no coinciden y Storage responde 403, new row violates row-level security policy.',
+def st_regla():
+    fid, h = 'stRegla', 452
+    s = head(fid, h, 'Una sola regla para un bucket privado', 'Una sola regla para un bucket privado',
+             'Un bucket privado empieza cerrado. Una política abre todo a quien inició sesión, y a nadie más.',
+             'A la izquierda, la política: for all, to authenticated, using y with check bucket_id igual a avatars. A la '
+             'derecha, dos columnas. Con sesión: subir, firmar una URL, ver la foto con esa URL y borrar, todo permitido. Sin '
+             'sesión: subir responde 403, firmar responde Object not found y la URL pública responde 400. Abajo, lo que la '
+             'regla no distingue: cualquiera con sesión puede borrar la foto de otra persona.',
              colors=('green', 'rose'))
-    t, c = table(48, 108, 452, 'teal', 'storage.objects', [
-        ('bucket_id', "'avatars'", '', None), ('name', f"'{UID}…/{NEW}….jpg'", '', 'amber'),
-        ('owner_id', f'{UID}…', '', None)], vx=128, who='una fila por archivo')
-    s += t
-    s += code_bar(540, 108, 372, '(storage.foldername(name))[1]', h=36)
-    s += f'  <path class="link" d="M500,{c[1]:.0f} H520 V126 H538"/>\n'
-    s += f'  <text x="540" y="168" font-size="12.5" fill="#454C61">parte el nombre en carpetas y toma la primera</text>\n'
-    s += badge(540, 196, 'amber', f"'{UID}…'", 120)
-    s += f'  <text class="mono" x="676" y="196" dy="0.35em" font-size="14" font-weight="700" fill="#556074">=</text>\n'
-    s += code_bar(700, 178, 212, 'auth.uid()::text', h=36)
-    for i, (color, who, uid, ok, lines) in enumerate([
-        ('green', 'Ana sube a su carpeta', UID, '✓ pasa', ['auth.uid() es ' + UID + '…', 'y la carpeta también.']),
-        ('rose', 'Beto sube a la carpeta de Ana', '7d10a4b2', '✗ 403', ['auth.uid() es 7d10a4b2…: no coincide.',
-                                                                         'new row violates row-level security policy']),
-    ]):
+    s += f'  <rect x="48" y="108" width="400" height="200" rx="12" fill="#1F2430"/>\n'
+    lines = [('create policy "avatars: usuarios autenticados"', '#C9CFDA'), ('on storage.objects', '#C9CFDA'),
+             ('for all', '#F0C572'), ('to authenticated', '#86D3CA'), ("using (bucket_id = 'avatars')", '#A9B4F2'),
+             ("with check (bucket_id = 'avatars');", '#A9B4F2')]
+    for k, (ln, col) in enumerate(lines):
+        s += f'  <text class="mono" x="66" y="{138 + k*28}" font-size="12.5" fill="{col}" data-fit="364">{ln}</text>\n'
+    for k, (color, text) in enumerate([('amber', 'for all · subir, ver, firmar y borrar'),
+                                       ('teal', 'to authenticated · solo con sesión'),
+                                       ('indigo', 'bucket_id · solo en este bucket')]):
+        s += legend(48, 336 + k * 24, color, text)
+    cols = [('green', 'Con sesión', [('uploadBinary', '✓'), ('createSignedUrl', '✓'), ('GET de la URL firmada', '✓'),
+                                     ('remove', '✓')]),
+            ('rose', 'Sin sesión', [('uploadBinary', '403'), ('createSignedUrl', 'Object not found'),
+                                    ('GET de la URL pública', '400'), ('remove', '0 archivos')])]
+    for i, (color, title, rows) in enumerate(cols):
         soft, border, strong = FAM[color]
-        x = 48 + i * 444
-        s += f'  <rect x="{x}" y="264" width="420" height="104" rx="12" fill="{soft}" stroke="{border}" stroke-width="1.75"/>\n'
-        s += f'  <text x="{x+16}" y="292" font-size="14" font-weight="700" fill="{strong}">{who}</text>\n'
-        s += badge(x + 420 - 80, 288, color, ok, 64)
-        for k, ln in enumerate(lines):
-            mono = 'class="mono" ' if 'violates' in ln else ''
-            s += f'  <text {mono}x="{x+16}" y="{322 + k*20}" font-size="12.5" fill="#454C61" data-fit="388">{ln}</text>\n'
-    s += '  ' + note(48, 392, 864, 'slate', 'Tres políticas, una por operación', [
-        'insert para subir, select para ver la carpeta propia y delete para borrar. remove() necesita las dos últimas.',
-        'No hay política de update: un upsert sobre un nombre que ya existe falla con 403.'])
+        x = 480 + i * 224
+        s += panel(x, 108, 208, 240, color, title)
+        for k, (op, res) in enumerate(rows):
+            y = 172 + k * 44
+            s += f'  <text class="mono" x="{x+14}" y="{y}" font-size="11.5" fill="#161A26" data-fit="180">{op}</text>\n'
+            s += f'  <text x="{x+14}" y="{y+18}" font-size="12" font-weight="700" fill="{strong}" data-fit="180">{res}</text>\n'
+    s += '  ' + note(480, 364, 432, 'amber', 'Lo que no distingue', [
+        'Cualquiera con sesión puede borrar la foto de otra persona.'])
     return s + '</svg>\n'
 
 
-FIGS['stPoliticas'] = st_politicas
+FIGS['stRegla'] = st_regla
 
 
 # ───────────────────────── 0093 · image_picker desde Clean Architecture ─────────────────────────
@@ -754,32 +754,29 @@ FIGS['stLabPantallas'] = st_lab_pantallas
 
 def st_lab_modelo():
     fid, h = 'stLabModelo', 432
-    s = head(fid, h, 'Lo que agrega la migración', 'Lo que agrega la migración',
-             'Una columna en profiles, un bucket público y tres políticas sobre storage.objects.',
+    s = head(fid, h, 'Lo que agrega la parte 1', 'Lo que agrega la parte 1',
+             'El bucket se declara en config.toml. La columna y la regla van en una migración.',
              'A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket '
-             'avatars: público, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP. Debajo del bucket, tres '
-             'políticas para usuarios con sesión: insert, select y delete, todas sobre la carpeta propia.',
+             'avatars declarado en config.toml: privado, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo '
+             'crea npx supabase seed buckets --linked. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.',
              colors=('amber',))
     t, c = table(48, 112, 360, 'indigo', 'profiles', [
         ('id', '', 'PK · FK', None), ('username', '', '', None), ('full_name', '', '', None),
         ('avatar_path', 'text · puede ser null', '', 'amber')], vx=124)
     s += t
     s += panel(456, 112, 456, 168, 'teal', 'bucket avatars')
-    for k, (badge_txt, text) in enumerate([('public', 'cualquiera lee por URL'), ('2 MB', 'tamaño máximo por archivo'),
+    s += f'  <text class="mono" x="896" y="132" dy="0.35em" text-anchor="end" font-size="11.5" fill="#454C61">config.toml</text>\n'
+    for k, (badge_txt, text) in enumerate([('privado', 'solo con URL firmada'), ('2 MiB', 'tamaño máximo por archivo'),
                                            ('jpeg · png · webp', 'los únicos tipos que acepta')]):
         y = 176 + k * 32
         s += badge(472, y, 'teal', badge_txt, 132)
         s += f'  <text x="620" y="{y}" dy="0.35em" font-size="12.5" fill="#454C61">{text}</text>\n'
     s += f'  <path class="ar-amber" d="M408,{c[3]:.0f} H432 V196 H454"/>\n'
-    s += f'  <text class="h" x="456" y="314">POLÍTICAS EN STORAGE.OBJECTS · ROL AUTHENTICATED</text>\n'
-    for k, (op, text) in enumerate([('insert', 'subir'), ('select', 'ver'), ('delete', 'borrar')]):
-        x = 456 + k * 156
-        s += f'  <rect x="{x}" y="328" width="144" height="52" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>\n'
-        s += f'  <text class="mono" x="{x+14}" y="348" font-size="13" font-weight="700" fill="#556074">{op}</text>\n'
-        s += f'  <text x="{x+14}" y="368" font-size="12" fill="#454C61">{text} en su carpeta</text>\n'
+    s += f'  <text class="h" x="456" y="314">LA MIGRACIÓN · UNA SOLA POLÍTICA</text>\n'
+    s += code_bar(456, 328, 456, 'for all to authenticated · bucket_id = \'avatars\'', h=40)
     s += '  ' + note(48, 310, 360, 'amber', 'avatar_path empieza en null', [
         'Quien no ha subido foto no tiene path:', 'la app muestra la inicial del nombre.'])
-    return s + tail(h, 'El orden importa: la columna y el bucket existen antes que las políticas que los nombran.')
+    return s + tail(h, 'La parte 2 repite lo mismo con un bucket post-images y una columna image_path en posts.')
 
 
 FIGS['stLabModelo'] = st_lab_modelo
@@ -789,31 +786,35 @@ def st_lab_carpetas():
     fid = 'stLabCarpetas'
     rows = [
         (0, 'lib/', 'slate', '', ''),
-        (1, 'components/avatar.dart', 'slate', 'Ya viene: la foto redonda o la inicial', ''),
+        (1, 'components/', 'slate', 'Ya viene: Avatar y PhotoSourceSheet', ''),
         (1, 'features/', 'slate', '', ''),
-        (2, 'avatar/', 'slate', 'Todo lo de la foto que no es pantalla', ''),
-        (3, 'domain/entities/', 'slate', 'Ya viene: PhotoSource y PickedPhoto', ''),
-        (3, 'domain/repository/avatar_repository.dart', 'amber', 'El contrato · vacío', '1'),
-        (3, 'domain/usecases/change_avatar_usecase.dart', 'amber', 'El caso de uso · vacío', '2'),
-        (3, 'data/source/device_photo_data_source.dart', 'teal', 'La galería y la cámara · vacío', '3'),
-        (3, 'data/source/supabase_avatar_data_source.dart', 'teal', 'El bucket · vacío', '3'),
-        (3, 'data/repository/avatar_repository_impl.dart', 'teal', 'Cumple el contrato · vacío', '3'),
-        (2, 'auth/', 'slate', 'Profile ya trae avatarPath y avatarUrl', ''),
-        (3, 'domain/repository/profile_repository.dart', 'amber', 'Le falta una operación', '1'),
-        (3, 'data/source/supabase_profile_data_source.dart', 'teal', 'Leer y guardar avatar_path', '4'),
-        (2, 'posts/data/source/supabase_post_data_source.dart', 'teal', 'La foto del autor', '4'),
-        (2, 'home/ui/', 'slate', 'Ya viene: ProfilePage, la hoja y PostCard', ''),
-        (3, 'bloc/feed_bloc.dart', 'violet', 'Evento y estado listos · el on solo imprime', '5'),
+        (2, 'avatar/domain/', 'slate', 'Ya viene: entidades y AvatarRepository', ''),
+        (3, 'usecases/change_avatar_usecase.dart', 'amber', 'call · vacío', '1'),
+        (2, 'avatar/data/', 'slate', '', ''),
+        (3, 'source/device_photo_data_source.dart', 'teal', 'pick · vacío', '1'),
+        (3, 'source/supabase_avatar_data_source.dart', 'teal', 'upload y remove · vacíos', '1'),
+        (3, 'repository/avatar_repository_impl.dart', 'teal', 'los tres · vacíos', '1'),
+        (2, 'auth/data/', 'slate', 'Ya viene: el Laboratorio 5', ''),
+        (3, 'source/supabase_profile_data_source.dart', 'teal', 'updateAvatarPath vacío · URL firmada', '1'),
+        (2, 'posts/domain/usecases/', 'slate', '', ''),
+        (3, 'pick_post_image_usecase.dart', 'amber', 'call · vacío', '2'),
+        (3, 'publish_post_usecase.dart', 'amber', 'Del Lab 6 · subir la foto', '2'),
+        (2, 'posts/data/', 'slate', '', ''),
+        (3, 'source/supabase_post_data_source.dart', 'teal', 'URLs firmadas e image_path', '1 · 2'),
+        (3, 'source/supabase_post_image_data_source.dart', 'teal', 'upload · vacío', '2'),
+        (3, 'repository/post_repository_impl.dart', 'teal', 'pickImage y uploadImage · vacíos', '2'),
+        (2, 'home/ui/bloc/feed_bloc.dart', 'violet', 'el on de la foto solo imprime', '1'),
+        (2, 'compose/ui/bloc/compose_bloc.dart', 'violet', 'los on de la foto solo imprimen', '2'),
     ]
     y0, rh = 112, 34
     h = y0 + rh * len(rows) + 64
     s = head(fid, h, 'La estructura de carpetas', 'La estructura de carpetas',
-             'En gris lo que ya viene hecho. Con número, lo que te toca y en qué paso.',
-             'Árbol de carpetas del proyecto 262AppsLab7. Ya vienen el componente Avatar, las entidades PhotoSource y '
-             'PickedPhoto, Profile con avatarPath y avatarUrl, y toda la interfaz. Están vacíos o incompletos y numerados por '
-             'paso: el contrato AvatarRepository y la operación nueva de ProfileRepository (1), ChangeAvatarUseCase (2), los dos '
-             'data sources de la foto y AvatarRepositoryImpl (3), leer avatar_path en los data sources de perfiles y de posts '
-             '(4) y el on de FeedBloc (5).')
+             'En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.',
+             'Árbol de carpetas del proyecto 262AppsLab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, '
+             'los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data '
+             'sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts y FeedBloc. Marcados con 2, los de '
+             'la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el '
+             'data source de posts y ComposeBloc.')
     s += f'  <rect x="48" y="96" width="864" height="{rh*len(rows)+20}" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
     last = {}
     for i, (lvl, name, color, text, step) in enumerate(rows):
@@ -829,9 +830,9 @@ def st_lab_carpetas():
         if text:
             s += f'  <text x="568" y="{y}" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">{text}</text>\n'
         if step:
-            s += '  ' + chip(886, y, step)
-    s += '  <text class="h" x="898" y="88" text-anchor="end">PASO</text>\n'
-    return s + tail(h, 'main.dart no cambia: FeedBloc crea su caso de uso, y cada capa crea la siguiente.')
+            s += ('  ' + chip(886, y, step)) if len(step) == 1 else badge(846, y, 'amber', step, 52)
+    s += '  <text class="h" x="898" y="88" text-anchor="end">PARTE</text>\n'
+    return s + tail(h, 'main.dart no cambia: cada Bloc crea sus casos de uso, y cada capa crea la siguiente.')
 
 
 FIGS['stLabCarpetas'] = st_lab_carpetas
@@ -866,6 +867,65 @@ def st_lab_caso():
 
 
 FIGS['stLabCaso'] = st_lab_caso
+
+
+def st_lab_composer():
+    fid, h = 'stLabComposer', 600
+    s = head(fid, h, 'Parte 2 · Un post con imagen', 'Parte 2 · Un post con imagen',
+             'El composer adjunta la foto y la muestra antes de publicar. Al publicar, primero sube la foto y después crea el post.',
+             'Dos teléfonos y una lista. El primero es ComposeScreen con el texto escrito, la vista previa de la foto con un '
+             'botón para quitarla y el botón Publicar. El segundo es el muro con el post publicado: autor, texto y la imagen '
+             'debajo. A la derecha, lo que hace PublishPostUseCase en orden: valida que haya texto o foto, sube la foto al '
+             'bucket post-images y recibe su path, y crea el post con content e image_path.',
+             colors=('violet',))
+    pw, ph, py = 232, 420, 132
+    xs = [48, 316]
+    for x, (screen, page) in zip(xs, [('ComposeScreen', ''), ('HomeScreen', 'FeedPage')]):
+        s += f'  <text class="mono" x="{x+pw/2:.0f}" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">{screen}' \
+             + (f' <tspan fill="#0F8478">· {page}</tspan>' if page else '') + '</text>\n'
+    cx = xs[0]
+    s += '  ' + phone(cx, py, pw, ph, 'Nuevo post')
+    s += f'  <rect x="{cx+16}" y="{py+58}" width="{pw-32}" height="70" rx="8" fill="#F5F6FA" stroke="#4453C9" stroke-width="1.5"/>\n'
+    s += f'  <text x="{cx+26}" y="{py+78}" dy="0.35em" font-size="12" fill="#161A26">Atardecer desde la U</text>\n'
+    s += f'  <rect x="{cx+16}" y="{py+142}" width="{pw-32}" height="140" rx="10" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>\n'
+    s += f'  <circle cx="{cx+pw/2-30:.0f}" cy="{py+196}" r="18" fill="#F5A35C"/>\n'
+    s += f'  <path d="M{cx+24},{py+272} L{cx+90},{py+214} L{cx+130},{py+246} L{cx+170},{py+206} L{cx+pw-24},{py+272} Z" fill="#C2571A" fill-opacity=".55"/>\n'
+    s += f'  <circle cx="{cx+pw-36}" cy="{py+162}" r="13" fill="#FFFFFF" stroke="#C2571A" stroke-width="1.5"/>\n'
+    s += f'  <text x="{cx+pw-36}" y="{py+162}" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#C2571A">×</text>\n'
+    s += f'  <rect x="{cx+16}" y="{py+300}" width="{pw-32}" height="34" rx="17" fill="#1F9D68"/>\n'
+    s += f'  <text x="{cx+pw/2:.0f}" y="{py+317}" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#FFFFFF">Publicar</text>\n'
+    s += f'  <text x="{cx+pw/2:.0f}" y="{py+356}" dy="0.35em" text-anchor="middle" font-size="11.5" fill="#79809A">sin foto: botón Agregar foto</text>\n'
+    fx = xs[1]
+    s += '  ' + phone(fx, py, pw, ph, 'Muro')
+    s += f'  <rect x="{fx+16}" y="{py+58}" width="{pw-32}" height="236" rx="8" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.25"/>\n'
+    s += photo(fx + 24, py + 66, 28, 2)
+    s += f'  <text x="{fx+60}" y="{py+80}" dy="0.35em" font-size="11" font-weight="700" fill="#161A26">@ana.dev</text>\n'
+    s += f'  <text x="{fx+28}" y="{py+112}" dy="0.35em" font-size="11.5" fill="#454C61">Atardecer desde la U</text>\n'
+    s += f'  <rect x="{fx+28}" y="{py+128}" width="{pw-56}" height="130" rx="10" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.25"/>\n'
+    s += f'  <circle cx="{fx+pw/2-26:.0f}" cy="{py+176}" r="16" fill="#F5A35C"/>\n'
+    s += f'  <path d="M{fx+34},{py+250} L{fx+92},{py+196} L{fx+128},{py+226} L{fx+164},{py+190} L{fx+pw-34},{py+250} Z" fill="#C2571A" fill-opacity=".55"/>\n'
+    s += f'  <text x="{fx+28}" y="{py+278}" dy="0.35em" font-size="11" fill="#C2354F">♥ 0</text>\n'
+    s += f'  <path class="ar-violet" d="M{cx+pw+4},{py+317} H{fx-6}"/>\n'
+    rx = 588
+    s += f'  <text class="h" x="{rx}" y="146">PUBLISHPOSTUSECASE, EN ORDEN</text>\n'
+    steps = [('slate', 'Valida', 'texto o foto · máximo 280'), ('teal', 'uploadImage(photo)', 'sube a post-images · path'),
+             ('indigo', 'create(text, imagePath: path)', 'inserta en posts')]
+    for k, (color, code, sub) in enumerate(steps):
+        soft, border, strong = FAM[color]
+        y = 166 + k * 96
+        s += chip(rx + 12, y + 30, k + 1, color)
+        s += f'  <rect x="{rx+34}" y="{y}" width="290" height="60" rx="10" fill="{soft}" stroke="{border}" stroke-width="1.5"/>\n'
+        mono = '' if k == 0 else 'class="mono" '
+        s += f'  <text {mono}x="{rx+48}" y="{y+22}" dy="0.35em" font-size="12.5" font-weight="700" fill="{strong}" data-fit="264">{code}</text>\n'
+        s += f'  <text x="{rx+48}" y="{y+42}" dy="0.35em" font-size="12" fill="#454C61" data-fit="264">{sub}</text>\n'
+        if k:
+            s += f'  <path class="link" d="M{rx+179},{y-34} V{y-2}"/>\n'
+    s += '  ' + note(rx, 462, 324, 'amber', 'La foto sube primero', [
+        'Si sube y el insert falla, sobra un archivo.', 'Al revés quedaría un post sin su imagen.'])
+    return s + '</svg>\n'
+
+
+FIGS['stLabComposer'] = st_lab_composer
 
 
 def main():

@@ -168,9 +168,12 @@ de «Laboratorio 5 a nivel conceptual» (0090), se usa igual y reutiliza los ayu
 `tools/supabase_cli_figuras.py` trae las cinco de «Configurando los servicios» (0091).
 `tools/database_figuras.py` trae las ocho de la sección Database: «Escribir en la base de datos» (0059),
 «Leer de la base de datos» (0060) y «Laboratorio 6 · Muro» (0061).
-`tools/storage_figuras.py` trae las dieciocho de la sección Storage: «Storage, CDN y caché» (0092),
+`tools/storage_figuras.py` trae las diecinueve de la sección Storage: «Storage, CDN y caché» (0092),
 «Acceso a galería y cámara» (0066), «Subir y mostrar archivos con Supabase Storage» (0067),
-«image_picker desde Clean Architecture» (0093) y «Laboratorio 7 · Foto de perfil» (0069). El círculo
+«image_picker desde Clean Architecture» (0093) y «Laboratorio 7 · Fotos en el muro» (0069).
+**El curso usa solo buckets privados**: se declaran en `supabase/config.toml`
+(`[storage.buckets.<id>]`), se crean con `npx supabase seed buckets --linked` y se abren con una
+sola política `for all to authenticated` por bucket; las fotos se muestran con URLs firmadas. El círculo
 de Clean de la 0093 usa la misma convención de anillos que el simulador `register-clean`. Reutiliza `table` y `legend` de `database_figuras.py`.
 
 ```bash

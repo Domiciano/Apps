@@ -169,7 +169,7 @@ En la tabla se guarda el path, nunca la URL. La URL se arma con el path, y depen
   <rect x="317.6" y="271" width="134" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="385" y="282" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">siempre la misma</text>
   <circle cx="72" cy="322" r="2.5" fill="#79809A"/><text x="82" y="326" font-size="12.5" fill="#454C61" data-fit="366">Cualquiera con la URL ve el archivo.</text>
   <circle cx="72" cy="344" r="2.5" fill="#79809A"/><text x="82" y="348" font-size="12.5" fill="#454C61" data-fit="366">La URL no cambia: se puede guardar en caché.</text>
-  <circle cx="72" cy="366" r="2.5" fill="#79809A"/><text x="82" y="370" font-size="12.5" fill="#454C61" data-fit="366">Para fotos de perfil, portadas o productos.</text>
+  <circle cx="72" cy="366" r="2.5" fill="#79809A"/><text x="82" y="370" font-size="12.5" fill="#454C61" data-fit="366">Para logos, portadas o fotos de productos.</text>
   <rect x="492" y="104" width="420" height="300" rx="12" fill="#FFFFFF" stroke="#C9A6EE" stroke-width="2"/>
   <path d="M492,144 V116 A12,12 0 0 1 504,104 H900 A12,12 0 0 1 912,116 V144 Z" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="2"/>
   <text x="508" y="124" dy="0.35em" font-size="14.5" font-weight="700" fill="#7439B8" data-fit="388">Bucket privado</text>
@@ -182,14 +182,16 @@ En la tabla se guarda el path, nunca la URL. La URL se arma con el path, y depen
   <rect x="769.0" y="271" width="127" height="22" rx="11" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.25"/><text x="832" y="282" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7439B8">vence en 3600 s</text>
   <circle cx="516" cy="322" r="2.5" fill="#79809A"/><text x="526" y="326" font-size="12.5" fill="#454C61" data-fit="366">Solo quien pasa la política obtiene la URL.</text>
   <circle cx="516" cy="344" r="2.5" fill="#79809A"/><text x="526" y="348" font-size="12.5" fill="#454C61" data-fit="366">Cada firma es distinta y deja de servir al vencer.</text>
-  <circle cx="516" cy="366" r="2.5" fill="#79809A"/><text x="526" y="370" font-size="12.5" fill="#454C61" data-fit="366">Para recibos, documentos o fotos de un chat.</text>
+  <circle cx="516" cy="366" r="2.5" fill="#79809A"/><text x="526" y="370" font-size="12.5" fill="#454C61" data-fit="366">Para fotos de perfil, recibos o documentos.</text>
   <g transform="translate(48,424)"><rect width="864" height="60" rx="10" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#556074" data-fit="836">Las políticas mandan en los dos</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="836">Quién sube y quién borra lo deciden siempre las políticas. El tipo de bucket solo decide quién puede leer.</text></g>
 </svg>
 ```
 
-En un bucket **público** la URL es fija y cualquiera que la tenga ve el archivo. Sirve para lo que igual se muestra a todos, como una foto de perfil. En uno **privado**, la app pide una **URL firmada**: lleva un token, vence y solo se entrega a quien pasa la política. Sirve para lo que no debe circular, como un recibo.
+En un bucket **público** la URL es fija y cualquiera que la tenga ve el archivo, aunque no use la app. Sirve para lo que igual se muestra a todos, como el logo de una tienda. En uno **privado**, la app pide una **URL firmada**: lleva un token, vence y solo se entrega a quien pasa la política. En este curso las fotos van en buckets privados: solo las ve quien inició sesión.
 
 Ninguno de los dos deja subir sin permiso. Las políticas deciden quién escribe y quién borra en los dos casos.
+
+Una URL firmada cambia cada vez que se pide, así que ninguna caché la reconoce. Eso no vuelve inútil el nombre aleatorio: si la app guarda la URL mientras no vence, o si mañana el bucket pasa a ser público, el nombre que nunca se repite sigue siendo lo que evita la foto vieja.
 
 ## Qué hace un CDN
 
