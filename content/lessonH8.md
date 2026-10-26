@@ -2,7 +2,8 @@
 
 <!-- tags: FeedBloc, BottomNavigationBar, select anidado, range, likes(count), upsert onConflict,
      Mostrar más, debugPrint, copyWith, permission denied for table likes,
-     duplicate key value violates unique constraint, qué va en cada capa -->
+     duplicate key value violates unique constraint, PGRST201 more than one relationship,
+     qué va en cada capa -->
 
 Vas a construir un muro al estilo de Twitter. Cada usuario publica textos cortos y ve los de todos, del más reciente al más antiguo. Puede dar «me gusta» y, en su perfil, ve sus tres últimas publicaciones. No hay imágenes, porque Storage todavía no lo hemos visto.
 
@@ -412,7 +413,7 @@ class SupabasePostDataSource {
   final SupabaseClient _client = Supabase.instance.client;
 
   static const _columns = 'id, content, created_at, '
-      'author:profiles(username, full_name), '
+      'author:profiles!profile_id(username, full_name), '
       'likes(count), '
       'my_like:likes(profile_id)';
 
@@ -469,6 +470,7 @@ class SupabasePostDataSource {
 }
 ```
 
+- `!profile_id` le dice a Supabase por cuál llave llegar a `profiles`. Hay dos caminos: la columna `profile_id` de `posts` y la tabla `likes`, que también une posts con perfiles. Sin la pista, la consulta falla con `PGRST201: more than one relationship was found for 'posts' and 'profiles'`.
 - `likes(count)` llega como `[{"count": 3}]`: una lista con un solo mapa.
 - `my_like` es la misma tabla `likes` con otro alias. El filtro `.eq('my_like.profile_id', _uid)` no quita posts: solo deja dentro de `my_like` tu «me gusta», si existe. Lista vacía significa que no te gusta.
 

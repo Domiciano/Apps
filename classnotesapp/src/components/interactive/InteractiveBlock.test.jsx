@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ThemeProvider } from '@/theme/ThemeContext';
 import InteractiveBlock from './InteractiveBlock';
-import { SIMS, parseSpec, runQuery, queryCode } from './flutterStateSims';
+import {
+  SIMS, parseSpec, runQuery, queryCode, cacheStart, cacheView, cacheUpload, cacheRestart, cacheWait, cacheUrl,
+} from './flutterStateSims';
 
 const renderBlock = (spec) => render(<ThemeProvider><InteractiveBlock spec={spec} /></ThemeProvider>);
 
@@ -462,5 +464,57 @@ describe('query-builder', () => {
     fireEvent.change(screen.getByLabelText('Terminador'), { target: { value: 'single' } });
     expect(screen.getByTestId('qb-result').textContent).toMatch(/Cannot coerce the result to a single JSON object/);
     expect(screen.getByTestId('qb-summary').textContent).toMatch(/llegaron 3: lanza PostgrestException/);
+  });
+});
+
+describe('storage-cache', () => {
+  const layerOf = (s) => s.trace[s.trace.length - 1][0];
+
+  it('with the same name, every cache keeps answering with the old photo', () => {
+    let s = cacheView(cacheStart('fixed'));
+    expect([s.shown, layerOf(s)]).toEqual([1, 'origin']);
+    s = cacheView(cacheUpload(s));
+    expect(s.dbPath).toBe('u1/avatar.jpg');
+    expect([s.shown, layerOf(s)]).toEqual([1, 'memory']);
+    s = cacheView(cacheRestart(s));
+    expect([s.shown, layerOf(s)]).toEqual([1, 'cdn']);
+    s = cacheView(cacheRestart(cacheWait(s)));
+    expect([s.shown, layerOf(s)]).toEqual([2, 'origin']);
+  });
+
+  it('with a random name, the new URL misses every cache and the old file is gone', () => {
+    let s = cacheView(cacheStart('random'));
+    s = cacheUpload(s);
+    expect(s.dbPath).toBe('u1/e4b05d11.jpg');
+    expect(Object.keys(s.bucket)).toEqual(['u1/e4b05d11.jpg']);
+    s = cacheView(s);
+    expect(s.trace).toEqual([['memory', false], ['cdn', false], ['origin', true]]);
+    expect(s.shown).toBe(2);
+    expect(s.cdn[cacheUrl('u1/9c1e7b20.jpg')].version).toBe(1);
+  });
+
+  it('a long max-age only matters for URLs that never change', () => {
+    let s = cacheView(cacheStart('random'));
+    for (let i = 0; i < 5; i += 1) s = cacheWait(s);
+    s = cacheView(cacheRestart(s));
+    expect([s.shown, layerOf(s)]).toEqual([1, 'cdn']);
+  });
+
+  it('shows which layer answered and warns when the photo is stale', () => {
+    renderBlock('storage-cache');
+    fireEvent.click(screen.getByText('Abrir el perfil'));
+    expect(document.querySelector('[data-layer="origin"]').dataset.result).toBe('hit');
+    fireEvent.click(screen.getByText('Subir foto nueva'));
+    fireEvent.click(screen.getByText('Abrir el perfil'));
+    expect(document.querySelector('[data-layer="memory"]').dataset.result).toBe('hit');
+    expect(screen.getByTestId('sc-summary').textContent).toMatch(/muestra la foto 1.*La última que subiste es la 2/);
+    expect(document.querySelector('.fs-dark').textContent).toContain('upsert: true');
+
+    fireEvent.click(screen.getByText('Nombre aleatorio'));
+    fireEvent.click(screen.getByText('Abrir el perfil'));
+    fireEvent.click(screen.getByText('Subir foto nueva'));
+    fireEvent.click(screen.getByText('Abrir el perfil'));
+    expect(screen.getByTestId('sc-summary').textContent).toMatch(/^La app muestra la foto 2: nadie la tenía/);
+    expect(document.querySelector('.fs-dark').textContent).toContain("remove([oldPath])");
   });
 });

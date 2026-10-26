@@ -168,6 +168,9 @@ de «Laboratorio 5 a nivel conceptual» (0090), se usa igual y reutiliza los ayu
 `tools/supabase_cli_figuras.py` trae las cinco de «Configurando los servicios» (0091).
 `tools/database_figuras.py` trae las ocho de la sección Database: «Escribir en la base de datos» (0059),
 «Leer de la base de datos» (0060) y «Laboratorio 6 · Muro» (0061).
+`tools/storage_figuras.py` trae las catorce de la sección Storage: «Storage, CDN y caché» (0092),
+«Acceso a galería y cámara» (0066), «Subir y mostrar archivos con Supabase Storage» (0067) y
+«Laboratorio 7 · Foto de perfil» (0069). Reutiliza `table` y `legend` de `database_figuras.py`.
 
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
@@ -232,8 +235,15 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   tabla `posts` de diez filas y ve qué filas pasan el filtro, cuáles caen en el recorte, el código
   Dart y lo que devuelve el `await` (o la `PostgrestException` de `single`). La lógica es pura y
   exportada (`runQuery`, `queryCode`), con pruebas en `InteractiveBlock.test.jsx`.
+- `storage-cache` («Storage, CDN y caché», 0092): el perfil de Ana con su foto y las tres capas que
+  la pueden responder (ImageCache, borde del CDN, bucket), con el `avatar_path` de la fila y el código
+  de subida. Dos modos: *Mismo nombre* (`avatar.jpg` + `upsert`, `max-age` de 1 h) y *Nombre
+  aleatorio* (UUID, `max-age` de un año, borra el anterior). Botones: abrir el perfil, subir, cerrar y
+  abrir la app (vacía ImageCache) y esperar 1 hora (vence el CDN del modo fijo). Marca HIT o MISS
+  por capa y avisa en rojo cuando la foto mostrada no es la última. Lógica pura y exportada
+  (`cacheStart`, `cacheView`, `cacheUpload`, `cacheRestart`, `cacheWait`).
 - `flutterStateSims.js` ya **no es idéntico** al de Seminario: tiene además `register-layers`,
-  `register-clean`, `query-builder` y unas palabras más en el resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
+  `register-clean`, `query-builder`, `storage-cache` y unas palabras más en el resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
 
 ### Darla de alta en `toc.md`
 

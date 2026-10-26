@@ -1,5 +1,6 @@
 // Interactive simulators for Flutter state (StatefulWidget, setState, lifecycle) and,
-// in Móviles, the sign up flow of Lab 5 across its layers and a Supabase query builder.
+// in Móviles, the sign up flow of Lab 5 across its layers, a Supabase query builder and
+// the cache layers in front of a Storage bucket.
 // Plain DOM, no React: the same file is copied into the session decks, so it must
 // not import anything. Every simulator is `mount(element, args) => destroy`.
 
@@ -3290,6 +3291,234 @@ const mountQueryBuilder = (root) => {
   return () => root.replaceChildren();
 };
 
+// ───────────────────────── storage-cache (Móviles, «Storage, CDN y caché») ─────────────────────────
+
+const SC_STYLE_ID = 'fsim-sc-style';
+
+const SC_CSS = `
+.fsim .sc-modes{display:flex;flex-wrap:wrap;gap:6px}
+.fsim .sc-mode{flex:1 1 140px;border:1px solid var(--fs-line);border-radius:10px;padding:6px 10px;background:#fff;cursor:pointer;
+  font:13px Roboto,Arial,sans-serif;text-align:left;color:var(--fs-ink)}
+.fsim .sc-mode small{display:block;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11.5px;color:var(--fs-muted)}
+.fsim .sc-mode[aria-pressed="true"]{border-color:var(--fs-accent);background:#F6F0FF;box-shadow:inset 0 0 0 1px var(--fs-accent)}
+.fsim .sc-photo{width:120px;height:120px;border-radius:60px;display:flex;align-items:center;justify-content:center;
+  font:600 15px Roboto,Arial,sans-serif;border:3px solid currentColor;margin:8px auto 4px}
+.fsim .sc-photo.sc-none{color:#9E9AA7;background:#F2F0F5;border-style:dashed}
+.fsim .sc-v1{color:#4453C9;background:#DCE7FF}.fsim .sc-v2{color:#C2571A;background:#FFE3CC}
+.fsim .sc-v3{color:#3A8235;background:#E8F6E3}.fsim .sc-v4{color:#7439B8;background:#F4EBFF}
+.fsim .sc-chip{display:inline-block;font:600 11.5px Roboto,Arial,sans-serif;border-radius:9px;padding:1px 8px;border:1.5px solid currentColor}
+.fsim .sc-layer{min-width:0;border:1px solid var(--fs-line);border-radius:12px;padding:8px 10px;background:#fff;transition:box-shadow .3s}
+.fsim .sc-layer h4{display:flex;justify-content:space-between;align-items:center;margin:0 0 4px}
+.fsim .sc-layer.sc-hit{box-shadow:0 0 0 3px #9FD68D;border-color:#3A8235}
+.fsim .sc-layer.sc-miss{border-color:#F0C572;border-style:dashed}
+.fsim .sc-entry{display:flex;justify-content:space-between;gap:8px;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:12px;
+  padding:2px 4px;border-radius:6px}
+.fsim .sc-entry span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsim .sc-entry span:last-child{flex:0 0 auto}
+.fsim .sc-entry.sc-key{background:#FFF3DC}
+.fsim .sc-empty{font-size:12px;color:#9E9AA7}
+.fsim .sc-tag{font:700 11px Roboto,Arial,sans-serif;border-radius:8px;padding:1px 8px}
+.fsim .sc-tag.sc-hit{background:#E8F6E3;color:#3A8235}.fsim .sc-tag.sc-miss{background:#FFF3DC;color:#A96C05}
+.fsim .sc-db{font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:12px;overflow-wrap:anywhere}
+.fsim .sc-summary{font-size:13px;min-height:54px}
+.fsim .sc-summary.sc-bad{color:var(--fs-err)}
+`;
+
+const ensureScStyle = () => {
+  if (typeof document === 'undefined' || document.getElementById(SC_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = SC_STYLE_ID;
+  style.textContent = SC_CSS;
+  document.head.appendChild(style);
+};
+
+const SC_NAMES = ['9c1e7b20.jpg', 'e4b05d11.jpg', '5a77c3f0.jpg', 'b18d2e94.jpg', '0f3c6a85.jpg', 'd2e9417b.jpg'];
+const SC_MODES = {
+  fixed: { label: 'Mismo nombre', hint: 'avatar.jpg + upsert', maxAge: 1 },
+  random: { label: 'Nombre aleatorio', hint: 'uuid.jpg', maxAge: 8760 },
+};
+const SC_LAYERS = ['memory', 'cdn', 'origin'];
+
+export const cacheUrl = (path) => `…/public/avatars/${path}`;
+
+const scPath = (mode, n) => `u1/${mode === 'fixed' ? 'avatar.jpg' : SC_NAMES[(n - 1) % SC_NAMES.length]}`;
+
+export const cacheStart = (mode = 'fixed') => {
+  const path = scPath(mode, 1);
+  return { mode, version: 1, bucket: { [path]: 1 }, dbPath: path, cdn: {}, memory: {}, shown: null, trace: [], last: 'start' };
+};
+
+export const cacheView = (s) => {
+  const url = cacheUrl(s.dbPath);
+  const memory = { ...s.memory };
+  const cdn = { ...s.cdn };
+  if (memory[url]) return { ...s, shown: memory[url], trace: [['memory', true]], last: 'view' };
+  const copy = cdn[url];
+  if (copy && copy.age < SC_MODES[s.mode].maxAge) {
+    memory[url] = copy.version;
+    return { ...s, memory, shown: copy.version, trace: [['memory', false], ['cdn', true]], last: 'view' };
+  }
+  const version = s.bucket[s.dbPath];
+  cdn[url] = { version, age: 0 };
+  memory[url] = version;
+  return { ...s, memory, cdn, shown: version, trace: [['memory', false], ['cdn', false], ['origin', true]], last: 'view' };
+};
+
+export const cacheUpload = (s) => {
+  const version = s.version + 1;
+  const bucket = { ...s.bucket };
+  if (s.mode === 'fixed') {
+    bucket[s.dbPath] = version;
+    return { ...s, version, bucket, trace: [], last: 'upload' };
+  }
+  const path = scPath('random', version);
+  bucket[path] = version;
+  delete bucket[s.dbPath];
+  return { ...s, version, bucket, dbPath: path, trace: [], last: 'upload' };
+};
+
+export const cacheRestart = (s) => ({ ...s, memory: {}, shown: null, trace: [], last: 'restart' });
+
+export const cacheWait = (s) => ({
+  ...s,
+  cdn: Object.fromEntries(Object.entries(s.cdn).map(([url, copy]) => [url, { ...copy, age: copy.age + 1 }])),
+  trace: [],
+  last: 'wait',
+});
+
+const scCode = (mode) => (mode === 'fixed'
+  ? `final path = '$uid/avatar.jpg';
+await _client.storage.from('avatars').uploadBinary(
+  path,
+  bytes,
+  fileOptions: const FileOptions(upsert: true),
+);
+// avatar_path no cambia: la URL tampoco`
+  : `final path = '$uid/\${_uuid.v4()}.jpg';
+await _client.storage.from('avatars').uploadBinary(
+  path,
+  bytes,
+  fileOptions: const FileOptions(cacheControl: '31536000'),
+);
+await _client.from('profiles')
+    .update({'avatar_path': path}).eq('id', uid);
+await _client.storage.from('avatars').remove([oldPath]);`);
+
+const SC_LAYER_NAMES = { memory: 'ImageCache · memoria de la app', cdn: 'CDN · borde', origin: 'Bucket avatars · origen' };
+
+export const cacheSummary = (s) => {
+  const latest = s.version;
+  if (s.last === 'start') return 'Ana ya subió la foto 1. Abre el perfil para que la app la descargue.';
+  if (s.last === 'upload') {
+    return s.mode === 'fixed'
+      ? `Subiste la foto ${latest} encima de avatar.jpg. avatar_path y la URL siguen iguales.`
+      : `Subiste la foto ${latest} con un nombre nuevo, avatar_path apunta a él y la foto anterior se borró.`;
+  }
+  if (s.last === 'restart') return 'La app se cerró: ImageCache quedó vacío. El CDN sigue con sus copias.';
+  if (s.last === 'wait') return `Pasó una hora. Las copias del CDN valen ${s.mode === 'fixed' ? '1 hora (cacheControl 3600)' : 'un año (cacheControl 31536000)'}.`;
+  const [layer] = s.trace[s.trace.length - 1];
+  const where = { memory: 'ImageCache ya tenía esa URL', cdn: 'el borde del CDN tenía una copia', origin: 'nadie la tenía, respondió el bucket y el CDN y la app se quedaron con una copia' }[layer];
+  if (s.shown !== latest) return `La app muestra la foto ${s.shown}: ${where}. La última que subiste es la ${latest}.`;
+  return `La app muestra la foto ${s.shown}: ${where}.`;
+};
+
+const scPhoto = (version, label) => el('div', { class: `sc-photo ${version ? `sc-v${((version - 1) % 4) + 1}` : 'sc-none'}`, text: label });
+
+const mountStorageCache = (root) => {
+  ensureScStyle();
+  const container = card(root);
+  let state = cacheStart('fixed');
+
+  const modeButtons = Object.entries(SC_MODES).map(([key, mode]) =>
+    el('button', { class: 'sc-mode', type: 'button', 'data-mode': key, onclick: () => apply(cacheStart(key)) }, mode.label, el('small', { text: mode.hint }))
+  );
+  const phoneBody = el('div', { class: 'fs-body' });
+  const phoneBox = el(
+    'div',
+    { class: 'fs-phone', style: 'height:300px' },
+    el('div', { class: 'fs-status' }, el('span', { text: '9:41' }), el('span', { text: '▲ ▮' })),
+    el('div', { class: 'fs-appbar', text: 'Perfil' }),
+    phoneBody
+  );
+  const summary = el('div', { class: 'sc-summary', 'data-testid': 'sc-summary', 'aria-live': 'polite' });
+  const code = codePanel('supabase_avatar_data_source.dart');
+  const layerBoxes = Object.fromEntries(SC_LAYERS.map((layer) => [layer, el('div', { class: 'sc-layer', 'data-layer': layer })]));
+  const db = el('div', { class: 'fs-panel' });
+
+  const button = (text, action, solid) =>
+    el('button', { class: `fs-btn${solid ? ' fs-solid' : ''}`, type: 'button', text, onclick: () => apply(action(state)) });
+
+  const entries = (layer) => {
+    if (layer === 'origin') {
+      return Object.entries(state.bucket).map(([path, v]) => [cacheUrl(path), `foto ${v}`]);
+    }
+    if (layer === 'memory') return Object.entries(state.memory).map(([url, v]) => [url, `foto ${v}`]);
+    return Object.entries(state.cdn).map(([url, copy]) => {
+      const stale = copy.age >= SC_MODES[state.mode].maxAge;
+      return [url, `foto ${copy.version} · ${stale ? 'vencida' : `${copy.age} h`}`];
+    });
+  };
+
+  const renderLayers = () => {
+    const key = cacheUrl(state.dbPath);
+    const result = Object.fromEntries(state.trace);
+    SC_LAYERS.forEach((layer) => {
+      const box = layerBoxes[layer];
+      const hit = result[layer];
+      box.className = `sc-layer${hit === true ? ' sc-hit' : hit === false ? ' sc-miss' : ''}`;
+      box.dataset.result = hit === undefined ? '' : hit ? 'hit' : 'miss';
+      const tag = hit === undefined ? null : el('span', { class: `sc-tag ${hit ? 'sc-hit' : 'sc-miss'}`, text: hit ? 'HIT' : 'MISS' });
+      const rows = entries(layer);
+      box.replaceChildren(
+        el('h4', {}, el('span', { text: SC_LAYER_NAMES[layer] }), tag),
+        ...(rows.length
+          ? rows.map(([url, text]) => el('div', { class: `sc-entry${url === key ? ' sc-key' : ''}` }, el('span', { text: url }), el('span', { text })))
+          : [el('div', { class: 'sc-empty', text: 'vacío' })])
+      );
+    });
+  };
+
+  const apply = (next) => {
+    state = next;
+    modeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode)));
+    code.setCode(scCode(state.mode));
+    phoneBody.replaceChildren(
+      el(
+        'div',
+        { class: 'fs-center' },
+        scPhoto(state.shown, state.shown ? `foto ${state.shown}` : 'sin cargar'),
+        el('div', { text: 'Ana Gómez' }),
+        el('small', { text: `última subida: foto ${state.version}` })
+      )
+    );
+    renderLayers();
+    db.replaceChildren(el('h4', { text: 'profiles · fila de Ana' }), el('div', { class: 'sc-db', text: `avatar_path = '${state.dbPath}'` }));
+    summary.textContent = cacheSummary(state);
+    summary.classList.toggle('sc-bad', state.last === 'view' && state.shown !== state.version);
+    flash(summary);
+  };
+
+  container.append(
+    el(
+      'div',
+      { class: 'fs-col' },
+      el('div', { class: 'sc-modes' }, ...modeButtons),
+      phoneBox,
+      el(
+        'div',
+        { class: 'fs-controls' },
+        button('Abrir el perfil', cacheView, true),
+        button('Subir foto nueva', cacheUpload),
+        button('Cerrar y abrir la app', cacheRestart),
+        button('Esperar 1 hora', cacheWait)
+      )
+    ),
+    el('div', { class: 'fs-side' }, summary, ...SC_LAYERS.map((layer) => layerBoxes[layer]), db, code.box)
+  );
+  apply(state);
+  return () => root.replaceChildren();
+};
+
 export const SIMS = Object.freeze({
   'state-counter': mountCounter,
   'hot-reload': (root, args = []) => mountCounter(root, ['reload', ...args]),
@@ -3299,6 +3528,7 @@ export const SIMS = Object.freeze({
   'register-layers': mountRegisterLayers,
   'register-clean': mountRegisterClean,
   'query-builder': mountQueryBuilder,
+  'storage-cache': mountStorageCache,
 });
 
 export const parseSpec = (spec) => {

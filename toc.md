@@ -85,15 +85,15 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH3.md | Escribir en la base de datos | 0059
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH7.md | Leer de la base de datos | 0060
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH8.md | Laboratorio 6 · Muro | 0061
+[t] Storage
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ0.md | Storage, CDN y caché | 0092
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ1.md | Acceso a galería y cámara | 0066
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ2.md | Subir y mostrar archivos con Supabase Storage | 0067
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ4.md | Laboratorio 7 · Foto de perfil | 0069
 [t] Realtime
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI1.md | Datos en Tiempo Real con Supabase | 0062
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2.md | Programación Reactiva y Supabase Streams | 0063
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH10.md | Laboratorio 7: Chat App | 0065
-[t] Storage
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ1.md | Acceso a Galería y Cámara | 0066
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ2.md | Subir Archivos a Supabase Storage | 0067
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ3.md | Políticas de Seguridad en Supabase Storage | 0068
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ4.md | Laboratorio 8 | 0069
 [t] Google Maps
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonL0.md | Clase: Introducción a Google Maps en Flutter | 0070
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonL1.md | Agregando Marcadores al Mapa | 0071
