@@ -124,11 +124,11 @@ Las fotos van en **buckets privados**: solo quien inició sesión las ve, y la a
 
 ## Preparación
 
-El punto de partida es este proyecto: [github.com/Domiciano/262AppsLab7](https://github.com/Domiciano/262AppsLab7). Es el Laboratorio 6 resuelto, más toda la interfaz de las fotos.
+El punto de partida es este proyecto: [github.com/Domiciano/Apps262Lab7](https://github.com/Domiciano/Apps262Lab7). Es el Laboratorio 6 resuelto, más toda la interfaz de las fotos.
 
 ```shell
-git clone https://github.com/Domiciano/262AppsLab7
-cd 262AppsLab7
+git clone https://github.com/Domiciano/Apps262Lab7
+cd Apps262Lab7
 flutter pub get
 ```
 
@@ -139,7 +139,7 @@ Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de
 ```svg
 <svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 856" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="stLabCarpetas-ttl">La estructura de carpetas</title>
-  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto 262AppsLab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts y FeedBloc. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts y ComposeBloc.</desc>
+  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto Apps262Lab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts y FeedBloc. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts y ComposeBloc.</desc>
   <defs>
     <style>
       #stLabCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}

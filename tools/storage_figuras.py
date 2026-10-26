@@ -810,7 +810,7 @@ def st_lab_carpetas():
     h = y0 + rh * len(rows) + 64
     s = head(fid, h, 'La estructura de carpetas', 'La estructura de carpetas',
              'En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.',
-             'Árbol de carpetas del proyecto 262AppsLab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, '
+             'Árbol de carpetas del proyecto Apps262Lab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, '
              'los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data '
              'sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts y FeedBloc. Marcados con 2, los de '
              'la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el '
