@@ -176,9 +176,9 @@ npx supabase migration list
 ## Lo que ya viene
 
 ```svg
-<svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 856" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 924" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="stLabCarpetas-ttl">La estructura de carpetas</title>
-  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto Apps262Lab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts y FeedBloc. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts y ComposeBloc.</desc>
+  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto Apps262Lab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts, FeedBloc y el _choosePhoto de HomeScreen. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts, ComposeBloc y el _choosePhoto de ComposeScreen.</desc>
   <defs>
     <style>
       #stLabCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -193,10 +193,10 @@ npx supabase migration list
       <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
     </marker>
   </defs>
-  <rect width="960" height="856" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="924" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">La estructura de carpetas</text>
   <text class="sub" x="48" y="80" data-fit="860">En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.</text>
-  <rect x="48" y="96" width="864" height="700" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="48" y="96" width="864" height="768" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="36">lib/</text>
   <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
@@ -279,12 +279,22 @@ npx supabase migration list
   <text x="568" y="736" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">el on de la foto solo imprime</text>
   <circle cx="886" cy="736" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="736" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
   <path d="M102,205 V770 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="757" width="268" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="254">compose/ui/bloc/compose_bloc.dart</text>
-  <text x="568" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">los on de la foto solo imprimen</text>
-  <circle cx="886" cy="770" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="770" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <rect x="116" y="757" width="260" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="246">home/ui/screens/home_screen.dart</text>
+  <text x="568" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">_choosePhoto · vacío</text>
+  <circle cx="886" cy="770" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="770" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M102,205 V804 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="791" width="268" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="804" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="254">compose/ui/bloc/compose_bloc.dart</text>
+  <text x="568" y="804" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">los on de la foto solo imprimen</text>
+  <circle cx="886" cy="804" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="804" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M102,205 V838 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="825" width="305" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="838" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="291">compose/ui/screens/compose_screen.dart</text>
+  <text x="568" y="838" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">_choosePhoto · vacío</text>
+  <circle cx="886" cy="838" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="838" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
   <text class="h" x="898" y="88" text-anchor="end">PARTE</text>
-  <text class="foot" x="48" y="828" data-fit="860">main.dart no cambia: cada Bloc crea sus casos de uso, y cada capa crea la siguiente.</text>
+  <text class="foot" x="48" y="896" data-fit="860">main.dart no cambia: cada Bloc crea sus casos de uso, y cada capa crea la siguiente.</text>
 </svg>
 ```
 
@@ -293,17 +303,13 @@ npx supabase migration list
 - **Los eventos y los estados.** `AvatarChangeRequested`, `ComposePhotoRequested`, `ComposePhotoRemoved`, `FeedState.avatarStatus` y `ComposeState.photo`.
 - **Los métodos vacíos.** Cada método nuevo de cada capa ya existe con su firma, pero su cuerpo es `throw UnimplementedError()`. Los `on` nuevos de los Bloc solo imprimen el evento.
 
-Corre la app, toca la cámara del perfil y elige una opción. En la consola aparece:
+Los botones de foto, el de la cámara del perfil y *Agregar foto* del composer, ya llaman a un método `_choosePhoto` de su pantalla, pero ese método está vacío: tocarlos todavía no hace nada.
 
-```text
-FeedBloc recibió AvatarChangeRequested(gallery)
-```
-
-Tu trabajo es reemplazar cada `throw UnimplementedError()` por su código, de afuera hacia adentro.
+Tu trabajo es reemplazar cada `throw UnimplementedError()` y cada `_choosePhoto` vacío por su código, de afuera hacia adentro.
 
 ## Parte 1 · Foto de perfil
 
-Del paso 1 al 9. Al terminar, cada persona tiene su foto en el perfil y en sus posts.
+Del paso 1 al 10. Al terminar, cada persona tiene su foto en el perfil y en sus posts.
 
 ## Paso 1 · El bucket avatars
 
@@ -639,6 +645,30 @@ try {
 
 `add(FeedStarted())` recarga el muro para que tus posts muestren la foto nueva.
 
+## Paso 10 · La hoja desde el perfil
+
+Falta el primer tramo del camino: de la pantalla al Bloc. En `home/ui/screens/home_screen.dart`, el botón de cámara de `ProfilePage` llama a `_choosePhoto`. Ese método abre `PhotoSourceSheet`, espera la opción que eligió la persona y la manda al Bloc como evento:
+
+```dart
+Future<void> _choosePhoto() async {
+  final source = await showModalBottomSheet<PhotoSource>(
+    context: context,
+    builder: (context) => const PhotoSourceSheet(),
+  );
+  if (source != null && mounted) {
+    context.read<FeedBloc>().add(AvatarChangeRequested(source));
+  }
+}
+```
+
+Importa `PhotoSourceSheet` y `PhotoSource`.
+
+- `showModalBottomSheet<PhotoSource>` devuelve lo que la hoja le pasa a `Navigator.pop`: `PhotoSource.gallery`, `PhotoSource.camera` o `null` si la persona la cierra sin elegir.
+- `mounted` evita usar el `context` si la pantalla se cerró mientras la hoja estaba abierta.
+- La pantalla no abre la galería ni sube nada: solo dice qué eligió la persona. Lo demás lo hacen las capas de los pasos anteriores.
+
+Corre la app, toca la cámara y elige una foto. En la consola ya no aparece `FeedBloc recibió`: el `on` del paso 9 atiende el evento.
+
 ## La prueba de la parte 1
 
 - Sube una foto. En `Storage > avatars` aparece una carpeta con tu id y un archivo con nombre de UUID. En `profiles`, `avatar_path` tiene ese path.
@@ -717,9 +747,9 @@ try {
 </svg>
 ```
 
-Del paso 10 al 13. Reutiliza lo de la parte 1: el mismo data source del teléfono y el mismo patrón de subida. Lo nuevo es que este bucket es **privado**: las imágenes se muestran con URLs firmadas, y para no hacer una petición por post se firman todas juntas.
+Del paso 11 al 15. Reutiliza lo de la parte 1: el mismo data source del teléfono y el mismo patrón de subida. Lo nuevo es que este bucket es **privado**: las imágenes se muestran con URLs firmadas, y para no hacer una petición por post se firman todas juntas.
 
-## Paso 10 · El bucket post-images
+## Paso 11 · El bucket post-images
 
 Al final de `supabase/config.toml`:
 
@@ -748,7 +778,7 @@ with check (bucket_id = 'post-images');
 npx supabase db push
 ```
 
-## Paso 11 · Los datos
+## Paso 12 · Los datos
 
 `posts/data/source/supabase_post_image_data_source.dart` es igual al `upload` del paso 4, con `bucket = 'post-images'`.
 
@@ -804,7 +834,7 @@ Future<List<Post>> _toPosts(List<Map<String, dynamic>> rows) async {
 
 `_toPost` recibe el mapa y saca de ahí la URL de su imagen: `imageUrl: images[row['image_path']]`. Un post sin imagen da `null` y `PostCard` no la pinta.
 
-## Paso 12 · Los casos de uso
+## Paso 13 · Los casos de uso
 
 `posts/domain/usecases/pick_post_image_usecase.dart` pide la foto y revisa su peso:
 
@@ -839,7 +869,7 @@ Future<void> call(String content, {PickedPhoto? photo}) async {
 }
 ```
 
-## Paso 13 · ComposeBloc
+## Paso 14 · ComposeBloc
 
 En `compose/ui/bloc/compose_bloc.dart`, crea `final PickPostImageUseCase _pickImage = PickPostImageUseCase();` y completa los dos `on` de la foto:
 
@@ -862,6 +892,24 @@ Future<void> _onPhotoRequested(
 ```
 
 `_onPhotoRemoved` emite `state.copyWith(removePhoto: true)`: un `copyWith` normal no puede volver `null` un campo, por eso el estado trae esa bandera. En `_onSubmitted`, pasa la foto al publicar: `await _publish(event.content, photo: state.photo);`.
+
+## Paso 15 · La hoja desde el composer
+
+En `compose/ui/screens/compose_screen.dart`, el botón *Agregar foto* llama a su propio `_choosePhoto`. Es igual al del paso 10, con el evento del composer:
+
+```dart
+Future<void> _choosePhoto() async {
+  final source = await showModalBottomSheet<PhotoSource>(
+    context: context,
+    builder: (context) => const PhotoSourceSheet(),
+  );
+  if (source != null && mounted) {
+    context.read<ComposeBloc>().add(ComposePhotoRequested(source));
+  }
+}
+```
+
+Importa `PhotoSourceSheet` y `PhotoSource`. La misma hoja sirve a las dos pantallas porque solo devuelve la opción elegida: qué hacer con ella lo decide el Bloc de cada una.
 
 ## La prueba de la parte 2
 

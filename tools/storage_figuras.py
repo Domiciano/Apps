@@ -802,7 +802,9 @@ def st_lab_carpetas():
         (3, 'source/supabase_post_image_data_source.dart', 'teal', 'upload · vacío', '2'),
         (3, 'repository/post_repository_impl.dart', 'teal', 'pickImage y uploadImage · vacíos', '2'),
         (2, 'home/ui/bloc/feed_bloc.dart', 'violet', 'el on de la foto solo imprime', '1'),
+        (2, 'home/ui/screens/home_screen.dart', 'violet', '_choosePhoto · vacío', '1'),
         (2, 'compose/ui/bloc/compose_bloc.dart', 'violet', 'los on de la foto solo imprimen', '2'),
+        (2, 'compose/ui/screens/compose_screen.dart', 'violet', '_choosePhoto · vacío', '2'),
     ]
     y0, rh = 112, 34
     h = y0 + rh * len(rows) + 64
@@ -810,9 +812,9 @@ def st_lab_carpetas():
              'En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.',
              'Árbol de carpetas del proyecto Apps262Lab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, '
              'los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data '
-             'sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts y FeedBloc. Marcados con 2, los de '
+             'sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts, FeedBloc y el _choosePhoto de HomeScreen. Marcados con 2, los de '
              'la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el '
-             'data source de posts y ComposeBloc.')
+             'data source de posts, ComposeBloc y el _choosePhoto de ComposeScreen.')
     s += f'  <rect x="48" y="96" width="864" height="{rh*len(rows)+20}" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
     last = {}
     for i, (lvl, name, color, text, step) in enumerate(rows):
