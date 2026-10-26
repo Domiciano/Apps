@@ -6,7 +6,7 @@
 
 El muro del Laboratorio 6 funciona, pero todos aparecen con una letra en vez de una cara, y los posts solo tienen texto. Este laboratorio tiene dos partes:
 
-- **Parte 1 · Foto de perfil.** Cada persona sube su foto desde la galería o la cámara. La foto aparece en su perfil y junto a cada post suyo.
+- **Parte 1 · Foto de perfil.** Cada persona sube su foto desde la galería. La foto aparece en su perfil y junto a cada post suyo.
 - **Parte 2 · Posts con imagen (avanzada).** El composer deja adjuntar una foto al post.
 
 Las fotos de perfil van en un **bucket público**: cada una tiene una URL fija que cualquiera puede abrir. Las de los posts van en un **bucket privado**: solo quien inició sesión las ve, con URLs firmadas.
@@ -16,7 +16,7 @@ Las fotos de perfil van en un **bucket público**: cada una tiene una URL fija q
 ```svg
 <svg id="stLabPantallas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabPantallas-ttl stLabPantallas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="stLabPantallas-ttl">Lo que vas a construir</title>
-  <desc id="stLabPantallas-dsc">Tres teléfonos. El primero es ProfilePage con la foto de Ana, un botón de cámara sobre la foto y sus últimos posts. El segundo es la misma pantalla con una hoja abierta abajo: Elegir de la galería y Tomar una foto. El tercero es FeedPage: cada post muestra la foto de su autor, y quien no tiene foto muestra su inicial.</desc>
+  <desc id="stLabPantallas-dsc">Tres teléfonos. El primero es ProfilePage con la foto de Ana, un botón de cámara sobre la foto y sus últimos posts. El segundo es la galería del sistema, que abre image_picker: una cuadrícula de fotos para elegir una. El tercero es FeedPage: cada post muestra la foto de su autor, y quien no tiene foto muestra su inicial.</desc>
   <defs>
     <style>
       #stLabPantallas .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -35,9 +35,9 @@ Las fotos de perfil van en un **bucket público**: cada una tiene una URL fija q
   </defs>
   <rect width="960" height="600" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">Lo que vas a construir</text>
-  <text class="sub" x="48" y="80" data-fit="860">La cámara del perfil abre una hoja con dos opciones. La foto nueva aparece en el perfil y en cada post tuyo.</text>
+  <text class="sub" x="48" y="80" data-fit="860">La cámara del perfil abre la galería del teléfono. La foto elegida aparece en el perfil y en cada post tuyo.</text>
   <text class="mono" x="164" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">HomeScreen <tspan fill="#0F8478">· ProfilePage</tspan></text>
-  <text class="mono" x="480" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">HomeScreen <tspan fill="#0F8478">· hoja de la cámara</tspan></text>
+  <text class="mono" x="480" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">image_picker <tspan fill="#0F8478">· galería del sistema</tspan></text>
   <text class="mono" x="796" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">HomeScreen <tspan fill="#0F8478">· FeedPage</tspan></text>
   <rect x="48" y="132" width="232" height="420" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="64" y="156" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Perfil</text><path d="M50,174 H278" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect x="124.0" y="190" width="80" height="80" rx="14" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
@@ -62,35 +62,24 @@ Las fotos de perfil van en un **bucket público**: cada una tiene una URL fija q
   <text x="96.0" y="423" text-anchor="end" font-size="10" font-weight="700" fill="#C2571A">2</text>
   <text x="108" y="420" dy="0.35em" font-size="11" font-weight="700" fill="#161A26" data-fit="148">@ana.dev</text>
   <text x="108" y="440" dy="0.35em" font-size="11" fill="#454C61" data-fit="148">Hoy vimos Storage</text>
-  <rect x="364" y="132" width="232" height="420" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="380" y="156" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Perfil</text><path d="M366,174 H594" stroke="#D9DEE8" stroke-width="1.5"/>
-  <rect x="440.0" y="190" width="80" height="80" rx="14" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
-  <circle cx="480.0" cy="222.0" r="13.6" fill="#C2571A"/>
-  <path d="M456.0,258.8 C459.2,238.0 500.8,238.0 504.0,258.8 Z" fill="#C2571A"/>
-  <text x="516.0" y="202" text-anchor="end" font-size="16" font-weight="700" fill="#C2571A">2</text>
-  <circle cx="514" cy="262" r="15" fill="#1F9D68"/>
-  <path transform="translate(506,255)" d="M0,3 H4 L6,0 H10 L12,3 H16 V14 H0 Z" fill="none" stroke="#FFFFFF" stroke-width="1.5"/><circle cx="514" cy="263" r="3.2" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
-  <text x="480" y="296" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#161A26">Ana Gómez</text>
-  <text x="480" y="314" dy="0.35em" text-anchor="middle" font-size="11.5" fill="#79809A">@ana.dev</text>
-  <rect x="380" y="336" width="200" height="58" rx="8" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.25"/>
-  <rect x="388" y="345" width="28" height="28" rx="5" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
-  <circle cx="402.0" cy="356.2" r="4.8" fill="#C2571A"/>
-  <path d="M393.6,369.1 C394.7,361.8 409.3,361.8 410.4,369.1 Z" fill="#C2571A"/>
-  <text x="412.0" y="357" text-anchor="end" font-size="10" font-weight="700" fill="#C2571A">2</text>
-  <text x="424" y="354" dy="0.35em" font-size="11" font-weight="700" fill="#161A26" data-fit="148">@ana.dev</text>
-  <text x="424" y="374" dy="0.35em" font-size="11" fill="#454C61" data-fit="148">Mi primer post</text>
-  <rect x="380" y="402" width="200" height="58" rx="8" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.25"/>
-  <rect x="388" y="411" width="28" height="28" rx="5" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
-  <circle cx="402.0" cy="422.2" r="4.8" fill="#C2571A"/>
-  <path d="M393.6,435.1 C394.7,427.8 409.3,427.8 410.4,435.1 Z" fill="#C2571A"/>
-  <text x="412.0" y="423" text-anchor="end" font-size="10" font-weight="700" fill="#C2571A">2</text>
-  <text x="424" y="420" dy="0.35em" font-size="11" font-weight="700" fill="#161A26" data-fit="148">@ana.dev</text>
-  <text x="424" y="440" dy="0.35em" font-size="11" fill="#454C61" data-fit="148">Hoy vimos Storage</text>
-  <rect x="367" y="174" width="226" height="375" rx="0" fill="#161A26" fill-opacity=".35"/>
-  <path d="M367,424 H593 V534 A15,15 0 0 1 578,549 H382 A15,15 0 0 1 367,534 Z" fill="#FFFFFF"/>
-  <rect x="384" y="444" width="16" height="16" rx="3" fill="none" stroke="#454C61" stroke-width="1.5"/>
-  <text x="412" y="452" dy="0.35em" font-size="13" fill="#161A26">Elegir de la galería</text>
-  <rect x="384" y="488" width="16" height="16" rx="3" fill="none" stroke="#454C61" stroke-width="1.5"/>
-  <text x="412" y="496" dy="0.35em" font-size="13" fill="#161A26">Tomar una foto</text>
+  <rect x="364" y="132" width="232" height="420" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="380" y="156" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Recientes</text><path d="M366,174 H594" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="380" y="190" width="62" height="62" rx="8" fill="#E4E7EE"/>
+  <rect x="450" y="190" width="62" height="62" rx="8" fill="#D9DEE8"/>
+  <rect x="520" y="190" width="62" height="62" rx="8" fill="#EFF1F5"/>
+  <rect x="380" y="260" width="62" height="62" rx="8" fill="#D9DEE8"/>
+  <rect x="450" y="260" width="62" height="62" rx="11" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
+  <circle cx="481.0" cy="284.8" r="10.5" fill="#C2571A"/>
+  <path d="M462.4,313.3 C464.9,297.2 497.1,297.2 499.6,313.3 Z" fill="#C2571A"/>
+  <text x="508.0" y="272" text-anchor="end" font-size="12" font-weight="700" fill="#C2571A">2</text>
+  <rect x="447" y="257" width="68" height="68" rx="13" fill="none" stroke="#1F9D68" stroke-width="3"/>
+  <rect x="520" y="260" width="62" height="62" rx="8" fill="#E4E7EE"/>
+  <rect x="380" y="330" width="62" height="62" rx="8" fill="#EFF1F5"/>
+  <rect x="450" y="330" width="62" height="62" rx="8" fill="#E4E7EE"/>
+  <rect x="520" y="330" width="62" height="62" rx="8" fill="#D9DEE8"/>
+  <rect x="380" y="400" width="62" height="62" rx="8" fill="#E4E7EE"/>
+  <rect x="450" y="400" width="62" height="62" rx="8" fill="#D9DEE8"/>
+  <rect x="520" y="400" width="62" height="62" rx="8" fill="#EFF1F5"/>
+  <text x="480" y="512" dy="0.35em" text-anchor="middle" font-size="11.5" fill="#79809A">no es de la app: la abre el sistema</text>
   <rect x="680" y="132" width="232" height="420" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="696" y="156" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Muro</text><path d="M682,174 H910" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect x="696" y="190" width="200" height="58" rx="8" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.25"/>
   <rect x="704" y="199" width="28" height="28" rx="5" fill="#FFE3CC" stroke="#C2571A" stroke-width="1.5"/>
@@ -117,7 +106,8 @@ Las fotos de perfil van en un **bucket público**: cada una tiene una URL fija q
   <text x="728.0" y="415" text-anchor="end" font-size="10" font-weight="700" fill="#C2571A">2</text>
   <text x="740" y="412" dy="0.35em" font-size="11" font-weight="700" fill="#161A26" data-fit="148">@ana.dev</text>
   <text x="740" y="432" dy="0.35em" font-size="11" fill="#454C61" data-fit="148">Mi primer post</text>
-  <path class="ar-violet" d="M214,262 C320,262 334,452 378,452"/>
+  <path class="ar-violet" d="M214,262 C300,262 324,332 358,332"/>
+  <path class="ar-violet" d="M602,332 C640,332 640,222 674,222"/>
   <text class="foot" x="48" y="572" data-fit="860">Mientras sube, la foto del perfil muestra un indicador de carga. Si algo falla, un SnackBar dice por qué.</text>
 </svg>
 ```
@@ -178,7 +168,7 @@ npx supabase migration list
 ```svg
 <svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 924" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="stLabCarpetas-ttl">La estructura de carpetas</title>
-  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto Apps262Lab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts, FeedBloc y el _choosePhoto de HomeScreen. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts, ComposeBloc y el _choosePhoto de ComposeScreen.</desc>
+  <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto Apps262Lab7. Ya vienen el componente Avatar, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts, FeedBloc y el botón de HomeScreen. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts, ComposeBloc y el botón de ComposeScreen.</desc>
   <defs>
     <style>
       #stLabCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -200,9 +190,9 @@ npx supabase migration list
   <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="36">lib/</text>
   <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="145" width="102" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="88">components/</text>
-  <text x="568" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: Avatar y PhotoSourceSheet</text>
+  <rect x="92" y="145" width="185" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="171">components/avatar.dart</text>
+  <text x="568" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Ya viene: la foto redonda o la inicial</text>
   <path d="M78,137 V192 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="92" y="179" width="88" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="74">features/</text>
@@ -281,7 +271,7 @@ npx supabase migration list
   <path d="M102,205 V770 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="116" y="757" width="260" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
   <text class="mono" x="126" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="246">home/ui/screens/home_screen.dart</text>
-  <text x="568" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">_choosePhoto · vacío</text>
+  <text x="568" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">onChangePhoto: () {}</text>
   <circle cx="886" cy="770" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="770" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
   <path d="M102,205 V804 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="116" y="791" width="268" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
@@ -291,21 +281,21 @@ npx supabase migration list
   <path d="M102,205 V838 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="116" y="825" width="305" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
   <text class="mono" x="126" y="838" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="291">compose/ui/screens/compose_screen.dart</text>
-  <text x="568" y="838" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">_choosePhoto · vacío</text>
+  <text x="568" y="838" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Agregar foto: () {}</text>
   <circle cx="886" cy="838" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="838" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
   <text class="h" x="898" y="88" text-anchor="end">PARTE</text>
   <text class="foot" x="48" y="896" data-fit="860">main.dart no cambia: cada Bloc crea sus casos de uso, y cada capa crea la siguiente.</text>
 </svg>
 ```
 
-- **La interfaz completa.** `Avatar` pinta la foto, o la inicial si no hay. `PhotoSourceSheet` es la hoja con *Elegir de la galería* y *Tomar una foto*. `ProfilePage` tiene el botón de cámara, `ComposeScreen` la vista previa con *Quitar foto* y `PostCard` la imagen del post.
-- **Las entidades y los contratos.** `PhotoSource`, `PickedPhoto`, `Profile` con `avatarPath` y `avatarUrl`, `Post` con `authorAvatarUrl` e `imageUrl`. `AvatarRepository`, `ProfileRepository` y `PostRepository` ya declaran todo lo que el laboratorio necesita.
+- **La interfaz completa.** `Avatar` pinta la foto, o la inicial si no hay. `ProfilePage` tiene el botón de cámara, `ComposeScreen` el botón *Agregar foto*, la vista previa y *Quitar foto*, y `PostCard` la imagen del post.
+- **Las entidades y los contratos.** `PickedPhoto` (los bytes y la extensión), `Profile` con `avatarPath` y `avatarUrl`, `Post` con `authorAvatarUrl` e `imageUrl`. `AvatarRepository`, `ProfileRepository` y `PostRepository` ya declaran todo lo que el laboratorio necesita.
 - **Los eventos y los estados.** `AvatarChangeRequested`, `ComposePhotoRequested`, `ComposePhotoRemoved`, `FeedState.avatarStatus` y `ComposeState.photo`.
 - **Los métodos vacíos.** Cada método nuevo de cada capa ya existe con su firma, pero su cuerpo es `throw UnimplementedError()`. Los `on` nuevos de los Bloc solo imprimen el evento.
 
-Los botones de foto, el de la cámara del perfil y *Agregar foto* del composer, ya llaman a un método `_choosePhoto` de su pantalla, pero ese método está vacío: tocarlos todavía no hace nada.
+Los dos botones de foto, el de la cámara del perfil y *Agregar foto* del composer, todavía no lanzan su evento: su callback es `() {}`.
 
-Tu trabajo es reemplazar cada `throw UnimplementedError()` y cada `_choosePhoto` vacío por su código, de afuera hacia adentro.
+Tu trabajo es reemplazar cada `throw UnimplementedError()` por su código, de afuera hacia adentro, y al final conectar los botones.
 
 ## Parte 1 · Foto de perfil
 
@@ -411,16 +401,14 @@ Que el bucket sea público solo abre la lectura por URL. Subir y borrar necesita
 
 ## Paso 3 · Elegir la foto
 
-`avatar/data/source/device_photo_data_source.dart` es el único archivo que importa `image_picker`. Traduce `PhotoSource` a `ImageSource`, y `XFile` a `PickedPhoto`:
+`avatar/data/source/device_photo_data_source.dart` es el único archivo que importa `image_picker`. Abre la galería y traduce el `XFile` que devuelve a un `PickedPhoto`:
 
 ```dart
 final ImagePicker _picker = ImagePicker();
 
-Future<PickedPhoto?> pick(PhotoSource source) async {
+Future<PickedPhoto?> pick() async {
   final file = await _picker.pickImage(
-    source: source == PhotoSource.camera
-        ? ImageSource.camera
-        : ImageSource.gallery,
+    source: ImageSource.gallery,
     maxWidth: 512,
     maxHeight: 512,
     imageQuality: 80,
@@ -504,7 +492,7 @@ final SupabaseAvatarDataSource _storage = SupabaseAvatarDataSource();
   <rect x="88" y="112" width="216" height="40" rx="8" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/>
   <text class="mono" x="100" y="132" dy="0.35em" font-size="12.5" font-weight="700" fill="#0F8478">AvatarRepository</text>
   <rect x="316" y="112" width="260" height="40" rx="8" fill="#1F2430"/>
-  <text class="mono" x="330" y="132" dy="0.35em" font-size="12.5" fill="#C9CFDA" data-fit="232">pick(source)</text>
+  <text class="mono" x="330" y="132" dy="0.35em" font-size="12.5" fill="#C9CFDA" data-fit="232">pick()</text>
   <text x="592" y="132" dy="0.35em" font-size="13" fill="#454C61" data-fit="316">null si la persona cancela: no sigue</text>
 <circle cx="64" cy="188" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="64" y="188" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">2</text>
   <rect x="88" y="168" width="216" height="40" rx="8" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.25"/>
@@ -548,10 +536,10 @@ final AuthRepository _auth = AuthRepositoryImpl();
 final ProfileRepository _profiles = ProfileRepositoryImpl();
 final AvatarRepository _avatars = AvatarRepositoryImpl();
 
-Future<Profile?> call(PhotoSource source) async {
+Future<Profile?> call() async {
   final user = _auth.currentUser();
   if (user == null) throw Exception('No hay una sesión iniciada');
-  final photo = await _avatars.pick(source);
+  final photo = await _avatars.pick();
   if (photo == null) return null;
   if (photo.bytes.length > maxBytes) {
     throw Exception('La foto pesa más de 2 MB');
@@ -628,7 +616,7 @@ En `home/ui/bloc/feed_bloc.dart`, crea el caso de uso como campo, `final ChangeA
 ```dart
 emit(state.copyWith(avatarStatus: AvatarStatus.uploading));
 try {
-  final profile = await _changeAvatar(event.source);
+  final profile = await _changeAvatar();
   if (profile == null) {
     emit(state.copyWith(avatarStatus: AvatarStatus.idle));
     return;
@@ -645,36 +633,24 @@ try {
 
 `add(FeedStarted())` recarga el muro para que tus posts muestren la foto nueva.
 
-## Paso 10 · La hoja desde el perfil
+## Paso 10 · El botón del perfil
 
-Falta el primer tramo del camino: de la pantalla al Bloc. En `home/ui/screens/home_screen.dart`, el botón de cámara de `ProfilePage` llama a `_choosePhoto`. Ese método abre `PhotoSourceSheet`, espera la opción que eligió la persona y la manda al Bloc como evento:
+Falta el primer tramo del camino: de la pantalla al Bloc. En `home/ui/screens/home_screen.dart`, `ProfilePage` recibe `onChangePhoto: () {}`. Haz que lance el evento, igual que `onLike` lanza el suyo:
 
 ```dart
-Future<void> _choosePhoto() async {
-  final source = await showModalBottomSheet<PhotoSource>(
-    context: context,
-    builder: (context) => const PhotoSourceSheet(),
-  );
-  if (source != null && mounted) {
-    context.read<FeedBloc>().add(AvatarChangeRequested(source));
-  }
-}
+onChangePhoto: () => bloc.add(AvatarChangeRequested()),
 ```
 
-Importa `PhotoSourceSheet` y `PhotoSource`.
+La pantalla no abre la galería ni sube nada: solo avisa que la persona quiere otra foto. La galería la abre el data source del paso 3.
 
-- `showModalBottomSheet<PhotoSource>` devuelve lo que la hoja le pasa a `Navigator.pop`: `PhotoSource.gallery`, `PhotoSource.camera` o `null` si la persona la cierra sin elegir.
-- `mounted` evita usar el `context` si la pantalla se cerró mientras la hoja estaba abierta.
-- La pantalla no abre la galería ni sube nada: solo dice qué eligió la persona. Lo demás lo hacen las capas de los pasos anteriores.
-
-Corre la app, toca la cámara y elige una foto. En la consola ya no aparece `FeedBloc recibió`: el `on` del paso 9 atiende el evento.
+Corre la app, toca la cámara del perfil y elige una foto.
 
 ## La prueba de la parte 1
 
 - Sube una foto. En `Storage > avatars` aparece una carpeta con tu id y un archivo con nombre de UUID. En `profiles`, `avatar_path` tiene ese path.
 - Cambia la foto dos veces. La app muestra la última y en tu carpeta queda un solo archivo.
 - Desde otra cuenta, tus posts muestran tu foto. Los de quien no tiene foto, su inicial.
-- Toca la cámara y cancela: no pasa nada.
+- Toca la cámara y cierra la galería sin elegir: no pasa nada.
 - Abre la URL de tu foto en el navegador, sin sesión: se ve, porque `avatars` es público.
 
 ## Parte 2 · Posts con imagen (avanzada)
@@ -842,8 +818,8 @@ Future<List<Post>> _toPosts(List<Map<String, dynamic>> rows) async {
 static const maxBytes = 2 * 1024 * 1024;
 final PostRepository _posts = PostRepositoryImpl();
 
-Future<PickedPhoto?> call(PhotoSource source) async {
-  final photo = await _posts.pickImage(source);
+Future<PickedPhoto?> call() async {
+  final photo = await _posts.pickImage();
   if (photo == null) return null;
   if (photo.bytes.length > maxBytes) {
     throw Exception('La foto pesa más de 2 MB');
@@ -879,7 +855,7 @@ Future<void> _onPhotoRequested(
   Emitter<ComposeState> emit,
 ) async {
   try {
-    final photo = await _pickImage(event.source);
+    final photo = await _pickImage();
     if (photo == null) return;
     emit(state.copyWith(status: ComposeStatus.initial, photo: photo));
   } on Exception catch (e) {
@@ -893,23 +869,14 @@ Future<void> _onPhotoRequested(
 
 `_onPhotoRemoved` emite `state.copyWith(removePhoto: true)`: un `copyWith` normal no puede volver `null` un campo, por eso el estado trae esa bandera. En `_onSubmitted`, pasa la foto al publicar: `await _publish(event.content, photo: state.photo);`.
 
-## Paso 15 · La hoja desde el composer
+## Paso 15 · El botón del composer
 
-En `compose/ui/screens/compose_screen.dart`, el botón *Agregar foto* llama a su propio `_choosePhoto`. Es igual al del paso 10, con el evento del composer:
+En `compose/ui/screens/compose_screen.dart`, el botón *Agregar foto* tiene `onPressed: () {}`. Haz que lance el evento del composer:
 
 ```dart
-Future<void> _choosePhoto() async {
-  final source = await showModalBottomSheet<PhotoSource>(
-    context: context,
-    builder: (context) => const PhotoSourceSheet(),
-  );
-  if (source != null && mounted) {
-    context.read<ComposeBloc>().add(ComposePhotoRequested(source));
-  }
-}
+onPressed: () =>
+    context.read<ComposeBloc>().add(ComposePhotoRequested()),
 ```
-
-Importa `PhotoSourceSheet` y `PhotoSource`. La misma hoja sirve a las dos pantallas porque solo devuelve la opción elegida: qué hacer con ella lo decide el Bloc de cada una.
 
 ## La prueba de la parte 2
 
@@ -922,6 +889,7 @@ Importa `PhotoSourceSheet` y `PhotoSource`. La misma hoja sirve a las dos pantal
 ## Retos
 
 - **Cada quien en su carpeta.** Con la regla mínima, cualquiera con sesión puede borrar la foto de otra persona. Cambia la política para que borrar solo se permita si `(storage.foldername(name))[1] = (select auth.uid()::text)`.
-- **Quitar la foto de perfil.** Una opción más en la hoja que borra el archivo y deja `avatar_path` en `null`.
+- **Galería o cámara.** Una hoja con *Elegir de la galería* y *Tomar una foto*. La pantalla pregunta y el evento lleva la opción, pero el dominio no puede recibir `ImageSource`, que es de `image_picker`: define un `enum PhotoSource { gallery, camera }` propio y tradúcelo en el data source.
+- **Quitar la foto de perfil.** Un botón que borra el archivo y deja `avatar_path` en `null`.
 - **Caché en disco.** Cambia `Image.network` por `cached_network_image`. ¿Sirve de algo con URLs firmadas que cambian cada vez?
 - **Borrar un post con imagen.** Al borrar el post, borra también su archivo del bucket.

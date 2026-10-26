@@ -526,17 +526,17 @@ def cl_preguntas():
     fid, h = 'clPreguntas', 412
     s = head(fid, h, 'Tres preguntas antes de usar una librería', 'Tres preguntas antes de usar una librería',
              'Sirven para cualquier paquete. Aquí, respondidas para image_picker.',
-             'Tres tarjetas. Una: ¿con qué habla fuera de tu código? Con la galería y la cámara del sistema, así que va en '
+             'Tres tarjetas. Una: ¿con qué habla fuera de tu código? Con la galería del sistema, así que va en '
              'un DataSource, en el anillo de afuera. Dos: ¿qué tipos propios trae? XFile e ImageSource, que se quedan en '
-             'ese DataSource; el dominio define los suyos, PickedPhoto y PhotoSource. Tres: ¿qué necesita de verdad el '
+             'ese DataSource; el dominio define el suyo, PickedPhoto. Tres: ¿qué necesita de verdad el '
              'caso de uso? Los bytes de la foto y su extensión, que es lo único que cruza al dominio.')
     cards = [
-        ('slate', '¿Con qué habla fuera', 'de tu código?', 'Con la galería y la cámara', 'del sistema del teléfono.',
+        ('slate', '¿Con qué habla fuera', 'de tu código?', 'Con la galería del sistema', 'del teléfono.',
          'teal', 'Va en un DataSource,', 'en el anillo de afuera.'),
         ('slate', '¿Qué tipos propios', 'trae?', 'XFile e ImageSource.', '',
-         'rose', 'Se quedan en ese DataSource.', 'El dominio define los suyos.'),
+         'rose', 'Se quedan en ese DataSource.', 'El dominio define el suyo.'),
         ('slate', '¿Qué necesita de verdad', 'el caso de uso?', 'Los bytes de la foto', 'y su extensión.',
-         'amber', 'PickedPhoto y PhotoSource:', 'lo único que cruza.'),
+         'amber', 'PickedPhoto: lo único', 'que cruza al dominio.'),
     ]
     w, gap = 272, 24
     for i, (_, q1, q2, a1, a2, color, c1, c2) in enumerate(cards):
@@ -566,9 +566,9 @@ def cl_circulo():
              'image_picker y supabase_flutter quedan en el borde. El centro no sabe que existen.',
              'El diagrama circular de arquitectura limpia con cuatro anillos: afuera, en azul, Devices, UI y DB; luego, en verde, '
              'Presenters y Gateways; luego, en rojo, Use Cases; y en el centro, en amarillo, Entities. En una línea vertical, de '
-             'arriba abajo: ProfilePage en UI, FeedBloc en Presenters, ChangeAvatarUseCase en Use Cases, PhotoSource y '
+             'arriba abajo: ProfilePage en UI, FeedBloc en Presenters, ChangeAvatarUseCase en Use Cases, '
              'PickedPhoto en Entities, el contrato AvatarRepository en Use Cases y AvatarRepositoryImpl en Gateways. Abajo, en '
-             'el anillo de afuera, DevicePhotoDataSource y SupabaseAvatarDataSource. Fuera del círculo, la galería y la cámara '
+             'el anillo de afuera, DevicePhotoDataSource y SupabaseAvatarDataSource. Fuera del círculo, la galería '
              'del teléfono, a la que se llega con image_picker, y Supabase Storage, a la que se llega con supabase_flutter.')
     for r, fill in [(380, '#6E93EC'), (282, '#6EE98A'), (182, '#EE7070'), (90, '#ECEE72')]:
         s += f'  <circle cx="{cx}" cy="{cy}" r="{r}" fill="#FFFFFF"/><circle cx="{cx}" cy="{cy}" r="{r}" fill="{fill}" fill-opacity="0.42" stroke="#FFFFFF" stroke-width="2"/>\n'
@@ -580,7 +580,7 @@ def cl_circulo():
         s += arc_label(fid, key, cx, cy, r, a1, a2, text, ink)
     s += f'  <text x="{cx}" y="{cy+64}" text-anchor="middle" font-size="16" font-weight="700" fill="#4F4F14">Entities</text>\n'
     ds_y = cy + 318
-    links = [(cy - 315, cy - 247), (cy - 217, cy - 151), (cy - 121, cy - 33), (cy + 33, cy + 121), (cy + 151, cy + 217)]
+    links = [(cy - 315, cy - 247), (cy - 217, cy - 151), (cy - 121, cy - 15), (cy + 15, cy + 121), (cy + 151, cy + 217)]
     for y1, y2 in links:
         s += f'  <path d="M{cx},{y1} V{y2}" stroke="#556074" stroke-width="1.5"/>\n'
     s += f'  <path d="M{cx},{cy+247} V{cy+272} H{cx-95} V{ds_y-15}" fill="none" stroke="#556074" stroke-width="1.5"/>\n'
@@ -588,14 +588,13 @@ def cl_circulo():
     s += node(cx, cy - 330, 150, 'view', 'ProfilePage')
     s += node(cx, cy - 232, 130, 'view', 'FeedBloc')
     s += node(cx, cy - 136, 200, 'dom', 'ChangeAvatarUseCase')
-    s += node(cx, cy - 18, 136, 'entity', 'PhotoSource')
-    s += node(cx, cy + 18, 136, 'entity', 'PickedPhoto')
+    s += node(cx, cy, 136, 'entity', 'PickedPhoto')
     s += node(cx, cy + 136, 170, 'contract', 'AvatarRepository')
     s += node(cx, cy + 232, 200, 'data', 'AvatarRepositoryImpl')
     s += node(cx - 95, ds_y, 182, 'data', 'DevicePhotoDataSource', fs=11.5)
     s += node(cx + 95, ds_y, 182, 'data', 'SupabaseAvatarDataSource', fs=11.5)
     by = 918
-    for x, name, lib in [(cx - 300, 'Teléfono · galería y cámara', 'image_picker'),
+    for x, name, lib in [(cx - 300, 'Teléfono · galería', 'image_picker'),
                          (cx + 60, 'Supabase Storage', 'supabase_flutter')]:
         s += f'  <rect x="{x}" y="{by}" width="240" height="44" rx="12" fill="#F4F5F8" stroke="#9AA1B2" stroke-width="1.5" stroke-dasharray="6 4"/>\n'
         s += f'  <text x="{x+120}" y="{by+22}" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#454C61">{name}</text>\n'
@@ -616,8 +615,8 @@ def cl_frontera():
     s = head(fid, h, 'La frontera: cada lado habla su idioma', 'La frontera: cada lado habla su idioma',
              'DevicePhotoDataSource traduce en los dos sentidos. Los tipos de image_picker no pasan de ahí.',
              'A la izquierda, DevicePhotoDataSource, en la capa de datos: es el único archivo con el import de image_picker y '
-             'usa ImageSource y XFile. A la derecha, el dominio, sin ningún import de image_picker: usa PhotoSource y '
-             'PickedPhoto. En medio, una línea punteada: la frontera. Hacia adentro, PhotoSource.gallery se traduce a '
+             'usa ImageSource y XFile. A la derecha, el dominio, sin ningún import de image_picker: pide pick() y recibe un '
+             'PickedPhoto. En medio, una línea punteada: la frontera. Hacia adentro, pick() llega sin datos y el DataSource elige '
              'ImageSource.gallery. Hacia afuera, el XFile se traduce a un PickedPhoto con los bytes y la extensión.',
              colors=('rose', 'amber'))
     s += panel(48, 104, 404, 300, 'teal', 'DevicePhotoDataSource · datos')
@@ -626,8 +625,8 @@ def cl_frontera():
     s += '  <text class="h" x="506" y="430" text-anchor="middle">LA FRONTERA</text>\n'
     s += code_bar(64, 160, 372, "import 'package:image_picker/…';", h=32)
     s += code_bar(576, 160, 320, '<tspan fill="#9AA1B2">sin imports de image_picker</tspan>', h=32)
-    rows = [(236, 'ImageSource.gallery', 'PhotoSource.gallery', 'entra', 'ar-amber', True),
-            (330, 'XFile', 'PickedPhoto(bytes, extension)', 'sale', 'ar-rose', False)]
+    rows = [(236, 'ImageSource.gallery', 'pick()', 'entra: elige la galería', 'ar-amber', True),
+            (330, 'XFile', 'PickedPhoto(bytes, extension)', 'sale y se traduce', 'ar-rose', False)]
     for y, left, right, verb, cls, inward in rows:
         s += node(250, y, 220, 'lib', left)
         s += node(736, y, 300, 'dom', right)
@@ -635,8 +634,8 @@ def cl_frontera():
             s += f'  <path class="ar-amber" d="M584,{y} H364"/>\n'
         else:
             s += f'  <path class="ar-rose" d="M362,{y} H584"/>\n'
-        s += f'  <rect x="410" y="{y-26}" width="126" height="20" rx="4" fill="#FBFBFD"/>\n'
-        s += f'  <text x="473" y="{y-12}" text-anchor="middle" font-size="12" font-weight="700" fill="#454C61">{verb} y se traduce</text>\n'
+        s += f'  <rect x="394" y="{y-26}" width="158" height="20" rx="4" fill="#FBFBFD"/>\n'
+        s += f'  <text x="473" y="{y-12}" text-anchor="middle" font-size="12" font-weight="700" fill="#454C61">{verb}</text>\n'
     s += f'  <text x="64" y="384" font-size="12.5" fill="#454C61">Los tipos de la librería, en rosa.</text>\n'
     s += f'  <text x="576" y="384" font-size="12.5" fill="#454C61">Los tipos propios, en ámbar.</text>\n'
     return s + tail(h, 'Si mañana cambias image_picker por otra librería, solo cambia este archivo. El caso de uso ni se entera.')
@@ -648,10 +647,10 @@ FIGS['clFrontera'] = cl_frontera
 def cl_viaje():
     fid, h = 'clViaje', 668
     s = head(fid, h, 'El viaje de una foto de la galería', 'El viaje de una foto de la galería',
-             'Baja como PhotoSource y sube como PickedPhoto. image_picker solo aparece en el último tramo.',
+             'Baja como pick(), sin datos, y sube como PickedPhoto. image_picker solo aparece en el último tramo.',
              'Un diagrama de secuencia con seis columnas: ProfilePage, FeedBloc, ChangeAvatarUseCase, AvatarRepositoryImpl, '
-             'DevicePhotoDataSource y la galería del teléfono. Bajan, de izquierda a derecha: el evento AvatarChangeRequested con '
-             'PhotoSource.gallery, la llamada al caso de uso, pick en el repositorio, pick en el DataSource y pickImage con '
+             'DevicePhotoDataSource y la galería del teléfono. Bajan, de izquierda a derecha: el evento AvatarChangeRequested, '
+             'la llamada al caso de uso, pick en el repositorio, pick en el DataSource y pickImage con '
              'ImageSource.gallery hacia la galería. Suben de vuelta: la galería devuelve un XFile, el DataSource lo convierte en '
              'PickedPhoto y ese PickedPhoto llega al caso de uso, que sube la foto, guarda el path y borra la anterior. Luego '
              'el caso de uso devuelve el Profile al Bloc, que emite el estado con la foto nueva para ProfilePage.',
@@ -668,8 +667,8 @@ def cl_viaje():
             ly = 123 + (i * 15 - 7.5 if l2 else 0)
             s += f'  <text class="mono" x="{x}" y="{ly:.1f}" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="{strong}" data-fit="124">{ln}</text>\n'
     msgs = [
-        (0, 1, 'AvatarChangeRequested', 'violet', False), (1, 2, 'call(PhotoSource.gallery)', 'amber', False),
-        (2, 3, 'pick(gallery)', 'amber', False), (3, 4, 'pick(gallery)', 'amber', False),
+        (0, 1, 'AvatarChangeRequested', 'violet', False), (1, 2, 'call()', 'amber', False),
+        (2, 3, 'pick()', 'amber', False), (3, 4, 'pick()', 'amber', False),
         (4, 5, 'pickImage(ImageSource.gallery)', 'rose', False), (5, 4, 'XFile', 'rose', True),
         (4, 3, 'PickedPhoto', 'amber', True), (3, 2, 'PickedPhoto', 'amber', True),
         (2, 1, 'Profile', 'amber', True), (1, 0, 'FeedState(profile)', 'violet', True),
@@ -712,38 +711,46 @@ def mini_post(x, y, w, n, user, text):
 def st_lab_pantallas():
     fid, h = 'stLabPantallas', 600
     s = head(fid, h, 'Lo que vas a construir', 'Lo que vas a construir',
-             'La cámara del perfil abre una hoja con dos opciones. La foto nueva aparece en el perfil y en cada post tuyo.',
+             'La cámara del perfil abre la galería del teléfono. La foto elegida aparece en el perfil y en cada post tuyo.',
              'Tres teléfonos. El primero es ProfilePage con la foto de Ana, un botón de cámara sobre la foto y sus últimos posts. '
-             'El segundo es la misma pantalla con una hoja abierta abajo: Elegir de la galería y Tomar una foto. El tercero es '
+             'El segundo es la galería del sistema, que abre image_picker: una cuadrícula de fotos para elegir una. El tercero es '
              'FeedPage: cada post muestra la foto de su autor, y quien no tiene foto muestra su inicial.',
              colors=('violet',))
     pw, ph, py = 232, 420, 132
     xs = [48, 364, 680]
-    for x, (screen, page) in zip(xs, [('HomeScreen', 'ProfilePage'), ('HomeScreen', 'hoja de la cámara'), ('HomeScreen', 'FeedPage')]):
+    labels = [('HomeScreen', 'ProfilePage'), ('image_picker', 'galería del sistema'), ('HomeScreen', 'FeedPage')]
+    for x, (screen, page) in zip(xs, labels):
         s += f'  <text class="mono" x="{x+pw/2:.0f}" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7439B8">{screen} <tspan fill="#0F8478">· {page}</tspan></text>\n'
-    for k, x in enumerate(xs[:2]):
-        s += '  ' + phone(x, py, pw, ph, 'Perfil')
-        s += photo(x + pw / 2 - 40, py + 58, 80, 2)
-        s += f'  <circle cx="{x+pw/2+34:.0f}" cy="{py+130}" r="15" fill="#1F9D68"/>\n'
-        s += (f'  <path transform="translate({x+pw/2+26:.0f},{py+123})" d="M0,3 H4 L6,0 H10 L12,3 H16 V14 H0 Z" fill="none" '
-              f'stroke="#FFFFFF" stroke-width="1.5"/><circle cx="{x+pw/2+34:.0f}" cy="{py+131}" r="3.2" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>\n')
-        s += f'  <text x="{x+pw/2:.0f}" y="{py+164}" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#161A26">Ana Gómez</text>\n'
-        s += f'  <text x="{x+pw/2:.0f}" y="{py+182}" dy="0.35em" text-anchor="middle" font-size="11.5" fill="#79809A">@ana.dev</text>\n'
-        s += mini_post(x + 16, py + 204, pw - 32, 2, 'ana.dev', 'Mi primer post')
-        s += mini_post(x + 16, py + 270, pw - 32, 2, 'ana.dev', 'Hoy vimos Storage')
-    sx = xs[1]
-    s += f'  <rect x="{sx+3}" y="{py+42}" width="{pw-6}" height="{ph-45}" rx="0" fill="#161A26" fill-opacity=".35"/>\n'
-    s += f'  <path d="M{sx+3},{py+ph-128} H{sx+pw-3} V{py+ph-18} A15,15 0 0 1 {sx+pw-18},{py+ph-3} H{sx+18} A15,15 0 0 1 {sx+3},{py+ph-18} Z" fill="#FFFFFF"/>\n'
-    for k, (label, icon) in enumerate([('Elegir de la galería', 'g'), ('Tomar una foto', 'c')]):
-        y = py + ph - 100 + k * 44
-        s += f'  <rect x="{sx+20}" y="{y-8}" width="16" height="16" rx="3" fill="none" stroke="#454C61" stroke-width="1.5"/>\n'
-        s += f'  <text x="{sx+48}" y="{y}" dy="0.35em" font-size="13" fill="#161A26">{label}</text>\n'
+    x = xs[0]
+    s += '  ' + phone(x, py, pw, ph, 'Perfil')
+    s += photo(x + pw / 2 - 40, py + 58, 80, 2)
+    s += f'  <circle cx="{x+pw/2+34:.0f}" cy="{py+130}" r="15" fill="#1F9D68"/>\n'
+    s += (f'  <path transform="translate({x+pw/2+26:.0f},{py+123})" d="M0,3 H4 L6,0 H10 L12,3 H16 V14 H0 Z" fill="none" '
+          f'stroke="#FFFFFF" stroke-width="1.5"/><circle cx="{x+pw/2+34:.0f}" cy="{py+131}" r="3.2" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>\n')
+    s += f'  <text x="{x+pw/2:.0f}" y="{py+164}" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#161A26">Ana Gómez</text>\n'
+    s += f'  <text x="{x+pw/2:.0f}" y="{py+182}" dy="0.35em" text-anchor="middle" font-size="11.5" fill="#79809A">@ana.dev</text>\n'
+    s += mini_post(x + 16, py + 204, pw - 32, 2, 'ana.dev', 'Mi primer post')
+    s += mini_post(x + 16, py + 270, pw - 32, 2, 'ana.dev', 'Hoy vimos Storage')
+    gx = xs[1]
+    s += '  ' + phone(gx, py, pw, ph, 'Recientes')
+    tile, gap = 62, 8
+    for r in range(4):
+        for c in range(3):
+            tx, ty = gx + 16 + c * (tile + gap), py + 58 + r * (tile + gap)
+            if r == 1 and c == 1:
+                s += photo(tx, ty, tile, 2)
+                s += f'  <rect x="{tx-3}" y="{ty-3}" width="{tile+6}" height="{tile+6}" rx="13" fill="none" stroke="#1F9D68" stroke-width="3"/>\n'
+            else:
+                shade = ['#E4E7EE', '#D9DEE8', '#EFF1F5'][(r + c) % 3]
+                s += f'  <rect x="{tx}" y="{ty}" width="{tile}" height="{tile}" rx="8" fill="{shade}"/>\n'
+    s += f'  <text x="{gx+pw/2:.0f}" y="{py+ph-40}" dy="0.35em" text-anchor="middle" font-size="11.5" fill="#79809A">no es de la app: la abre el sistema</text>\n'
     fx = xs[2]
     s += '  ' + phone(fx, py, pw, ph, 'Muro')
-    for k, (n, u, t) in enumerate([(2, 'ana.dev', 'Hoy vimos Storage'), (1, 'juanpa', 'Mi foto nueva!'),
-                                   (0, 'lu.mora', 'Aún sin foto'), (2, 'ana.dev', 'Mi primer post')]):
-        s += mini_post(fx + 16, py + 58 + k * 68, pw - 32, n, u, t)
-    s += f'  <path class="ar-violet" d="M{xs[0]+pw/2+50:.0f},{py+130} C{xs[0]+pw+40:.0f},{py+130} {xs[1]-30:.0f},{py+ph-100} {sx+14:.0f},{py+ph-100}"/>\n'
+    for k, (n, u, t_) in enumerate([(2, 'ana.dev', 'Hoy vimos Storage'), (1, 'juanpa', 'Mi foto nueva!'),
+                                    (0, 'lu.mora', 'Aún sin foto'), (2, 'ana.dev', 'Mi primer post')]):
+        s += mini_post(fx + 16, py + 58 + k * 68, pw - 32, n, u, t_)
+    s += f'  <path class="ar-violet" d="M{xs[0]+pw/2+50:.0f},{py+130} C{xs[0]+pw+20:.0f},{py+130} {xs[1]-40:.0f},{py+200} {gx-6},{py+200}"/>\n'
+    s += f'  <path class="ar-violet" d="M{gx+pw+6},{py+200} C{xs[2]-40:.0f},{py+200} {xs[2]-40:.0f},{py+90} {fx-6},{py+90}"/>\n'
     return s + tail(h, 'Mientras sube, la foto del perfil muestra un indicador de carga. Si algo falla, un SnackBar dice por qué.')
 
 
@@ -784,7 +791,7 @@ def st_lab_carpetas():
     fid = 'stLabCarpetas'
     rows = [
         (0, 'lib/', 'slate', '', ''),
-        (1, 'components/', 'slate', 'Ya viene: Avatar y PhotoSourceSheet', ''),
+        (1, 'components/avatar.dart', 'slate', 'Ya viene: la foto redonda o la inicial', ''),
         (1, 'features/', 'slate', '', ''),
         (2, 'avatar/domain/', 'slate', 'Ya viene: entidades y AvatarRepository', ''),
         (3, 'usecases/change_avatar_usecase.dart', 'amber', 'call · vacío', '1'),
@@ -802,19 +809,19 @@ def st_lab_carpetas():
         (3, 'source/supabase_post_image_data_source.dart', 'teal', 'upload · vacío', '2'),
         (3, 'repository/post_repository_impl.dart', 'teal', 'pickImage y uploadImage · vacíos', '2'),
         (2, 'home/ui/bloc/feed_bloc.dart', 'violet', 'el on de la foto solo imprime', '1'),
-        (2, 'home/ui/screens/home_screen.dart', 'violet', '_choosePhoto · vacío', '1'),
+        (2, 'home/ui/screens/home_screen.dart', 'violet', 'onChangePhoto: () {}', '1'),
         (2, 'compose/ui/bloc/compose_bloc.dart', 'violet', 'los on de la foto solo imprimen', '2'),
-        (2, 'compose/ui/screens/compose_screen.dart', 'violet', '_choosePhoto · vacío', '2'),
+        (2, 'compose/ui/screens/compose_screen.dart', 'violet', 'Agregar foto: () {}', '2'),
     ]
     y0, rh = 112, 34
     h = y0 + rh * len(rows) + 64
     s = head(fid, h, 'La estructura de carpetas', 'La estructura de carpetas',
              'En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.',
-             'Árbol de carpetas del proyecto Apps262Lab7. Ya vienen los componentes Avatar y PhotoSourceSheet, las entidades, '
+             'Árbol de carpetas del proyecto Apps262Lab7. Ya vienen el componente Avatar, las entidades, '
              'los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data '
-             'sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts, FeedBloc y el _choosePhoto de HomeScreen. Marcados con 2, los de '
+             'sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts, FeedBloc y el botón de HomeScreen. Marcados con 2, los de '
              'la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el '
-             'data source de posts, ComposeBloc y el _choosePhoto de ComposeScreen.')
+             'data source de posts, ComposeBloc y el botón de ComposeScreen.')
     s += f'  <rect x="48" y="96" width="864" height="{rh*len(rows)+20}" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
     last = {}
     for i, (lvl, name, color, text, step) in enumerate(rows):
@@ -846,7 +853,7 @@ def st_lab_caso():
              'ProfileRepository.getProfile para recordar el path anterior. 3, AvatarRepository.upload sube los bytes con un nombre '
              'nuevo y devuelve el path. 4, ProfileRepository.updateAvatarPath guarda ese path. 5, AvatarRepository.remove borra el '
              'archivo anterior, si había. 6, ProfileRepository.getProfile devuelve el perfil con la URL nueva.')
-    calls = [('teal', 'AvatarRepository', 'pick(source)', 'null si la persona cancela: no sigue'),
+    calls = [('teal', 'AvatarRepository', 'pick()', 'null si la persona cancela: no sigue'),
              ('indigo', 'ProfileRepository', 'getProfile(id)', 'recuerda el avatarPath anterior'),
              ('teal', 'AvatarRepository', 'upload(photo)', 'nombre nuevo · devuelve el path'),
              ('indigo', 'ProfileRepository', 'updateAvatarPath(id, path)', 'el perfil apunta a la foto nueva'),

@@ -1,6 +1,6 @@
 # image_picker desde Clean Architecture
 
-<!-- tags: dónde va image_picker, XFile en el dominio, PhotoSource, PickedPhoto, DataSource,
+<!-- tags: dónde va image_picker, XFile en el dominio, PickedPhoto, DataSource,
      frontera del dominio, ImageSource, caso de uso subir foto, analizar una librería,
      tipos de una librería en el dominio, DevicePhotoDataSource -->
 
@@ -11,7 +11,7 @@ Con `flutter pub add image_picker` ya puedes abrir la galería desde un botón. 
 ```svg
 <svg id="clPreguntas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 412" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="clPreguntas-ttl clPreguntas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="clPreguntas-ttl">Tres preguntas antes de usar una librería</title>
-  <desc id="clPreguntas-dsc">Tres tarjetas. Una: ¿con qué habla fuera de tu código? Con la galería y la cámara del sistema, así que va en un DataSource, en el anillo de afuera. Dos: ¿qué tipos propios trae? XFile e ImageSource, que se quedan en ese DataSource; el dominio define los suyos, PickedPhoto y PhotoSource. Tres: ¿qué necesita de verdad el caso de uso? Los bytes de la foto y su extensión, que es lo único que cruza al dominio.</desc>
+  <desc id="clPreguntas-dsc">Tres tarjetas. Una: ¿con qué habla fuera de tu código? Con la galería del sistema, así que va en un DataSource, en el anillo de afuera. Dos: ¿qué tipos propios trae? XFile e ImageSource, que se quedan en ese DataSource; el dominio define el suyo, PickedPhoto. Tres: ¿qué necesita de verdad el caso de uso? Los bytes de la foto y su extensión, que es lo único que cruza al dominio.</desc>
   <defs>
     <style>
       #clPreguntas .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -34,8 +34,8 @@ Con `flutter pub add image_picker` ya puedes abrir la galería desde un botón. 
   <text x="98" y="134" font-size="14.5" font-weight="700" fill="#161A26">¿Con qué habla fuera</text>
   <text x="98" y="154" font-size="14.5" font-weight="700" fill="#161A26">de tu código?</text>
   <text class="h" x="68" y="194">CON IMAGE_PICKER</text>
-  <text x="68" y="218" font-size="13" fill="#454C61" data-fit="232">Con la galería y la cámara</text>
-  <text x="68" y="237" font-size="13" fill="#454C61" data-fit="232">del sistema del teléfono.</text>
+  <text x="68" y="218" font-size="13" fill="#454C61" data-fit="232">Con la galería del sistema</text>
+  <text x="68" y="237" font-size="13" fill="#454C61" data-fit="232">del teléfono.</text>
   <rect x="60" y="272" width="248" height="68" rx="10" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
   <text x="74" y="298" font-size="13" font-weight="700" fill="#0F8478" data-fit="220">Va en un DataSource,</text>
   <text x="74" y="320" font-size="13" font-weight="700" fill="#0F8478" data-fit="220">en el anillo de afuera.</text>
@@ -47,7 +47,7 @@ Con `flutter pub add image_picker` ya puedes abrir la galería desde un botón. 
   <text x="364" y="218" font-size="13" fill="#454C61" data-fit="232">XFile e ImageSource.</text>
   <rect x="356" y="272" width="248" height="68" rx="10" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.5"/>
   <text x="370" y="298" font-size="13" font-weight="700" fill="#C2354F" data-fit="220">Se quedan en ese DataSource.</text>
-  <text x="370" y="320" font-size="13" font-weight="700" fill="#C2354F" data-fit="220">El dominio define los suyos.</text>
+  <text x="370" y="320" font-size="13" font-weight="700" fill="#C2354F" data-fit="220">El dominio define el suyo.</text>
   <rect x="640" y="108" width="272" height="248" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
   <circle cx="668" cy="138" r="12" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/><text x="668" y="138" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#556074">3</text>
   <text x="690" y="134" font-size="14.5" font-weight="700" fill="#161A26">¿Qué necesita de verdad</text>
@@ -56,20 +56,20 @@ Con `flutter pub add image_picker` ya puedes abrir la galería desde un botón. 
   <text x="660" y="218" font-size="13" fill="#454C61" data-fit="232">Los bytes de la foto</text>
   <text x="660" y="237" font-size="13" fill="#454C61" data-fit="232">y su extensión.</text>
   <rect x="652" y="272" width="248" height="68" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text x="666" y="298" font-size="13" font-weight="700" fill="#A96C05" data-fit="220">PickedPhoto y PhotoSource:</text>
-  <text x="666" y="320" font-size="13" font-weight="700" fill="#A96C05" data-fit="220">lo único que cruza.</text>
+  <text x="666" y="298" font-size="13" font-weight="700" fill="#A96C05" data-fit="220">PickedPhoto: lo único</text>
+  <text x="666" y="320" font-size="13" font-weight="700" fill="#A96C05" data-fit="220">que cruza al dominio.</text>
   <text class="foot" x="48" y="384" data-fit="860">supabase_flutter responde igual: habla con Supabase, trae PostgrestException y StorageException, y vive en sus DataSource.</text>
 </svg>
 ```
 
-Antes de escribir código, se le hacen tres preguntas a la librería. Las respuestas dicen en qué anillo va, qué tipos se quedan afuera y qué tiene que inventar el dominio. Con `image_picker` dan esto: va en un `DataSource`, `XFile` e `ImageSource` no salen de ahí, y el dominio define `PhotoSource` y `PickedPhoto`.
+Antes de escribir código, se le hacen tres preguntas a la librería. Las respuestas dicen en qué anillo va, qué tipos se quedan afuera y qué tiene que inventar el dominio. Con `image_picker` dan esto: va en un `DataSource`, `XFile` e `ImageSource` no salen de ahí, y el dominio define `PickedPhoto`.
 
 ## Dónde va cada pieza
 
 ```svg
 <svg id="clCirculo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 990" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="clCirculo-ttl clCirculo-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="clCirculo-ttl">Dónde va cada pieza</title>
-  <desc id="clCirculo-dsc">El diagrama circular de arquitectura limpia con cuatro anillos: afuera, en azul, Devices, UI y DB; luego, en verde, Presenters y Gateways; luego, en rojo, Use Cases; y en el centro, en amarillo, Entities. En una línea vertical, de arriba abajo: ProfilePage en UI, FeedBloc en Presenters, ChangeAvatarUseCase en Use Cases, PhotoSource y PickedPhoto en Entities, el contrato AvatarRepository en Use Cases y AvatarRepositoryImpl en Gateways. Abajo, en el anillo de afuera, DevicePhotoDataSource y SupabaseAvatarDataSource. Fuera del círculo, la galería y la cámara del teléfono, a la que se llega con image_picker, y Supabase Storage, a la que se llega con supabase_flutter.</desc>
+  <desc id="clCirculo-dsc">El diagrama circular de arquitectura limpia con cuatro anillos: afuera, en azul, Devices, UI y DB; luego, en verde, Presenters y Gateways; luego, en rojo, Use Cases; y en el centro, en amarillo, Entities. En una línea vertical, de arriba abajo: ProfilePage en UI, FeedBloc en Presenters, ChangeAvatarUseCase en Use Cases, PickedPhoto en Entities, el contrato AvatarRepository en Use Cases y AvatarRepositoryImpl en Gateways. Abajo, en el anillo de afuera, DevicePhotoDataSource y SupabaseAvatarDataSource. Fuera del círculo, la galería del teléfono, a la que se llega con image_picker, y Supabase Storage, a la que se llega con supabase_flutter.</desc>
   <defs>
     <style>
       #clCirculo .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -100,22 +100,21 @@ Antes de escribir código, se le hacen tres preguntas a la librería. Las respue
   <text x="480" y="564" text-anchor="middle" font-size="16" font-weight="700" fill="#4F4F14">Entities</text>
   <path d="M480,185 V253" stroke="#556074" stroke-width="1.5"/>
   <path d="M480,283 V349" stroke="#556074" stroke-width="1.5"/>
-  <path d="M480,379 V467" stroke="#556074" stroke-width="1.5"/>
-  <path d="M480,533 V621" stroke="#556074" stroke-width="1.5"/>
+  <path d="M480,379 V485" stroke="#556074" stroke-width="1.5"/>
+  <path d="M480,515 V621" stroke="#556074" stroke-width="1.5"/>
   <path d="M480,651 V717" stroke="#556074" stroke-width="1.5"/>
   <path d="M480,747 V772 H385 V803" fill="none" stroke="#556074" stroke-width="1.5"/>
   <path d="M480,772 H575 V803" fill="none" stroke="#556074" stroke-width="1.5"/>
   <rect x="405" y="155" width="150" height="30" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.75"/><text class="mono" x="480" y="170" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8" data-fit="138">ProfilePage</text>
   <rect x="415" y="253" width="130" height="30" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.75"/><text class="mono" x="480" y="268" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7439B8" data-fit="118">FeedBloc</text>
   <rect x="380" y="349" width="200" height="30" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.75"/><text class="mono" x="480" y="364" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05" data-fit="188">ChangeAvatarUseCase</text>
-  <rect x="412" y="467" width="136" height="30" rx="8" fill="#FFFFFF" stroke="#E3B95A" stroke-width="1.75"/><text class="mono" x="480" y="482" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A5A04" data-fit="124">PhotoSource</text>
-  <rect x="412" y="503" width="136" height="30" rx="8" fill="#FFFFFF" stroke="#E3B95A" stroke-width="1.75"/><text class="mono" x="480" y="518" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A5A04" data-fit="124">PickedPhoto</text>
+  <rect x="412" y="485" width="136" height="30" rx="8" fill="#FFFFFF" stroke="#E3B95A" stroke-width="1.75"/><text class="mono" x="480" y="500" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8A5A04" data-fit="124">PickedPhoto</text>
   <rect x="395" y="621" width="170" height="30" rx="8" fill="#FFFFFF" stroke="#F0C572" stroke-width="1.75"/><text class="mono" x="480" y="636" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05" data-fit="158">AvatarRepository</text>
   <rect x="380" y="717" width="200" height="30" rx="8" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.75"/><text class="mono" x="480" y="732" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0F8478" data-fit="188">AvatarRepositoryImpl</text>
   <rect x="294" y="803" width="182" height="30" rx="8" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.75"/><text class="mono" x="385" y="818" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478" data-fit="170">DevicePhotoDataSource</text>
   <rect x="484" y="803" width="182" height="30" rx="8" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.75"/><text class="mono" x="575" y="818" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478" data-fit="170">SupabaseAvatarDataSource</text>
   <rect x="180" y="918" width="240" height="44" rx="12" fill="#F4F5F8" stroke="#9AA1B2" stroke-width="1.5" stroke-dasharray="6 4"/>
-  <text x="300" y="940" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#454C61">Teléfono · galería y cámara</text>
+  <text x="300" y="940" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#454C61">Teléfono · galería</text>
   <rect x="540" y="918" width="240" height="44" rx="12" fill="#F4F5F8" stroke="#9AA1B2" stroke-width="1.5" stroke-dasharray="6 4"/>
   <text x="660" y="940" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#454C61">Supabase Storage</text>
   <path d="M385,833 V870 H300 V916" fill="none" stroke="#C2354F" stroke-width="1.75" stroke-dasharray="5 4"/>
@@ -133,7 +132,7 @@ Para la arquitectura, `image_picker` y `supabase_flutter` son lo mismo: algo fue
 ```svg
 <svg id="clFrontera" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 476" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="clFrontera-ttl clFrontera-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="clFrontera-ttl">La frontera: cada lado habla su idioma</title>
-  <desc id="clFrontera-dsc">A la izquierda, DevicePhotoDataSource, en la capa de datos: es el único archivo con el import de image_picker y usa ImageSource y XFile. A la derecha, el dominio, sin ningún import de image_picker: usa PhotoSource y PickedPhoto. En medio, una línea punteada: la frontera. Hacia adentro, PhotoSource.gallery se traduce a ImageSource.gallery. Hacia afuera, el XFile se traduce a un PickedPhoto con los bytes y la extensión.</desc>
+  <desc id="clFrontera-dsc">A la izquierda, DevicePhotoDataSource, en la capa de datos: es el único archivo con el import de image_picker y usa ImageSource y XFile. A la derecha, el dominio, sin ningún import de image_picker: pide pick() y recibe un PickedPhoto. En medio, una línea punteada: la frontera. Hacia adentro, pick() llega sin datos y el DataSource elige ImageSource.gallery. Hacia afuera, el XFile se traduce a un PickedPhoto con los bytes y la extensión.</desc>
   <defs>
     <style>
       #clFrontera .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -168,14 +167,14 @@ Para la arquitectura, `image_picker` y `supabase_flutter` son lo mismo: algo fue
   <rect x="576" y="160" width="320" height="32" rx="8" fill="#1F2430"/>
   <text class="mono" x="590" y="176" dy="0.35em" font-size="12.5" fill="#C9CFDA" data-fit="292"><tspan fill="#9AA1B2">sin imports de image_picker</tspan></text>
   <rect x="140" y="221" width="220" height="30" rx="8" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.75"/><text class="mono" x="250" y="236" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#C2354F" data-fit="208">ImageSource.gallery</text>
-  <rect x="586" y="221" width="300" height="30" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.75"/><text class="mono" x="736" y="236" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05" data-fit="288">PhotoSource.gallery</text>
+  <rect x="586" y="221" width="300" height="30" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.75"/><text class="mono" x="736" y="236" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05" data-fit="288">pick()</text>
   <path class="ar-amber" d="M584,236 H364"/>
-  <rect x="410" y="210" width="126" height="20" rx="4" fill="#FBFBFD"/>
-  <text x="473" y="224" text-anchor="middle" font-size="12" font-weight="700" fill="#454C61">entra y se traduce</text>
+  <rect x="394" y="210" width="158" height="20" rx="4" fill="#FBFBFD"/>
+  <text x="473" y="224" text-anchor="middle" font-size="12" font-weight="700" fill="#454C61">entra: elige la galería</text>
   <rect x="140" y="315" width="220" height="30" rx="8" fill="#FFEBEF" stroke="#F3A3B2" stroke-width="1.75"/><text class="mono" x="250" y="330" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#C2354F" data-fit="208">XFile</text>
   <rect x="586" y="315" width="300" height="30" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.75"/><text class="mono" x="736" y="330" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05" data-fit="288">PickedPhoto(bytes, extension)</text>
   <path class="ar-rose" d="M362,330 H584"/>
-  <rect x="410" y="304" width="126" height="20" rx="4" fill="#FBFBFD"/>
+  <rect x="394" y="304" width="158" height="20" rx="4" fill="#FBFBFD"/>
   <text x="473" y="318" text-anchor="middle" font-size="12" font-weight="700" fill="#454C61">sale y se traduce</text>
   <text x="64" y="384" font-size="12.5" fill="#454C61">Los tipos de la librería, en rosa.</text>
   <text x="576" y="384" font-size="12.5" fill="#454C61">Los tipos propios, en ámbar.</text>
@@ -183,11 +182,9 @@ Para la arquitectura, `image_picker` y `supabase_flutter` son lo mismo: algo fue
 </svg>
 ```
 
-El dominio define sus propios tipos, con lo justo que necesita:
+El dominio define su propio tipo, con lo justo que necesita:
 
 ```dart
-enum PhotoSource { gallery, camera }
-
 class PickedPhoto {
   final Uint8List bytes;
   final String extension;
@@ -196,15 +193,15 @@ class PickedPhoto {
 }
 ```
 
-El contrato habla solo con esos tipos:
+El contrato habla solo con ese tipo. Pedir una foto no lleva parámetros:
 
 ```dart
 abstract class AvatarRepository {
-  Future<PickedPhoto?> pick(PhotoSource source);
+  Future<PickedPhoto?> pick();
 }
 ```
 
-Y el `DataSource` es el único archivo que importa `image_picker`. Traduce `PhotoSource` a `ImageSource` al entrar y `XFile` a `PickedPhoto` al salir:
+Y el `DataSource` es el único archivo que importa `image_picker`. Decide que la foto sale de la galería, con `ImageSource.gallery`, y traduce el `XFile` que vuelve a un `PickedPhoto`:
 
 ```dart
 import 'package:image_picker/image_picker.dart';
@@ -212,11 +209,9 @@ import 'package:image_picker/image_picker.dart';
 class DevicePhotoDataSource {
   final ImagePicker _picker = ImagePicker();
 
-  Future<PickedPhoto?> pick(PhotoSource source) async {
+  Future<PickedPhoto?> pick() async {
     final file = await _picker.pickImage(
-      source: source == PhotoSource.camera
-          ? ImageSource.camera
-          : ImageSource.gallery,
+      source: ImageSource.gallery,
       maxWidth: 512,
       imageQuality: 80,
     );
@@ -234,7 +229,7 @@ class DevicePhotoDataSource {
 ```svg
 <svg id="clViaje" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 668" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="clViaje-ttl clViaje-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="clViaje-ttl">El viaje de una foto de la galería</title>
-  <desc id="clViaje-dsc">Un diagrama de secuencia con seis columnas: ProfilePage, FeedBloc, ChangeAvatarUseCase, AvatarRepositoryImpl, DevicePhotoDataSource y la galería del teléfono. Bajan, de izquierda a derecha: el evento AvatarChangeRequested con PhotoSource.gallery, la llamada al caso de uso, pick en el repositorio, pick en el DataSource y pickImage con ImageSource.gallery hacia la galería. Suben de vuelta: la galería devuelve un XFile, el DataSource lo convierte en PickedPhoto y ese PickedPhoto llega al caso de uso, que sube la foto, guarda el path y borra la anterior. Luego el caso de uso devuelve el Profile al Bloc, que emite el estado con la foto nueva para ProfilePage.</desc>
+  <desc id="clViaje-dsc">Un diagrama de secuencia con seis columnas: ProfilePage, FeedBloc, ChangeAvatarUseCase, AvatarRepositoryImpl, DevicePhotoDataSource y la galería del teléfono. Bajan, de izquierda a derecha: el evento AvatarChangeRequested, la llamada al caso de uso, pick en el repositorio, pick en el DataSource y pickImage con ImageSource.gallery hacia la galería. Suben de vuelta: la galería devuelve un XFile, el DataSource lo convierte en PickedPhoto y ese PickedPhoto llega al caso de uso, que sube la foto, guarda el path y borra la anterior. Luego el caso de uso devuelve el Profile al Bloc, que emite el estado con la foto nueva para ProfilePage.</desc>
   <defs>
     <style>
       #clViaje .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -259,7 +254,7 @@ class DevicePhotoDataSource {
   </defs>
   <rect width="960" height="668" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">El viaje de una foto de la galería</text>
-  <text class="sub" x="48" y="80" data-fit="860">Baja como PhotoSource y sube como PickedPhoto. image_picker solo aparece en el último tramo.</text>
+  <text class="sub" x="48" y="80" data-fit="860">Baja como pick(), sin datos, y sube como PickedPhoto. image_picker solo aparece en el último tramo.</text>
   <path d="M120,144 V608" stroke="#D9DEE8" stroke-width="1.5" stroke-dasharray="4 4"/>
   <rect x="52" y="102" width="136" height="42" rx="8" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.75"/>
   <text class="mono" x="120" y="123.0" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7439B8" data-fit="124">ProfilePage</text>
@@ -284,11 +279,11 @@ class DevicePhotoDataSource {
   <path class="ar-violet" d="M120,186 H260"/>
   <text class="mono" x="192" y="178" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7439B8">AvatarChangeRequested</text>
   <path class="ar-amber" d="M264,226 H404"/>
-  <text class="mono" x="336" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">call(PhotoSource.gallery)</text>
+  <text class="mono" x="336" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">call()</text>
   <path class="ar-amber" d="M408,266 H548"/>
-  <text class="mono" x="480" y="258" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">pick(gallery)</text>
+  <text class="mono" x="480" y="258" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">pick()</text>
   <path class="ar-amber" d="M552,306 H692"/>
-  <text class="mono" x="624" y="298" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">pick(gallery)</text>
+  <text class="mono" x="624" y="298" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">pick()</text>
   <path class="ar-rose" d="M696,346 H836"/>
   <text class="mono" x="768" y="338" text-anchor="middle" font-size="11.5" font-weight="700" fill="#C2354F">pickImage(ImageSource.gallery)</text>
   <path class="ar-rose" d="M840,386 H700" stroke-dasharray="6 4"/>
@@ -309,10 +304,10 @@ class DevicePhotoDataSource {
 </svg>
 ```
 
-La petición baja como `PhotoSource.gallery` y la foto sube como `PickedPhoto`. `ImageSource` y `XFile` solo aparecen en el último tramo, entre el `DataSource` y el teléfono. El caso de uso se lee sin saber de dónde salió la foto:
+La petición baja sin datos, como `pick()`, y la foto sube como `PickedPhoto`. `ImageSource` y `XFile` solo aparecen en el último tramo, entre el `DataSource` y el teléfono. El caso de uso se lee sin saber de dónde salió la foto:
 
 ```dart
-final photo = await _avatars.pick(source);
+final photo = await _avatars.pick();
 if (photo == null) return null;
 ```
 
@@ -320,4 +315,4 @@ Para él, `null` significa que la persona canceló. Si no canceló, sigue con lo
 
 ## ¿Y si llamo a image_picker desde el botón?
 
-Funciona, pero entonces el `XFile` tiene que viajar por el evento, el `Bloc` y el caso de uso, y todo el camino queda atado a la librería. Además, el widget hace dos trabajos: dibujar y hablar con el sistema. Con la librería en su `DataSource`, el botón solo dice *galería* o *cámara*, y cambiar de librería, o simularla en una prueba, toca un solo archivo.
+Funciona, pero entonces el `XFile` tiene que viajar por el evento, el `Bloc` y el caso de uso, y todo el camino queda atado a la librería. Además, el widget hace dos trabajos: dibujar y hablar con el sistema. Con la librería en su `DataSource`, el botón solo lanza el evento, y cambiar de librería, o simularla en una prueba, toca un solo archivo.

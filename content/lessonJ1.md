@@ -4,7 +4,7 @@
      maxWidth e imageQuality, NSCameraUsageDescription, MissingPluginException,
      camera_access_denied, Camera not available, foto de la galería -->
 
-Antes de guardar una foto en la nube hay que conseguirla. `image_picker` abre la galería o la cámara del sistema y te devuelve la foto elegida. Esta lección termina con los bytes de la foto en memoria y una vista previa en pantalla. Subirlos es la siguiente.
+Antes de guardar una foto en la nube hay que conseguirla. `image_picker` abre la galería del sistema, o la cámara, y te devuelve la foto elegida. En el curso usamos la galería. Esta lección termina con los bytes de la foto en memoria y una vista previa en pantalla. Subirlos es la siguiente.
 
 ## Instalar
 
@@ -78,15 +78,15 @@ flutter pub add image_picker
 </svg>
 ```
 
-`pickImage` abre una pantalla que no es tuya: la galería o la cámara del sistema. Cuando la persona elige, recibes un `XFile`. Si cancela, recibes `null`, y eso no es un error: simplemente no hay foto.
+`pickImage` abre una pantalla que no es tuya: la galería del sistema. Cuando la persona elige, recibes un `XFile`. Si cancela, recibes `null`, y eso no es un error: simplemente no hay foto.
 
 ```dart
 final ImagePicker _picker = ImagePicker();
 Uint8List? _bytes;
 
-Future<void> _pick(ImageSource source) async {
+Future<void> _pickFromGallery() async {
   final file = await _picker.pickImage(
-    source: source,
+    source: ImageSource.gallery,
     maxWidth: 512,
     maxHeight: 512,
     imageQuality: 80,
@@ -114,20 +114,21 @@ Column(
         child: Image.memory(_bytes!, fit: BoxFit.cover),
       ),
     ElevatedButton.icon(
-      onPressed: () => _pick(ImageSource.gallery),
+      onPressed: () => _pickFromGallery(),
       icon: const Icon(Icons.photo_library_outlined),
       label: const Text('Elegir de la galería'),
-    ),
-    ElevatedButton.icon(
-      onPressed: () => _pick(ImageSource.camera),
-      icon: const Icon(Icons.photo_camera_outlined),
-      label: const Text('Tomar una foto'),
     ),
   ],
 )
 ```
 
 `Image.memory` pinta la foto a partir de los bytes, sin red. El `Container` con `clipBehavior` la recorta en círculo.
+
+## La cámara
+
+Para tomar la foto en vez de elegirla, cambia `ImageSource.gallery` por `ImageSource.camera`. Es lo único que cambia.
+
+`image_picker` no le pregunta a la persona si quiere galería o cámara: abre la que le digas. Si la app ofrece las dos, la pregunta la hace la app, por ejemplo con dos botones. En el laboratorio usamos solo la galería, que funciona igual en el simulador y en el teléfono.
 
 ## Qué pide cada plataforma
 
@@ -179,7 +180,7 @@ Column(
 </svg>
 ```
 
-En iOS, agrega estas dos llaves dentro del `<dict>` de `ios/Runner/Info.plist`. El texto es el que el sistema le muestra a la persona cuando le pide permiso:
+En iOS, agrega estas llaves dentro del `<dict>` de `ios/Runner/Info.plist`: la de fotos para la galería, y la de cámara solo si también la usas. El texto es el que el sistema le muestra a la persona cuando le pide permiso:
 
 ```xml
 <key>NSPhotoLibraryUsageDescription</key>
@@ -201,3 +202,7 @@ En macOS, en `macos/Runner/DebugProfile.entitlements` y en `Release.entitlements
 - **La app se cierra en iOS al abrir la cámara**. Falta `NSCameraUsageDescription` en `Info.plist`.
 - **`PlatformException(camera_access_denied)`** o **`photo_access_denied`**. La persona negó el permiso. Atrápalo con `on PlatformException` y dile cómo activarlo en los ajustes.
 - **«Camera not available.» en el simulador de iOS**. El simulador no tiene cámara: prueba la galería ahí y la cámara en un teléfono.
+
+## Y en una app con capas
+
+Aquí `image_picker` se llama desde el widget, para verlo funcionar. En el laboratorio no se queda ahí: va en un `DataSource`, y el resto de la app recibe solo los bytes. Por qué, en *image_picker desde Clean Architecture*.
