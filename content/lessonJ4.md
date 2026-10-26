@@ -1,6 +1,6 @@
 # Laboratorio 7 · Fotos en el muro
 
-<!-- tags: ChangeAvatarUseCase, createSignedUrlsResult, seed buckets --linked, bucket público y privado,
+<!-- tags: ChangeAvatarUseCase, createSignedUrl, seed buckets --linked, bucket público y privado,
      avatar_path, image_path, UnimplementedError, PublishPostUseCase con foto,
      Object not found, new row violates row-level security policy, qué va en cada capa -->
 
@@ -166,7 +166,7 @@ npx supabase migration list
 ## Lo que ya viene
 
 ```svg
-<svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 924" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="stLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 958" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabCarpetas-ttl stLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="stLabCarpetas-ttl">La estructura de carpetas</title>
   <desc id="stLabCarpetas-dsc">Árbol de carpetas del proyecto Apps262Lab7. Ya vienen el componente Avatar, las entidades, los contratos y toda la interfaz. Marcados con 1, los archivos de la parte 1: ChangeAvatarUseCase, los dos data sources de la foto, AvatarRepositoryImpl, el data source de perfiles, el de posts, FeedBloc y el botón de HomeScreen. Marcados con 2, los de la parte 2: PickPostImageUseCase, PublishPostUseCase, el data source de imágenes de posts, PostRepositoryImpl, el data source de posts, ComposeBloc y el botón de ComposeScreen.</desc>
   <defs>
@@ -183,10 +183,10 @@ npx supabase migration list
       <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
     </marker>
   </defs>
-  <rect width="960" height="924" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="958" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">La estructura de carpetas</text>
   <text class="sub" x="48" y="80" data-fit="860">En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.</text>
-  <rect x="48" y="96" width="864" height="768" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="48" y="96" width="864" height="802" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect x="68" y="111" width="50" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
   <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="36">lib/</text>
   <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
@@ -245,46 +245,51 @@ npx supabase migration list
   <text class="mono" x="150" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="194">publish_post_usecase.dart</text>
   <text x="568" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Del Lab 6 · subir la foto</text>
   <circle cx="886" cy="566" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="566" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
-  <path d="M102,205 V600 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="587" width="102" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="126" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="88">posts/data/</text>
-  <path d="M126,613 V634 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="621" width="298" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="284">source/supabase_post_data_source.dart</text>
-  <text x="568" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">avatar_path · image_path firmado</text>
-  <rect x="846" y="623" width="52" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="872" y="634" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2</text>
-  <path d="M126,613 V668 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="655" width="342" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="668" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="328">source/supabase_post_image_data_source.dart</text>
-  <text x="568" y="668" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">upload · vacío</text>
-  <circle cx="886" cy="668" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="668" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
-  <path d="M126,613 V702 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="140" y="689" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="150" y="702" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="276">repository/post_repository_impl.dart</text>
-  <text x="568" y="702" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">pickImage y uploadImage · vacíos</text>
+  <path d="M126,511 V600 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="587" width="388" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="150" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="374">get_feed_usecase.dart · get_my_posts_usecase.dart</text>
+  <text x="568" y="600" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Del Lab 6 · la URL de cada imagen</text>
+  <circle cx="886" cy="600" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="600" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M102,205 V634 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="621" width="102" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="126" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="88">posts/data/</text>
+  <path d="M126,647 V668 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="655" width="298" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="668" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="284">source/supabase_post_data_source.dart</text>
+  <text x="568" y="668" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">avatar_path · image_path</text>
+  <rect x="846" y="657" width="52" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="872" y="668" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2</text>
+  <path d="M126,647 V702 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="689" width="342" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="702" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="328">source/supabase_post_image_data_source.dart</text>
+  <text x="568" y="702" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">upload y signedUrl · vacíos</text>
   <circle cx="886" cy="702" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="702" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
-  <path d="M102,205 V736 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="723" width="222" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="736" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="208">home/ui/bloc/feed_bloc.dart</text>
-  <text x="568" y="736" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">el on de la foto solo imprime</text>
-  <circle cx="886" cy="736" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="736" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
+  <path d="M126,647 V736 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="140" y="723" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="150" y="736" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="276">repository/post_repository_impl.dart</text>
+  <text x="568" y="736" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">pickImage, uploadImage, imageUrl · vacíos</text>
+  <circle cx="886" cy="736" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="736" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
   <path d="M102,205 V770 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="757" width="260" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="246">home/ui/screens/home_screen.dart</text>
-  <text x="568" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">onChangePhoto: () {}</text>
+  <rect x="116" y="757" width="222" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="770" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="208">home/ui/bloc/feed_bloc.dart</text>
+  <text x="568" y="770" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">el on de la foto solo imprime</text>
   <circle cx="886" cy="770" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="770" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
   <path d="M102,205 V804 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="791" width="268" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="804" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="254">compose/ui/bloc/compose_bloc.dart</text>
-  <text x="568" y="804" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">los on de la foto solo imprimen</text>
-  <circle cx="886" cy="804" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="804" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <rect x="116" y="791" width="260" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="804" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="246">home/ui/screens/home_screen.dart</text>
+  <text x="568" y="804" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">onChangePhoto: () {}</text>
+  <circle cx="886" cy="804" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="804" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
   <path d="M102,205 V838 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="825" width="305" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
-  <text class="mono" x="126" y="838" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="291">compose/ui/screens/compose_screen.dart</text>
-  <text x="568" y="838" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Agregar foto: () {}</text>
+  <rect x="116" y="825" width="268" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="838" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="254">compose/ui/bloc/compose_bloc.dart</text>
+  <text x="568" y="838" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">los on de la foto solo imprimen</text>
   <circle cx="886" cy="838" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="838" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
+  <path d="M102,205 V872 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="859" width="305" height="26" rx="4" fill="#F4EBFF" stroke="#C9A6EE" stroke-width="1.5"/>
+  <text class="mono" x="126" y="872" dy="0.35em" font-size="12.5" font-weight="600" fill="#7439B8" data-fit="291">compose/ui/screens/compose_screen.dart</text>
+  <text x="568" y="872" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">Agregar foto: () {}</text>
+  <circle cx="886" cy="872" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="872" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">2</text>
   <text class="h" x="898" y="88" text-anchor="end">PARTE</text>
-  <text class="foot" x="48" y="896" data-fit="860">main.dart no cambia: cada Bloc crea sus casos de uso, y cada capa crea la siguiente.</text>
+  <text class="foot" x="48" y="930" data-fit="860">main.dart no cambia: cada Bloc crea sus casos de uso, y cada capa crea la siguiente.</text>
 </svg>
 ```
 
@@ -723,7 +728,7 @@ Corre la app, toca la cámara del perfil y elige una foto.
 </svg>
 ```
 
-Del paso 11 al 15. Reutiliza lo de la parte 1: el mismo data source del teléfono y el mismo patrón de subida. Lo nuevo es que este bucket es **privado**: las imágenes se muestran con URLs firmadas, y para no hacer una petición por post se firman todas juntas.
+Del paso 11 al 15. Reutiliza lo de la parte 1: el mismo data source del teléfono y el mismo patrón de subida. Lo nuevo es que este bucket es **privado**: la base de datos guarda el path de cada imagen, y para mostrarla hay que pedir una URL firmada. Eso lo hace el caso de uso: trae los posts y completa cada uno con la URL de su imagen.
 
 ## Paso 11 · El bucket post-images
 
@@ -756,7 +761,17 @@ npx supabase db push
 
 ## Paso 12 · Los datos
 
-`posts/data/source/supabase_post_image_data_source.dart` es igual al `upload` del paso 4, con `bucket = 'post-images'`.
+`posts/data/source/supabase_post_image_data_source.dart` tiene dos métodos. `upload` es igual al del paso 4, con `bucket = 'post-images'`. `signedUrl` pide a Storage una URL firmada para un path:
+
+```dart
+Future<String> signedUrl(String path) async {
+  try {
+    return await _client.storage.from(bucket).createSignedUrl(path, 3600);
+  } on StorageException catch (e) {
+    throw Exception(e.message);
+  }
+}
+```
 
 En `posts/data/repository/post_repository_impl.dart`, crea dos campos más y delega en ellos. El data source del teléfono es el mismo de la parte 1:
 
@@ -766,51 +781,42 @@ final SupabasePostImageDataSource _images =
     SupabasePostImageDataSource();
 ```
 
-`pickImage` va a `_device.pick`, y `uploadImage` a `_images.upload`.
+`pickImage` va a `_device.pick`, `uploadImage` a `_images.upload` e `imageUrl` a `_images.signedUrl`.
 
-En `posts/data/source/supabase_post_data_source.dart`, `create` agrega `'image_path': imagePath` al `insert`, y las columnas piden `image_path`:
+En `posts/data/source/supabase_post_data_source.dart`, `create` agrega `'image_path': imagePath` al `insert`, las columnas piden `image_path` y `_toPost` lo pasa a la entidad tal cual, sin firmarlo:
 
 ```dart
 'id, content, image_path, created_at, '
 ```
 
-Para mostrar las imágenes, agrega un método que firma una lista de paths en una sola petición y devuelve el mapa path → URL:
-
 ```dart
-Future<Map<String, String>> _sign(
-  String bucket,
-  List<String?> paths,
-) async {
-  final unique = paths.whereType<String>().toSet().toList();
-  if (unique.isEmpty) return {};
-  try {
-    final results = await _client.storage
-        .from(bucket)
-        .createSignedUrlsResult(unique, 3600);
-    return {
-      for (final result in results)
-        if (result is SignedUrlSuccess) result.path: result.signedUrl,
-    };
-  } on StorageException catch (e) {
-    throw Exception(e.message);
-  }
-}
+imagePath: row['image_path'] as String?,
 ```
 
-`_toPosts` ya existe y es por donde pasan todas las filas. Haz que firme las imágenes antes de convertirlas:
-
-```dart
-Future<List<Post>> _toPosts(List<Map<String, dynamic>> rows) async {
-  final images = await _sign('post-images', [
-    for (final row in rows) row['image_path'] as String?,
-  ]);
-  return [for (final row in rows) _toPost(row, images)];
-}
-```
-
-`_toPost` recibe el mapa y saca de ahí la URL de su imagen: `imageUrl: images[row['image_path']]`. Un post sin imagen da `null` y `PostCard` no la pinta.
+El data source no arma la URL: solo trae lo que hay en la tabla.
 
 ## Paso 13 · Los casos de uso
+
+`GetFeedUseCase` y `GetMyPostsUseCase` traen los posts de la base de datos y después completan cada uno con la URL de su imagen. En `posts/domain/usecases/get_feed_usecase.dart`:
+
+```dart
+Future<List<Post>> call({required int page, required int size}) async {
+  final posts = await _posts.fetchFeed(page: page, size: size);
+  return Future.wait(posts.map(_withImage));
+}
+
+Future<Post> _withImage(Post post) async {
+  final path = post.imagePath;
+  if (path == null) return post;
+  return post.copyWith(imageUrl: await _posts.imageUrl(path));
+}
+```
+
+- `_withImage` deja igual el post sin imagen. Al que tiene, le pide la URL al repositorio y la pone con `copyWith`.
+- `Future.wait` pide todas las URL de la página al mismo tiempo, en vez de esperar una por una.
+- El caso de uso no sabe que la URL es firmada: solo pide `imageUrl`. Cómo se obtiene es asunto de la capa de datos.
+
+`GetMyPostsUseCase` es igual, con `fetchMine(limit: limit)`.
 
 `posts/domain/usecases/pick_post_image_usecase.dart` pide la foto y revisa su peso:
 
@@ -893,3 +899,4 @@ onPressed: () =>
 - **Quitar la foto de perfil.** Un botón que borra el archivo y deja `avatar_path` en `null`.
 - **Caché en disco.** Cambia `Image.network` por `cached_network_image`. ¿Sirve de algo con URLs firmadas que cambian cada vez?
 - **Borrar un post con imagen.** Al borrar el post, borra también su archivo del bucket.
+- **Firmar en lote.** El muro pide una URL por imagen. Con `createSignedUrlsResult(paths, 3600)`, Storage firma todos los paths de la página en una sola petición.

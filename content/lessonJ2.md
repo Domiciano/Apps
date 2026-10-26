@@ -2,7 +2,7 @@
 
 <!-- tags: storage.buckets en config.toml, supabase seed buckets, bucket público y privado,
      getPublicUrl, createSignedUrl, uploadBinary, avatar_path, Object not found,
-     new row violates row-level security policy, createSignedUrlsResult,
+     new row violates row-level security policy, URL firmada,
      exp claim timestamp check failed, StorageException -->
 
 Ya tienes los bytes de una foto. En esta lección los guardas en un bucket, apuntas el perfil a ellos y los muestras. Se usan dos buckets, los mismos del laboratorio: `avatars`, **público**, para las fotos de perfil, y `post-images`, **privado**, para las imágenes de los posts. Son seis pasos, en el orden en que se hacen.
@@ -261,19 +261,7 @@ final url = await _client.storage
     .createSignedUrl(path, 3600);
 ```
 
-El `3600` son los segundos que vale la URL. Para una lista, como las imágenes de una página del muro, se firman todas en una sola petición:
-
-```dart
-final results = await _client.storage
-    .from('post-images')
-    .createSignedUrlsResult(paths, 3600);
-final urls = {
-  for (final result in results)
-    if (result is SignedUrlSuccess) result.path: result.signedUrl,
-};
-```
-
-Cada resultado es un `SignedUrlSuccess` o un `SignedUrlFailure`, si ese archivo no existe. El mapa queda con path → URL, y lo que falló no está. `createSignedUrls`, sin `Result`, quedó obsoleto.
+El `3600` son los segundos que vale la URL. Para una lista, como las imágenes de una página del muro, se pide una URL por imagen. Storage también puede firmar varios paths en una sola petición con `createSignedUrlsResult`, pero no hace falta para empezar.
 
 Cada firma es una URL distinta, así que ninguna caché la reconoce y la imagen se descarga cada vez que firmas. Firma al cargar la pantalla, no en cada `build`.
 

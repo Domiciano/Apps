@@ -172,7 +172,8 @@ de «Laboratorio 5 a nivel conceptual» (0090), se usa igual y reutiliza los ayu
 «Acceso a galería y cámara» (0066), «Subir y mostrar archivos con Supabase Storage» (0067),
 «image_picker desde Clean Architecture» (0093) y «Laboratorio 7 · Fotos en el muro» (0069).
 **Buckets del curso**: `avatars` es público (fotos de perfil, `getPublicUrl`) y `post-images` es
-privado (imágenes de posts, URLs firmadas en lote con `createSignedUrlsResult`). Se declaran en
+privado (imágenes de posts: la tabla guarda `image_path` y los casos de uso del muro piden una URL firmada
+por imagen con `imageUrl` → `createSignedUrl`). Se declaran en
 `supabase/config.toml` (`[storage.buckets.<id>]`), se crean con `npx supabase seed buckets --linked` y
 se abren con una sola política `for all to authenticated` por bucket. El círculo
 de Clean de la 0093 usa la misma convención de anillos que el simulador `register-clean`. Reutiliza `table` y `legend` de `database_figuras.py`.
