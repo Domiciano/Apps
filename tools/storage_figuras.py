@@ -1,5 +1,6 @@
 """Figuras SVG de la sección Storage: «Storage, CDN y caché» (0092), «Acceso a galería y cámara» (0066),
-«Subir y mostrar archivos con Supabase Storage» (0067) y «Laboratorio 7 · Foto de perfil» (0069).
+«Subir y mostrar archivos con Supabase Storage» (0067), «image_picker desde Clean Architecture» (0093)
+y «Laboratorio 7 · Foto de perfil» (0069).
 
     python3 tools/storage_figuras.py <carpeta>     escribe un .svg por figura, para revisarlas
     python3 tools/storage_figuras.py --inject      reemplaza cada bloque ```svg de las cuatro lecciones
@@ -10,6 +11,7 @@ Colores: la base de datos en índigo, Storage en verde azulado, el CDN en violet
 lo que se crea en verde y lo que se borra o falla en rosa.
 """
 
+import math
 import pathlib
 import re
 import sys
@@ -19,7 +21,7 @@ from bloc_figuras import FAM, chip, head, note, phone, tail  # noqa: E402
 from database_figuras import legend, table  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-LESSONS = ['lessonJ0.md', 'lessonJ1.md', 'lessonJ2.md', 'lessonJ4.md']
+LESSONS = ['lessonJ0.md', 'lessonJ1.md', 'lessonJ2.md', 'lessonJ2clean.md', 'lessonJ4.md']
 FIGS = {}
 UID = '3f2a9c1e'
 OLD = '9c1e7b20'
@@ -494,6 +496,206 @@ def st_politicas():
 
 
 FIGS['stPoliticas'] = st_politicas
+
+
+# ───────────────────────── 0093 · image_picker desde Clean Architecture ─────────────────────────
+
+KIND = {'view': ('#F4EBFF', '#C9A6EE', '#7439B8'), 'dom': ('#FFF3DC', '#F0C572', '#A96C05'),
+        'contract': ('#FFFFFF', '#F0C572', '#A96C05'), 'entity': ('#FFFFFF', '#E3B95A', '#8A5A04'),
+        'data': ('#E3F6F3', '#86D3CA', '#0F8478'), 'ext': ('#F4F5F8', '#9AA1B2', '#454C61'),
+        'lib': ('#FFEBEF', '#F3A3B2', '#C2354F')}
+
+
+def node(cx, cy, w, kind, text, h=30, fs=12.5, mono=True):
+    soft, border, strong = KIND[kind]
+    cls = 'class="mono" ' if mono else ''
+    return (f'  <rect x="{cx-w/2:.0f}" y="{cy-h/2:.0f}" width="{w}" height="{h}" rx="8" fill="{soft}" stroke="{border}" stroke-width="1.75"/>'
+            f'<text {cls}x="{cx:.0f}" y="{cy:.0f}" dy="0.35em" text-anchor="middle" font-size="{fs}" font-weight="700" fill="{strong}" data-fit="{w-12}">{text}</text>\n')
+
+
+def arc_label(fid, key, cx, cy, r, a1, a2, text, ink, size=16):
+    """Texto curvo sobre un anillo, de a1 a a2 en grados (0 a la derecha, positivo hacia abajo)."""
+    x1, y1 = cx + r * math.cos(math.radians(a1)), cy + r * math.sin(math.radians(a1))
+    x2, y2 = cx + r * math.cos(math.radians(a2)), cy + r * math.sin(math.radians(a2))
+    sweep = 1 if a2 > a1 else 0
+    pid = f'{fid}-arc-{key}'
+    return (f'  <path id="{pid}" d="M{x1:.1f},{y1:.1f} A{r},{r} 0 0 {sweep} {x2:.1f},{y2:.1f}" fill="none"/>'
+            f'<text font-size="{size}" font-weight="700" letter-spacing=".02em" fill="{ink}">'
+            f'<textPath href="#{pid}" startOffset="50%" text-anchor="middle">{text}</textPath></text>\n')
+
+
+def cl_preguntas():
+    fid, h = 'clPreguntas', 412
+    s = head(fid, h, 'Tres preguntas antes de usar una librería', 'Tres preguntas antes de usar una librería',
+             'Sirven para cualquier paquete. Aquí, respondidas para image_picker.',
+             'Tres tarjetas. Una: ¿con qué habla fuera de tu código? Con la galería y la cámara del sistema, así que va en '
+             'un DataSource, en el anillo de afuera. Dos: ¿qué tipos propios trae? XFile e ImageSource, que se quedan en '
+             'ese DataSource; el dominio define los suyos, PickedPhoto y PhotoSource. Tres: ¿qué necesita de verdad el '
+             'caso de uso? Los bytes de la foto y su extensión, que es lo único que cruza al dominio.')
+    cards = [
+        ('slate', '¿Con qué habla fuera', 'de tu código?', 'Con la galería y la cámara', 'del sistema del teléfono.',
+         'teal', 'Va en un DataSource,', 'en el anillo de afuera.'),
+        ('slate', '¿Qué tipos propios', 'trae?', 'XFile e ImageSource.', '',
+         'rose', 'Se quedan en ese DataSource.', 'El dominio define los suyos.'),
+        ('slate', '¿Qué necesita de verdad', 'el caso de uso?', 'Los bytes de la foto', 'y su extensión.',
+         'amber', 'PickedPhoto y PhotoSource:', 'lo único que cruza.'),
+    ]
+    w, gap = 272, 24
+    for i, (_, q1, q2, a1, a2, color, c1, c2) in enumerate(cards):
+        soft, border, strong = FAM[color]
+        x = 48 + i * (w + gap)
+        s += f'  <rect x="{x}" y="108" width="{w}" height="248" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>\n'
+        s += '  ' + chip(x + 28, 138, i + 1, 'slate')
+        s += f'  <text x="{x+50}" y="134" font-size="14.5" font-weight="700" fill="#161A26">{q1}</text>\n'
+        s += f'  <text x="{x+50}" y="154" font-size="14.5" font-weight="700" fill="#161A26">{q2}</text>\n'
+        s += f'  <text class="h" x="{x+20}" y="194">CON IMAGE_PICKER</text>\n'
+        s += f'  <text x="{x+20}" y="218" font-size="13" fill="#454C61" data-fit="{w-40}">{a1}</text>\n'
+        if a2:
+            s += f'  <text x="{x+20}" y="237" font-size="13" fill="#454C61" data-fit="{w-40}">{a2}</text>\n'
+        s += f'  <rect x="{x+12}" y="272" width="{w-24}" height="68" rx="10" fill="{soft}" stroke="{border}" stroke-width="1.5"/>\n'
+        s += f'  <text x="{x+26}" y="298" font-size="13" font-weight="700" fill="{strong}" data-fit="{w-52}">{c1}</text>\n'
+        s += f'  <text x="{x+26}" y="320" font-size="13" font-weight="700" fill="{strong}" data-fit="{w-52}">{c2}</text>\n'
+    return s + tail(h, 'supabase_flutter responde igual: habla con Supabase, trae PostgrestException y StorageException, y vive en sus DataSource.')
+
+
+FIGS['clPreguntas'] = cl_preguntas
+
+
+def cl_circulo():
+    fid, h = 'clCirculo', 990
+    cx, cy = 480, 500
+    s = head(fid, h, 'Dónde va cada pieza', 'Dónde va cada pieza',
+             'image_picker y supabase_flutter quedan en el borde. El centro no sabe que existen.',
+             'El diagrama circular de arquitectura limpia con cuatro anillos: afuera, en azul, Devices, UI y DB; luego, en verde, '
+             'Presenters y Gateways; luego, en rojo, Use Cases; y en el centro, en amarillo, Entities. En una línea vertical, de '
+             'arriba abajo: ProfilePage en UI, FeedBloc en Presenters, ChangeAvatarUseCase en Use Cases, PhotoSource y '
+             'PickedPhoto en Entities, el contrato AvatarRepository en Use Cases y AvatarRepositoryImpl en Gateways. Abajo, en '
+             'el anillo de afuera, DevicePhotoDataSource y SupabaseAvatarDataSource. Fuera del círculo, la galería y la cámara '
+             'del teléfono, a la que se llega con image_picker, y Supabase Storage, a la que se llega con supabase_flutter.')
+    for r, fill in [(380, '#6E93EC'), (282, '#6EE98A'), (182, '#EE7070'), (90, '#ECEE72')]:
+        s += f'  <circle cx="{cx}" cy="{cy}" r="{r}" fill="#FFFFFF"/><circle cx="{cx}" cy="{cy}" r="{r}" fill="{fill}" fill-opacity="0.42" stroke="#FFFFFF" stroke-width="2"/>\n'
+    for key, r, a1, a2, text, ink in [
+        ('ui', 352, -150, -118, 'UI', '#1E2A55'), ('dev', 350, 162, 136, 'Devices', '#1E2A55'),
+        ('db', 350, 64, 50, 'DB', '#1E2A55'), ('pre', 252, -162, -122, 'Presenters', '#1B4D2A'),
+        ('gw', 252, 160, 126, 'Gateways', '#1B4D2A'), ('uc', 150, -172, -120, 'Use Cases', '#5A1A1A'),
+    ]:
+        s += arc_label(fid, key, cx, cy, r, a1, a2, text, ink)
+    s += f'  <text x="{cx}" y="{cy+64}" text-anchor="middle" font-size="16" font-weight="700" fill="#4F4F14">Entities</text>\n'
+    ds_y = cy + 318
+    links = [(cy - 315, cy - 247), (cy - 217, cy - 151), (cy - 121, cy - 33), (cy + 33, cy + 121), (cy + 151, cy + 217)]
+    for y1, y2 in links:
+        s += f'  <path d="M{cx},{y1} V{y2}" stroke="#556074" stroke-width="1.5"/>\n'
+    s += f'  <path d="M{cx},{cy+247} V{cy+272} H{cx-95} V{ds_y-15}" fill="none" stroke="#556074" stroke-width="1.5"/>\n'
+    s += f'  <path d="M{cx},{cy+272} H{cx+95} V{ds_y-15}" fill="none" stroke="#556074" stroke-width="1.5"/>\n'
+    s += node(cx, cy - 330, 150, 'view', 'ProfilePage')
+    s += node(cx, cy - 232, 130, 'view', 'FeedBloc')
+    s += node(cx, cy - 136, 200, 'dom', 'ChangeAvatarUseCase')
+    s += node(cx, cy - 18, 136, 'entity', 'PhotoSource')
+    s += node(cx, cy + 18, 136, 'entity', 'PickedPhoto')
+    s += node(cx, cy + 136, 170, 'contract', 'AvatarRepository')
+    s += node(cx, cy + 232, 200, 'data', 'AvatarRepositoryImpl')
+    s += node(cx - 95, ds_y, 182, 'data', 'DevicePhotoDataSource', fs=11.5)
+    s += node(cx + 95, ds_y, 182, 'data', 'SupabaseAvatarDataSource', fs=11.5)
+    by = 918
+    for x, name, lib in [(cx - 300, 'Teléfono · galería y cámara', 'image_picker'),
+                         (cx + 60, 'Supabase Storage', 'supabase_flutter')]:
+        s += f'  <rect x="{x}" y="{by}" width="240" height="44" rx="12" fill="#F4F5F8" stroke="#9AA1B2" stroke-width="1.5" stroke-dasharray="6 4"/>\n'
+        s += f'  <text x="{x+120}" y="{by+22}" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" fill="#454C61">{name}</text>\n'
+    for x1, x2, lib in [(cx - 95, cx - 180, 'image_picker'), (cx + 95, cx + 180, 'supabase_flutter')]:
+        s += f'  <path d="M{x1},{ds_y+15} V{ds_y+52} H{x2} V{by-2}" fill="none" stroke="#C2354F" stroke-width="1.75" stroke-dasharray="5 4"/>\n'
+        lx = x2 + (-8 if x2 < cx else 8)
+        anchor = 'end' if x2 < cx else 'start'
+        s += f'  <text class="mono" x="{lx}" y="{by-14}" text-anchor="{anchor}" font-size="12.5" font-weight="700" fill="#C2354F">{lib}</text>\n'
+    s += f'  <text x="48" y="{by+22}" dy="0.35em" font-size="12" fill="#79809A">fuera de la app</text>\n'
+    return s + '</svg>\n'
+
+
+FIGS['clCirculo'] = cl_circulo
+
+
+def cl_frontera():
+    fid, h = 'clFrontera', 476
+    s = head(fid, h, 'La frontera: cada lado habla su idioma', 'La frontera: cada lado habla su idioma',
+             'DevicePhotoDataSource traduce en los dos sentidos. Los tipos de image_picker no pasan de ahí.',
+             'A la izquierda, DevicePhotoDataSource, en la capa de datos: es el único archivo con el import de image_picker y '
+             'usa ImageSource y XFile. A la derecha, el dominio, sin ningún import de image_picker: usa PhotoSource y '
+             'PickedPhoto. En medio, una línea punteada: la frontera. Hacia adentro, PhotoSource.gallery se traduce a '
+             'ImageSource.gallery. Hacia afuera, el XFile se traduce a un PickedPhoto con los bytes y la extensión.',
+             colors=('rose', 'amber'))
+    s += panel(48, 104, 404, 300, 'teal', 'DevicePhotoDataSource · datos')
+    s += panel(560, 104, 352, 300, 'amber', 'Dominio')
+    s += '  <path d="M506,96 V412" stroke="#9AA1B2" stroke-width="2" stroke-dasharray="7 5"/>\n'
+    s += '  <text class="h" x="506" y="430" text-anchor="middle">LA FRONTERA</text>\n'
+    s += code_bar(64, 160, 372, "import 'package:image_picker/…';", h=32)
+    s += code_bar(576, 160, 320, '<tspan fill="#9AA1B2">sin imports de image_picker</tspan>', h=32)
+    rows = [(236, 'ImageSource.gallery', 'PhotoSource.gallery', 'entra', 'ar-amber', True),
+            (330, 'XFile', 'PickedPhoto(bytes, extension)', 'sale', 'ar-rose', False)]
+    for y, left, right, verb, cls, inward in rows:
+        s += node(250, y, 220, 'lib', left)
+        s += node(736, y, 300, 'dom', right)
+        if inward:
+            s += f'  <path class="ar-amber" d="M584,{y} H364"/>\n'
+        else:
+            s += f'  <path class="ar-rose" d="M362,{y} H584"/>\n'
+        s += f'  <rect x="410" y="{y-26}" width="126" height="20" rx="4" fill="#FBFBFD"/>\n'
+        s += f'  <text x="473" y="{y-12}" text-anchor="middle" font-size="12" font-weight="700" fill="#454C61">{verb} y se traduce</text>\n'
+    s += f'  <text x="64" y="384" font-size="12.5" fill="#454C61">Los tipos de la librería, en rosa.</text>\n'
+    s += f'  <text x="576" y="384" font-size="12.5" fill="#454C61">Los tipos propios, en ámbar.</text>\n'
+    return s + tail(h, 'Si mañana cambias image_picker por otra librería, solo cambia este archivo. El caso de uso ni se entera.')
+
+
+FIGS['clFrontera'] = cl_frontera
+
+
+def cl_viaje():
+    fid, h = 'clViaje', 668
+    s = head(fid, h, 'El viaje de una foto de la galería', 'El viaje de una foto de la galería',
+             'Baja como PhotoSource y sube como PickedPhoto. image_picker solo aparece en el último tramo.',
+             'Un diagrama de secuencia con seis columnas: ProfilePage, FeedBloc, ChangeAvatarUseCase, AvatarRepositoryImpl, '
+             'DevicePhotoDataSource y la galería del teléfono. Bajan, de izquierda a derecha: el evento AvatarChangeRequested con '
+             'PhotoSource.gallery, la llamada al caso de uso, pick en el repositorio, pick en el DataSource y pickImage con '
+             'ImageSource.gallery hacia la galería. Suben de vuelta: la galería devuelve un XFile, el DataSource lo convierte en '
+             'PickedPhoto y ese PickedPhoto llega al caso de uso, que sube la foto, guarda el path y borra la anterior. Luego '
+             'el caso de uso devuelve el Profile al Bloc, que emite el estado con la foto nueva para ProfilePage.',
+             colors=('amber', 'rose', 'violet', 'teal'))
+    cols = [('view', 'ProfilePage', ''), ('view', 'FeedBloc', ''), ('dom', 'ChangeAvatar', 'UseCase'),
+            ('data', 'AvatarRepository', 'Impl'), ('data', 'DevicePhoto', 'DataSource'), ('ext', 'Galería', '')]
+    xs = [120 + i * 144 for i in range(6)]
+    for x, (kind, l1, l2) in zip(xs, cols):
+        soft, border, strong = KIND[kind]
+        s += f'  <path d="M{x},144 V{h-60}" stroke="#D9DEE8" stroke-width="1.5" stroke-dasharray="4 4"/>\n'
+        s += f'  <rect x="{x-68}" y="102" width="136" height="42" rx="8" fill="{soft}" stroke="{border}" stroke-width="1.75"/>\n'
+        lines = [l1, l2] if l2 else [l1]
+        for i, ln in enumerate(lines):
+            ly = 123 + (i * 15 - 7.5 if l2 else 0)
+            s += f'  <text class="mono" x="{x}" y="{ly:.1f}" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="{strong}" data-fit="124">{ln}</text>\n'
+    msgs = [
+        (0, 1, 'AvatarChangeRequested', 'violet', False), (1, 2, 'call(PhotoSource.gallery)', 'amber', False),
+        (2, 3, 'pick(gallery)', 'amber', False), (3, 4, 'pick(gallery)', 'amber', False),
+        (4, 5, 'pickImage(ImageSource.gallery)', 'rose', False), (5, 4, 'XFile', 'rose', True),
+        (4, 3, 'PickedPhoto', 'amber', True), (3, 2, 'PickedPhoto', 'amber', True),
+        (2, 1, 'Profile', 'amber', True), (1, 0, 'FeedState(profile)', 'violet', True),
+    ]
+    y = 186
+    for k, (a, b, label, color, back) in enumerate(msgs):
+        _, _, strong = FAM[color]
+        x1, x2 = xs[a], xs[b]
+        dash = ' stroke-dasharray="6 4"' if back else ''
+        end = x2 - 4 if x2 > x1 else x2 + 4
+        s += f'  <path class="ar-{color}" d="M{x1},{y} H{end}"{dash}/>\n'
+        s += f'  <text class="mono" x="{(x1+x2)/2:.0f}" y="{y-8}" text-anchor="middle" font-size="11.5" font-weight="700" fill="{strong}">{label}</text>\n'
+        y += 40
+        if k == 7:
+            s += f'  <rect x="{xs[2]-120}" y="{y-14}" width="240" height="40" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>\n'
+            s += f'  <text x="{xs[2]}" y="{y+6}" dy="0.35em" text-anchor="middle" font-size="12" fill="#A96C05" font-weight="700">sube, apunta y borra · Storage</text>\n'
+            y += 52
+    s += legend(48, h - 30, 'amber', 'tipos del dominio')
+    s += legend(220, h - 30, 'rose', 'tipos de image_picker')
+    s += legend(420, h - 30, 'violet', 'eventos y estados del Bloc')
+    return s + '</svg>\n'
+
+
+FIGS['clViaje'] = cl_viaje
 
 
 # ───────────────────────── 0069 · Laboratorio 7 ─────────────────────────

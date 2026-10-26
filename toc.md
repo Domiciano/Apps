@@ -89,6 +89,7 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ0.md | Storage, CDN y caché | 0092
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ1.md | Acceso a galería y cámara | 0066
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ2.md | Subir y mostrar archivos con Supabase Storage | 0067
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ2clean.md | image_picker desde Clean Architecture | 0093
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ4.md | Laboratorio 7 · Foto de perfil | 0069
 [t] Realtime
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI1.md | Datos en Tiempo Real con Supabase | 0062
