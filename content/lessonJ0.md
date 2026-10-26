@@ -187,11 +187,11 @@ En la tabla se guarda el path, nunca la URL. La URL se arma con el path, y depen
 </svg>
 ```
 
-En un bucket **público** la URL es fija y cualquiera que la tenga ve el archivo, aunque no use la app. Sirve para lo que igual se muestra a todos, como el logo de una tienda. En uno **privado**, la app pide una **URL firmada**: lleva un token, vence y solo se entrega a quien pasa la política. En este curso las fotos van en buckets privados: solo las ve quien inició sesión.
+En un bucket **público** la URL es fija y cualquiera que la tenga ve el archivo, aunque no use la app. Sirve para lo que igual se muestra a todos, como el logo de una tienda. En uno **privado**, la app pide una **URL firmada**: lleva un token, vence y solo se entrega a quien pasa la política. En el laboratorio, las fotos de perfil van en un bucket público y las imágenes de los posts en uno privado.
 
 Ninguno de los dos deja subir sin permiso. Las políticas deciden quién escribe y quién borra en los dos casos.
 
-Una URL firmada cambia cada vez que se pide, así que ninguna caché la reconoce. Eso no vuelve inútil el nombre aleatorio: si la app guarda la URL mientras no vence, o si mañana el bucket pasa a ser público, el nombre que nunca se repite sigue siendo lo que evita la foto vieja.
+Una URL firmada cambia cada vez que se pide, así que ninguna caché la reconoce y la imagen se descarga de nuevo. Con una URL pública pasa lo contrario: es fija y todas las cachés la guardan. Ahí aparece el problema de las secciones siguientes.
 
 ## Qué hace un CDN
 

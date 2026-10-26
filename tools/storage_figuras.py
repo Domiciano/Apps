@@ -415,11 +415,11 @@ FIGS['stPermisos'] = st_permisos
 def st_subida():
     fid, h = 'stSubida', 556
     s = head(fid, h, 'Cambiar la foto: subir, apuntar, borrar', 'Cambiar la foto: subir, apuntar, borrar',
-             'Tres operaciones para cambiarla, en este orden, y una más para mostrarla: firmar su URL.',
+             'Tres operaciones contra dos servicios, en este orden. La URL para mostrarla se arma en el teléfono.',
              'Tres columnas: la app, el bucket avatars de Storage y la tabla profiles de Postgres. Paso 1: uploadBinary sube '
              'la foto nueva con un nombre aleatorio y aparece en el bucket. Paso 2: update cambia avatar_path de la fila al '
-             'path nuevo. Paso 3: remove borra el archivo anterior del bucket. Paso 4: createSignedUrl pide a Storage una URL '
-             'firmada que vence en una hora, y con ella Image.network descarga la foto.',
+             'path nuevo. Paso 3: remove borra el archivo anterior del bucket. Paso 4: getPublicUrl arma la URL en el teléfono '
+             'e Image.network la descarga.',
              colors=('green', 'amber', 'rose', 'indigo'))
     s += '  <text class="h" x="48" y="118">LA APP</text>\n'
     s += '  <text class="h" x="560" y="118">STORAGE · avatars</text>\n'
@@ -430,7 +430,7 @@ def st_subida():
         ('green', '1', f"uploadBinary('{UID}/{NEW}.jpg', bytes)", 'storage'),
         ('amber', '2', f"update({{'avatar_path': '{UID}/{NEW}.jpg'}})", 'db'),
         ('rose', '3', f"remove(['{UID}/{OLD}.jpg'])", 'storage'),
-        ('indigo', '4', 'await createSignedUrl(path, 3600)', 'storage'),
+        ('indigo', '4', 'getPublicUrl(path) → Image.network(url)', 'local'),
     ]
     for k, (color, n, code, where) in enumerate(rows):
         soft, border, strong = FAM[color]
@@ -446,8 +446,6 @@ def st_subida():
             s += f'  <text x="512" y="{y+18}" dy="0.35em" font-size="12" fill="#4453C9">en el teléfono</text>\n'
     s += file_icon(566, 136, 'green', f'{NEW}….jpg', 'nuevo', w=170)
     s += file_icon(566, 292, 'rose', f'{OLD}….jpg', 'borrado', w=170, crossed=True)
-    s += f'  <text class="mono" x="566" y="392" font-size="11.5" font-weight="700" fill="#4453C9">…/sign/avatars/…?token</text>\n'
-    s += f'  <text x="566" y="410" font-size="11.5" fill="#454C61">URL que vence en una hora</text>\n'
     s += f'  <rect x="760" y="214" width="152" height="36" rx="8" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/>\n'
     s += f'  <text class="mono" x="770" y="226" dy="0.35em" font-size="11" fill="#79809A">avatar_path</text>\n'
     s += f'  <text class="mono" x="770" y="241" dy="0.35em" font-size="11.5" font-weight="700" fill="#A96C05">{UID}/{NEW}…</text>\n'
@@ -463,15 +461,15 @@ def st_regla():
     fid, h = 'stRegla', 452
     s = head(fid, h, 'Una sola regla para un bucket privado', 'Una sola regla para un bucket privado',
              'Un bucket privado empieza cerrado. Una política abre todo a quien inició sesión, y a nadie más.',
-             'A la izquierda, la política: for all, to authenticated, using y with check bucket_id igual a avatars. A la '
+             'A la izquierda, la política del bucket privado post-images: for all, to authenticated, using y with check bucket_id igual a post-images. A la '
              'derecha, dos columnas. Con sesión: subir, firmar una URL, ver la foto con esa URL y borrar, todo permitido. Sin '
              'sesión: subir responde 403, firmar responde Object not found y la URL pública responde 400. Abajo, lo que la '
-             'regla no distingue: cualquiera con sesión puede borrar la foto de otra persona.',
+             'regla no distingue: cualquiera con sesión puede borrar la imagen de otra persona.',
              colors=('green', 'rose'))
     s += f'  <rect x="48" y="108" width="400" height="200" rx="12" fill="#1F2430"/>\n'
-    lines = [('create policy "avatars: usuarios autenticados"', '#C9CFDA'), ('on storage.objects', '#C9CFDA'),
-             ('for all', '#F0C572'), ('to authenticated', '#86D3CA'), ("using (bucket_id = 'avatars')", '#A9B4F2'),
-             ("with check (bucket_id = 'avatars');", '#A9B4F2')]
+    lines = [('create policy "post-images: autenticados"', '#C9CFDA'), ('on storage.objects', '#C9CFDA'),
+             ('for all', '#F0C572'), ('to authenticated', '#86D3CA'), ("using (bucket_id = 'post-images')", '#A9B4F2'),
+             ("with check (bucket_id = 'post-images');", '#A9B4F2')]
     for k, (ln, col) in enumerate(lines):
         s += f'  <text class="mono" x="66" y="{138 + k*28}" font-size="12.5" fill="{col}" data-fit="364">{ln}</text>\n'
     for k, (color, text) in enumerate([('amber', 'for all · subir, ver, firmar y borrar'),
@@ -491,7 +489,7 @@ def st_regla():
             s += f'  <text class="mono" x="{x+14}" y="{y}" font-size="11.5" fill="#161A26" data-fit="180">{op}</text>\n'
             s += f'  <text x="{x+14}" y="{y+18}" font-size="12" font-weight="700" fill="{strong}" data-fit="180">{res}</text>\n'
     s += '  ' + note(480, 364, 432, 'amber', 'Lo que no distingue', [
-        'Cualquiera con sesión puede borrar la foto de otra persona.'])
+        'Cualquiera con sesión puede borrar la imagen de otra persona.'])
     return s + '</svg>\n'
 
 
@@ -755,9 +753,9 @@ FIGS['stLabPantallas'] = st_lab_pantallas
 def st_lab_modelo():
     fid, h = 'stLabModelo', 432
     s = head(fid, h, 'Lo que agrega la parte 1', 'Lo que agrega la parte 1',
-             'El bucket se declara en config.toml. La columna y la regla van en una migración.',
+             'Un bucket público, declarado en config.toml. La columna y la regla van en una migración.',
              'A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket '
-             'avatars declarado en config.toml: privado, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo '
+             'avatars declarado en config.toml: público, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo '
              'crea npx supabase seed buckets --linked. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.',
              colors=('amber',))
     t, c = table(48, 112, 360, 'indigo', 'profiles', [
@@ -766,7 +764,7 @@ def st_lab_modelo():
     s += t
     s += panel(456, 112, 456, 168, 'teal', 'bucket avatars')
     s += f'  <text class="mono" x="896" y="132" dy="0.35em" text-anchor="end" font-size="11.5" fill="#454C61">config.toml</text>\n'
-    for k, (badge_txt, text) in enumerate([('privado', 'solo con URL firmada'), ('2 MiB', 'tamaño máximo por archivo'),
+    for k, (badge_txt, text) in enumerate([('público', 'cualquiera lee por URL'), ('2 MiB', 'tamaño máximo por archivo'),
                                            ('jpeg · png · webp', 'los únicos tipos que acepta')]):
         y = 176 + k * 32
         s += badge(472, y, 'teal', badge_txt, 132)
@@ -776,7 +774,7 @@ def st_lab_modelo():
     s += code_bar(456, 328, 456, 'for all to authenticated · bucket_id = \'avatars\'', h=40)
     s += '  ' + note(48, 310, 360, 'amber', 'avatar_path empieza en null', [
         'Quien no ha subido foto no tiene path:', 'la app muestra la inicial del nombre.'])
-    return s + tail(h, 'La parte 2 repite lo mismo con un bucket post-images y una columna image_path en posts.')
+    return s + tail(h, 'La parte 2 repite lo mismo con un bucket privado, post-images, y una columna image_path en posts.')
 
 
 FIGS['stLabModelo'] = st_lab_modelo
@@ -795,12 +793,12 @@ def st_lab_carpetas():
         (3, 'source/supabase_avatar_data_source.dart', 'teal', 'upload y remove · vacíos', '1'),
         (3, 'repository/avatar_repository_impl.dart', 'teal', 'los tres · vacíos', '1'),
         (2, 'auth/data/', 'slate', 'Ya viene: el Laboratorio 5', ''),
-        (3, 'source/supabase_profile_data_source.dart', 'teal', 'updateAvatarPath vacío · URL firmada', '1'),
+        (3, 'source/supabase_profile_data_source.dart', 'teal', 'updateAvatarPath vacío · URL pública', '1'),
         (2, 'posts/domain/usecases/', 'slate', '', ''),
         (3, 'pick_post_image_usecase.dart', 'amber', 'call · vacío', '2'),
         (3, 'publish_post_usecase.dart', 'amber', 'Del Lab 6 · subir la foto', '2'),
         (2, 'posts/data/', 'slate', '', ''),
-        (3, 'source/supabase_post_data_source.dart', 'teal', 'URLs firmadas e image_path', '1 · 2'),
+        (3, 'source/supabase_post_data_source.dart', 'teal', 'avatar_path · image_path firmado', '1 · 2'),
         (3, 'source/supabase_post_image_data_source.dart', 'teal', 'upload · vacío', '2'),
         (3, 'repository/post_repository_impl.dart', 'teal', 'pickImage y uploadImage · vacíos', '2'),
         (2, 'home/ui/bloc/feed_bloc.dart', 'violet', 'el on de la foto solo imprime', '1'),

@@ -1,6 +1,6 @@
 # Laboratorio 7 · Fotos en el muro
 
-<!-- tags: ChangeAvatarUseCase, createSignedUrlsResult, seed buckets --linked, bucket privado,
+<!-- tags: ChangeAvatarUseCase, createSignedUrlsResult, seed buckets --linked, bucket público y privado,
      avatar_path, image_path, UnimplementedError, PublishPostUseCase con foto,
      Object not found, new row violates row-level security policy, qué va en cada capa -->
 
@@ -9,7 +9,7 @@ El muro del Laboratorio 6 funciona, pero todos aparecen con una letra en vez de 
 - **Parte 1 · Foto de perfil.** Cada persona sube su foto desde la galería o la cámara. La foto aparece en su perfil y junto a cada post suyo.
 - **Parte 2 · Posts con imagen (avanzada).** El composer deja adjuntar una foto al post.
 
-Las fotos van en **buckets privados**: solo quien inició sesión las ve, y la app las muestra con URLs firmadas.
+Las fotos de perfil van en un **bucket público**: cada una tiene una URL fija que cualquiera puede abrir. Las de los posts van en un **bucket privado**: solo quien inició sesión las ve, con URLs firmadas.
 
 ## Lo que vas a construir
 
@@ -201,7 +201,7 @@ Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de
   <path d="M126,443 V464 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="140" y="451" width="320" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
   <text class="mono" x="150" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="306">source/supabase_profile_data_source.dart</text>
-  <text x="568" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">updateAvatarPath vacío · URL firmada</text>
+  <text x="568" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">updateAvatarPath vacío · URL pública</text>
   <circle cx="886" cy="464" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="464" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">1</text>
   <path d="M102,205 V498 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="116" y="485" width="185" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
@@ -222,7 +222,7 @@ Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de
   <path d="M126,613 V634 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="140" y="621" width="298" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
   <text class="mono" x="150" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="284">source/supabase_post_data_source.dart</text>
-  <text x="568" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">URLs firmadas e image_path</text>
+  <text x="568" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="290">avatar_path · image_path firmado</text>
   <rect x="846" y="623" width="52" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="872" y="634" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2</text>
   <path d="M126,613 V668 H137" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
   <rect x="140" y="655" width="342" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
@@ -271,7 +271,7 @@ Del paso 1 al 9. Al terminar, cada persona tiene su foto en el perfil y en sus p
 ```svg
 <svg id="stLabModelo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 432" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabModelo-ttl stLabModelo-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="stLabModelo-ttl">Lo que agrega la parte 1</title>
-  <desc id="stLabModelo-dsc">A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket avatars declarado en config.toml: privado, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo crea npx supabase seed buckets --linked. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.</desc>
+  <desc id="stLabModelo-dsc">A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket avatars declarado en config.toml: público, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo crea npx supabase seed buckets --linked. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.</desc>
   <defs>
     <style>
       #stLabModelo .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -290,7 +290,7 @@ Del paso 1 al 9. Al terminar, cada persona tiene su foto en el perfil y en sus p
   </defs>
   <rect width="960" height="432" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">Lo que agrega la parte 1</text>
-  <text class="sub" x="48" y="80" data-fit="860">El bucket se declara en config.toml. La columna y la regla van en una migración.</text>
+  <text class="sub" x="48" y="80" data-fit="860">Un bucket público, declarado en config.toml. La columna y la regla van en una migración.</text>
   <rect x="48" y="112" width="360" height="176" rx="12" fill="#FFFFFF" stroke="#A9B4F2" stroke-width="2"/>
   <path d="M48,152 V124 A12,12 0 0 1 60,112 H396 A12,12 0 0 1 408,124 V152 Z" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="2"/>
   <text class="mono" x="62" y="132" dy="0.35em" font-size="14" font-weight="700" fill="#4453C9">profiles</text>
@@ -308,8 +308,8 @@ Del paso 1 al 9. Al terminar, cada persona tiene su foto en el perfil y en sus p
   <path d="M456,152 V124 A12,12 0 0 1 468,112 H900 A12,12 0 0 1 912,124 V152 Z" fill="#E3F6F3" stroke="#86D3CA" stroke-width="2"/>
   <text x="472" y="132" dy="0.35em" font-size="14.5" font-weight="700" fill="#0F8478" data-fit="424">bucket avatars</text>
   <text class="mono" x="896" y="132" dy="0.35em" text-anchor="end" font-size="11.5" fill="#454C61">config.toml</text>
-  <rect x="472" y="165" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="176" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">privado</text>
-  <text x="620" y="176" dy="0.35em" font-size="12.5" fill="#454C61">solo con URL firmada</text>
+  <rect x="472" y="165" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="176" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">público</text>
+  <text x="620" y="176" dy="0.35em" font-size="12.5" fill="#454C61">cualquiera lee por URL</text>
   <rect x="472" y="197" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="208" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">2 MiB</text>
   <text x="620" y="208" dy="0.35em" font-size="12.5" fill="#454C61">tamaño máximo por archivo</text>
   <rect x="472" y="229" width="132" height="22" rx="11" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.25"/><text x="538" y="240" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0F8478">jpeg · png · webp</text>
@@ -319,7 +319,7 @@ Del paso 1 al 9. Al terminar, cada persona tiene su foto en el perfil y en sus p
   <rect x="456" y="328" width="456" height="40" rx="8" fill="#1F2430"/>
   <text class="mono" x="470" y="348" dy="0.35em" font-size="12.5" fill="#C9CFDA" data-fit="428">for all to authenticated · bucket_id = 'avatars'</text>
   <g transform="translate(48,310)"><rect width="360" height="77" rx="10" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="14" y="23" font-size="13.5" font-weight="700" fill="#A96C05" data-fit="332">avatar_path empieza en null</text><text x="14" y="43" font-size="12.5" fill="#454C61" data-fit="332">Quien no ha subido foto no tiene path:</text><text x="14" y="60" font-size="12.5" fill="#454C61" data-fit="332">la app muestra la inicial del nombre.</text></g>
-  <text class="foot" x="48" y="404" data-fit="860">La parte 2 repite lo mismo con un bucket post-images y una columna image_path en posts.</text>
+  <text class="foot" x="48" y="404" data-fit="860">La parte 2 repite lo mismo con un bucket privado, post-images, y una columna image_path en posts.</text>
 </svg>
 ```
 
@@ -330,7 +330,7 @@ Al final de `supabase/config.toml`:
 enabled = true
 
 [storage.buckets.avatars]
-public = false
+public = true
 file_size_limit = "2MiB"
 allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
 ```
@@ -341,7 +341,7 @@ Créalo en tu proyecto:
 npx supabase seed buckets --linked
 ```
 
-En el dashboard, `Storage` muestra `avatars` sin la etiqueta *Public*.
+En el dashboard, `Storage` muestra `avatars` con la etiqueta *Public*.
 
 ## Paso 2 · La columna y la regla
 
@@ -362,7 +362,7 @@ with check (bucket_id = 'avatars');
 npx supabase db push
 ```
 
-Una sola política abre el bucket a quien inició sesión: subir, ver, firmar y borrar.
+Que el bucket sea público solo abre la lectura por URL. Subir y borrar necesitan política, y basta una: abre todo a quien inició sesión.
 
 ## Paso 3 · Elegir la foto
 
@@ -539,7 +539,7 @@ Future<void> updateAvatarPath(String id, String path) async {
 }
 ```
 
-En `getProfile`, lee `avatar_path` y fírmalo. Agrega estos dos campos al `Profile` que ya devuelve, y un `on StorageException` al `try`:
+En `getProfile`, lee `avatar_path` y arma su URL pública. Agrega estos dos campos al `Profile` que ya devuelve:
 
 ```dart
 final path = row['avatar_path'] as String?;
@@ -549,54 +549,32 @@ final path = row['avatar_path'] as String?;
 avatarPath: path,
 avatarUrl: path == null
     ? null
-    : await _client.storage.from('avatars').createSignedUrl(path, 3600),
+    : _client.storage.from('avatars').getPublicUrl(path),
 ```
 
 En `auth/data/repository/profile_repository_impl.dart`, `updateAvatarPath` delega en el data source.
 
 ## Paso 8 · Las fotos del muro
 
-El muro trae varios posts a la vez. Firmar una foto por post serían muchas peticiones, así que se firman todas juntas. En `posts/data/source/supabase_post_data_source.dart`, primero pide `avatar_path` en las columnas del autor:
+En `posts/data/source/supabase_post_data_source.dart`, pide `avatar_path` en las columnas del autor:
 
 ```dart
 'author:profiles!profile_id(username, full_name, avatar_path), '
 ```
 
-Luego agrega un método que firma una lista de paths en una sola petición y devuelve el mapa path → URL:
+Y en `_toPost`, arma su URL igual que en el perfil:
 
 ```dart
-Future<Map<String, String>> _sign(
-  String bucket,
-  List<String?> paths,
-) async {
-  final unique = paths.whereType<String>().toSet().toList();
-  if (unique.isEmpty) return {};
-  try {
-    final results = await _client.storage
-        .from(bucket)
-        .createSignedUrlsResult(unique, 3600);
-    return {
-      for (final result in results)
-        if (result is SignedUrlSuccess) result.path: result.signedUrl,
-    };
-  } on StorageException catch (e) {
-    throw Exception(e.message);
-  }
-}
+final avatarPath = author['avatar_path'] as String?;
 ```
-
-`_toPosts` ya existe y es por donde pasan todas las filas. Haz que firme los avatares antes de convertirlas:
 
 ```dart
-Future<List<Post>> _toPosts(List<Map<String, dynamic>> rows) async {
-  final avatars = await _sign('avatars', [
-    for (final row in rows) row['author']['avatar_path'] as String?,
-  ]);
-  return [for (final row in rows) _toPost(row, avatars)];
-}
+authorAvatarUrl: avatarPath == null
+    ? null
+    : _client.storage.from('avatars').getPublicUrl(avatarPath),
 ```
 
-`_toPost` recibe el mapa y saca de ahí la URL de su autor: `authorAvatarUrl: avatars[author['avatar_path']]`. Si el autor no tiene foto, la búsqueda da `null` y `Avatar` muestra la inicial.
+`getPublicUrl` no va a la red: solo arma el texto de la URL. Por eso alcanza para todos los posts de la página sin hacer más peticiones. Si el autor no tiene foto, queda `null` y `Avatar` muestra la inicial.
 
 ## Paso 9 · FeedBloc
 
@@ -628,6 +606,7 @@ try {
 - Cambia la foto dos veces. La app muestra la última y en tu carpeta queda un solo archivo.
 - Desde otra cuenta, tus posts muestran tu foto. Los de quien no tiene foto, su inicial.
 - Toca la cámara y cancela: no pasa nada.
+- Abre la URL de tu foto en el navegador, sin sesión: se ve, porque `avatars` es público.
 
 ## Parte 2 · Posts con imagen (avanzada)
 
@@ -699,7 +678,7 @@ try {
 </svg>
 ```
 
-Del paso 10 al 13. Reutiliza todo lo de la parte 1: el mismo data source del teléfono, el mismo patrón de subida y la misma firma en lote.
+Del paso 10 al 13. Reutiliza lo de la parte 1: el mismo data source del teléfono y el mismo patrón de subida. Lo nuevo es que este bucket es **privado**: las imágenes se muestran con URLs firmadas, y para no hacer una petición por post se firman todas juntas.
 
 ## Paso 10 · El bucket post-images
 
@@ -744,11 +723,47 @@ final SupabasePostImageDataSource _images =
 
 `pickImage` va a `_device.pick`, y `uploadImage` a `_images.upload`.
 
-En `posts/data/source/supabase_post_data_source.dart`, tres cambios:
+En `posts/data/source/supabase_post_data_source.dart`, `create` agrega `'image_path': imagePath` al `insert`, y las columnas piden `image_path`:
 
-- `create` agrega `'image_path': imagePath` al `insert`.
-- Las columnas piden `image_path`: `'id, content, image_path, created_at, '`.
-- `_toPosts` firma también las imágenes, con `_sign('post-images', …)` sobre `row['image_path']`, y `_toPost` recibe ese segundo mapa para llenar `imageUrl`.
+```dart
+'id, content, image_path, created_at, '
+```
+
+Para mostrar las imágenes, agrega un método que firma una lista de paths en una sola petición y devuelve el mapa path → URL:
+
+```dart
+Future<Map<String, String>> _sign(
+  String bucket,
+  List<String?> paths,
+) async {
+  final unique = paths.whereType<String>().toSet().toList();
+  if (unique.isEmpty) return {};
+  try {
+    final results = await _client.storage
+        .from(bucket)
+        .createSignedUrlsResult(unique, 3600);
+    return {
+      for (final result in results)
+        if (result is SignedUrlSuccess) result.path: result.signedUrl,
+    };
+  } on StorageException catch (e) {
+    throw Exception(e.message);
+  }
+}
+```
+
+`_toPosts` ya existe y es por donde pasan todas las filas. Haz que firme las imágenes antes de convertirlas:
+
+```dart
+Future<List<Post>> _toPosts(List<Map<String, dynamic>> rows) async {
+  final images = await _sign('post-images', [
+    for (final row in rows) row['image_path'] as String?,
+  ]);
+  return [for (final row in rows) _toPost(row, images)];
+}
+```
+
+`_toPost` recibe el mapa y saca de ahí la URL de su imagen: `imageUrl: images[row['image_path']]`. Un post sin imagen da `null` y `PostCard` no la pinta.
 
 ## Paso 12 · Los casos de uso
 
@@ -815,6 +830,7 @@ Future<void> _onPhotoRequested(
 - Publica con texto y foto, y luego solo con foto. Los dos aparecen en el muro con su imagen.
 - Publica sin texto y sin foto: aparece *Escribe algo o agrega una foto*.
 - En `Storage > post-images` hay una carpeta con tu id. En `posts`, `image_path` tiene el path.
+- Copia la URL de una imagen, espera más de una hora y ábrela: responde `"exp" claim timestamp check failed`. Al recargar el muro se firma de nuevo.
 
 ## Retos
 
