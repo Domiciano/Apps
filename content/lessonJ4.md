@@ -132,7 +132,46 @@ cd Apps262Lab7
 flutter pub get
 ```
 
-Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de Supabase. Después copia en la raíz la carpeta `supabase/` de tu Laboratorio 6, que ya trae tu `link`, tu `config.toml` y las migraciones de `profiles`, `posts` y `likes`.
+Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto de Supabase. Usa el mismo proyecto de los laboratorios 5 y 6: ya tiene las tablas, las cuentas y los posts.
+
+## Conectar con tu proyecto de Supabase
+
+El repositorio no trae la carpeta `supabase/`: es de cada quien. Créala y conéctala desde la carpeta `Apps262Lab7`, como en *Configurando los servicios*:
+
+```shell
+npx supabase login
+npx supabase init
+npx supabase link --project-ref TU_IDENTIFICADOR
+```
+
+`login` solo hace falta si nunca lo corriste en este computador. El identificador es el de tu proyecto, el mismo del Laboratorio 6.
+
+Tu proyecto ya tiene aplicadas las migraciones de `profiles`, `posts` y `likes`, pero la carpeta nueva no las conoce. Tráelas:
+
+```shell
+npx supabase migration fetch --linked
+```
+
+Aparece un archivo por migración en `supabase/migrations/`. Sin ellos, el `db push` del paso 2 se niega con `Remote migration versions not found in local migrations directory`.
+
+Por último, `init` crea un `config.toml` largo que ya trae una sección `[storage]`. Si en el paso 1 le agregas otra, el archivo queda inválido. Reemplaza todo su contenido por el del curso:
+
+```toml
+project_id = "Apps262Lab7"
+
+[auth]
+enabled = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+```
+
+Comprueba que todo coincide. Las tres migraciones deben aparecer en las dos columnas, la local y la remota:
+
+```shell
+npx supabase migration list
+```
 
 ## Lo que ya viene
 

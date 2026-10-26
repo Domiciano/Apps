@@ -91,6 +91,8 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ2.md | Subir y mostrar archivos con Supabase Storage | 0067
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ2clean.md | image_picker desde Clean Architecture | 0093
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonJ4.md | Laboratorio 7 · Fotos en el muro | 0069
+[t] Dependency Injection
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonN1.md | Inyección de dependencias con GetIt | 0079
 [t] Realtime
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI1.md | Datos en Tiempo Real con Supabase | 0062
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2.md | Programación Reactiva y Supabase Streams | 0063
@@ -106,8 +108,6 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK2.md | Configurando Firebase para Enviar Notificaciones Push | 0076
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK3.md | Integración completa de notificaciones con Firebase en Flutter | 0077
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK4.md | El Rol del Backend en las Notificaciones Push | 0078
-[t] Dependency Injection
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonN1.md | Inyección de dependencias con GetIt | 0079
 [t] Deploy
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM1.md | Creando AAB Android | 0080
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM2.md | Creando IPA iOS | 0081

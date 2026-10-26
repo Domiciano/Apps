@@ -176,6 +176,8 @@ privado (imágenes de posts, URLs firmadas en lote con `createSignedUrlsResult`)
 `supabase/config.toml` (`[storage.buckets.<id>]`), se crean con `npx supabase seed buckets --linked` y
 se abren con una sola política `for all to authenticated` por bucket. El círculo
 de Clean de la 0093 usa la misma convención de anillos que el simulador `register-clean`. Reutiliza `table` y `legend` de `database_figuras.py`.
+`tools/di_figuras.py` trae las dos de «Inyección de dependencias con GetIt» (0079), que va justo después del
+Laboratorio 7 y migra un solo camino de ese laboratorio con `= sl()`.
 
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
