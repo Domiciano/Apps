@@ -1,6 +1,6 @@
 // Interactive simulators for Flutter state (StatefulWidget, setState, lifecycle) and,
-// in Móviles, the sign up flow of Lab 5 across its layers, a Supabase query builder and
-// the cache layers in front of a Storage bucket.
+// in Móviles, the sign up flow of Lab 5 across its layers, a Supabase query builder,
+// the cache layers in front of a Storage bucket and the Realtime DB section (streams, layers, chat, paging).
 // Plain DOM, no React: the same file is copied into the session decks, so it must
 // not import anything. Every simulator is `mount(element, args) => destroy`.
 
@@ -177,7 +177,8 @@ const flash = (node) => {
 const DART_KEYWORDS = new Set(['class', 'extends', 'void', 'return', 'final', 'const', 'if', 'for', 'in', 'this', 'super', 'late', 'true', 'false', 'try', 'on', 'catch', 'async', 'await', 'is']);
 const DART_TYPES = new Set(['int', 'String', 'List', 'Widget', 'State', 'StatefulWidget', 'StatelessWidget', 'BuildContext', 'Scaffold', 'Text', 'TextEditingController', 'Column', 'Song', 'SongCard', 'FloatingActionButton', 'TextField', 'MyHomePage', 'GreetingScreen', 'Future', 'AuthResponse', 'Supabase', 'Emitter', 'Exception', 'Navigator',
   'RegisterBloc', 'RegisterState', 'OnRegisterSubmittedEvent', 'RegisterLoadingState', 'RegisterSuccessState', 'RegisterErrorState',
-  'BlocListener', 'BlocBuilder']);
+  'BlocListener', 'BlocBuilder', 'Stream', 'StreamController', 'StreamSubscription', 'Completer', 'Message', 'ChatState', 'ChatBloc',
+  'ChatStarted', 'MessagesUpdated', 'MessageSent', 'Emitter']);
 const DART_TOKEN = /('[^']*')|(@\w+)|(\b\d+\b)|(\b[A-Za-z_]\w*\b)/g;
 
 const escapeHtml = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -3519,6 +3520,864 @@ const mountStorageCache = (root) => {
   return () => root.replaceChildren();
 };
 
+// ───────────────────────── Realtime DB: streams, capas, chat y paginación ─────────────────────────
+
+const RT_STYLE_ID = 'fsim-rt-style';
+
+const RT_CSS = `
+.fsim .rt-full{flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:12px}
+.fsim .rt-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.fsim .rt-summary{font-size:13.5px;min-height:40px;color:var(--fs-ink)}
+.fsim .rt-summary.rt-bad{color:var(--fs-err)}
+.fsim .rt-track{position:relative;height:64px;border-radius:32px;background:#E3F6F3;border:2px solid #86D3CA;margin:0 4px}
+.fsim .rt-track.rt-future{background:#FFF3DC;border-color:#F0C572}
+.fsim .rt-end{position:absolute;top:50%;transform:translateY(-50%);font:600 11.5px 'JetBrains Mono',Menlo,Consolas,monospace;
+  background:#fff;border:1.5px solid var(--fs-line);border-radius:10px;padding:4px 8px;z-index:2;color:var(--fs-ink)}
+.fsim .rt-end.rt-l{left:-4px}.fsim .rt-end.rt-r{right:-4px}
+.fsim .rt-end.rt-deaf{color:#9E9AA7;text-decoration:line-through}
+.fsim .rt-station{position:absolute;left:50%;top:-14px;transform:translateX(-50%);font:600 11px 'JetBrains Mono',Menlo,Consolas,monospace;
+  background:#0F8478;color:#fff;border-radius:8px;padding:2px 8px;z-index:2;white-space:nowrap}
+.fsim .rt-ball{position:absolute;top:50%;width:30px;height:30px;margin-top:-15px;border-radius:15px;display:flex;align-items:center;
+  justify-content:center;font:700 12px 'JetBrains Mono',Menlo,Consolas,monospace;border:2px solid #4453C9;background:#EEF1FF;color:#4453C9;
+  left:12%;transition:left .9s linear,opacity .3s;z-index:1}
+.fsim .rt-ball.rt-err{border-color:#C2354F;background:#FFEBEF;color:#C2354F}
+.fsim .rt-ball.rt-done{border-radius:4px;width:10px;margin-left:10px;border-color:#556074;background:#556074}
+.fsim .rt-ball.rt-mapped{border-color:#0F8478;background:#E3F6F3;color:#0F8478}
+.fsim .rt-ball.rt-lost{opacity:.25}
+.fsim .rt-marbles{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:34px;padding:6px 10px;border:1px dashed var(--fs-line);border-radius:12px}
+.fsim .rt-marbles small{color:var(--fs-muted);font-size:12px}
+.fsim .rt-m{width:28px;height:28px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;
+  font:700 11.5px 'JetBrains Mono',Menlo,Consolas,monospace;border:2px solid #4453C9;background:#EEF1FF;color:#4453C9}
+.fsim .rt-m.rt-mapped{border-color:#0F8478;background:#E3F6F3;color:#0F8478}
+.fsim .rt-m.rt-err{border-color:#C2354F;background:#FFEBEF;color:#C2354F}
+.fsim .rt-m.rt-done{width:6px;border-radius:3px;background:#556074;border-color:#556074}
+.fsim .rt-grid{display:flex;flex-direction:column;gap:6px;width:100%}
+.fsim .rt-cols{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.fsim .rt-colname{font:600 11px 'JetBrains Mono',Menlo,Consolas,monospace;text-align:center;padding:6px 2px;border-radius:8px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsim .rt-pipe{position:relative;height:20px}
+.fsim .rt-pipe-bar{position:absolute;top:5px;height:10px;border-radius:5px;background:#86D3CA;transition:left .4s,width .4s}
+.fsim .rt-ear{position:absolute;top:-1px;font:700 10.5px 'JetBrains Mono',Menlo,Consolas,monospace;color:#fff;background:#4453C9;
+  border-radius:8px;padding:2px 6px;transform:translateX(-50%)}
+.fsim .rt-row{position:relative;border:1px solid var(--fs-line);border-radius:10px;padding:20px 4px 6px;background:#fff}
+.fsim .rt-row.rt-old{opacity:.55}
+.fsim .rt-row-title{position:absolute;top:3px;left:10px;font-size:11.5px;font-weight:600;color:var(--fs-muted)}
+.fsim .rt-cell{min-height:50px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:3px;transition:background .3s,box-shadow .3s;min-width:0}
+.fsim .rt-cell.rt-on{background:#FFF8E1;box-shadow:inset 0 0 0 2px #F2C069}
+.fsim .rt-chip{font:600 10.5px 'JetBrains Mono',Menlo,Consolas,monospace;border-radius:8px;padding:1px 6px;max-width:100%;
+  overflow-wrap:normal;text-align:center;line-height:1.25;background:#EFF1F5;color:#556074}
+.fsim .rt-hop{position:absolute;top:calc(50% + 7px);height:0;border-top:2.5px solid currentColor;z-index:3;pointer-events:none}
+.fsim .rt-hop span{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);font:600 10.5px 'JetBrains Mono',Menlo,Consolas,monospace;
+  background:#fff;padding:0 4px;border-radius:6px;white-space:nowrap;border:1px solid currentColor}
+.fsim .rt-hop::after{content:'';position:absolute;top:-7px;border:6px solid transparent}
+.fsim .rt-hop.rt-right::after{right:-3px;border-left:9px solid currentColor;border-right:0}
+.fsim .rt-hop.rt-left::after{left:-3px;border-right:9px solid currentColor;border-left:0}
+.fsim .rt-hop i{position:absolute;top:-6px;width:10px;height:10px;border-radius:5px;background:currentColor}
+.fsim .rt-hop.rt-right i{animation:rtMoveR .8s ease-in-out forwards}
+.fsim .rt-hop.rt-left i{animation:rtMoveL .8s ease-in-out forwards}
+@keyframes rtMoveR{from{left:0}to{left:calc(100% - 10px)}}
+@keyframes rtMoveL{from{left:calc(100% - 10px)}to{left:0}}
+.fsim .rt-bubs{display:flex;flex-direction:column;gap:3px;width:100%}
+.fsim .rt-bub{height:7px;border-radius:4px;width:62%;background:#DDE1E8}
+.fsim .rt-bub.rt-mine{align-self:flex-end;background:#1F9D68}
+.fsim .rc-wrap{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1.1fr) 34px minmax(0,1fr);gap:4px;align-items:stretch;width:100%}
+.fsim .rc-phone{border:6px solid #1C1B1F;border-radius:22px;background:#FFFFFF;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.fsim .rc-head{background:#F7F8FA;border-bottom:1px solid var(--fs-line);padding:8px 10px;font-weight:600;font-size:13px;
+  display:flex;justify-content:space-between;align-items:center;gap:6px}
+.fsim .rc-head button{border:0;background:none;color:var(--fs-accent);font:500 11.5px Roboto,Arial,sans-serif;cursor:pointer;padding:0}
+.fsim .rc-list{height:210px;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;background:#F7F8FA}
+.fsim .rc-b{max-width:82%;border-radius:12px;padding:5px 9px;font-size:12.5px;background:#fff;border:1px solid #DDE1E8;align-self:flex-start;
+  overflow-wrap:anywhere}
+.fsim .rc-b.rc-mine{align-self:flex-end;background:#1F9D68;color:#fff;border-color:#1F9D68}
+.fsim .rc-b.rc-new{box-shadow:0 0 0 3px #FFE082}
+.fsim .rc-input{display:flex;gap:4px;padding:6px;border-top:1px solid var(--fs-line)}
+.fsim .rc-input input{flex:1;min-width:0;border:1px solid #DDE1E8;border-radius:14px;padding:5px 9px;font:13px Roboto,Arial,sans-serif;color:var(--fs-ink)}
+.fsim .rc-input button{border:0;border-radius:14px;background:#1F9D68;color:#fff;font:600 12px Roboto,Arial,sans-serif;padding:0 10px;cursor:pointer}
+.fsim .rc-wire{display:flex;flex-direction:column;justify-content:center;gap:18px;align-items:center}
+.fsim .rc-arrow{font:700 16px Roboto,Arial,sans-serif;color:#C4CBD8;transition:color .3s,transform .3s}
+.fsim .rc-arrow.rc-on{transform:scale(1.35)}
+.fsim .rc-arrow.rc-insert.rc-on{color:#A96C05}.fsim .rc-arrow.rc-stream.rc-on{color:#0F8478}
+.fsim .rc-db{border:1.5px solid #C9A6EE;border-radius:12px;background:#fff;display:flex;flex-direction:column;min-width:0}
+.fsim .rc-db h4{margin:0;padding:8px 10px;background:#F4EBFF;border-radius:11px 11px 0 0;font:700 12.5px 'JetBrains Mono',Menlo,Consolas,monospace;color:#7439B8}
+.fsim .rc-rows{padding:6px 8px;display:flex;flex-direction:column;gap:3px;flex:1}
+.fsim .rc-row{font:12px 'JetBrains Mono',Menlo,Consolas,monospace;display:flex;gap:6px;padding:2px 4px;border-radius:5px;min-width:0}
+.fsim .rc-row b{color:#7439B8;flex:0 0 auto}.fsim .rc-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsim .rc-pub{margin:6px 8px 8px;padding:6px 8px;border-radius:8px;background:#FFF3DC;font-size:12px}
+.fsim .rc-pub.rc-off{background:#FFEBEF}
+.fsim .rc-legend{font-size:12px;color:var(--fs-muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+.fsim .rc-legend b{font-weight:700}
+.fsim .pg-list{display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1px solid var(--fs-line);border-radius:12px;background:#fff;min-height:44px}
+.fsim .pg-m{font:600 11.5px 'JetBrains Mono',Menlo,Consolas,monospace;border-radius:6px;padding:3px 6px;border:1.5px solid}
+.fsim .pg-live{background:#E3F6F3;border-color:#86D3CA;color:#0F8478}
+.fsim .pg-page{background:#FFF3DC;border-color:#F0C572;color:#A96C05}
+.fsim .pg-m.pg-new{box-shadow:0 0 0 2px #1F9D68}
+.fsim .pg-stats{display:flex;flex-wrap:wrap;gap:6px 16px;font:12px 'JetBrains Mono',Menlo,Consolas,monospace;color:var(--fs-muted)}
+.fsim .pg-stats b{color:var(--fs-ink)}
+@container (max-width:600px){.fsim .rc-wrap{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr)}.fsim .rc-wrap .rc-db{grid-column:1 / -1;order:5}
+  .fsim .rc-wrap .rc-wire{display:none}.fsim .rt-colname{font-size:9.5px}.fsim .rt-chip,.fsim .rt-hop span{font-size:9.5px}}
+`;
+
+const ensureRtStyle = () => {
+  if (typeof document === 'undefined' || document.getElementById(RT_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = RT_STYLE_ID;
+  style.textContent = RT_CSS;
+  document.head.appendChild(style);
+};
+
+const segmented = (options, onPick) => {
+  const buttons = options.map(([key, label]) => el('button', { type: 'button', 'data-key': key, text: label, onclick: () => onPick(key) }));
+  const node = el('div', { class: 'fs-seg', role: 'group' }, ...buttons);
+  const select = (key) => buttons.forEach((b) => b.classList.toggle('fs-sel', b.dataset.key === key));
+  return { node, select };
+};
+
+// ── stream-pipe: Future frente a Stream, listen, error, close, cancel y map ──
+
+export const pipeStart = (mode = 'stream', mapped = false) => ({
+  mode, mapped, next: 1, closed: false, cancelled: false, completed: false,
+});
+
+const BAD_CLOSE = 'Bad state: Cannot add new events after calling close';
+const BAD_FUTURE = 'Bad state: Future already completed';
+
+export const pipeAct = (s, action) => {
+  if (s.mode === 'future') {
+    if (s.completed) return { s, effect: { kind: 'throw', text: BAD_FUTURE } };
+    const done = { ...s, completed: true };
+    if (action === 'complete') return { s: done, effect: { kind: 'data', value: 42 } };
+    return { s: done, effect: { kind: 'error', text: 'Exception: sin red' } };
+  }
+  if (action === 'cancel') return { s: { ...s, cancelled: true }, effect: { kind: 'cancel' } };
+  if (action === 'close') {
+    if (s.closed) return { s, effect: { kind: 'none' } };
+    return { s: { ...s, closed: true }, effect: { kind: 'done', lost: s.cancelled } };
+  }
+  if (s.closed) return { s, effect: { kind: 'throw', text: BAD_CLOSE } };
+  if (action === 'error') return { s, effect: { kind: 'error', text: 'Exception: sin red', lost: s.cancelled } };
+  const value = s.next;
+  return {
+    s: { ...s, next: s.next + 1 },
+    effect: { kind: 'data', value, out: s.mapped ? value * 10 : value, lost: s.cancelled },
+  };
+};
+
+const pipeCode = (s) => (s.mode === 'future'
+  ? `final completer = Completer<int>();
+
+completer.future.then(
+  (value) => print('llegó $value'),
+  onError: (e) => print('falló $e'),
+);
+
+completer.complete(42);
+completer.completeError(Exception('sin red'));`
+  : `final controller = StreamController<int>();
+
+final subscription = controller.stream${s.mapped ? '\n    .map((x) => x * 10)' : ''}
+    .listen(
+      (value) => print('llegó $value'),
+      onError: (e) => print('falló $e'),
+      onDone: () => print('se cerró'),
+    );
+
+controller.add(${s.next});
+controller.addError(Exception('sin red'));
+controller.close();
+subscription.cancel();`);
+
+const PIPE_MS = 900;
+
+const mountStreamPipe = (root, args = []) => {
+  ensureRtStyle();
+  const container = card(root);
+  let state = pipeStart(args.includes('future') ? 'future' : 'stream');
+  let timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+  const summary = el('div', { class: 'rt-summary', 'data-testid': 'rt-pipe-summary', 'aria-live': 'polite' });
+  const track = el('div', { class: 'rt-track' });
+  const source = el('div', { class: 'rt-end rt-l' });
+  const sink = el('div', { class: 'rt-end rt-r' });
+  const station = el('div', { class: 'rt-station', text: 'map((x) => x * 10)' });
+  track.append(source, sink, station);
+  const marbles = el('div', { class: 'rt-marbles' });
+  const out = consolePanel('Consola');
+  const code = codePanel('main.dart');
+  const mode = segmented([['stream', 'Stream'], ['future', 'Future']], (key) => reset(key, false));
+  const mapSwitch = switchControl('con .map((x) => x * 10)', (on) => reset('stream', on));
+  const controls = el('div', { class: 'fs-controls' });
+
+  const button = (text, action, solid) =>
+    el('button', { class: `fs-btn${solid ? ' fs-solid' : ''}`, type: 'button', text, onclick: () => act(action) });
+
+  const render = () => {
+    mode.select(state.mode);
+    track.classList.toggle('rt-future', state.mode === 'future');
+    station.style.display = state.mapped && state.mode === 'stream' ? '' : 'none';
+    mapSwitch.node.style.display = state.mode === 'stream' ? '' : 'none';
+    mapSwitch.input.checked = state.mapped;
+    source.textContent = state.mode === 'future' ? 'Completer' : 'controller';
+    sink.textContent = state.mode === 'future' ? 'then' : 'listen';
+    sink.classList.toggle('rt-deaf', state.cancelled);
+    code.setCode(pipeCode(state));
+    controls.replaceChildren(
+      ...(state.mode === 'future'
+        ? [button('complete(42)', 'complete', true), button('completeError(…)', 'fail')]
+        : [button(`add(${state.next})`, 'add', true), button('addError(…)', 'error'), button('close()', 'close'), button('cancel()', 'cancel')]),
+      el('button', { class: 'fs-btn', type: 'button', text: 'Reiniciar', onclick: () => reset(state.mode, state.mapped) })
+    );
+  };
+
+  const reset = (nextMode, mapped) => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    state = pipeStart(nextMode, mapped);
+    [...track.querySelectorAll('.rt-ball')].forEach((b) => b.remove());
+    marbles.replaceChildren(el('small', { text: 'Aquí aparece cada evento que llega a quien escucha.' }));
+    out.clear();
+    summary.textContent = nextMode === 'future'
+      ? 'Un Future se completa una sola vez: con un valor o con un error.'
+      : 'Agrega valores al controller y mira cómo llegan a listen, uno por uno.';
+    summary.classList.remove('rt-bad');
+    render();
+  };
+
+  const arrive = (effect, ball) => {
+    if (effect.lost) {
+      ball.classList.add('rt-lost');
+      summary.textContent = 'Se emitió, pero la suscripción ya estaba cancelada: nadie lo recibió.';
+      later(() => ball.remove(), 600);
+      return;
+    }
+    ball.remove();
+    if (marbles.querySelector('small')) marbles.replaceChildren();
+    if (effect.kind === 'data') {
+      const shown = effect.out ?? effect.value;
+      marbles.appendChild(el('span', { class: `rt-m${state.mapped && state.mode === 'stream' ? ' rt-mapped' : ''}`, text: String(shown) }));
+      out.print(`llegó ${shown}`);
+      summary.textContent = state.mode === 'future'
+        ? 'then recibió el valor. El Future ya terminó: no puede entregar nada más.'
+        : `listen recibió ${shown}. El stream sigue abierto: pueden llegar más.`;
+    } else if (effect.kind === 'error') {
+      marbles.appendChild(el('span', { class: 'rt-m rt-err', text: '✕' }));
+      out.print(`falló ${effect.text}`, 'err');
+      summary.textContent = state.mode === 'future'
+        ? 'El Future terminó con error. Tampoco puede entregar nada más.'
+        : 'onError recibió el error, pero el stream no se cerró: prueba agregar otro valor.';
+    } else if (effect.kind === 'done') {
+      marbles.appendChild(el('span', { class: 'rt-m rt-done' }));
+      out.print('se cerró');
+      summary.textContent = 'onDone: el productor cerró el stream. Ya no llegará nada más.';
+    }
+  };
+
+  const act = (action) => {
+    const result = pipeAct(state, action);
+    state = result.s;
+    const { effect } = result;
+    summary.classList.toggle('rt-bad', effect.kind === 'throw');
+    if (effect.kind === 'throw') {
+      out.print(effect.text, 'err');
+      summary.textContent = state.mode === 'future'
+        ? 'Un Future no se completa dos veces: el Completer lanza un error al intentarlo.'
+        : 'Después de close() el controller no acepta más eventos: add lanza un error.';
+    } else if (effect.kind === 'cancel') {
+      out.print('(suscripción cancelada)');
+      summary.textContent = 'cancel(): quien escuchaba se retiró. El productor puede seguir emitiendo, pero ya no le llega.';
+    } else if (effect.kind !== 'none') {
+      const ball = el('div', {
+        class: `rt-ball${effect.kind === 'error' ? ' rt-err' : effect.kind === 'done' ? ' rt-done' : ''}`,
+        text: effect.kind === 'data' ? String(effect.value) : effect.kind === 'error' ? '✕' : '',
+      });
+      track.appendChild(ball);
+      later(() => { ball.style.left = 'calc(88% - 30px)'; }, 20);
+      if (state.mapped && effect.kind === 'data') {
+        later(() => { ball.textContent = String(effect.out); ball.classList.add('rt-mapped'); }, PIPE_MS / 2);
+      }
+      later(() => arrive(effect, ball), PIPE_MS + 30);
+    }
+    render();
+  };
+
+  container.append(
+    el('div', { class: 'rt-full' },
+      el('div', { class: 'rt-bar' }, mode.node, mapSwitch.node),
+      track,
+      controls,
+      summary,
+      marbles,
+      el('div', { class: 'fs-row2' }, code.box, out.box))
+  );
+  reset(state.mode, false);
+  return () => {
+    timers.forEach(clearTimeout);
+    root.replaceChildren();
+  };
+};
+
+// ── stream-layers: el Stream retorna por las capas y solo el Bloc escucha ──
+
+const RT_COLS = [
+  ['ChatScreen', '#F4EBFF', '#7439B8'],
+  ['ChatBloc', '#EEF1FF', '#4453C9'],
+  ['UseCase', '#E8F6E3', '#3A8235'],
+  ['RepositoryImpl', '#E3F6F3', '#0F8478'],
+  ['DataSource', '#E3F6F3', '#0F8478'],
+  ['Supabase', '#EFF1F5', '#556074'],
+];
+
+const RT_HOP = { call: '#4453C9', stream: '#0F8478', future: '#A96C05', emit: '#7439B8', close: '#556074' };
+
+const RT_CODE = [
+  `@override
+void initState() {
+  super.initState();
+  context.read<ChatBloc>().add(ChatStarted());
+}
+
+BlocBuilder<ChatBloc, ChatState>(
+  builder: (context, state) => _messages(state),
+)
+onSend: (text) => bloc.add(MessageSent(text)),`,
+  `_onStarted(ChatStarted event, Emitter<ChatState> emit) {
+  _subscription = _watchMessages(limit: 15).listen(
+    (messages) => add(MessagesUpdated(messages)),
+  );
+}
+
+_onMessagesUpdated(MessagesUpdated event, emit) {
+  emit(state.copyWith(messages: event.messages));
+}
+
+_onMessageSent(MessageSent event, emit) async {
+  await _sendMessage(event.content);
+}
+
+Future<void> close() async {
+  await _subscription?.cancel();
+  return super.close();
+}`,
+  `Stream<List<Message>> call({required int limit}) {
+  return _messages.watchLatest(limit: limit);
+}
+
+// SendMessageUseCase
+Future<void> call(String content) {
+  return _messages.send(content);
+}`,
+  `Stream<List<Message>> watchLatest({required int limit}) {
+  return _messages.watchLatest(limit: limit);
+}
+
+Future<void> send(String content) {
+  return _messages.send(content);
+}`,
+  `Stream<List<Message>> watchLatest({required int limit}) {
+  return _client
+      .from('messages')
+      .stream(primaryKey: ['id'])
+      .order('created_at', ascending: false)
+      .limit(limit)
+      .map((rows) => rows.map(_toMessage).toList());
+}
+
+Future<void> send(String content) async {
+  await _client.from('messages').insert({...});
+}`,
+  `-- la tabla está en la publicación
+alter publication supabase_realtime
+  add table public.messages;
+
+-- cada insert se empuja por el websocket
+-- a todos los canales abiertos`,
+];
+
+const RT_FILES = ['chat_screen.dart', 'chat_bloc.dart', 'watch_messages_usecase.dart', 'message_repository_impl.dart',
+  'supabase_message_data_source.dart', 'migración · messages'];
+
+const at = (col, chip, text, code, extra = {}) => ({ at: col, chip, text, code, ...extra });
+const hop = (from, to, label, kind, text, code, extra = {}) => ({ at: to, hop: [from, to, label, kind], text, code, ...extra });
+
+const streamUp = (count, who) => [
+  hop(5, 4, 'List<Map>', 'stream', 'Por el websocket llega la lista de filas, completa, no solo la nueva.', [4, 6]),
+  at(4, 'map → Message', 'map convierte cada fila en un Message. El data source retorna ese Stream ya transformado.', [4, 6]),
+  hop(4, 3, 'List<Message>', 'stream', 'Sube por la misma tubería. El repositorio no hace nada con ella.', [3, 1]),
+  hop(3, 2, 'List<Message>', 'stream', 'El caso de uso tampoco escucha: la lista solo pasa.', [2, 1]),
+  hop(2, 1, 'List<Message>', 'stream', 'Llega al único que escucha: la función que se le pasó a listen.', [1, 2]),
+  at(1, 'MessagesUpdated', 'La función de listen no emite: lanza el evento MessagesUpdated con la lista.', [1, 2]),
+  at(1, 'emit', 'on<MessagesUpdated> emite un estado nuevo con los mensajes.', [1, 7]),
+  hop(1, 0, 'emit(state)', 'emit', 'El estado viaja a la vista.', [1, 7]),
+  at(0, null, `BlocBuilder pinta ${count} mensajes${who ? `. ${who}` : ''}.`, [0, 6, 7], { bubbles: count }),
+];
+
+const RT_SCENARIOS = {
+  open: {
+    label: 'Abrir el chat',
+    rows: [
+      {
+        title: 'Abrir el chat',
+        steps: [
+          at(0, 'ChatStarted', 'initState de ChatScreen lanza ChatStarted.', [0, 3]),
+          hop(0, 1, 'add(ChatStarted)', 'call', 'El evento viaja al ChatBloc.', [0, 3]),
+          at(1, 'on<ChatStarted>', 'El Bloc recibe ChatStarted y llama al caso de uso.', [1, 0]),
+          hop(1, 2, 'call(limit: 15)', 'call', 'Llama a WatchMessagesUseCase.', [1, 1]),
+          hop(2, 3, 'watchLatest()', 'call', 'El caso de uso no escucha: le pide el Stream al repositorio.', [2, 1]),
+          hop(3, 4, 'watchLatest()', 'call', 'El repositorio tampoco: se lo pide al data source.', [3, 1]),
+          hop(4, 5, '.stream()', 'call', 'El data source arma la suscripción con .stream().', [4, 1, 2, 3, 4, 5]),
+          at(5, 'canal abierto', 'Supabase abre un canal por websocket para la tabla messages.', [5, 1, 2], { pipe: 4 }),
+          at(4, 'Stream', 'El data source retorna el Stream de inmediato. Todavía no llegó ningún dato.', [4, 1]),
+          hop(4, 3, 'return Stream', 'stream', 'El repositorio retorna el mismo Stream.', [3, 1], { pipe: 3 }),
+          hop(3, 2, 'return Stream', 'stream', 'El caso de uso lo retorna también.', [2, 1], { pipe: 2 }),
+          hop(2, 1, 'return Stream', 'stream', 'El Stream llega al Bloc, que es quien lo va a escuchar.', [1, 1], { pipe: 1 }),
+          at(1, 'listen', 'Solo aquí se hace listen. El Bloc guarda la suscripción en _subscription.', [1, 1, 2], { listening: true }),
+        ],
+      },
+      { title: 'La foto inicial', steps: [at(5, '3 filas', 'Como alguien escucha, Supabase manda la foto inicial: las filas que ya hay.', [5]), ...streamUp(3)] },
+    ],
+  },
+  ana: {
+    label: 'Ana envía un mensaje',
+    rows: [{ title: 'Ana envía «hola»', steps: [at(5, 'fila nueva', 'Ana insertó una fila desde su teléfono.', [5, 4, 5]), ...streamUp(4, 'El de Ana, a la izquierda')] }],
+  },
+  me: {
+    label: 'Tú envías un mensaje',
+    rows: [{
+      title: 'Tú envías «¿qué tal?»',
+      steps: [
+        at(0, 'MessageSent', 'Tocas Enviar: el composer lanza MessageSent.', [0, 9]),
+        hop(0, 1, 'add(MessageSent)', 'call', 'El evento viaja al ChatBloc.', [0, 9]),
+        at(1, 'on<MessageSent>', 'El Bloc llama a SendMessageUseCase. Escribir es un Future, no un Stream.', [1, 10, 11]),
+        hop(1, 2, 'call(text)', 'future', 'Llama al caso de uso.', [1, 11]),
+        hop(2, 3, 'send()', 'future', 'El caso de uso le pide al repositorio que inserte.', [2, 5, 6]),
+        hop(3, 4, 'send()', 'future', 'El repositorio delega en el data source.', [3, 5]),
+        hop(4, 5, 'insert', 'future', 'El data source hace el insert.', [4, 10]),
+        at(5, 'fila nueva', 'La fila entra a la tabla. Nadie la agrega a la lista a mano: la va a traer el stream.', [5]),
+        ...streamUp(5, 'El tuyo, a la derecha'),
+      ],
+    }],
+  },
+  close: {
+    label: 'Cerrar el chat',
+    rows: [{
+      title: 'Cerrar el chat',
+      steps: [
+        at(0, 'pop', 'Sales de la pantalla. BlocProvider cierra su Bloc.', [0]),
+        hop(0, 1, 'close()', 'close', 'Se llama close() en el ChatBloc.', [1, 14]),
+        at(1, 'cancel()', 'close() cancela la suscripción que guardó listen.', [1, 14, 15], { listening: false }),
+        hop(1, 2, 'cancel', 'close', 'La cancelación baja por la misma tubería.', [1, 15], { pipe: 2 }),
+        hop(2, 3, 'cancel', 'close', 'Cada capa la deja pasar.', [2, 1], { pipe: 3 }),
+        hop(3, 4, 'cancel', 'close', 'Hasta el data source.', [3, 1], { pipe: 4 }),
+        hop(4, 5, 'cancel', 'close', 'El SDK avisa a Supabase.', [4, 3], { pipe: 5 }),
+        at(5, 'canal cerrado', 'Supabase cierra el canal. Sin cancel, la app seguiría recibiendo cambios de una pantalla que ya no existe.', [5]),
+      ],
+    }],
+  },
+};
+
+export const rtLayersScenario = (key) => RT_SCENARIOS[key].rows;
+
+const RT_STEP_MS = 1000;
+
+const mountStreamLayers = (root) => {
+  ensureRtStyle();
+  const container = card(root);
+  let timers = [];
+  let open = false;
+  let running = false;
+  let pipeMin = 5;
+  let listening = false;
+  let queue = [];
+  let rowNodes = [];
+  let current = null;
+
+  const caption = el('div', { class: 'fs-caption', 'data-testid': 'rt-layers-caption', 'aria-live': 'polite' });
+  const code = codePanel(RT_FILES[0]);
+  const head = el('div', { class: 'rt-cols' }, ...RT_COLS.map(([name, bg, fg]) => el('div', { class: 'rt-colname', style: `background:${bg};color:${fg}`, text: name })));
+  const pipeBar = el('div', { class: 'rt-pipe-bar' });
+  const ear = el('div', { class: 'rt-ear', text: 'listen', style: `left:${(1.5 / 6) * 100}%` });
+  const pipe = el('div', { class: 'rt-pipe' }, pipeBar, ear);
+  const rowsBox = el('div', { class: 'rt-grid' });
+  const stepMode = switchControl('Paso a paso', () => {});
+  const next = el('button', { class: 'fs-btn fs-solid', type: 'button', text: 'Siguiente paso', onclick: () => advance() });
+  const buttons = Object.fromEntries(Object.entries(RT_SCENARIOS).map(([key, sc]) => [key,
+    el('button', { class: 'fs-btn', type: 'button', text: sc.label, onclick: () => start(key) })]));
+
+  const center = (col) => ((col + 0.5) / 6) * 100;
+
+  const renderPipe = () => {
+    const visible = pipeMin < 5;
+    pipeBar.style.display = visible ? '' : 'none';
+    pipeBar.style.left = `${center(pipeMin)}%`;
+    pipeBar.style.width = `${center(5) - center(pipeMin)}%`;
+    ear.style.display = listening ? '' : 'none';
+  };
+
+  const renderButtons = () => {
+    buttons.open.disabled = running || open;
+    ['ana', 'me', 'close'].forEach((key) => { buttons[key].disabled = running || !open; });
+    next.style.display = running && stepMode.input.checked ? '' : 'none';
+  };
+
+  const newRow = (title) => {
+    const cells = RT_COLS.map(() => el('div', { class: 'rt-cell' }));
+    const node = el('div', { class: 'rt-row' }, el('div', { class: 'rt-row-title', text: title }), el('div', { class: 'rt-cols' }, ...cells));
+    rowNodes.forEach((r) => r.node.classList.add('rt-old'));
+    rowsBox.appendChild(node);
+    rowNodes.push({ node, cells });
+    while (rowNodes.length > 3) rowNodes.shift().node.remove();
+    return rowNodes[rowNodes.length - 1];
+  };
+
+  const show = (step) => {
+    const row = current;
+    row.node.querySelectorAll('.rt-hop').forEach((h) => h.remove());
+    rowsBox.querySelectorAll('.rt-cell.rt-on').forEach((c) => c.classList.remove('rt-on'));
+    row.cells[step.at].classList.add('rt-on');
+    container.dataset.col = String(step.at);
+    if (step.hop) {
+      const [from, to, label, kind] = step.hop;
+      const left = Math.min(center(from), center(to));
+      const width = Math.abs(center(to) - center(from));
+      row.node.appendChild(el('div', {
+        class: `rt-hop ${to > from ? 'rt-right' : 'rt-left'}`,
+        style: `left:calc(${left}% + 4px);width:calc(${width}% - 8px);color:${RT_HOP[kind]}`,
+      }, el('span', { text: label }), el('i')));
+    }
+    if (step.chip) row.cells[step.at].appendChild(el('span', { class: 'rt-chip', text: step.chip.replace(/([a-z])([A-Z])/g, '$1\u200B$2') }));
+    if (step.bubbles) {
+      const mineAt = new Set([1, 4]);
+      row.cells[step.at].appendChild(el('div', { class: 'rt-bubs' },
+        ...Array.from({ length: Math.min(step.bubbles, 5) }, (_, i) => el('span', { class: `rt-bub${mineAt.has(i) ? ' rt-mine' : ''}` }))));
+    }
+    if (step.pipe !== undefined) pipeMin = step.pipe;
+    if (step.listening !== undefined) listening = step.listening;
+    renderPipe();
+    const [file, ...lines] = step.code;
+    code.box.querySelector('h4').textContent = RT_FILES[file];
+    code.setCode(RT_CODE[file]);
+    code.mark(...lines);
+    caption.textContent = step.text;
+  };
+
+  const advance = () => {
+    if (!queue.length) {
+      running = false;
+      renderButtons();
+      return;
+    }
+    const item = queue.shift();
+    if (item.row) current = newRow(item.row);
+    show(item.step);
+    if (!queue.length) {
+      running = false;
+      renderButtons();
+      return;
+    }
+    renderButtons();
+    if (!stepMode.input.checked) timers.push(setTimeout(advance, RT_STEP_MS));
+  };
+
+  const start = (key) => {
+    if (running) return;
+    if (key === 'open') open = true;
+    if (key === 'close') open = false;
+    queue = [];
+    RT_SCENARIOS[key].rows.forEach((row) => row.steps.forEach((step, i) => queue.push({ row: i === 0 ? row.title : null, step })));
+    running = true;
+    renderButtons();
+    advance();
+  };
+
+  container.append(
+    el('div', { class: 'rt-full' },
+      el('div', { class: 'rt-bar' }, el('div', { class: 'fs-controls' }, ...Object.values(buttons)), stepMode.node),
+      el('div', { class: 'rt-grid' }, head, pipe, rowsBox),
+      el('div', { class: 'rt-bar' }, caption, next),
+      code.box)
+  );
+  code.setCode(RT_CODE[0]);
+  caption.textContent = 'Abre el chat para ver cómo baja la llamada y cómo sube el Stream.';
+  renderPipe();
+  renderButtons();
+  return () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    root.replaceChildren();
+  };
+};
+
+// ── realtime-chat: dos teléfonos, la tabla y la publicación ──
+
+export const chatStart = () => ({
+  rows: [
+    { id: 1, who: 'ana', text: '¿alguien conectado?' },
+    { id: 2, who: 'me', text: '¡aquí!' },
+  ],
+  next: 3,
+  published: true,
+  seen: { me: [1, 2], ana: [1, 2] },
+  last: { kind: 'start' },
+});
+
+export const chatSend = (s, who, text) => {
+  const clean = String(text || '').trim();
+  if (!clean) return s;
+  const row = { id: s.next, who, text: clean };
+  const rows = [...s.rows, row];
+  const all = rows.map((r) => r.id);
+  const seen = s.published ? { me: all, ana: all } : s.seen;
+  return { ...s, rows, next: s.next + 1, seen, last: { kind: 'send', who, id: row.id, notified: s.published } };
+};
+
+export const chatReopen = (s, who) => ({
+  ...s, seen: { ...s.seen, [who]: s.rows.map((r) => r.id) }, last: { kind: 'reopen', who },
+});
+
+export const chatPublish = (s, published) => ({ ...s, published, last: { kind: 'publish' } });
+
+const CHAT_NAMES = { me: 'Tú', ana: 'Ana' };
+
+export const chatSummary = (s) => {
+  const { last } = s;
+  if (last.kind === 'start') return 'Escribe en cualquiera de los dos teléfonos y envía.';
+  if (last.kind === 'publish') {
+    return s.published
+      ? 'messages está en la publicación: cada cambio se empuja a quien esté escuchando.'
+      : 'Quitaste messages de supabase_realtime. Los insert siguen funcionando. Prueba enviar.';
+  }
+  if (last.kind === 'reopen') return `Al abrir el chat, .stream() trae primero la foto completa: ${CHAT_NAMES[last.who]} ve todas las filas que hay.`;
+  if (last.notified) return 'La fila entró a messages y Realtime la empujó a los dos teléfonos, también a quien la envió.';
+  return 'La fila entró a messages, pero ningún teléfono se enteró: la tabla no está en la publicación. Ni siquiera quien la envió la ve.';
+};
+
+const mountRealtimeChat = (root) => {
+  ensureRtStyle();
+  const container = card(root);
+  let state = chatStart();
+  let timers = [];
+
+  const summary = el('div', { class: 'rt-summary', 'data-testid': 'rc-summary', 'aria-live': 'polite' });
+  const arrows = {
+    me: { insert: el('span', { class: 'rc-arrow rc-insert', text: '→' }), stream: el('span', { class: 'rc-arrow rc-stream', text: '←' }) },
+    ana: { insert: el('span', { class: 'rc-arrow rc-insert', text: '←' }), stream: el('span', { class: 'rc-arrow rc-stream', text: '→' }) },
+  };
+  const rowsBox = el('div', { class: 'rc-rows' });
+  const pubSwitch = switchControl('messages en supabase_realtime', (on) => apply(chatPublish(state, on)));
+  const pub = el('div', { class: 'rc-pub' }, pubSwitch.node);
+  const db = el('div', { class: 'rc-db' }, el('h4', { text: 'tabla messages' }), rowsBox, pub);
+
+  const phones = {};
+  ['me', 'ana'].forEach((who) => {
+    const list = el('div', { class: 'rc-list', 'data-phone': who });
+    const input = el('input', { type: 'text', 'aria-label': `Mensaje de ${CHAT_NAMES[who]}`, placeholder: 'Mensaje' });
+    const send = () => {
+      if (!input.value.trim()) return;
+      const text = input.value;
+      input.value = '';
+      sendFrom(who, text);
+    };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+    const frame = el('div', { class: 'rc-phone' },
+      el('div', { class: 'rc-head' }, el('span', { text: `Chat · ${CHAT_NAMES[who]}` }),
+        el('button', { type: 'button', text: 'Reabrir', onclick: () => apply(chatReopen(state, who)) })),
+      list,
+      el('div', { class: 'rc-input' }, input, el('button', { type: 'button', text: 'Enviar', 'aria-label': `Enviar como ${CHAT_NAMES[who]}`, onclick: send })));
+    phones[who] = { frame, list, input };
+  });
+
+  const light = (node) => {
+    node.classList.add('rc-on');
+    timers.push(setTimeout(() => node.classList.remove('rc-on'), 700));
+  };
+
+  const renderPhone = (who, fresh) => {
+    const { list } = phones[who];
+    const visible = state.rows.filter((r) => state.seen[who].includes(r.id));
+    list.replaceChildren(...visible.map((r) => el('div', {
+      class: `rc-b${r.who === who ? ' rc-mine' : ''}${fresh === r.id ? ' rc-new' : ''}`, text: r.text,
+    })));
+    list.scrollTop = list.scrollHeight;
+  };
+
+  const render = (fresh) => {
+    rowsBox.replaceChildren(...state.rows.slice(-6).map((r) => el('div', { class: 'rc-row' },
+      el('b', { text: `m${r.id}` }), el('span', { text: `${r.who === 'me' ? 'tú' : 'ana'} · ${r.text}` }))));
+    pub.classList.toggle('rc-off', !state.published);
+    pubSwitch.input.checked = state.published;
+    renderPhone('me', fresh);
+    renderPhone('ana', fresh);
+    summary.textContent = chatSummary(state);
+    summary.classList.toggle('rt-bad', state.last.kind === 'send' && !state.last.notified);
+  };
+
+  const apply = (next, fresh) => {
+    state = next;
+    render(fresh);
+  };
+
+  const sendFrom = (who, text) => {
+    const next = chatSend(state, who, text);
+    if (next === state) return;
+    state = next;
+    light(arrows[who].insert);
+    timers.push(setTimeout(() => {
+      render(next.last.id);
+      if (next.published) {
+        light(arrows.me.stream);
+        light(arrows.ana.stream);
+      }
+      flash(summary);
+    }, 450));
+  };
+
+  container.append(
+    el('div', { class: 'rt-full' },
+      el('div', { class: 'rc-wrap' },
+        phones.me.frame,
+        el('div', { class: 'rc-wire' }, arrows.me.insert, arrows.me.stream),
+        db,
+        el('div', { class: 'rc-wire' }, arrows.ana.stream, arrows.ana.insert),
+        phones.ana.frame),
+      el('div', { class: 'rc-legend' },
+        el('span', {}, el('b', { text: '→ ámbar', style: 'color:#A96C05' }), ' insert, un Future'),
+        el('span', {}, el('b', { text: '← verde', style: 'color:#0F8478' }), ' Realtime empuja la lista, un Stream')),
+      summary)
+  );
+  render();
+  return () => {
+    timers.forEach(clearTimeout);
+    root.replaceChildren();
+  };
+};
+
+// ── chat-pagination: la ventana en vivo y las páginas por Future ──
+
+export const PG_LIVE = 15;
+export const PG_PAGE = 5;
+
+const pgMerge = (current, incoming) => {
+  const byId = new Map(current.map((m) => [m.id, m]));
+  incoming.forEach((m) => byId.set(m.id, m));
+  return [...byId.values()].sort((a, b) => a.id - b.id);
+};
+
+const pgWindow = (total) => Array.from({ length: Math.min(PG_LIVE, total) }, (_, i) => ({ id: total - PG_LIVE + 1 + i, src: 'live' }))
+  .filter((m) => m.id >= 1);
+
+export const pageStart = (mode = 'replace', total = 32) => ({
+  mode, total, messages: pgWindow(total), hasMore: true, last: { kind: 'start' },
+});
+
+export const pageIncoming = (s) => {
+  const total = s.total + 1;
+  const live = pgWindow(total);
+  const before = s.messages.length;
+  const messages = s.mode === 'replace' ? live : pgMerge(s.messages, live);
+  return { ...s, total, messages, last: { kind: 'incoming', id: total, lost: Math.max(0, before + 1 - messages.length) } };
+};
+
+export const pageOlder = (s) => {
+  if (!s.hasMore || !s.messages.length) return { ...s, last: { kind: 'none' } };
+  const oldest = s.messages[0].id;
+  const older = [];
+  for (let id = oldest - PG_PAGE; id < oldest; id += 1) if (id >= 1) older.push({ id, src: 'page' });
+  return {
+    ...s,
+    messages: pgMerge(s.messages, older),
+    hasMore: older.length === PG_PAGE,
+    last: { kind: 'older', count: older.length, before: oldest },
+  };
+};
+
+export const pageMode = (s, mode) => ({ ...s, mode, last: { kind: 'mode' } });
+
+export const pageSummary = (s) => {
+  const { last } = s;
+  if (last.kind === 'start') return 'El stream trajo los 15 más nuevos. Llega arriba para pedir los anteriores.';
+  if (last.kind === 'mode') return s.mode === 'replace' ? 'Así queda MessagesUpdated en la parte 1: reemplaza la lista.' : 'Así queda en la parte 2: junta por id lo que llega con lo que ya estaba.';
+  if (last.kind === 'none') return 'hasMore es false: la última página trajo menos de 5. No hay nada más atrás.';
+  if (last.kind === 'older') return `fetchBefore(m${last.before}, limit: 5) trajo ${last.count} por Future y se juntaron en el mismo estado.`;
+  if (last.lost) {
+    const lost = last.lost === 1 ? 'se perdió 1 mensaje que estaba' : `se perdieron ${last.lost} mensajes que estaban`;
+    return `Llegó m${last.id} por el stream y reemplazó la lista: ${lost} en pantalla.`;
+  }
+  return `Llegó m${last.id} por el stream. Se juntó por id con lo que había: no se perdió nada.`;
+};
+
+const PG_CODE = {
+  replace: `void _onMessagesUpdated(MessagesUpdated event, emit) {
+  emit(state.copyWith(messages: event.messages));
+}`,
+  merge: `void _onMessagesUpdated(MessagesUpdated event, emit) {
+  emit(state.copyWith(
+    messages: _merge(state.messages, event.messages),
+  ));
+}`,
+};
+
+const PG_OLDER = `
+Future<void> _onOlderRequested(event, emit) async {
+  final oldest = state.messages.last.createdAt;
+  final older = await _loadOlder(oldest, limit: 5);
+  emit(state.copyWith(
+    messages: _merge(state.messages, older),
+    hasMore: older.length == 5,
+  ));
+}`;
+
+const mountChatPagination = (root) => {
+  ensureRtStyle();
+  const container = card(root);
+  let state = pageStart('replace');
+  const summary = el('div', { class: 'rt-summary', 'data-testid': 'pg-summary', 'aria-live': 'polite' });
+  const list = el('div', { class: 'pg-list', 'data-testid': 'pg-list' });
+  const stats = el('div', { class: 'pg-stats' });
+  const code = codePanel('chat_bloc.dart');
+  const mode = segmented([['replace', 'Parte 1 · reemplazar'], ['merge', 'Parte 2 · juntar por id']], (key) => apply(pageMode(state, key)));
+  const button = (text, fn, solid) => el('button', { class: `fs-btn${solid ? ' fs-solid' : ''}`, type: 'button', text, onclick: () => apply(fn(state)) });
+
+  const apply = (next) => {
+    state = next;
+    mode.select(state.mode);
+    const fresh = state.last.kind === 'incoming' ? state.last.id : null;
+    list.replaceChildren(...state.messages.map((m) => el('span', {
+      class: `pg-m pg-${m.src}${m.id === fresh ? ' pg-new' : ''}`, text: `m${m.id}`,
+    })));
+    stats.replaceChildren(
+      el('span', {}, 'en la tabla: ', el('b', { text: String(state.total) })),
+      el('span', {}, 'en el estado: ', el('b', { text: String(state.messages.length) })),
+      el('span', {}, 'hasMore: ', el('b', { text: String(state.hasMore) })));
+    code.setCode(PG_CODE[state.mode] + '\n' + PG_OLDER);
+    const base = PG_CODE[state.mode].split('\n').length + 1;
+    const paging = state.last.kind === 'older' || state.last.kind === 'none';
+    code.mark(...(paging ? [base + 1, base + 2, base + 3, base + 4, base + 5] : state.mode === 'merge' ? [1, 2, 3] : [1]));
+    summary.textContent = pageSummary(state);
+    summary.classList.toggle('rt-bad', state.last.kind === 'incoming' && state.last.lost > 0);
+    flash(summary);
+  };
+
+  container.append(
+    el('div', { class: 'rt-full' },
+      el('div', { class: 'rt-bar' }, mode.node,
+        el('div', { class: 'fs-controls' },
+          button('Llegar arriba', pageOlder, true),
+          button('Ana envía un mensaje', pageIncoming),
+          el('button', { class: 'fs-btn', type: 'button', text: 'Reiniciar', onclick: () => apply(pageStart(state.mode)) }))),
+      el('div', { class: 'rc-legend' },
+        el('span', {}, el('b', { text: 'verde azulado', style: 'color:#0F8478' }), ' llegó por el Stream'),
+        el('span', {}, el('b', { text: 'ámbar', style: 'color:#A96C05' }), ' llegó por Future, al llegar arriba'),
+        el('span', { text: 'el más viejo a la izquierda' })),
+      list,
+      stats,
+      summary,
+      code.box)
+  );
+  apply(state);
+  return () => root.replaceChildren();
+};
+
 export const SIMS = Object.freeze({
   'state-counter': mountCounter,
   'hot-reload': (root, args = []) => mountCounter(root, ['reload', ...args]),
@@ -3529,6 +4388,10 @@ export const SIMS = Object.freeze({
   'register-clean': mountRegisterClean,
   'query-builder': mountQueryBuilder,
   'storage-cache': mountStorageCache,
+  'stream-pipe': mountStreamPipe,
+  'stream-layers': mountStreamLayers,
+  'realtime-chat': mountRealtimeChat,
+  'chat-pagination': mountChatPagination,
 });
 
 export const parseSpec = (spec) => {

@@ -4,6 +4,8 @@ import { ThemeProvider } from '@/theme/ThemeContext';
 import InteractiveBlock from './InteractiveBlock';
 import {
   SIMS, parseSpec, runQuery, queryCode, cacheStart, cacheView, cacheUpload, cacheRestart, cacheWait, cacheUrl,
+  pipeStart, pipeAct, rtLayersScenario, chatStart, chatSend, chatReopen, chatPublish,
+  pageStart, pageOlder, pageIncoming, pageMode,
 } from './flutterStateSims';
 
 const renderBlock = (spec) => render(<ThemeProvider><InteractiveBlock spec={spec} /></ThemeProvider>);
@@ -516,5 +518,149 @@ describe('storage-cache', () => {
     fireEvent.click(screen.getByText('Abrir el perfil'));
     expect(screen.getByTestId('sc-summary').textContent).toMatch(/^La app muestra la foto 2: nadie la tenía/);
     expect(document.querySelector('.fs-dark').textContent).toContain("remove([oldPath])");
+  });
+});
+
+describe('stream-pipe', () => {
+  const run = (s, ...actions) => actions.reduce((acc, a) => {
+    const r = pipeAct(acc.s, a);
+    return { s: r.s, effects: [...acc.effects, r.effect] };
+  }, { s, effects: [] });
+
+  it('a stream delivers many values, survives an error and refuses events after close', () => {
+    const { effects } = run(pipeStart('stream'), 'add', 'add', 'error', 'add', 'close', 'add');
+    expect(effects.map((e) => e.kind)).toEqual(['data', 'data', 'error', 'data', 'done', 'throw']);
+    expect(effects[3].value).toBe(3);
+    expect(effects[5].text).toMatch(/after calling close/);
+  });
+
+  it('map transforms each value and cancel stops the delivery', () => {
+    const { effects } = run(pipeStart('stream', true), 'add', 'cancel', 'add');
+    expect(effects[0].out).toBe(10);
+    expect(effects[2].lost).toBe(true);
+  });
+
+  it('a future completes only once', () => {
+    const { effects } = run(pipeStart('future'), 'complete', 'complete');
+    expect(effects.map((e) => e.kind)).toEqual(['data', 'throw']);
+    expect(effects[1].text).toMatch(/already completed/);
+  });
+
+  it('prints what reaches listen once the value crosses the pipe', () => {
+    const { container } = renderBlock('stream-pipe');
+    fireEvent.click(screen.getByText('add(1)'));
+    expect(container.querySelector('.fs-log').textContent).toBe('');
+    act(() => vi.advanceTimersByTime(1000));
+    expect(container.querySelector('.fs-log').textContent).toContain('llegó 1');
+    fireEvent.click(screen.getByText('cancel()'));
+    fireEvent.click(screen.getByText('add(2)'));
+    act(() => vi.advanceTimersByTime(2000));
+    expect(container.querySelector('.fs-log').textContent).not.toContain('llegó 2');
+    expect(screen.getByTestId('rt-pipe-summary').textContent).toMatch(/nadie lo recibió/);
+  });
+});
+
+describe('stream-layers', () => {
+  ['open', 'ana', 'me', 'close'].forEach((key) => {
+    it(`${key}: one hop per step and no skipped layers inside a row`, () => {
+      rtLayersScenario(key).forEach((row) => {
+        row.steps.slice(1).forEach((step, i) => {
+          expect(Math.abs(step.at - row.steps[i].at)).toBeLessThanOrEqual(1);
+        });
+        row.steps.filter((step) => step.hop).forEach((step) => {
+          expect(Math.abs(step.hop[0] - step.hop[1])).toBe(1);
+          expect(step.hop[1]).toBe(step.at);
+        });
+      });
+    });
+  });
+
+  it('only the Bloc listens, and walking step by step shows at most one hop', () => {
+    const { container } = renderBlock('stream-layers');
+    expect(screen.getByRole('button', { name: 'Ana envía un mensaje' }).disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText('Paso a paso'));
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir el chat' }));
+    let max = 0;
+    let guard = 0;
+    while (screen.getByText('Siguiente paso').style.display !== 'none' && guard < 100) {
+      max = Math.max(max, container.querySelectorAll('.rt-hop').length);
+      fireEvent.click(screen.getByText('Siguiente paso'));
+      guard += 1;
+    }
+    expect(max).toBe(1);
+    expect(container.querySelector('.rt-ear').style.display).toBe('');
+    expect(container.querySelectorAll('.rt-bub').length).toBe(3);
+    expect(screen.getByRole('button', { name: 'Ana envía un mensaje' }).disabled).toBe(false);
+  });
+
+  it('closing cancels the subscription and removes the pipe', () => {
+    const { container } = renderBlock('stream-layers');
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir el chat' }));
+    act(() => vi.advanceTimersByTime(60000));
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar el chat' }));
+    act(() => vi.advanceTimersByTime(60000));
+    expect(container.querySelector('.rt-ear').style.display).toBe('none');
+    expect(container.querySelector('.rt-pipe-bar').style.display).toBe('none');
+    expect(screen.getByRole('button', { name: 'Abrir el chat' }).disabled).toBe(false);
+  });
+});
+
+describe('realtime-chat', () => {
+  it('a published table pushes every insert to both phones', () => {
+    const s = chatSend(chatStart(), 'me', 'hola');
+    expect(s.seen.me).toContain(3);
+    expect(s.seen.ana).toContain(3);
+  });
+
+  it('without the publication nobody hears, until the chat is opened again', () => {
+    let s = chatSend(chatPublish(chatStart(), false), 'ana', 'hola');
+    expect(s.rows).toHaveLength(3);
+    expect(s.seen.me).not.toContain(3);
+    expect(s.seen.ana).not.toContain(3);
+    s = chatReopen(s, 'me');
+    expect(s.seen.me).toContain(3);
+  });
+
+  it('puts my messages on the right in each phone', () => {
+    const { container } = renderBlock('realtime-chat');
+    type('Mensaje de Ana', 'hola a todos');
+    fireEvent.click(screen.getByLabelText('Enviar como Ana'));
+    act(() => vi.advanceTimersByTime(500));
+    const last = (who) => [...container.querySelectorAll(`[data-phone="${who}"] .rc-b`)].pop();
+    expect(last('ana').textContent).toBe('hola a todos');
+    expect(last('ana').classList.contains('rc-mine')).toBe(true);
+    expect(last('me').classList.contains('rc-mine')).toBe(false);
+    expect(screen.getByTestId('rc-summary').textContent).toMatch(/a los dos teléfonos/);
+  });
+});
+
+describe('chat-pagination', () => {
+  it('pages back five at a time until there is nothing left', () => {
+    let s = pageStart('merge', 22);
+    expect(s.messages.map((m) => m.id)[0]).toBe(8);
+    s = pageOlder(s);
+    expect(s.messages[0].id).toBe(3);
+    expect(s.hasMore).toBe(true);
+    s = pageOlder(s);
+    expect(s.messages[0].id).toBe(1);
+    expect(s.hasMore).toBe(false);
+  });
+
+  it('replacing on MessagesUpdated loses the pages; merging keeps them', () => {
+    const lost = pageIncoming(pageOlder(pageStart('replace')));
+    expect(lost.messages).toHaveLength(15);
+    expect(lost.last.lost).toBe(6);
+    const kept = pageIncoming(pageOlder(pageMode(pageStart('replace'), 'merge')));
+    expect(kept.messages).toHaveLength(21);
+    expect(kept.messages[kept.messages.length - 1].id).toBe(33);
+  });
+
+  it('marks the page that came by Future and warns when it is lost', () => {
+    renderBlock('chat-pagination');
+    fireEvent.click(screen.getByText('Llegar arriba'));
+    expect(document.querySelectorAll('.pg-page')).toHaveLength(5);
+    fireEvent.click(screen.getByText('Ana envía un mensaje'));
+    expect(document.querySelectorAll('.pg-page')).toHaveLength(0);
+    expect(screen.getByTestId('pg-summary').textContent).toMatch(/se perdieron 6/);
   });
 });

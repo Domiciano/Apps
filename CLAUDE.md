@@ -179,6 +179,13 @@ se abren con una sola política `for all to authenticated` por bucket. El círcu
 de Clean de la 0093 usa la misma convención de anillos que el simulador `register-clean`. Reutiliza `table` y `legend` de `database_figuras.py`.
 `tools/di_figuras.py` trae las dos de «Inyección de dependencias con GetIt» (0079), que va justo después del
 Laboratorio 7 y migra un solo camino de ese laboratorio con `= sl()`.
+`tools/realtime_figuras.py` trae las once de la sección **Realtime DB**: «Programación reactiva y Streams»
+(0063, `lessonI2.md`), «El Stream viaja por las capas» (0094, `lessonI2capas.md`), «Supabase Realtime» (0062,
+`lessonI1.md`) y «Laboratorio 8 · Chat en tiempo real» (0065, `lessonH10.md`). **Convención del curso**: a lo
+largo de las capas el `Stream` se retorna y solo el Bloc hace `listen`; la función de `listen` lanza un evento
+(`MessagesUpdated`) en vez de emitir, y el Bloc cancela la suscripción en `close()`. El punto de partida del
+laboratorio es `Domiciano/262App5` (ramas `main` y `solution`): el Laboratorio 7 resuelto más la feature `chat`,
+con la tabla `messages` sin RLS en la publicación `supabase_realtime` y el bucket privado `chat-images`.
 
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
@@ -250,8 +257,23 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   abrir la app (vacía ImageCache) y esperar 1 hora (vence el CDN del modo fijo). Marca HIT o MISS
   por capa y avisa en rojo cuando la foto mostrada no es la última. Lógica pura y exportada
   (`cacheStart`, `cacheView`, `cacheUpload`, `cacheRestart`, `cacheWait`).
+- **Los cuatro de Realtime DB** (2026-11-06). Lógica pura y exportada, con pruebas:
+  - `stream-pipe` (0063): un `StreamController` (o un `Completer` en modo *Future*) y una tubería por la que
+    viaja cada `add`, `addError` y `close` hasta `listen`, con `map` opcional. Muestra la consola, la línea de
+    tiempo de lo que llegó, que un error no cierra el stream, el `Bad state` de `add` tras `close` y que tras
+    `cancel()` lo emitido ya no llega (`pipeStart`, `pipeAct`).
+  - `stream-layers` (0094): una fila por escenario y una columna por capa (ChatScreen, ChatBloc, UseCase,
+    RepositoryImpl, DataSource, Supabase). *Abrir el chat* baja la llamada y sube el `Stream` hasta el `listen`
+    del Bloc; *Ana envía* y *Tú envías* (el insert baja como `Future`) suben la lista por la tubería; *Cerrar*
+    baja la cancelación. Cumple un salto por paso y continuidad dentro de cada fila (`rtLayersScenario`).
+  - `realtime-chat` (0062): dos teléfonos (tú y Ana), la tabla `messages` y el interruptor de la publicación.
+    Sin publicación, el insert entra pero nadie se entera hasta *Reabrir* (`chatSend`, `chatReopen`, `chatPublish`).
+  - `chat-pagination` (0065, parte 2): la ventana en vivo de 15 y las páginas de 5 por `Future`. En modo
+    *reemplazar* (el `MessagesUpdated` de la parte 1) la siguiente emisión borra las páginas; en *juntar por id*
+    se quedan (`pageStart`, `pageOlder`, `pageIncoming`, `pageMode`).
 - `flutterStateSims.js` ya **no es idéntico** al de Seminario: tiene además `register-layers`,
-  `register-clean`, `query-builder`, `storage-cache` y unas palabras más en el resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
+  `register-clean`, `query-builder`, `storage-cache`, los cuatro de Realtime DB y unas palabras más en el
+  resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
 
 ### Darla de alta en `toc.md`
 
