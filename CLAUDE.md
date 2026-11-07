@@ -195,6 +195,18 @@ App Store Connect, Transporter), sin logos, con los pasos numerados en círculos
 cita como (1), (2)… Colores por herramienta: Firebase ámbar, Play verde, Xcode gris, App Store Connect índigo,
 Transporter violeta. El video viejo de publicación en Play va al final de la 0082.
 
+`tools/push_figuras.py` trae las siete de la sección **Push notifications** (2026-11-07), que se reescribió
+enfocada en Android: «Notificaciones push» (0074), «Conectar la app con Firebase» (0075), «La llave del backend»
+(0076), «Recibir notificaciones en Flutter» (0077) y «Enviar notificaciones desde el backend» (0078). iOS va solo
+al final de la 0077 («¿Y en iPhone?»): APNs, la llave `.p8` subida a Firebase y FCM como intermediario hacia APNs
+(verificado en la página *FCM Architectural Overview* de Firebase). El código de la 0077 se compiló
+(`flutter build apk`) con `firebase_core ^5.1.0`, `firebase_messaging ^17.0.1` y `flutter_local_notifications
+^22.3.3`: la 23.0.0 exige `compileSdk` 37 y la plantilla de Flutter 3.44 trae 36, así que se fijó la 22. Reutiliza
+las piezas de panel de `deploy_figuras.py`. La 0078 enseña a correr el backend en localhost con
+[`Domiciano/FCMNode`](https://github.com/Domiciano/FCMNode) (Spring Boot 4.1, `./mvnw spring-boot:run`): lee la llave
+de `fcm-key.json` en su raíz y recibe solo `{"message": {...}}`; sigue aceptando el formato viejo `{data, key}` que
+usa el servidor desplegado en `i2thub.icesi.edu.co:5443/fcm/messages`.
+
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
 python3 tools/bloc_figuras.py --inject    # reemplaza cada bloque svg de la lección por su figura

@@ -104,11 +104,11 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonL2.md | Controlando la Cámara del Mapa | 0072
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonL3.md | Interactuando con el Mapa | 0073
 [t] Push notifications
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK0.md | Notificaciones Push | 0074
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK1.md | Creando y Conectando un Proyecto de Firebase | 0075
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK2.md | Configurando Firebase para Enviar Notificaciones Push | 0076
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK3.md | Integración completa de notificaciones con Firebase en Flutter | 0077
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK4.md | El Rol del Backend en las Notificaciones Push | 0078
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK0.md | Notificaciones push | 0074
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK1.md | Conectar la app con Firebase | 0075
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK2.md | La llave del backend | 0076
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK3.md | Recibir notificaciones en Flutter | 0077
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK4.md | Enviar notificaciones desde el backend | 0078
 [t] Deploy
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM0.md | Distribuir con Firebase App Distribution | 0095
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM1.md | Generación de artefactos: AAB e IPA | 0080
