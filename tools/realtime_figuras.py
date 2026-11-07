@@ -18,7 +18,6 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from bloc_figuras import FAM, head, note, phone, tail  # noqa: E402
 from code_frame import frame  # noqa: E402
-from database_figuras import legend  # noqa: E402
 from storage_figuras import badge, code_bar  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -26,23 +25,6 @@ LESSONS = ['lessonI2.md', 'lessonI2capas.md', 'lessonI1.md', 'lessonH10.md']
 FIGS = {}
 MINE = ('#1F9D68', '#FFFFFF')
 THEIRS = ('#FFFFFF', '#161A26')
-
-
-def marble(cx, cy, color, text, r=17):
-    soft, border, strong = FAM[color]
-    return (f'  <circle cx="{cx}" cy="{cy}" r="{r}" fill="{soft}" stroke="{strong}" stroke-width="2"/>'
-            f'<text class="mono" x="{cx}" y="{cy}" dy="0.35em" text-anchor="middle" font-size="13" font-weight="700" '
-            f'fill="{strong}">{text}</text>\n')
-
-
-def xmark(cx, cy, r=13):
-    _, _, strong = FAM['rose']
-    return (f'  <path d="M{cx-r},{cy-r} L{cx+r},{cy+r} M{cx+r},{cy-r} L{cx-r},{cy+r}" stroke="{strong}" '
-            f'stroke-width="3.5" stroke-linecap="round"/>\n')
-
-
-def done_bar(x, cy, h=22):
-    return f'  <path d="M{x},{cy-h} V{cy+h}" stroke="#556074" stroke-width="4" stroke-linecap="round"/>\n'
 
 
 def axis(x1, x2, y):
@@ -74,121 +56,6 @@ def bubble(x, y, w, text, mine, h=30, photo=False):
     o += (f'  <text x="{bx+10:.0f}" y="{ty:.0f}" dy="0.35em" font-size="11.5" fill="{ink}" '
           f'data-fit="{bw-20:.0f}">{text}</text>\n')
     return o, bh
-
-
-# ───────────────────────── 0063 · Programación reactiva y Streams ─────────────────────────
-
-def rt_future_stream():
-    fid, h = 'rtFutureStream', 430
-    s = head(fid, h, 'Un Future entrega una vez. Un Stream entrega muchas veces.',
-             'Un Future entrega una vez. Un Stream entrega muchas veces.',
-             'El tiempo corre hacia la derecha. Cada círculo es un valor que llega a quien está escuchando.',
-             'Dos líneas de tiempo. Arriba, un Future de tipo int: entrega un solo valor, 42, y con eso termina. '
-             'Abajo, un Stream de tipo int: entrega 1, 2 y 3, luego un error, luego 4, y al final se cierra. '
-             'Debajo de cada evento del Stream se lee qué función de listen lo recibe: onData, onError u onDone.',
-             colors=('teal',))
-    y1, y2, x0, x1 = 176, 316, 236, 900
-    s += caption(48, y1, 'Future&lt;int&gt;', '#A96C05', 15, 'start', weight=700, mono=True)
-    s += caption(48, y1 + 22, 'await · un valor', '#79809A', 12, 'start')
-    s += axis(x0, x1, y1)
-    s += marble(470, y1, 'amber', '42')
-    s += done_bar(500, y1)
-    s += caption(485, y1 + 40, 'llega y termina', '#A96C05', 12)
-    s += caption(48, y2, 'Stream&lt;int&gt;', '#0F8478', 15, 'start', weight=700, mono=True)
-    s += caption(48, y2 + 22, 'listen · muchos valores', '#79809A', 12, 'start')
-    s += axis(x0, x1, y2)
-    for cx, v in ((300, '1'), (400, '2'), (500, '3'), (720, '4')):
-        s += marble(cx, y2, 'indigo', v)
-        s += caption(cx, y2 + 40, 'onData', '#4453C9', 12, mono=True)
-    s += xmark(610, y2)
-    s += caption(610, y2 + 40, 'onError', '#C2354F', 12, mono=True)
-    s += done_bar(830, y2)
-    s += caption(830, y2 + 40, 'onDone', '#556074', 12, mono=True)
-    s += legend(236, 384, 'indigo', 'un valor')
-    s += legend(356, 384, 'rose', 'un error')
-    s += legend(476, 384, 'slate', 'se cerró: no llega nada más')
-    return s + tail(h + 6, 'Un error no cierra el stream: después del error todavía llegó el 4.')
-
-
-FIGS['rtFutureStream'] = rt_future_stream
-
-
-def rt_map():
-    fid, h = 'rtMap', 420
-    s = head(fid, h, '<tspan class="mono">map</tspan> transforma cada valor y devuelve otro Stream',
-             'map transforma cada valor y devuelve otro Stream',
-             'El stream de arriba sigue emitiendo igual. El de abajo emite lo mismo, pero ya transformado.',
-             'Arriba, un Stream que emite 1, 2 y 3. En el medio, una caja con el código map de x a x por 10. '
-             'Abajo, el Stream que devuelve map: emite 10, 20 y 30, en los mismos instantes que el de arriba. '
-             'Una flecha baja de cada valor de arriba a su valor transformado.',
-             colors=('teal',))
-    y1, y2, x0, x1 = 150, 330, 236, 900
-    s += caption(48, y1, 'numbers', '#4453C9', 15, 'start', weight=700, mono=True)
-    s += axis(x0, x1, y1)
-    s += f'  <rect x="236" y="214" width="664" height="52" rx="12" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.75"/>\n'
-    s += caption(568, 240, 'numbers.map((x) =&gt; x * 10)', '#0F8478', 15, weight=700, mono=True)
-    s += caption(48, 240, 'el operador', '#79809A', 12.5, 'start')
-    s += caption(48, y2, 'tens', '#0F8478', 15, 'start', weight=700, mono=True)
-    s += axis(x0, x1, y2)
-    for cx, a, b in ((340, '1', '10'), (520, '2', '20'), (720, '3', '30')):
-        s += marble(cx, y1, 'indigo', a)
-        s += f'  <path class="ar-teal" d="M{cx},{y1+20} V{208}"/>\n'
-        s += f'  <path class="ar-teal" d="M{cx},{272} V{y2-24}"/>\n'
-        s += marble(cx, y2, 'teal', b, r=19)
-    return s + tail(h, 'En el chat, cada valor es la lista de filas de la tabla, y map la convierte en una lista de Message.')
-
-
-FIGS['rtMap'] = rt_map
-
-
-CONSOLE = ['llegó 1', 'llegó 2', 'falló Exception: sin red', 'llegó 3', 'se cerró']
-
-
-def rt_listen_result():
-    o = ''
-    colors = ['#4453C9', '#4453C9', '#C2354F', '#4453C9', '#556074']
-    for i, (line, c) in enumerate(zip(CONSOLE, colors)):
-        o += f'<text class="mono" x="28" y="{34 + i*26}" dy="0.35em" font-size="13" fill="{c}">{line}</text>'
-    o += '<path d="M16,172 H344" stroke="#E4E7EE" stroke-width="1.25"/>'
-    o += ('<text x="28" y="198" dy="0.35em" font-size="12.5" fill="#79809A">después de cancel(), lo que se emita</text>'
-          '<text x="28" y="216" dy="0.35em" font-size="12.5" fill="#79809A">ya no llega a esta suscripción</text>')
-    return o
-
-
-FIGS['rtListen'] = lambda: frame(dict(
-    id='rtListen',
-    title='Las partes de <tspan class="mono">listen</tspan>',
-    title_plain='Las partes de listen',
-    desc='Código a la izquierda: final subscription igual a numbers.listen, con una función para cada valor, onError para '
-         'los errores y onDone para el cierre; abajo, await subscription.cancel. A la derecha, la consola: llegó 1, llegó 2, '
-         'falló Exception sin red, llegó 3 y se cerró. Una flecha une cada función con las líneas que imprime.',
-    sub='listen recibe una función por tipo de evento y devuelve la suscripción, que es lo que se cancela.',
-    file='main.dart',
-    code=[
-        'final subscription = numbers.listen(',
-        "  (value) => print('llegó $value'),",
-        "  onError: (e) => print('falló $e'),",
-        "  onDone: () => print('se cerró'),",
-        ');',
-        '',
-        'await subscription.cancel();',
-    ],
-    panel='CONSOLA',
-    result=rt_listen_result(),
-    min_h=270,
-    arrows=[
-        dict(line=1, find='(value)', to=(20, 34), color='indigo', lane=0),
-        dict(line=2, find='onError', to=(20, 86), color='rose', lane=1),
-        dict(line=3, find='onDone', to=(20, 138), color='teal', lane=2),
-        dict(line=6, find='cancel()', to=(20, 198), color='amber', lane=3),
-    ],
-    cards=[
-        ('indigo', '(value) => …', ['Corre una vez', 'por cada valor.']),
-        ('rose', 'onError', ['Un error no', 'cierra el stream.']),
-        ('teal', 'onDone', ['Corre cuando el', 'productor cierra.']),
-        ('amber', 'cancel()', ['Deja de escuchar.', 'Lo llama el oyente.']),
-    ],
-))
 
 
 # ───────────────────────── 0094 · El Stream viaja por las capas ─────────────────────────

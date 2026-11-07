@@ -179,7 +179,7 @@ se abren con una sola política `for all to authenticated` por bucket. El círcu
 de Clean de la 0093 usa la misma convención de anillos que el simulador `register-clean`. Reutiliza `table` y `legend` de `database_figuras.py`.
 `tools/di_figuras.py` trae las dos de «Inyección de dependencias con GetIt» (0079), que va justo después del
 Laboratorio 7 y migra un solo camino de ese laboratorio con `= sl()`.
-`tools/realtime_figuras.py` trae las once de la sección **Realtime DB**: «Programación reactiva y Streams»
+`tools/realtime_figuras.py` trae las ocho de la sección **Realtime DB**: «Programación reactiva y Streams»
 (0063, `lessonI2.md`), «El Stream viaja por las capas» (0094, `lessonI2capas.md`), «Supabase Realtime» (0062,
 `lessonI1.md`) y «Laboratorio 8 · Chat en tiempo real» (0065, `lessonH10.md`). **Convención del curso**: a lo
 largo de las capas el `Stream` se retorna y solo el Bloc hace `listen`; la función de `listen` lanza un evento
@@ -257,8 +257,15 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   abrir la app (vacía ImageCache) y esperar 1 hora (vence el CDN del modo fijo). Marca HIT o MISS
   por capa y avisa en rojo cuando la foto mostrada no es la última. Lógica pura y exportada
   (`cacheStart`, `cacheView`, `cacheUpload`, `cacheRestart`, `cacheWait`).
-- **Los cuatro de Realtime DB** (2026-11-06). Lógica pura y exportada, con pruebas:
-  - `stream-pipe` (0063): un `StreamController` (o un `Completer` en modo *Future*) y una tubería por la que
+- **Los de Realtime DB** (2026-11-06). Lógica pura y exportada, con pruebas:
+  - `future-stream` (0063, 2026-11-07): reemplaza la figura estática `rtFutureStream`. La App a la izquierda,
+    el Servidor a la derecha y el tiempo hacia abajo, con una línea «ahora» que avanza (Reproducir, Pausar,
+    Reiniciar). *Future*: la petición sale, la app queda en pausa en el `await` mientras el servidor consulta, y
+    vuelve un solo valor. *Stream*: `listen`, canal abierto, la app «sigue libre» y los datos llegan a intervalos
+    irregulares, con un error que no cierra, y al final la app hace `cancel()` (sin `onDone`: el Stream de
+    Supabase no lo cierra el servidor). Pestañas `int`, `String`, Objeto (`Message`) y Lista de
+    objetos (`List<Message>`, cada evento trae la lista completa). Lógica pura y exportada (`fsScenario`, `fsAt`).
+  - `stream-pipe` (ya no lo usa ninguna lección desde 2026-11-07, porque gira alrededor de `StreamController`): un `StreamController` (o un `Completer` en modo *Future*) y una tubería por la que
     viaja cada `add`, `addError` y `close` hasta `listen`, con `map` opcional. Muestra la consola, la línea de
     tiempo de lo que llegó, que un error no cierra el stream, el `Bad state` de `add` tras `close` y que tras
     `cancel()` lo emitido ya no llega (`pipeStart`, `pipeAct`).

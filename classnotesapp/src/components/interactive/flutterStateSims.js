@@ -3817,6 +3817,382 @@ const mountStreamPipe = (root, args = []) => {
   };
 };
 
+// ── future-stream: la app pregunta una vez (Future) o se suscribe a un canal (Stream) ──
+
+const FS_TYPES = Object.freeze({
+  int: {
+    tab: 'int', type: 'int', names: ['fetchCount', 'watchCount'],
+    hint: 'Un número.',
+    future: { chip: '42', log: '42' },
+    stream: [{ chip: '1', log: '1' }, { chip: '2', log: '2' }, { chip: '3', log: '3' }],
+  },
+  string: {
+    tab: 'String', type: 'String', names: ['fetchGreeting', 'watchGreetings'],
+    hint: 'Un texto.',
+    future: { chip: "'Hola'", log: 'Hola' },
+    stream: [{ chip: "'Hola'", log: 'Hola' }, { chip: "'¿Vienes?'", log: '¿Vienes?' }, { chip: "'Voy'", log: 'Voy' }],
+  },
+  object: {
+    tab: 'Objeto', type: 'Message', names: ['fetchLastMessage', 'watchLastMessage'],
+    hint: 'Un objeto Message: quién lo envía y qué dice.',
+    future: { chip: 'Message(Ana: Hola)', log: 'Message(Ana: Hola)' },
+    stream: [
+      { chip: 'Message(Ana: Hola)', log: 'Message(Ana: Hola)' },
+      { chip: 'Message(Luis: ¿Vienes?)', log: 'Message(Luis: ¿Vienes?)' },
+      { chip: 'Message(Ana: Voy)', log: 'Message(Ana: Voy)' },
+    ],
+  },
+  list: {
+    tab: 'Lista de objetos', type: 'List<Message>', names: ['fetchMessages', 'watchMessages'],
+    hint: 'Una lista de Message. En el Stream cada evento trae la lista completa, igual que .stream() de Supabase.',
+    legend: 'm1 = Message(Ana: Hola) · m2 = Message(Luis: ¿Vienes?) · m3 = Message(Ana: Voy)',
+    future: { chip: '[m1, m2]', log: '[Message(Ana: Hola), Message(Luis: ¿Vienes?)]' },
+    stream: [
+      { chip: '[m1]', log: '[Message(Ana: Hola)]' },
+      { chip: '[m1, m2]', log: '[Message(Ana: Hola), Message(Luis: ¿Vienes?)]' },
+      { chip: '[m1, m2, m3]', log: '[Message(Ana: Hola), Message(Luis: ¿Vienes?), Message(Ana: Voy)]' },
+    ],
+  },
+});
+
+export const FS_TYPE_KEYS = Object.freeze(Object.keys(FS_TYPES));
+
+const FS_TRIP = 500;
+const FS_ERROR = 'Exception: sin red';
+export const FS_TOTAL = 7000;
+
+const fsSeconds = (ms) => `${(ms / 1000).toFixed(1).replace('.', ',')} s`;
+
+const fsCode = (mode, spec) => {
+  const [fetchName, watchName] = spec.names;
+  return mode === 'future'
+    ? `final Future<${spec.type}> future = api.${fetchName}();
+final ${spec.type} value = await future;
+print('llegó $value');`
+    : `final Stream<${spec.type}> stream = api.${watchName}();
+final subscription = stream.listen(
+  (value) => print('llegó $value'),
+  onError: (e) => print('falló $e'),
+);
+print('sigo libre');
+subscription.cancel();`;
+};
+
+export const fsScenario = (mode = 'future', typeKey = 'int') => {
+  const spec = FS_TYPES[typeKey];
+  const [fetchName, watchName] = spec.names;
+  if (mode === 'future') {
+    const reply = 2100;
+    const done = reply + FS_TRIP;
+    return {
+      mode, typeKey, spec, code: fsCode(mode, spec), duration: done + 400,
+      hops: [
+        { from: 'app', t0: 0, t1: FS_TRIP, chip: `${fetchName}()`, tone: 'call' },
+        { from: 'server', t0: reply, t1: done, chip: spec.future.chip, tone: 'future' },
+      ],
+      spans: [
+        { side: 'app', t0: 0, t1: FS_TRIP, tone: 'active' },
+        { side: 'app', t0: FS_TRIP, t1: done, tone: 'await', label: 'await · en pausa' },
+        { side: 'server', t0: FS_TRIP, t1: reply, tone: 'work', label: 'consulta los datos' },
+        { side: 'app', t0: done, t1: done + 400, tone: 'active', label: 'completado' },
+      ],
+      steps: [
+        { t: 0, line: 0, say: `La app lanza el Future<${spec.type}>: la petición sale hacia el servidor. El Future todavía está vacío.` },
+        { t: FS_TRIP, line: 1, say: 'await: la función queda en pausa hasta que llegue la respuesta. La línea de abajo todavía no se ejecuta.' },
+        { t: reply, line: 1, say: `El servidor terminó y responde una sola vez, con un ${spec.type}.` },
+        { t: done, line: 2, log: `llegó ${spec.future.log}`, say: 'Llegó el valor: el await se resuelve y sigue la línea de abajo. El Future ya terminó y no entregará nada más.' },
+      ],
+    };
+  }
+  const emits = [1200, 1800, 3700, 4800];
+  const close = 6000;
+  const end = close + FS_TRIP;
+  const kinds = ['data', 'data', 'error', 'data'];
+  let value = 0;
+  let lastArrival = null;
+  const hops = [{ from: 'app', t0: 0, t1: FS_TRIP, chip: `${watchName}().listen`, tone: 'call' }];
+  const steps = [
+    { t: 0, line: 0, say: `La app pide el Stream<${spec.type}> y se suscribe con listen.` },
+    { t: FS_TRIP, line: 5, log: 'sigo libre', say: 'El canal queda abierto. listen no espera: la app sigue con lo suyo mientras llegan los datos.' },
+  ];
+  emits.forEach((t, i) => {
+    const arrival = t + FS_TRIP;
+    if (kinds[i] === 'error') {
+      hops.push({ from: 'server', t0: t, t1: arrival, chip: '✕ error', tone: 'error' });
+      steps.push({ t: arrival, line: 3, log: `falló ${FS_ERROR}`, logKind: 'err', say: 'onError: llegó un error, pero el canal sigue abierto. Pueden llegar más valores.' });
+    } else {
+      const item = spec.stream[value];
+      value += 1;
+      hops.push({ from: 'server', t0: t, t1: arrival, chip: item.chip, tone: 'data' });
+      const gap = lastArrival === null ? null : arrival - lastArrival;
+      steps.push({
+        t: arrival, line: 2, log: `llegó ${item.log}`,
+        say: gap === null
+          ? `onData recibió su primer ${spec.type}. Nadie lo pidió: el servidor lo empujó cuando cambió el dato.`
+          : `onData recibió otro ${spec.type}, ${fsSeconds(gap)} después del anterior. Los datos llegan cuando el servidor los emite, no a intervalos fijos.`,
+      });
+    }
+    lastArrival = arrival;
+  });
+  hops.push({ from: 'app', t0: close, t1: end, chip: 'cancel()', tone: 'done' });
+  steps.push({ t: close, line: 6, say: 'La app sale del chat y cancela la suscripción. Un Stream de Supabase no se cierra solo: lo cierra quien escucha.' });
+  steps.push({ t: end, line: 6, say: 'El canal se cerró. Lo que el servidor emita de aquí en adelante ya no le llega a la app.' });
+  return {
+    mode, typeKey, spec, code: fsCode(mode, spec), duration: end + 400, hops, steps,
+    spans: [
+      { side: 'app', t0: 0, t1: end + 400, tone: 'active', label: 'sigue libre' },
+      { side: 'channel', t0: FS_TRIP, t1: end, tone: 'channel', label: 'canal abierto' },
+      ...emits.map((t) => ({ side: 'server', t0: t - 200, t1: t, tone: 'work' })),
+    ],
+  };
+};
+
+export const fsAt = (scenario, t) => {
+  const passed = scenario.steps.filter((step) => step.t <= t);
+  const current = passed[passed.length - 1];
+  return {
+    line: current ? current.line : -1,
+    say: current ? current.say : '',
+    logs: passed.filter((step) => step.log).map((step) => ({ text: step.log, kind: step.logKind })),
+    arrived: scenario.hops.filter((hop) => hop.from === 'server' && hop.t1 <= t).length,
+    finished: t >= scenario.duration,
+  };
+};
+
+const FS_CSS = `
+.fsim .fs-tl{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--fs-line);border-radius:12px}
+.fsim .fs-tl text{font-family:Roboto,Arial,sans-serif}
+.fsim .fs-tl .fs-mono{font-family:'JetBrains Mono',Menlo,Consolas,monospace}
+.fsim .fs-clock{font:600 13px 'JetBrains Mono',Menlo,Consolas,monospace;color:var(--fs-ink);min-width:72px;text-align:right}
+.fsim .fs-hint{font-size:12.5px;color:var(--fs-muted)}
+`;
+
+const FS_TONE = {
+  call: '#556074', future: '#A96C05', data: '#4453C9', error: '#C2354F', done: '#556074',
+};
+const FS_W = 640;
+const FS_X = { app: 170, server: 480 };
+const FS_Y0 = 86;
+const FS_PX = 0.056;
+const FS_H = FS_Y0 + FS_TOTAL * FS_PX + 26;
+const fsY = (t) => FS_Y0 + t * FS_PX;
+
+const fsChipWidth = (text) => Math.round(text.length * 6.7 + 16);
+
+const mountFutureStream = (root, args = []) => {
+  ensureRtStyle();
+  if (typeof document !== 'undefined' && !document.getElementById('fsim-fs-style')) {
+    document.head.appendChild(el('style', { id: 'fsim-fs-style', text: FS_CSS }));
+  }
+  const container = card(root);
+  let mode = args.includes('stream') ? 'stream' : 'future';
+  let typeKey = 'int';
+  let scenario = fsScenario(mode, typeKey);
+  let t = 0;
+  let playing = false;
+  let timer = null;
+  let printed = 0;
+  let parts = [];
+
+  const svg = svgEl('svg', {
+    class: 'fs-tl', viewBox: `0 0 ${FS_W} ${FS_H}`, role: 'img',
+    'aria-label': 'Línea de tiempo: la app a la izquierda, el servidor a la derecha y el tiempo corre hacia abajo.',
+  });
+  const summary = el('div', { class: 'rt-summary', 'data-testid': 'fs-summary', 'aria-live': 'polite' });
+  const clock = el('span', { class: 'fs-clock', 'data-testid': 'fs-clock' });
+  const hint = el('div', { class: 'fs-hint' });
+  const legend = el('div', { class: 'fs-hint' });
+  const code = codePanel('main.dart');
+  const out = consolePanel('Consola');
+  const playButton = el('button', { class: 'fs-btn fs-solid', type: 'button', onclick: () => toggle() });
+  const resetButton = el('button', { class: 'fs-btn', type: 'button', text: 'Reiniciar', onclick: () => load() });
+  const modes = segmented([['future', 'Future'], ['stream', 'Stream']], (key) => { mode = key; load(); });
+  const types = segmented(FS_TYPE_KEYS.map((key) => [key, FS_TYPES[key].tab]), (key) => { typeKey = key; load(); });
+
+  const text = (x, y, value, attrs = {}) => {
+    const node = svgEl('text', { x, y, 'font-size': 12, fill: '#556074', ...attrs });
+    node.textContent = value;
+    return node;
+  };
+
+  const drawStatic = () => {
+    svg.replaceChildren();
+    for (let s = 0; s * 1000 <= FS_TOTAL; s += 1) {
+      const y = fsY(s * 1000);
+      svg.append(
+        svgEl('line', { x1: 52, x2: FS_W - 20, y1: y, y2: y, stroke: '#EEF0F4', 'stroke-width': 1 }),
+        text(40, y, `${s} s`, { 'text-anchor': 'end', dy: '0.35em', 'font-size': 11, fill: '#9AA1B5', class: 'fs-mono' })
+      );
+    }
+    [['app', 'App · Flutter', '#E8EBFF', '#4453C9'], ['server', 'Servidor · Supabase', '#F4EBFF', '#7439B8']]
+      .forEach(([side, label, fill, ink]) => {
+        const x = FS_X[side];
+        svg.append(
+          svgEl('rect', { x: x - 78, y: 14, width: 156, height: 40, rx: 10, fill, stroke: ink, 'stroke-width': 1.5 }),
+          text(x, 34, label, { 'text-anchor': 'middle', dy: '0.35em', 'font-size': 13.5, 'font-weight': 700, fill: ink }),
+          svgEl('line', { x1: x, x2: x, y1: 54, y2: FS_H - 14, stroke: '#C4CBD8', 'stroke-width': 1.5, 'stroke-dasharray': '4 5' })
+        );
+      });
+    parts = [];
+    scenario.spans.forEach((span) => {
+      const tone = span.tone;
+      const node = tone === 'channel'
+        ? svgEl('rect', { x: FS_X.app + 8, width: FS_X.server - FS_X.app - 16, rx: 8, fill: '#E3F6F3', stroke: '#86D3CA', 'stroke-width': 1.5 })
+        : svgEl('rect', {
+          x: FS_X[span.side] - (tone === 'await' ? 8 : 6), width: tone === 'await' ? 16 : 12, rx: 4,
+          fill: tone === 'await' ? '#FFF3DC' : tone === 'work' ? '#C9A6EE' : '#4453C9',
+          stroke: tone === 'await' ? '#F0C572' : 'none', 'stroke-width': 1.5, 'stroke-dasharray': tone === 'await' ? '4 3' : '',
+        });
+      const label = span.label
+        ? tone === 'channel'
+          ? text((FS_X.app + FS_X.server) / 2, fsY(span.t0) + 16, span.label, { 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 600, fill: '#0F8478' })
+          : span.side === 'app'
+            ? text(FS_X.app - 14, fsY(span.t0) + 14, span.label, { 'text-anchor': 'end', 'font-size': 11.5, 'font-weight': 600, fill: tone === 'await' ? '#A96C05' : '#4453C9' })
+            : text(FS_X.server + 14, fsY(span.t0) + 14, span.label, { 'font-size': 11.5, 'font-weight': 600, fill: '#7439B8' })
+        : null;
+      svg.append(node);
+      if (label) svg.append(label);
+      parts.push({ kind: 'span', span, node, label });
+    });
+    scenario.hops.forEach((hop) => {
+      const color = FS_TONE[hop.tone];
+      const line = svgEl('line', { stroke: color, 'stroke-width': 2.2, 'stroke-dasharray': hop.tone === 'done' ? '5 4' : '' });
+      const head = svgEl('polygon', { fill: color });
+      const w = fsChipWidth(hop.chip);
+      const chip = svgEl('g', {});
+      chip.append(
+        svgEl('rect', { x: -w / 2, y: -11, width: w, height: 22, rx: 11, fill: '#fff', stroke: color, 'stroke-width': 1.5 }),
+        text(0, 0, hop.chip, { 'text-anchor': 'middle', dy: '0.35em', 'font-size': 11.5, 'font-weight': 600, fill: color, class: 'fs-mono' })
+      );
+      svg.append(line, head, chip);
+      parts.push({ kind: 'hop', hop, line, head, chip });
+    });
+    const now = svgEl('line', { x1: 52, x2: FS_W - 20, stroke: '#F2A93B', 'stroke-width': 1.5 });
+    const nowLabel = text(FS_W - 22, 0, 'ahora', { 'text-anchor': 'end', 'font-size': 11, 'font-weight': 700, fill: '#C97F10' });
+    svg.append(now, nowLabel);
+    parts.push({ kind: 'now', now, nowLabel });
+  };
+
+  const paint = () => {
+    parts.forEach((part) => {
+      if (part.kind === 'now') {
+        const y = fsY(Math.min(t, FS_TOTAL));
+        part.now.setAttribute('y1', y);
+        part.now.setAttribute('y2', y);
+        part.nowLabel.setAttribute('y', y - 5);
+        return;
+      }
+      if (part.kind === 'span') {
+        const { span } = part;
+        const visible = t > span.t0;
+        const h = Math.max(0, fsY(Math.min(t, span.t1)) - fsY(span.t0));
+        part.node.setAttribute('y', fsY(span.t0));
+        part.node.setAttribute('height', h);
+        part.node.style.display = visible ? '' : 'none';
+        if (part.label) part.label.style.display = visible && h > 18 ? '' : 'none';
+        return;
+      }
+      const { hop } = part;
+      const p = Math.max(0, Math.min(1, (t - hop.t0) / (hop.t1 - hop.t0)));
+      const x0 = FS_X[hop.from];
+      const x1 = FS_X[hop.from === 'app' ? 'server' : 'app'];
+      const dir = Math.sign(x1 - x0);
+      const sx = x0 + dir * 8;
+      const ex = x1 - dir * 10;
+      const y0 = fsY(hop.t0);
+      const y1 = fsY(hop.t1);
+      const hx = sx + (ex - sx) * p;
+      const hy = y0 + (y1 - y0) * p;
+      const shown = t > hop.t0;
+      [part.line, part.head, part.chip].forEach((node) => { node.style.display = shown ? '' : 'none'; });
+      part.line.setAttribute('x1', sx);
+      part.line.setAttribute('y1', y0);
+      part.line.setAttribute('x2', hx);
+      part.line.setAttribute('y2', hy);
+      const angle = Math.atan2(y1 - y0, ex - sx);
+      const tip = (dx, dy) => `${hx + dx * Math.cos(angle) - dy * Math.sin(angle)},${hy + dx * Math.sin(angle) + dy * Math.cos(angle)}`;
+      part.head.setAttribute('points', `${tip(2, 0)} ${tip(-9, -5)} ${tip(-9, 5)}`);
+      const cx = p < 1 ? hx : (sx + ex) / 2;
+      const cy = p < 1 ? hy - 16 : (y0 + y1) / 2 - 14;
+      const half = fsChipWidth(hop.chip) / 2;
+      const clampX = Math.max(FS_X.app + half - 30, Math.min(FS_X.server - half + 30, cx));
+      part.chip.setAttribute('transform', `translate(${clampX},${cy})`);
+    });
+    const view = fsAt(scenario, t);
+    code.mark(view.line);
+    summary.textContent = view.say || (mode === 'future'
+      ? 'Pulsa Reproducir: la app va a preguntar una vez y esperar la respuesta.'
+      : 'Pulsa Reproducir: la app va a suscribirse y los datos llegarán cuando el servidor quiera.');
+    while (printed < view.logs.length) {
+      out.print(view.logs[printed].text, view.logs[printed].kind);
+      printed += 1;
+    }
+    clock.textContent = `t = ${fsSeconds(Math.min(t, scenario.duration))}`;
+    playButton.textContent = playing ? 'Pausar' : view.finished ? 'Repetir' : t > 0 ? 'Continuar' : 'Reproducir';
+  };
+
+  const stop = () => {
+    playing = false;
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+
+  const tick = () => {
+    t = Math.min(scenario.duration, t + 50);
+    if (t >= scenario.duration) stop();
+    paint();
+    if (playing) timer = setTimeout(tick, 50);
+  };
+
+  const toggle = () => {
+    if (playing) {
+      stop();
+      paint();
+      return;
+    }
+    if (t >= scenario.duration) {
+      t = 0;
+      printed = 0;
+      out.clear();
+    }
+    playing = true;
+    paint();
+    timer = setTimeout(tick, 50);
+  };
+
+  const load = () => {
+    stop();
+    scenario = fsScenario(mode, typeKey);
+    t = 0;
+    printed = 0;
+    out.clear();
+    modes.select(mode);
+    types.select(typeKey);
+    hint.textContent = `${mode === 'future' ? 'Future' : 'Stream'}<${scenario.spec.type}> · ${scenario.spec.hint}`;
+    legend.textContent = scenario.spec.legend || '';
+    legend.style.display = scenario.spec.legend ? '' : 'none';
+    code.setCode(scenario.code);
+    drawStatic();
+    paint();
+  };
+
+  container.append(
+    el('div', { class: 'rt-full' },
+      el('div', { class: 'rt-bar' }, types.node, modes.node),
+      hint,
+      svg,
+      legend,
+      el('div', { class: 'rt-bar' }, el('div', { class: 'fs-controls' }, playButton, resetButton), clock),
+      summary,
+      el('div', { class: 'fs-row2' }, code.box, out.box))
+  );
+  load();
+  return () => {
+    stop();
+    root.replaceChildren();
+  };
+};
+
 // ── stream-layers: el Stream retorna por las capas y solo el Bloc escucha ──
 
 const RT_COLS = [
@@ -4388,6 +4764,7 @@ export const SIMS = Object.freeze({
   'register-clean': mountRegisterClean,
   'query-builder': mountQueryBuilder,
   'storage-cache': mountStorageCache,
+  'future-stream': mountFutureStream,
   'stream-pipe': mountStreamPipe,
   'stream-layers': mountStreamLayers,
   'realtime-chat': mountRealtimeChat,

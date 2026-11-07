@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/theme/ThemeContext';
 import InteractiveBlock from './InteractiveBlock';
 import {
   SIMS, parseSpec, runQuery, queryCode, cacheStart, cacheView, cacheUpload, cacheRestart, cacheWait, cacheUrl,
-  pipeStart, pipeAct, rtLayersScenario, chatStart, chatSend, chatReopen, chatPublish,
+  fsScenario, fsAt, FS_TYPE_KEYS, FS_TOTAL, pipeStart, pipeAct, rtLayersScenario, chatStart, chatSend, chatReopen, chatPublish,
   pageStart, pageOlder, pageIncoming, pageMode,
 } from './flutterStateSims';
 
@@ -518,6 +518,77 @@ describe('storage-cache', () => {
     fireEvent.click(screen.getByText('Abrir el perfil'));
     expect(screen.getByTestId('sc-summary').textContent).toMatch(/^La app muestra la foto 2: nadie la tenía/);
     expect(document.querySelector('.fs-dark').textContent).toContain("remove([oldPath])");
+  });
+});
+
+describe('future-stream', () => {
+  it('a future sends one request and gets exactly one reply, typed for every tab', () => {
+    FS_TYPE_KEYS.forEach((key) => {
+      const sc = fsScenario('future', key);
+      expect(sc.hops.filter((h) => h.from === 'app')).toHaveLength(1);
+      expect(sc.hops.filter((h) => h.from === 'server')).toHaveLength(1);
+      expect(sc.code).toContain(`Future<${sc.spec.type}>`);
+      expect(sc.code).toContain('await future');
+      const end = fsAt(sc, sc.duration);
+      expect(end.logs).toHaveLength(1);
+      expect(end.finished).toBe(true);
+      expect(sc.duration).toBeLessThanOrEqual(FS_TOTAL);
+    });
+  });
+
+  it('while awaiting nothing below the await runs', () => {
+    const sc = fsScenario('future', 'string');
+    const mid = fsAt(sc, 1500);
+    expect(mid.line).toBe(1);
+    expect(mid.logs).toHaveLength(0);
+    expect(fsAt(sc, sc.duration).logs[0].text).toBe('llegó Hola');
+  });
+
+  it('a stream keeps the app free, delivers values at uneven times and an error, and the app cancels', () => {
+    FS_TYPE_KEYS.forEach((key) => {
+      const sc = fsScenario('stream', key);
+      expect(sc.code).toContain(`Stream<${sc.spec.type}>`);
+      const fromServer = sc.hops.filter((h) => h.from === 'server');
+      expect(fromServer.map((h) => h.tone)).toEqual(['data', 'data', 'error', 'data']);
+      expect(sc.hops[sc.hops.length - 1]).toMatchObject({ from: 'app', chip: 'cancel()' });
+      expect(sc.code).toContain('subscription.cancel()');
+      expect(sc.code).not.toContain('onDone');
+      const gaps = fromServer.slice(1).map((h, i) => h.t1 - fromServer[i].t1);
+      expect(new Set(gaps).size).toBeGreaterThan(1);
+      const logs = fsAt(sc, sc.duration).logs.map((l) => l.text);
+      expect(logs[0]).toBe('sigo libre');
+      expect(logs[logs.length - 1]).toMatch(/^llegó/);
+      expect(logs.filter((l) => l.startsWith('llegó'))).toHaveLength(3);
+      expect(sc.duration).toBeLessThanOrEqual(FS_TOTAL);
+    });
+  });
+
+  it('a list stream sends the whole list on every event', () => {
+    const logs = fsAt(fsScenario('stream', 'list'), FS_TOTAL).logs.map((l) => l.text);
+    expect(logs).toContain('llegó [Message(Ana: Hola)]');
+    expect(logs).toContain('llegó [Message(Ana: Hola), Message(Luis: ¿Vienes?), Message(Ana: Voy)]');
+  });
+
+  it('plays over time, prints on arrival and switches tabs', () => {
+    const { container } = renderBlock('future-stream');
+    const log = () => container.querySelector('.fs-log').textContent;
+    fireEvent.click(screen.getByRole('button', { name: 'Reproducir' }));
+    act(() => vi.advanceTimersByTime(1500));
+    expect(log()).toBe('');
+    expect(screen.getByTestId('fs-summary').textContent).toMatch(/await/);
+    act(() => vi.advanceTimersByTime(2000));
+    expect(log()).toContain('llegó 42');
+    expect(screen.getByRole('button', { name: 'Repetir' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Stream' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Objeto' }));
+    expect(log()).toBe('');
+    fireEvent.click(screen.getByRole('button', { name: 'Reproducir' }));
+    act(() => vi.advanceTimersByTime(800));
+    expect(log()).toContain('sigo libre');
+    act(() => vi.advanceTimersByTime(7000));
+    expect(log()).toContain('llegó Message(Luis: ¿Vienes?)');
+    expect(screen.getByTestId('fs-summary').textContent).toMatch(/ya no le llega/);
+    expect(screen.getByTestId('fs-clock').textContent).toMatch(/t = 6,9 s/);
   });
 });
 
