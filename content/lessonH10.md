@@ -90,8 +90,16 @@ flutter pub get
 ```
 
 1. Pon en `lib/main.dart` la `Project URL` y la `publishable key` de tu proyecto, el mismo de los laboratorios anteriores.
-2. Copia en `262App5` la carpeta `supabase/` de tu Laboratorio 7. Ya está conectada a tu proyecto y conoce sus migraciones.
-3. Crea la tabla `messages` y agrégala a la publicación de Realtime:
+2. Conéctate a tu proyecto y trae las migraciones anteriores, como en *Supabase Realtime*. `login` solo hace falta si nunca lo corriste en este computador:
+
+```shell
+npx supabase login
+npx supabase init
+npx supabase link --project-ref TU_IDENTIFICADOR
+npx supabase migration fetch --linked
+```
+
+3. Crea la tabla `messages` y agrégala a la publicación de Realtime. El comando crea un archivo vacío en `supabase/migrations/`, y en él va el SQL:
 
 ```shell
 npx supabase migration new create_messages
@@ -649,7 +657,7 @@ Cada mensaje puede llevar una foto. Va en un **bucket privado**, `chat-images`: 
 
 ## Paso 8 · El bucket chat-images
 
-Al final de `supabase/config.toml`, junto a los buckets del Laboratorio 7:
+Al final de `supabase/config.toml` agrega el bucket. Solo la tabla `[storage.buckets.chat-images]`: el archivo ya tiene su sección `[storage]`, y repetirla lo deja inválido.
 
 ```toml
 [storage.buckets.chat-images]

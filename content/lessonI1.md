@@ -75,7 +75,29 @@ Escribir no cambia: un `insert` sigue siendo un `Future` por HTTP. Lo nuevo es e
 
 ## Activar Realtime en una tabla
 
-Una tabla nueva no está en la publicación. Se agrega en la misma migración que la crea:
+Una tabla nueva no está en la publicación. Se agrega en la misma migración que la crea. Son cuatro pasos, todos desde la carpeta del proyecto.
+
+**1. Conectarse a tu proyecto.** `init` crea la carpeta `supabase/` y `link` la conecta con tu proyecto. `login` solo hace falta si nunca lo corriste en este computador:
+
+```shell
+npx supabase login
+npx supabase init
+npx supabase link --project-ref TU_IDENTIFICADOR
+```
+
+**2. Traer las migraciones anteriores.** Tu proyecto ya tiene aplicadas las de los laboratorios pasados, pero la carpeta nueva no las conoce. Sin ellas, el `db push` se niega con `Remote migration versions not found in local migrations directory`:
+
+```shell
+npx supabase migration fetch --linked
+```
+
+**3. Crear la migración nueva.** El comando crea un archivo vacío en `supabase/migrations/`:
+
+```shell
+npx supabase migration new create_messages
+```
+
+Pega en ese archivo:
 
 ```sql
 create table public.messages (
@@ -89,6 +111,12 @@ create table public.messages (
 grant select, insert on public.messages to authenticated;
 
 alter publication supabase_realtime add table public.messages;
+```
+
+**4. Aplicarla en Supabase.**
+
+```shell
+npx supabase db push
 ```
 
 El `grant` es el mismo de siempre: sin `select`, Realtime tampoco puede mandarte las filas. En el curso las tablas no usan RLS, así que no hace falta ninguna política.
