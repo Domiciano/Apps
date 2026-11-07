@@ -187,6 +187,14 @@ largo de las capas el `Stream` se retorna y solo el Bloc hace `listen`; la funci
 laboratorio es `Domiciano/262App5` (ramas `main` y `solution`): el Laboratorio 7 resuelto más la feature `chat`,
 con la tabla `messages` sin RLS en la publicación `supabase_realtime` y el bucket privado `chat-images`.
 
+`tools/deploy_figuras.py` trae las dieciocho de la sección **Deploy** (2026-11-07): «Distribuir con Firebase
+App Distribution» (0095, `lessonM0.md`, primera de la sección), «Generación de artefactos: AAB e IPA» (0080,
+`lessonM1.md`, absorbió a la vieja 0081 «Creando IPA iOS», que salió del toc), «Publicar en Google Play» (0082) y
+«Publicar en App Store» (0083). Los paneles son esquemas de las pantallas reales (Firebase, Play Console, Xcode,
+App Store Connect, Transporter), sin logos, con los pasos numerados en círculos rosa que el texto de la lección
+cita como (1), (2)… Colores por herramienta: Firebase ámbar, Play verde, Xcode gris, App Store Connect índigo,
+Transporter violeta. El video viejo de publicación en Play va al final de la 0082.
+
 ```bash
 python3 tools/bloc_figuras.py <carpeta>   # un .svg por figura, para validarlas y mirarlas
 python3 tools/bloc_figuras.py --inject    # reemplaza cada bloque svg de la lección por su figura

@@ -110,7 +110,7 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK3.md | Integración completa de notificaciones con Firebase en Flutter | 0077
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonK4.md | El Rol del Backend en las Notificaciones Push | 0078
 [t] Deploy
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM1.md | Creando AAB Android | 0080
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM2.md | Creando IPA iOS | 0081
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM0.md | Distribuir con Firebase App Distribution | 0095
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM1.md | Generación de artefactos: AAB e IPA | 0080
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM3.md | Publicar en Google Play | 0082
-[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM4.md | Publicar en App Store Connect | 0083
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonM4.md | Publicar en App Store | 0083
