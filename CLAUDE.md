@@ -258,9 +258,9 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   por capa y avisa en rojo cuando la foto mostrada no es la última. Lógica pura y exportada
   (`cacheStart`, `cacheView`, `cacheUpload`, `cacheRestart`, `cacheWait`).
 - **Los de Realtime DB** (2026-11-06). Lógica pura y exportada, con pruebas:
-  - `future-stream` (0063, 2026-11-07): reemplaza la figura estática `rtFutureStream`. La App a la izquierda,
-    el Servidor a la derecha y el tiempo hacia abajo, con una línea «ahora» que avanza (Reproducir, Pausar,
-    Reiniciar). *Future*: la petición sale, la app queda en pausa en el `await` mientras el servidor consulta, y
+  - `future-stream` (0063, 2026-11-07): reemplaza la figura estática `rtFutureStream`. Horizontal: la App arriba,
+    el Servidor abajo y el tiempo hacia la derecha, con una línea «ahora» que avanza (Reproducir, Pausar,
+    Reiniciar, encima del diagrama). *Future*: la petición sale, la app queda en pausa en el `await` mientras el servidor consulta, y
     vuelve un solo valor. *Stream*: `listen`, canal abierto, la app «sigue libre» y los datos llegan a intervalos
     irregulares, con un error que no cierra, y al final la app hace `cancel()` (sin `onDone`: el Stream de
     Supabase no lo cierra el servidor). Pestañas `int`, `String`, Objeto (`Message`) y Lista de

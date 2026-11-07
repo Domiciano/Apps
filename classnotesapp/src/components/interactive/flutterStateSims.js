@@ -3904,7 +3904,7 @@ export const fsScenario = (mode = 'future', typeKey = 'int') => {
       ],
     };
   }
-  const emits = [1200, 1800, 3700, 4800];
+  const emits = [1600, 2300, 3900, 5000];
   const close = 6000;
   const end = close + FS_TRIP;
   const kinds = ['data', 'data', 'error', 'data'];
@@ -3970,12 +3970,12 @@ const FS_CSS = `
 const FS_TONE = {
   call: '#556074', future: '#A96C05', data: '#4453C9', error: '#C2354F', done: '#556074',
 };
-const FS_W = 640;
-const FS_X = { app: 170, server: 480 };
-const FS_Y0 = 86;
-const FS_PX = 0.056;
-const FS_H = FS_Y0 + FS_TOTAL * FS_PX + 26;
-const fsY = (t) => FS_Y0 + t * FS_PX;
+const FS_W = 760;
+const FS_H = 262;
+const FS_X0 = 122;
+const FS_X1 = FS_W - 22;
+const FS_LANE = { app: 92, server: 206 };
+const fsX = (t) => FS_X0 + (t * (FS_X1 - FS_X0)) / FS_TOTAL;
 
 const fsChipWidth = (text) => Math.round(text.length * 6.7 + 16);
 
@@ -3996,7 +3996,7 @@ const mountFutureStream = (root, args = []) => {
 
   const svg = svgEl('svg', {
     class: 'fs-tl', viewBox: `0 0 ${FS_W} ${FS_H}`, role: 'img',
-    'aria-label': 'Línea de tiempo: la app a la izquierda, el servidor a la derecha y el tiempo corre hacia abajo.',
+    'aria-label': 'Línea de tiempo: la app arriba, el servidor abajo y el tiempo corre hacia la derecha.',
   });
   const summary = el('div', { class: 'rt-summary', 'data-testid': 'fs-summary', 'aria-live': 'polite' });
   const clock = el('span', { class: 'fs-clock', 'data-testid': 'fs-clock' });
@@ -4018,42 +4018,46 @@ const mountFutureStream = (root, args = []) => {
   const drawStatic = () => {
     svg.replaceChildren();
     for (let s = 0; s * 1000 <= FS_TOTAL; s += 1) {
-      const y = fsY(s * 1000);
+      const x = fsX(s * 1000);
       svg.append(
-        svgEl('line', { x1: 52, x2: FS_W - 20, y1: y, y2: y, stroke: '#EEF0F4', 'stroke-width': 1 }),
-        text(40, y, `${s} s`, { 'text-anchor': 'end', dy: '0.35em', 'font-size': 11, fill: '#9AA1B5', class: 'fs-mono' })
+        svgEl('line', { x1: x, x2: x, y1: 40, y2: FS_H - 12, stroke: '#EEF0F4', 'stroke-width': 1 }),
+        text(x, 28, `${s} s`, { 'text-anchor': 'middle', 'font-size': 11, fill: '#9AA1B5', class: 'fs-mono' })
       );
     }
-    [['app', 'App · Flutter', '#E8EBFF', '#4453C9'], ['server', 'Servidor · Supabase', '#F4EBFF', '#7439B8']]
-      .forEach(([side, label, fill, ink]) => {
-        const x = FS_X[side];
+    [['app', 'App', 'Flutter', '#E8EBFF', '#4453C9'], ['server', 'Servidor', 'Supabase', '#F4EBFF', '#7439B8']]
+      .forEach(([side, label, sub, fill, ink]) => {
+        const y = FS_LANE[side];
         svg.append(
-          svgEl('rect', { x: x - 78, y: 14, width: 156, height: 40, rx: 10, fill, stroke: ink, 'stroke-width': 1.5 }),
-          text(x, 34, label, { 'text-anchor': 'middle', dy: '0.35em', 'font-size': 13.5, 'font-weight': 700, fill: ink }),
-          svgEl('line', { x1: x, x2: x, y1: 54, y2: FS_H - 14, stroke: '#C4CBD8', 'stroke-width': 1.5, 'stroke-dasharray': '4 5' })
+          svgEl('line', { x1: FS_X0, x2: FS_X1, y1: y, y2: y, stroke: '#C4CBD8', 'stroke-width': 1.5, 'stroke-dasharray': '4 5' }),
+          svgEl('rect', { x: 8, y: y - 24, width: 100, height: 48, rx: 10, fill, stroke: ink, 'stroke-width': 1.5 }),
+          text(58, y - 6, label, { 'text-anchor': 'middle', dy: '0.35em', 'font-size': 14, 'font-weight': 700, fill: ink }),
+          text(58, y + 11, sub, { 'text-anchor': 'middle', dy: '0.35em', 'font-size': 11.5, fill: ink })
         );
       });
     parts = [];
     scenario.spans.forEach((span) => {
       const tone = span.tone;
+      const lane = FS_LANE[span.side];
       const node = tone === 'channel'
-        ? svgEl('rect', { x: FS_X.app + 8, width: FS_X.server - FS_X.app - 16, rx: 8, fill: '#E3F6F3', stroke: '#86D3CA', 'stroke-width': 1.5 })
+        ? svgEl('rect', { y: FS_LANE.app + 12, height: FS_LANE.server - FS_LANE.app - 24, rx: 8, fill: '#E3F6F3', stroke: '#86D3CA', 'stroke-width': 1.5 })
         : svgEl('rect', {
-          x: FS_X[span.side] - (tone === 'await' ? 8 : 6), width: tone === 'await' ? 16 : 12, rx: 4,
+          y: lane - (tone === 'await' ? 8 : 6), height: tone === 'await' ? 16 : 12, rx: 4,
           fill: tone === 'await' ? '#FFF3DC' : tone === 'work' ? '#C9A6EE' : '#4453C9',
           stroke: tone === 'await' ? '#F0C572' : 'none', 'stroke-width': 1.5, 'stroke-dasharray': tone === 'await' ? '4 3' : '',
         });
+      const color = tone === 'channel' ? '#0F8478' : tone === 'await' ? '#A96C05' : span.side === 'app' ? '#4453C9' : '#7439B8';
       const label = span.label
         ? tone === 'channel'
-          ? text((FS_X.app + FS_X.server) / 2, fsY(span.t0) + 16, span.label, { 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 600, fill: '#0F8478' })
+          ? text(58, (FS_LANE.app + FS_LANE.server) / 2, span.label, { 'text-anchor': 'middle', dy: '0.35em', 'font-size': 11.5, 'font-weight': 700, fill: color })
           : span.side === 'app'
-            ? text(FS_X.app - 14, fsY(span.t0) + 14, span.label, { 'text-anchor': 'end', 'font-size': 11.5, 'font-weight': 600, fill: tone === 'await' ? '#A96C05' : '#4453C9' })
-            : text(FS_X.server + 14, fsY(span.t0) + 14, span.label, { 'font-size': 11.5, 'font-weight': 600, fill: '#7439B8' })
+            ? text(fsX(span.t0), lane - 16, span.label, { 'font-size': 11.5, 'font-weight': 600, fill: color })
+            : text(fsX(span.t0), lane + 24, span.label, { 'font-size': 11.5, 'font-weight': 600, fill: color })
         : null;
       svg.append(node);
       if (label) svg.append(label);
       parts.push({ kind: 'span', span, node, label });
     });
+    let fromServer = 0;
     scenario.hops.forEach((hop) => {
       const color = FS_TONE[hop.tone];
       const line = svgEl('line', { stroke: color, 'stroke-width': 2.2, 'stroke-dasharray': hop.tone === 'done' ? '5 4' : '' });
@@ -4064,11 +4068,13 @@ const mountFutureStream = (root, args = []) => {
         svgEl('rect', { x: -w / 2, y: -11, width: w, height: 22, rx: 11, fill: '#fff', stroke: color, 'stroke-width': 1.5 }),
         text(0, 0, hop.chip, { 'text-anchor': 'middle', dy: '0.35em', 'font-size': 11.5, 'font-weight': 600, fill: color, class: 'fs-mono' })
       );
+      const lift = hop.from === 'server' ? (fromServer % 2 === 0 ? -24 : 24) : 0;
+      if (hop.from === 'server') fromServer += 1;
       svg.append(line, head, chip);
-      parts.push({ kind: 'hop', hop, line, head, chip });
+      parts.push({ kind: 'hop', hop, line, head, chip, lift });
     });
-    const now = svgEl('line', { x1: 52, x2: FS_W - 20, stroke: '#F2A93B', 'stroke-width': 1.5 });
-    const nowLabel = text(FS_W - 22, 0, 'ahora', { 'text-anchor': 'end', 'font-size': 11, 'font-weight': 700, fill: '#C97F10' });
+    const now = svgEl('line', { y1: 38, y2: FS_H - 10, stroke: '#F2A93B', 'stroke-width': 1.5 });
+    const nowLabel = text(0, FS_H - 2, 'ahora', { 'text-anchor': 'middle', 'font-size': 11, 'font-weight': 700, fill: '#C97F10' });
     svg.append(now, nowLabel);
     parts.push({ kind: 'now', now, nowLabel });
   };
@@ -4076,46 +4082,45 @@ const mountFutureStream = (root, args = []) => {
   const paint = () => {
     parts.forEach((part) => {
       if (part.kind === 'now') {
-        const y = fsY(Math.min(t, FS_TOTAL));
-        part.now.setAttribute('y1', y);
-        part.now.setAttribute('y2', y);
-        part.nowLabel.setAttribute('y', y - 5);
+        const x = fsX(Math.min(t, FS_TOTAL));
+        part.now.setAttribute('x1', x);
+        part.now.setAttribute('x2', x);
+        part.nowLabel.setAttribute('x', Math.min(x, FS_X1 - 14));
         return;
       }
       if (part.kind === 'span') {
         const { span } = part;
         const visible = t > span.t0;
-        const h = Math.max(0, fsY(Math.min(t, span.t1)) - fsY(span.t0));
-        part.node.setAttribute('y', fsY(span.t0));
-        part.node.setAttribute('height', h);
+        const w = Math.max(0, fsX(Math.min(t, span.t1)) - fsX(span.t0));
+        part.node.setAttribute('x', fsX(span.t0));
+        part.node.setAttribute('width', w);
         part.node.style.display = visible ? '' : 'none';
-        if (part.label) part.label.style.display = visible && h > 18 ? '' : 'none';
+        if (part.label) part.label.style.display = visible ? '' : 'none';
         return;
       }
       const { hop } = part;
       const p = Math.max(0, Math.min(1, (t - hop.t0) / (hop.t1 - hop.t0)));
-      const x0 = FS_X[hop.from];
-      const x1 = FS_X[hop.from === 'app' ? 'server' : 'app'];
-      const dir = Math.sign(x1 - x0);
-      const sx = x0 + dir * 8;
-      const ex = x1 - dir * 10;
-      const y0 = fsY(hop.t0);
-      const y1 = fsY(hop.t1);
+      const toApp = hop.from === 'server';
+      const sx = fsX(hop.t0);
+      const ex = fsX(hop.t1);
+      const sy = FS_LANE[hop.from] + (toApp ? -8 : 8);
+      const ey = FS_LANE[toApp ? 'app' : 'server'] + (toApp ? 10 : -10);
       const hx = sx + (ex - sx) * p;
-      const hy = y0 + (y1 - y0) * p;
+      const hy = sy + (ey - sy) * p;
       const shown = t > hop.t0;
       [part.line, part.head, part.chip].forEach((node) => { node.style.display = shown ? '' : 'none'; });
       part.line.setAttribute('x1', sx);
-      part.line.setAttribute('y1', y0);
+      part.line.setAttribute('y1', sy);
       part.line.setAttribute('x2', hx);
       part.line.setAttribute('y2', hy);
-      const angle = Math.atan2(y1 - y0, ex - sx);
+      const angle = Math.atan2(ey - sy, ex - sx);
       const tip = (dx, dy) => `${hx + dx * Math.cos(angle) - dy * Math.sin(angle)},${hy + dx * Math.sin(angle) + dy * Math.cos(angle)}`;
       part.head.setAttribute('points', `${tip(2, 0)} ${tip(-9, -5)} ${tip(-9, 5)}`);
-      const cx = p < 1 ? hx : (sx + ex) / 2;
-      const cy = p < 1 ? hy - 16 : (y0 + y1) / 2 - 14;
       const half = fsChipWidth(hop.chip) / 2;
-      const clampX = Math.max(FS_X.app + half - 30, Math.min(FS_X.server - half + 30, cx));
+      const midY = (FS_LANE.app + FS_LANE.server) / 2;
+      const cx = p < 1 ? hx : (sx + ex) / 2;
+      const cy = p < 1 ? hy : midY + part.lift;
+      const clampX = Math.max(FS_X0 + half, Math.min(FS_X1 - half, cx));
       part.chip.setAttribute('transform', `translate(${clampX},${cy})`);
     });
     const view = fsAt(scenario, t);
@@ -4180,9 +4185,9 @@ const mountFutureStream = (root, args = []) => {
     el('div', { class: 'rt-full' },
       el('div', { class: 'rt-bar' }, types.node, modes.node),
       hint,
+      el('div', { class: 'rt-bar' }, el('div', { class: 'fs-controls' }, playButton, resetButton), clock),
       svg,
       legend,
-      el('div', { class: 'rt-bar' }, el('div', { class: 'fs-controls' }, playButton, resetButton), clock),
       summary,
       el('div', { class: 'fs-row2' }, code.box, out.box))
   );
