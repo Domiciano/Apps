@@ -33,7 +33,7 @@ allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
 ## Paso 2 · Crear los buckets en tu proyecto
 
 ```shell
-npx supabase seed buckets --linked
+npx supabase seed buckets --remote
 ```
 
 `seed buckets` crea en el proyecto vinculado cada bucket que declara `config.toml`. Si después cambias algo, corre el mismo comando y actualiza los que ya existen. En el dashboard, en `Storage`, aparecen los dos, y solo `avatars` lleva la etiqueta *Public*.
@@ -119,7 +119,7 @@ with check (bucket_id = 'avatars');
 ```
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 La de `post-images` es igual, cambiando el nombre del bucket. `for all` cubre subir, ver, firmar y borrar. `to authenticated` deja fuera a quien no inició sesión. Es la regla mínima, y tiene un precio: cualquiera con sesión puede borrar el archivo de otra persona. Para el curso basta.

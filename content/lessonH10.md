@@ -96,7 +96,7 @@ flutter pub get
 npx supabase login
 npx supabase init
 npx supabase link --project-ref TU_IDENTIFICADOR
-npx supabase migration fetch --linked
+npx supabase migration fetch --remote
 ```
 
 3. Crea las tablas `conversations` y `messages`, y agrega `messages` a la publicación de Realtime. El comando crea un archivo vacío en `supabase/migrations/`, y en él va el SQL:
@@ -134,7 +134,7 @@ alter publication supabase_realtime add table public.messages;
 Una conversación guarda a sus dos participantes, con el id menor en `user1_id`: así, entre dos personas solo puede haber una fila. Si eliges tu propio usuario, los dos ids son el tuyo.
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 Para probar necesitas **dos cuentas abiertas a la vez**: por ejemplo, una en Chrome con `flutter run -d chrome` y otra en el emulador o en tu teléfono.
@@ -718,7 +718,7 @@ allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
 ```
 
 ```shell
-npx supabase seed buckets --linked
+npx supabase seed buckets --remote
 npx supabase migration new create_chat_images
 ```
 
@@ -730,7 +730,7 @@ with check (bucket_id = 'chat-images');
 ```
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 La tabla no usa RLS, pero Storage sí: sin esta política, subir falla con `new row violates row-level security policy`.

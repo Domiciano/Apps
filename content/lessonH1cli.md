@@ -198,7 +198,7 @@ Cada cuenta tiene un identificador único, el UID. La fila del perfil usa ese mi
 ```svg
 <svg id="sbPasos" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 384" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="sbPasos-ttl sbPasos-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="sbPasos-ttl">Cuatro pasos desde la consola</title>
-  <desc id="sbPasos-dsc">Cuatro pasos en orden: comprobar que el comando supabase funciona con npx, conectar la carpeta con el proyecto usando supabase login y supabase link, crear la tabla profiles con supabase db push y configurar el Auth por email con supabase config push.</desc>
+  <desc id="sbPasos-dsc">Cuatro pasos en orden: comprobar que el comando supabase funciona con npx, conectar la carpeta con el proyecto usando supabase login y supabase link, crear la tabla profiles con supabase db push --remote y configurar el Auth por email con supabase config push.</desc>
   <defs>
     <style>
       #sbPasos .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -234,7 +234,7 @@ Cada cuenta tiene un identificador único, el UID. La fila del perfil usa ese mi
     <circle cx="28" cy="28" r="12" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/><text x="28" y="28" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4453C9">3</text>
     <text x="50" y="28" dy="0.35em" font-size="14.5" font-weight="700" fill="#161A26" data-fit="350">La tabla profiles</text>
     <rect x="16" y="46" width="392" height="24" rx="6" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.25"/>
-    <text class="mono" x="26" y="58" dy="0.35em" font-size="12" font-weight="600" fill="#4453C9" data-fit="372">npx supabase db push</text>
+    <text class="mono" x="26" y="58" dy="0.35em" font-size="12" font-weight="600" fill="#4453C9" data-fit="372">npx supabase db push --remote</text>
     <text x="16" y="88" font-size="12.5" fill="#454C61" data-fit="392">Sube el SQL de la tabla y sus permisos.</text>
   </g>
   <g transform="translate(488,228)"><rect width="424" height="100" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
@@ -365,10 +365,12 @@ Son dos cosas, en orden:
 Súbela:
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
-Para cambiar la tabla más adelante no edites este archivo: crea otra migración con el cambio y vuelve a ejecutar `npx supabase db push`.
+`--remote` le dice que la suba a tu proyecto en la nube. Sin él, el CLI apunta a una base de datos local en tu computador, que no estás usando. Lo mismo vale para `migration list`, `migration fetch` y `seed buckets` en las lecciones que siguen. Si te sale `unknown flag: --remote`, tu CLI es anterior a la versión 3: cambia `--remote` por `--linked`.
+
+Para cambiar la tabla más adelante no edites este archivo: crea otra migración con el cambio y vuelve a ejecutar `npx supabase db push --remote`.
 
 ## 4. El Auth por email
 
@@ -404,7 +406,7 @@ npx supabase config push
 Este comando lista las migraciones. La tuya debe aparecer en las dos columnas, la local y la remota:
 
 ```shell
-npx supabase migration list
+npx supabase migration list --remote
 ```
 
 En el dashboard, la tabla `profiles` aparece en `Table Editor`, todavía vacía. Las cuentas que se registren aparecerán en `Authentication > Users`.

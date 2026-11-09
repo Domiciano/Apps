@@ -1,6 +1,6 @@
 # Laboratorio 7 · Fotos en el muro
 
-<!-- tags: ChangeAvatarUseCase, createSignedUrl, seed buckets --linked, bucket público y privado,
+<!-- tags: ChangeAvatarUseCase, createSignedUrl, seed buckets --remote, bucket público y privado,
      avatar_path, image_path, UnimplementedError, PublishPostUseCase con foto,
      Object not found, new row violates row-level security policy, qué va en cada capa -->
 
@@ -139,7 +139,7 @@ npx supabase link --project-ref TU_IDENTIFICADOR
 Tu proyecto ya tiene aplicadas las migraciones de `profiles`, `posts` y `likes`, pero la carpeta nueva no las conoce. Tráelas:
 
 ```shell
-npx supabase migration fetch --linked
+npx supabase migration fetch --remote
 ```
 
 Aparece un archivo por migración en `supabase/migrations/`. Sin ellos, el `db push` del paso 2 se niega con `Remote migration versions not found in local migrations directory`.
@@ -160,7 +160,7 @@ enable_confirmations = false
 Comprueba que todo coincide. Las tres migraciones deben aparecer en las dos columnas, la local y la remota:
 
 ```shell
-npx supabase migration list
+npx supabase migration list --remote
 ```
 
 ## Lo que ya viene
@@ -311,7 +311,7 @@ Del paso 1 al 10. Al terminar, cada persona tiene su foto en el perfil y en sus 
 ```svg
 <svg id="stLabModelo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 432" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="stLabModelo-ttl stLabModelo-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="stLabModelo-ttl">Lo que agrega la parte 1</title>
-  <desc id="stLabModelo-dsc">A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket avatars declarado en config.toml: público, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo crea npx supabase seed buckets --linked. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.</desc>
+  <desc id="stLabModelo-dsc">A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket avatars declarado en config.toml: público, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo crea npx supabase seed buckets --remote. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.</desc>
   <defs>
     <style>
       #stLabModelo .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -378,7 +378,7 @@ allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
 Créalo en tu proyecto:
 
 ```shell
-npx supabase seed buckets --linked
+npx supabase seed buckets --remote
 ```
 
 En el dashboard, `Storage` muestra `avatars` con la etiqueta *Public*.
@@ -399,7 +399,7 @@ with check (bucket_id = 'avatars');
 ```
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 Que el bucket sea público solo abre la lectura por URL. Subir y borrar necesitan política, y basta una: abre todo a quien inició sesión.
@@ -742,7 +742,7 @@ allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
 ```
 
 ```shell
-npx supabase seed buckets --linked
+npx supabase seed buckets --remote
 npx supabase migration new create_post_images
 ```
 
@@ -756,7 +756,7 @@ with check (bucket_id = 'post-images');
 ```
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 ## Paso 12 · Los datos

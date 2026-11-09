@@ -101,7 +101,7 @@ grant select, insert, update, delete on public.posts to authenticated;
 ```
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 El `id` y el `created_at` los pone la base de datos. Tú solo mandas quién escribe y qué escribe.

@@ -134,12 +134,12 @@ def sb_pasos():
     s = head(fid, h, 'Cuatro pasos desde la consola', 'Cuatro pasos desde la consola',
              'El proyecto ya existe. Lo que falta es crear la tabla y ajustar el Auth, y eso se hace con comandos.',
              'Cuatro pasos en orden: comprobar que el comando supabase funciona con npx, conectar la carpeta con el proyecto usando '
-             'supabase login y supabase link, crear la tabla profiles con supabase db push y configurar el Auth por email con supabase '
+             'supabase login y supabase link, crear la tabla profiles con supabase db push --remote y configurar el Auth por email con supabase '
              'config push.')
     steps = [
         ('slate', 'El comando supabase', 'npx supabase --version', 'Se ejecuta con npx, que viene con Node.js.'),
         ('amber', 'Conectar con tu proyecto', 'npx supabase login · npx supabase link', 'Autorizas la consola y eliges el proyecto.'),
-        ('indigo', 'La tabla profiles', 'npx supabase db push', 'Sube el SQL de la tabla y sus permisos.'),
+        ('indigo', 'La tabla profiles', 'npx supabase db push --remote', 'Sube el SQL de la tabla y sus permisos.'),
         ('teal', 'El Auth por email', 'npx supabase config push', 'Registro activo, sin confirmación de correo.'),
     ]
     for i, (color, title, cmd, text) in enumerate(steps):

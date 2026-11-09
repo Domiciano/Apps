@@ -88,7 +88,7 @@ npx supabase link --project-ref TU_IDENTIFICADOR
 **2. Traer las migraciones anteriores.** Tu proyecto ya tiene aplicadas las de los laboratorios pasados, pero la carpeta nueva no las conoce. Sin ellas, el `db push` se niega con `Remote migration versions not found in local migrations directory`:
 
 ```shell
-npx supabase migration fetch --linked
+npx supabase migration fetch --remote
 ```
 
 **3. Crear la migración nueva.** El comando crea un archivo vacío en `supabase/migrations/`:
@@ -116,7 +116,7 @@ alter publication supabase_realtime add table public.messages;
 **4. Aplicarla en Supabase.**
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 El `grant` es el mismo de siempre: sin `select`, Realtime tampoco puede mandarte las filas. En el curso las tablas no usan RLS, así que no hace falta ninguna política.

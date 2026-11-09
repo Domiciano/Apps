@@ -763,7 +763,7 @@ def st_lab_modelo():
              'Un bucket público, declarado en config.toml. La columna y la regla van en una migración.',
              'A la izquierda, la tabla profiles con su nueva columna avatar_path, que puede ser nula. A la derecha, el bucket '
              'avatars declarado en config.toml: público, con un límite de 2 MB por archivo y solo imágenes JPEG, PNG o WebP; lo '
-             'crea npx supabase seed buckets --linked. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.',
+             'crea npx supabase seed buckets --remote. Debajo, una sola política para usuarios con sesión, sobre todo el bucket.',
              colors=('amber',))
     t, c = table(48, 112, 360, 'indigo', 'profiles', [
         ('id', '', 'PK · FK', None), ('username', '', '', None), ('full_name', '', '', None),

@@ -237,7 +237,7 @@ grant select, insert, update, delete on public.likes to authenticated;
 Súbelas las dos juntas. Como el nombre de cada archivo empieza por la fecha en que lo creaste, `db push` las aplica en orden:
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 

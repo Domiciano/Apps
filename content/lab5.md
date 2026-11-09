@@ -1216,7 +1216,7 @@ alter table public.profiles add column full_name text not null default '';
 ```
 
 ```shell
-npx supabase db push
+npx supabase db push --remote
 ```
 
 `auth/data/source/supabase_profile_data_source.dart`
