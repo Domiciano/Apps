@@ -1,10 +1,10 @@
 # Laboratorio 8 · Chat en tiempo real
 
 <!-- tags: ChatBloc, listen en el Bloc, WatchMessagesUseCase, fetchBefore, OlderMessagesRequested,
-     isMine, juntar por id, chat-images, createSignedUrl, asyncMap,
-     UnimplementedError, el mensaje no aparece en tiempo real -->
+     conversation_id, isMine, juntar por id, chat-images, createSignedUrl, asyncMap,
+     el mensaje no aparece en tiempo real -->
 
-El muro del Laboratorio 7 tiene ahora un botón de chat: una sola sala general donde escribe todo el que inició sesión. La interfaz ya está hecha. Te toca conectar las capas, en tres partes:
+El muro del Laboratorio 7 tiene ahora un botón de chat. Lleva a la lista de usuarios registrados, tú incluido, y al elegir uno chateas solo con esa persona. La lista, la tabla `conversations` y toda la interfaz ya están hechas. Te toca conectar las capas del chat, en tres partes:
 
 - **Parte 1 · Chat sencillo en tiempo real.** Los mensajes llegan por un `Stream`. Los tuyos a la derecha, los de los demás a la izquierda.
 - **Parte 2 · Paginación.** El Stream solo trae los 15 más nuevos. Al llegar arriba, se piden los 5 anteriores con un `Future`.
@@ -17,7 +17,7 @@ La regla de todo el laboratorio: **las capas retornan el Stream, y solo `ChatBlo
 ```svg
 <svg id="rtLabPantalla" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="rtLabPantalla-ttl rtLabPantalla-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="rtLabPantalla-ttl">Lo que vas a construir</title>
-  <desc id="rtLabPantalla-dsc">Dos teléfonos con la pantalla Chat, uno con la cuenta de Ana y otro con la tuya, mostrando la misma conversación. En el de Ana, sus mensajes van a la derecha en verde y los tuyos a la izquierda en blanco. En el tuyo, al revés. Uno de los mensajes trae una foto. Abajo de cada teléfono, la barra para escribir, con el botón de foto y el de enviar. A los lados, notas: al llegar arriba se piden los cinco anteriores, y al llegar un mensaje nuevo la lista baja sola.</desc>
+  <desc id="rtLabPantalla-dsc">Dos teléfonos con la pantalla del chat, uno con la cuenta de Ana y otro con la tuya, mostrando la misma conversación, la que tienen solo ustedes dos. En el de Ana, sus mensajes van a la derecha en verde y los tuyos a la izquierda en blanco. En el tuyo, al revés. Uno de los mensajes trae una foto. Abajo de cada teléfono, la barra para escribir, con el botón de foto y el de enviar. A los lados, notas: al llegar arriba se piden los cinco anteriores, y al llegar un mensaje nuevo la lista baja sola.</desc>
   <defs>
     <style>
       #rtLabPantalla .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -38,7 +38,7 @@ La regla de todo el laboratorio: **las capas retornan el Stream, y solo `ChatBlo
   </defs>
   <rect width="960" height="600" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">Lo que vas a construir</text>
-  <text class="sub" x="48" y="80" data-fit="860">La misma sala vista desde dos cuentas. Lo de cada quien va a la derecha, en verde.</text>
+  <text class="sub" x="48" y="80" data-fit="860">Una conversación entre dos personas, vista desde las dos cuentas. Lo de cada quien va a la derecha.</text>
 <rect x="292" y="112" width="196" height="420" rx="18" fill="#FFFFFF" stroke="#2A3040" stroke-width="3"/><text x="308" y="136" dy="0.35em" font-size="14" font-weight="600" fill="#161A26">Chat · Ana</text><path d="M294,154 H486" stroke="#D9DEE8" stroke-width="1.5"/>
   <rect x="352" y="168" width="124" height="30" rx="12" fill="#1F9D68"/>
   <text x="362" y="183" dy="0.35em" font-size="11.5" fill="#FFFFFF" data-fit="104">hola</text>
@@ -99,25 +99,39 @@ npx supabase link --project-ref TU_IDENTIFICADOR
 npx supabase migration fetch --linked
 ```
 
-3. Crea la tabla `messages` y agrégala a la publicación de Realtime. El comando crea un archivo vacío en `supabase/migrations/`, y en él va el SQL:
+3. Crea las tablas `conversations` y `messages`, y agrega `messages` a la publicación de Realtime. El comando crea un archivo vacío en `supabase/migrations/`, y en él va el SQL:
 
 ```shell
-npx supabase migration new create_messages
+npx supabase migration new create_chat
 ```
 
 ```sql
+create table public.conversations (
+  id uuid primary key default gen_random_uuid(),
+  user1_id uuid not null references public.profiles(id) on delete cascade,
+  user2_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (user1_id, user2_id),
+  check (user1_id <= user2_id)
+);
+
 create table public.messages (
   id uuid primary key default gen_random_uuid(),
+  conversation_id uuid not null
+    references public.conversations(id) on delete cascade,
   sender_id uuid not null references public.profiles(id) on delete cascade,
   content text not null default '',
   image_path text,
   created_at timestamptz not null default now()
 );
 
+grant select, insert on public.conversations to authenticated;
 grant select, insert on public.messages to authenticated;
 
 alter publication supabase_realtime add table public.messages;
 ```
+
+Una conversación guarda a sus dos participantes, con el id menor en `user1_id`: así, entre dos personas solo puede haber una fila. Si eliges tu propio usuario, los dos ids son el tuyo.
 
 ```shell
 npx supabase db push
@@ -128,9 +142,9 @@ Para probar necesitas **dos cuentas abiertas a la vez**: por ejemplo, una en Chr
 ## Lo que ya viene
 
 ```svg
-<svg id="rtLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="rtLabCarpetas-ttl rtLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<svg id="rtLabCarpetas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 754" width="100%" style="max-width:960px;display:block;margin:0 auto" role="img" aria-labelledby="rtLabCarpetas-ttl rtLabCarpetas-dsc" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
   <title id="rtLabCarpetas-ttl">La estructura de carpetas</title>
-  <desc id="rtLabCarpetas-dsc">Árbol de carpetas de la feature chat del proyecto 262App5. Ya vienen la entidad Message, el contrato MessageRepository, los eventos, el estado, ChatScreen y los componentes. Te tocan los cuatro casos de uso, los dos data sources, MessageRepositoryImpl y ChatBloc, marcados con la parte del laboratorio en que se completan: 1 el chat en tiempo real, 2 la paginación y 3 la imagen.</desc>
+  <desc id="rtLabCarpetas-dsc">Árbol de carpetas del proyecto 262App5. La feature conversations ya viene completa: la lista de usuarios y la tabla conversations. En la feature chat ya vienen la entidad Message, el contrato MessageRepository, los eventos, el estado, ChatScreen y los componentes. Te tocan los cuatro casos de uso, los dos data sources, MessageRepositoryImpl y ChatBloc, marcados con la parte del laboratorio en que se completan: 1 el chat en tiempo real, 2 la paginación y 3 la imagen.</desc>
   <defs>
     <style>
       #rtLabCarpetas .title{fill:#161A26;font-size:22px;font-weight:700}
@@ -145,89 +159,94 @@ Para probar necesitas **dos cuentas abiertas a la vez**: por ejemplo, una en Chr
       <path d="M0,0 L10,5 L0,10 L2.4,5 Z" fill="#556074"/>
     </marker>
   </defs>
-  <rect width="960" height="720" rx="16" fill="#FBFBFD"/>
+  <rect width="960" height="754" rx="16" fill="#FBFBFD"/>
   <text class="title" x="48" y="56">La estructura de carpetas</text>
   <text class="sub" x="48" y="80" data-fit="860">En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.</text>
-  <rect x="48" y="96" width="864" height="564" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
-  <rect x="68" y="111" width="155" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="141">lib/features/chat/</text>
-  <path d="M78,137 V158 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="145" width="230" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="216">domain/entities/message.dart</text>
-  <text x="568" y="158" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya viene: isMine, imagePath, imageUrl</text>
-  <path d="M78,137 V192 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="179" width="328" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="314">domain/repository/message_repository.dart</text>
-  <text x="568" y="192" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya viene: el contrato completo</text>
-  <path d="M78,137 V226 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="213" width="140" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="226" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="126">domain/usecases/</text>
-  <path d="M102,239 V260 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="247" width="222" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="126" y="260" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="208">watch_messages_usecase.dart</text>
-  <text x="568" y="260" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · retorna el Stream</text>
-  <rect x="847.0" y="249" width="53" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="874" y="260" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 3</text>
-  <path d="M102,239 V294 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="281" width="208" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="126" y="294" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="194">send_message_usecase.dart</text>
-  <text x="568" y="294" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · inserta</text>
+  <rect x="48" y="96" width="864" height="598" rx="12" fill="#FFFFFF" stroke="#D9DEE8" stroke-width="1.5"/>
+  <rect x="68" y="111" width="222" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="78" y="124" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="208">lib/features/conversations/</text>
+  <text x="568" y="124" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya viene: usuarios y conversaciones</text>
+  <rect x="68" y="145" width="155" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="78" y="158" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="141">lib/features/chat/</text>
+  <path d="M78,171 V192 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="179" width="230" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="192" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="216">domain/entities/message.dart</text>
+  <text x="568" y="192" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya viene: isMine, imagePath, imageUrl</text>
+  <path d="M78,171 V226 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="213" width="328" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="226" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="314">domain/repository/message_repository.dart</text>
+  <text x="568" y="226" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya viene: el contrato completo</text>
+  <path d="M78,171 V260 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="247" width="140" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="260" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="126">domain/usecases/</text>
+  <path d="M102,273 V294 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="281" width="222" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="126" y="294" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="208">watch_messages_usecase.dart</text>
+  <text x="568" y="294" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · retorna el Stream</text>
   <rect x="847.0" y="283" width="53" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="874" y="294" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 3</text>
-  <path d="M102,239 V328 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="315" width="260" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="126" y="328" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="246">load_older_messages_usecase.dart</text>
-  <text x="568" y="328" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · Future</text>
-  <rect x="847.0" y="317" width="53" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="874" y="328" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">2 · 3</text>
-  <path d="M102,239 V362 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="349" width="230" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
-  <text class="mono" x="126" y="362" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="216">pick_chat_image_usecase.dart</text>
-  <text x="568" y="362" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · abre la galería</text>
-  <circle cx="886" cy="362" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="362" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M78,137 V396 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="383" width="110" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="396" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="96">data/source/</text>
-  <path d="M102,409 V430 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="417" width="268" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="126" y="430" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="254">supabase_message_data_source.dart</text>
-  <text x="568" y="430" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">watchLatest, send, fetchBefore</text>
-  <rect x="847.0" y="419" width="53" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="874" y="430" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2</text>
-  <path d="M102,409 V464 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="116" y="451" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="126" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="276">supabase_chat_image_data_source.dart</text>
-  <text x="568" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">upload, signedUrl</text>
-  <circle cx="886" cy="464" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="464" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
-  <path d="M78,137 V498 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="485" width="350" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
-  <text class="mono" x="102" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="336">data/repository/message_repository_impl.dart</text>
-  <text x="568" y="498" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">los seis métodos, delegando</text>
-  <rect x="817.4" y="487" width="83" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="859" y="498" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2 · 3</text>
-  <path d="M78,137 V532 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="519" width="328" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="314">ui/bloc/chat_event.dart · chat_state.dart</text>
-  <text x="568" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya vienen: eventos y ChatState</text>
-  <path d="M78,137 V566 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="553" width="185" height="26" rx="4" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/>
-  <text class="mono" x="102" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#4453C9" data-fit="171">ui/bloc/chat_bloc.dart</text>
-  <text x="568" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">los on solo imprimen</text>
-  <rect x="817.4" y="555" width="83" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="859" y="566" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2 · 3</text>
-  <path d="M78,137 V600 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="587" width="222" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="208">ui/screens/chat_screen.dart</text>
-  <text x="568" y="600" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya viene: lista, scroll y SnackBar</text>
-  <path d="M78,137 V634 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
-  <rect x="92" y="621" width="125" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
-  <text class="mono" x="102" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="111">ui/components/</text>
-  <text x="568" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya vienen: burbuja y composer</text>
+  <path d="M102,273 V328 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="315" width="208" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="126" y="328" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="194">send_message_usecase.dart</text>
+  <text x="568" y="328" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · inserta</text>
+  <rect x="847.0" y="317" width="53" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="874" y="328" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 3</text>
+  <path d="M102,273 V362 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="349" width="260" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="126" y="362" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="246">load_older_messages_usecase.dart</text>
+  <text x="568" y="362" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · Future</text>
+  <rect x="847.0" y="351" width="53" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="874" y="362" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">2 · 3</text>
+  <path d="M102,273 V396 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="383" width="230" height="26" rx="4" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/>
+  <text class="mono" x="126" y="396" dy="0.35em" font-size="12.5" font-weight="600" fill="#A96C05" data-fit="216">pick_chat_image_usecase.dart</text>
+  <text x="568" y="396" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">call · abre la galería</text>
+  <circle cx="886" cy="396" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="396" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
+  <path d="M78,171 V430 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="417" width="110" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="430" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="96">data/source/</text>
+  <path d="M102,443 V464 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="451" width="268" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="126" y="464" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="254">supabase_message_data_source.dart</text>
+  <text x="568" y="464" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">watchLatest, send, fetchBefore</text>
+  <rect x="847.0" y="453" width="53" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="874" y="464" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2</text>
+  <path d="M102,443 V498 H113" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="116" y="485" width="290" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="126" y="498" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="276">supabase_chat_image_data_source.dart</text>
+  <text x="568" y="498" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">upload, signedUrl</text>
+  <circle cx="886" cy="498" r="12" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.5"/><text x="886" y="498" dy="0.35em" text-anchor="middle" font-size="12.5" font-weight="700" fill="#A96C05">3</text>
+  <path d="M78,171 V532 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="519" width="350" height="26" rx="4" fill="#E3F6F3" stroke="#86D3CA" stroke-width="1.5"/>
+  <text class="mono" x="102" y="532" dy="0.35em" font-size="12.5" font-weight="600" fill="#0F8478" data-fit="336">data/repository/message_repository_impl.dart</text>
+  <text x="568" y="532" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">los seis métodos, delegando</text>
+  <rect x="817.4" y="521" width="83" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="859" y="532" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2 · 3</text>
+  <path d="M78,171 V566 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="553" width="328" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="566" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="314">ui/bloc/chat_event.dart · chat_state.dart</text>
+  <text x="568" y="566" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya vienen: eventos y ChatState</text>
+  <path d="M78,171 V600 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="587" width="185" height="26" rx="4" fill="#EEF1FF" stroke="#A9B4F2" stroke-width="1.5"/>
+  <text class="mono" x="102" y="600" dy="0.35em" font-size="12.5" font-weight="600" fill="#4453C9" data-fit="171">ui/bloc/chat_bloc.dart</text>
+  <text x="568" y="600" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">trae la Conversation; los on imprimen</text>
+  <rect x="817.4" y="589" width="83" height="22" rx="11" fill="#FFF3DC" stroke="#F0C572" stroke-width="1.25"/><text x="859" y="600" dy="0.35em" text-anchor="middle" font-size="11.5" font-weight="700" fill="#A96C05">1 · 2 · 3</text>
+  <path d="M78,171 V634 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="621" width="222" height="26" rx="4" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="634" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="208">ui/screens/chat_screen.dart</text>
+  <text x="568" y="634" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya viene: lista, scroll y SnackBar</text>
+  <path d="M78,171 V668 H89" fill="none" stroke="#C4CBD8" stroke-width="1.5"/>
+  <rect x="92" y="655" width="125" height="26" rx="8" fill="#EFF1F5" stroke="#C4CBD8" stroke-width="1.5"/>
+  <text class="mono" x="102" y="668" dy="0.35em" font-size="12.5" font-weight="600" fill="#556074" data-fit="111">ui/components/</text>
+  <text x="568" y="668" dy="0.35em" font-size="13" fill="#454C61" data-fit="250">Ya vienen: burbuja y composer</text>
   <text class="h" x="898" y="88" text-anchor="end">PARTE</text>
-  <text class="foot" x="48" y="692" data-fit="860">main.dart e injection_container.dart ya registran todo lo del chat: no hay que tocarlos.</text>
+  <text class="foot" x="48" y="726" data-fit="860">main.dart e injection_container.dart ya registran todo: no hay que tocarlos.</text>
 </svg>
 ```
 
+- **La lista de usuarios y las conversaciones.** La feature `conversations` está completa. `ContactsScreen` lista los perfiles, tú primero. Al tocar uno, `OpenConversationUseCase` busca la fila de `conversations` de esa pareja, la crea si no existe y abre el chat con ella.
+- **El chat sabe con quién hablas.** `ChatBloc` recibe la `Conversation` en su constructor y la guarda en el campo `conversation`. En cada capa, los métodos ya reciben el `conversationId`.
 - **Toda la interfaz.** `ChatScreen` con la lista al revés (el más nuevo abajo), `MessageBubble` y `MessageComposer`. Enviar, llegar arriba y el botón de foto ya lanzan su evento. Cuando cambia el mensaje más nuevo, la lista baja sola.
 - **La entidad y el contrato.** `Message` con `isMine`, y `imagePath` e `imageUrl` opcionales. `MessageRepository` ya declara los seis métodos.
 - **Los eventos y el estado.** `ChatStarted`, `MessagesUpdated`, `ChatStreamFailed`, `MessageSent`, `OlderMessagesRequested`, `ChatPhotoRequested`, `ChatPhotoRemoved` y `ChatState` con su `copyWith`.
 - **Los métodos vacíos.** Cada método de cada capa ya tiene su firma y un `throw UnimplementedError()`. Los `on` de `ChatBloc` solo imprimen el evento.
 
-Abre el chat desde el muro, escribe algo y sube hasta el tope de la lista. En la consola verás:
+Abre el chat desde el muro, elige a alguien, escribe algo y sube hasta el tope de la lista. En la consola verás:
 
 ```text
 ChatBloc recibió ChatStarted()
@@ -238,7 +257,7 @@ ChatBloc recibió MessageSent(Hola)
 
 ## Parte 1 · Chat sencillo en tiempo real
 
-Del paso 1 al 4. Al terminar, dos cuentas conversan y cada mensaje aparece en las dos pantallas.
+Del paso 1 al 4. Al terminar, dos cuentas conversan y cada mensaje aparece en las dos pantallas. Todo se hace sobre **una conversación**: cada consulta filtra por `conversation_id`.
 
 ## Paso 1 · El data source
 
@@ -264,25 +283,36 @@ Message _toMessage(Map<String, dynamic> row) {
 
 `isMine` se decide aquí, comparando el autor con quien inició sesión. La vista solo lo lee.
 
-`watchLatest` crea el Stream y lo **retorna**, sin `async` y sin `await`:
+`watchLatest` crea el Stream de una conversación y lo **retorna**, sin `async` y sin `await`:
 
 ```dart
-Stream<List<Message>> watchLatest({required int limit}) {
+Stream<List<Message>> watchLatest(
+  String conversationId, {
+  required int limit,
+}) {
   return _client
       .from(table)
       .stream(primaryKey: ['id'])
+      .eq('conversation_id', conversationId)
       .order('created_at', ascending: false)
       .limit(limit)
       .map((rows) => rows.map(_toMessage).toList());
 }
 ```
 
+Con `.eq`, Realtime solo te manda las filas de esa conversación: los mensajes de otras parejas no llegan.
+
 `send` es un `insert` normal, un `Future`:
 
 ```dart
-Future<void> send(String content, {String? imagePath}) async {
+Future<void> send(
+  String conversationId,
+  String content, {
+  String? imagePath,
+}) async {
   try {
     await _client.from(table).insert({
+      'conversation_id': conversationId,
       'sender_id': _uid,
       'content': content,
     });
@@ -300,8 +330,11 @@ Future<void> send(String content, {String? imagePath}) async {
 final SupabaseMessageDataSource _messages = sl();
 
 @override
-Stream<List<Message>> watchLatest({required int limit}) {
-  return _messages.watchLatest(limit: limit);
+Stream<List<Message>> watchLatest(
+  String conversationId, {
+  required int limit,
+}) {
+  return _messages.watchLatest(conversationId, limit: limit);
 }
 ```
 
@@ -314,8 +347,8 @@ Stream<List<Message>> watchLatest({required int limit}) {
 ```dart
 final MessageRepository _messages = sl();
 
-Stream<List<Message>> call({required int limit}) {
-  return _messages.watchLatest(limit: limit);
+Stream<List<Message>> call(String conversationId, {required int limit}) {
+  return _messages.watchLatest(conversationId, limit: limit);
 }
 ```
 
@@ -324,16 +357,20 @@ Stream<List<Message>> call({required int limit}) {
 ```dart
 final MessageRepository _messages = sl();
 
-Future<void> call(String content, {PickedPhoto? photo}) async {
+Future<void> call(
+  String conversationId,
+  String content, {
+  PickedPhoto? photo,
+}) async {
   final text = content.trim();
   if (text.isEmpty) return;
-  await _messages.send(text);
+  await _messages.send(conversationId, text);
 }
 ```
 
 ## Paso 4 · ChatBloc
 
-Aquí, y solo aquí, se hace `listen`. Agrega los casos de uso y el campo de la suscripción:
+Aquí, y solo aquí, se hace `listen`. El Bloc ya tiene el campo `conversation`, que le pasa la ruta al abrir el chat. Agrega los casos de uso y el campo de la suscripción:
 
 ```dart
 final WatchMessagesUseCase _watchMessages = sl();
@@ -352,7 +389,7 @@ String _message(Object error) {
 Future<void> _onStarted(ChatStarted event, Emitter<ChatState> emit) async {
   emit(state.copyWith(status: ChatStatus.loading));
   await _subscription?.cancel();
-  _subscription = _watchMessages(limit: liveSize).listen(
+  _subscription = _watchMessages(conversation.id, limit: liveSize).listen(
     (messages) => add(MessagesUpdated(messages)),
     onError: (Object error) => add(ChatStreamFailed(_message(error))),
   );
@@ -383,7 +420,7 @@ Future<void> _onMessageSent(
   if (state.isSending) return;
   emit(state.copyWith(isSending: true));
   try {
-    await _sendMessage(event.content);
+    await _sendMessage(conversation.id, event.content);
     emit(state.copyWith(isSending: false));
   } on Exception catch (e) {
     emit(state.copyWith(isSending: false, errorMessage: _message(e)));
@@ -403,7 +440,7 @@ Future<void> close() async {
 
 ## La prueba de la parte 1
 
-Abre el chat con las dos cuentas y escribe desde cada una. Cada mensaje aparece en las dos pantallas, a la derecha en la de quien lo envió. Escribe unos 20 mensajes y sube hasta el tope: solo hay 15, y la consola imprime `ChatBloc recibió OlderMessagesRequested()`. Eso es lo que resuelve la parte 2.
+Con las dos cuentas abiertas, cada una elige a la otra en la lista y escribe. Cada mensaje aparece en las dos pantallas, a la derecha en la de quien lo envió. Escribe unos 20 mensajes y sube hasta el tope: solo hay 15, y la consola imprime `ChatBloc recibió OlderMessagesRequested()`. Eso es lo que resuelve la parte 2. Si abres el chat con un tercer usuario, o contigo, la conversación empieza vacía: cada pareja tiene la suya.
 
 ## Parte 2 · Paginación
 
@@ -504,10 +541,11 @@ En la segunda pestaña, `_onMessagesUpdated` todavía **reemplaza** la lista: cu
 
 ## Paso 5 · fetchBefore
 
-En el data source, los mensajes anteriores al más viejo que hay en pantalla:
+En el data source, los mensajes de la conversación anteriores al más viejo que hay en pantalla:
 
 ```dart
 Future<List<Message>> fetchBefore(
+  String conversationId,
   DateTime before, {
   required int limit,
 }) async {
@@ -515,6 +553,7 @@ Future<List<Message>> fetchBefore(
     final rows = await _client
         .from(table)
         .select()
+        .eq('conversation_id', conversationId)
         .lt('created_at', before.toUtc().toIso8601String())
         .order('created_at', ascending: false)
         .limit(limit);
@@ -532,8 +571,12 @@ En el repositorio, `fetchBefore` delega igual que los otros.
 ```dart
 final MessageRepository _messages = sl();
 
-Future<List<Message>> call(DateTime before, {required int limit}) {
-  return _messages.fetchBefore(before, limit: limit);
+Future<List<Message>> call(
+  String conversationId,
+  DateTime before, {
+  required int limit,
+}) {
+  return _messages.fetchBefore(conversationId, before, limit: limit);
 }
 ```
 
@@ -573,7 +616,11 @@ Future<void> _onOlderRequested(
   emit(state.copyWith(isLoadingOlder: true));
   try {
     final oldest = state.messages.last.createdAt;
-    final older = await _loadOlder(oldest, limit: pageSize);
+    final older = await _loadOlder(
+      conversation.id,
+      oldest,
+      limit: pageSize,
+    );
     emit(state.copyWith(
       isLoadingOlder: false,
       messages: _merge(state.messages, older),
@@ -763,19 +810,25 @@ Sin ese mapa, cada emisión del Stream volvería a firmar todas las fotos, cada 
 `PickChatImageUseCase` retorna `_messages.pickImage()`. `SendMessageUseCase` sube la foto antes de insertar:
 
 ```dart
-Future<void> call(String content, {PickedPhoto? photo}) async {
+Future<void> call(
+  String conversationId,
+  String content, {
+  PickedPhoto? photo,
+}) async {
   final text = content.trim();
   if (text.isEmpty && photo == null) return;
   final path = photo == null ? null : await _messages.uploadImage(photo);
-  await _messages.send(text, imagePath: path);
+  await _messages.send(conversationId, text, imagePath: path);
 }
 ```
 
 `WatchMessagesUseCase` sigue retornando el Stream, pero ahora transformado con `asyncMap`, porque pedir la URL es un `Future`:
 
 ```dart
-Stream<List<Message>> call({required int limit}) {
-  return _messages.watchLatest(limit: limit).asyncMap(_withImages);
+Stream<List<Message>> call(String conversationId, {required int limit}) {
+  return _messages
+      .watchLatest(conversationId, limit: limit)
+      .asyncMap(_withImages);
 }
 
 Future<List<Message>> _withImages(List<Message> messages) {
@@ -816,7 +869,7 @@ void _onPhotoRemoved(ChatPhotoRemoved event, Emitter<ChatState> emit) {
 En `_onMessageSent`, pasa la foto del estado y quítala cuando el mensaje salió:
 
 ```dart
-await _sendMessage(event.content, photo: state.photo);
+await _sendMessage(conversation.id, event.content, photo: state.photo);
 emit(state.copyWith(isSending: false, removePhoto: true));
 ```
 
@@ -826,6 +879,6 @@ Adjunta una foto, mira la vista previa y envíala con o sin texto. Aparece en la
 
 ## Retos
 
-- **El nombre de quien escribe.** `.stream()` no admite joins como `select('*, profiles(...)')`. Trae los perfiles una vez y cruza por `sender_id` en el caso de uso.
+- **El último mensaje en la lista.** Muestra bajo cada usuario de `ContactsScreen` el último mensaje que se cruzaron, con una consulta a `messages` por `conversation_id`.
 - **URLs vencidas.** La URL firmada dura una hora. Haz que el mapa del repositorio olvide las que tengan más de 50 minutos.
 - **Sin conexión.** Apaga el Wi-Fi con el chat abierto: ¿qué llega a `onError`? Muestra un aviso y vuelve a suscribirte al recuperar la red.

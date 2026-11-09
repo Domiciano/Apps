@@ -255,8 +255,9 @@ FIGS['rtPublicacion'] = rt_publicacion
 def rt_lab_pantalla():
     fid, h = 'rtLabPantalla', 600
     s = head(fid, h, 'Lo que vas a construir', 'Lo que vas a construir',
-             'La misma sala vista desde dos cuentas. Lo de cada quien va a la derecha, en verde.',
-             'Dos teléfonos con la pantalla Chat, uno con la cuenta de Ana y otro con la tuya, mostrando la misma conversación. '
+             'Una conversación entre dos personas, vista desde las dos cuentas. Lo de cada quien va a la derecha.',
+             'Dos teléfonos con la pantalla del chat, uno con la cuenta de Ana y otro con la tuya, mostrando la misma conversación, '
+             'la que tienen solo ustedes dos. '
              'En el de Ana, sus mensajes van a la derecha en verde y los tuyos a la izquierda en blanco. En el tuyo, al revés. '
              'Uno de los mensajes trae una foto. Abajo de cada teléfono, la barra para escribir, con el botón de foto y el de '
              'enviar. A los lados, notas: al llegar arriba se piden los cinco anteriores, y al llegar un mensaje nuevo la lista '
@@ -296,6 +297,7 @@ def chip(x, y, n, color='amber'):
 def rt_lab_carpetas():
     fid = 'rtLabCarpetas'
     rows = [
+        (0, 'lib/features/conversations/', 'slate', 'Ya viene: usuarios y conversaciones', ''),
         (0, 'lib/features/chat/', 'slate', '', ''),
         (1, 'domain/entities/message.dart', 'slate', 'Ya viene: isMine, imagePath, imageUrl', ''),
         (1, 'domain/repository/message_repository.dart', 'slate', 'Ya viene: el contrato completo', ''),
@@ -309,7 +311,7 @@ def rt_lab_carpetas():
         (2, 'supabase_chat_image_data_source.dart', 'teal', 'upload, signedUrl', '3'),
         (1, 'data/repository/message_repository_impl.dart', 'teal', 'los seis métodos, delegando', '1 · 2 · 3'),
         (1, 'ui/bloc/chat_event.dart · chat_state.dart', 'slate', 'Ya vienen: eventos y ChatState', ''),
-        (1, 'ui/bloc/chat_bloc.dart', 'indigo', 'los on solo imprimen', '1 · 2 · 3'),
+        (1, 'ui/bloc/chat_bloc.dart', 'indigo', 'trae la Conversation; los on imprimen', '1 · 2 · 3'),
         (1, 'ui/screens/chat_screen.dart', 'slate', 'Ya viene: lista, scroll y SnackBar', ''),
         (1, 'ui/components/', 'slate', 'Ya vienen: burbuja y composer', ''),
     ]
@@ -317,7 +319,8 @@ def rt_lab_carpetas():
     h = y0 + rh * len(rows) + 64
     s = head(fid, h, 'La estructura de carpetas', 'La estructura de carpetas',
              'En gris lo que ya viene hecho. Con número, la parte del laboratorio en la que lo completas.',
-             'Árbol de carpetas de la feature chat del proyecto 262App5. Ya vienen la entidad Message, el contrato '
+             'Árbol de carpetas del proyecto 262App5. La feature conversations ya viene completa: la lista de usuarios y '
+             'la tabla conversations. En la feature chat ya vienen la entidad Message, el contrato '
              'MessageRepository, los eventos, el estado, ChatScreen y los componentes. Te tocan los cuatro casos de uso, los dos '
              'data sources, MessageRepositoryImpl y ChatBloc, marcados con la parte del laboratorio en que se completan: 1 el '
              'chat en tiempo real, 2 la paginación y 3 la imagen.')
@@ -338,7 +341,7 @@ def rt_lab_carpetas():
         if step:
             s += ('  ' + chip(886, y, step)) if len(step) == 1 else badge(900 - (len(step) * 7.4 + 16), y, 'amber', step)
     s += '  <text class="h" x="898" y="88" text-anchor="end">PARTE</text>\n'
-    return s + tail(h, 'main.dart e injection_container.dart ya registran todo lo del chat: no hay que tocarlos.')
+    return s + tail(h, 'main.dart e injection_container.dart ya registran todo: no hay que tocarlos.')
 
 
 FIGS['rtLabCarpetas'] = rt_lab_carpetas

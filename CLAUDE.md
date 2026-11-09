@@ -185,7 +185,13 @@ Laboratorio 7 y migra un solo camino de ese laboratorio con `= sl()`.
 largo de las capas el `Stream` se retorna y solo el Bloc hace `listen`; la función de `listen` lanza un evento
 (`MessagesUpdated`) en vez de emitir, y el Bloc cancela la suscripción en `close()`. El punto de partida del
 laboratorio es `Domiciano/262App5` (ramas `main` y `solution`): el Laboratorio 7 resuelto más la feature `chat`,
-con la tabla `messages` sin RLS en la publicación `supabase_realtime` y el bucket privado `chat-images`.
+con la tabla `messages` sin RLS en la publicación `supabase_realtime` y el bucket privado `chat-images`. Desde el
+2026-11-09 el chat es **entre dos personas**: la feature `conversations` viene completa en el punto de partida
+(`ContactsScreen` lista todos los perfiles, uno mismo incluido; `OpenConversationUseCase` carga o crea la fila de
+`conversations`, con el par ordenado en `user1_id <= user2_id` y `unique`), `ChatBloc` recibe la `Conversation` en el
+constructor y cada capa del chat recibe el `conversationId` (`.eq('conversation_id', …)` en el stream y en
+`fetchBefore`). No añadió pasos al laboratorio: solo cambió la firma de los existentes y el SQL de la preparación.
+Las lecciones 0063 y 0094 siguen mostrando `_watchMessages(limit: liveSize)` sin conversación, a propósito.
 
 `tools/deploy_figuras.py` trae las dieciocho de la sección **Deploy** (2026-11-07): «Distribuir con Firebase
 App Distribution» (0095, `lessonM0.md`, primera de la sección), «Generación de artefactos: AAB e IPA» (0080,

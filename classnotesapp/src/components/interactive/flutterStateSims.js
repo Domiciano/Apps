@@ -4742,7 +4742,7 @@ const PG_OLDER = {
 }`,
   full: `Future<void> _onOlderRequested(event, emit) async {
   final oldest = state.messages.last.createdAt;
-  final older = await _loadOlder(oldest, limit: 5);
+  final older = await _loadOlder(conversation.id, oldest, limit: 5);
   emit(state.copyWith(
     messages: _merge(state.messages, older),
     hasMore: older.length == 5,
