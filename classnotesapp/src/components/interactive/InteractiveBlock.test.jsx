@@ -6,7 +6,7 @@ import {
   SIMS, parseSpec, runQuery, queryCode, cacheStart, cacheView, cacheUpload, cacheRestart, cacheWait, cacheUrl,
   fsScenario, fsAt, FS_TYPE_KEYS, FS_TOTAL, pipeStart, pipeAct, rtLayersScenario, chatStart, chatSend, chatReopen, chatPublish,
   pageStart, pageOlder, pageIncoming, pageStage,
-  convStart, convOpen,
+  convStart, convOpen, marbleRun, marbleHeard, MB_VARIANTS,
 } from './flutterStateSims';
 
 const renderBlock = (spec) => render(<ThemeProvider><InteractiveBlock spec={spec} /></ThemeProvider>);
@@ -805,5 +805,74 @@ describe('conversation-open', () => {
     act(() => { vi.advanceTimersByTime(1500 * 10); });
     expect(screen.getByTestId('cv-table').children).toHaveLength(2);
     expect(screen.getByTestId('cv-caption').textContent).toMatch(/no crea nada/);
+  });
+});
+
+describe('marble', () => {
+  const v = (id, t, value) => ({ id, t, kind: 'value', v: value });
+
+  it('map, filter and distinct', () => {
+    const ins = [v(1, 0, 1), v(2, 100, 2), v(3, 200, 2), v(4, 300, 3)];
+    expect(marbleRun('map', ins).outputs.map((e) => e.v)).toEqual([2, 4, 4, 6]);
+    const f = marbleRun('filter', ins);
+    expect(f.outputs.map((e) => e.v)).toEqual([2, 2]);
+    expect([...f.dropped]).toEqual([1, 4]);
+    expect(marbleRun('distinct', ins).outputs.map((e) => e.v)).toEqual([1, 2, 3]);
+  });
+
+  it('debounce keeps only the last of a burst, after the quiet time', () => {
+    const ins = [v(1, 0, 'h'), v(2, 180, 'ho'), v(3, 360, 'hol'), v(4, 540, 'hola')];
+    expect(marbleRun('debounce', ins, 900).outputs).toEqual([]);
+    const r = marbleRun('debounce', ins, 1200);
+    expect(r.outputs).toEqual([{ id: 4, t: 1140, kind: 'value', v: 'hola' }]);
+    expect([...r.dropped]).toEqual([1, 2, 3]);
+  });
+
+  it('throttle keeps the first of each window', () => {
+    const ins = [v(1, 0, 'a'), v(2, 200, 'b'), v(3, 650, 'c'), v(4, 800, 'd')];
+    expect(marbleRun('throttle', ins).outputs.map((e) => e.v)).toEqual(['a', 'c']);
+  });
+
+  it('an error does not close the stream; done does', () => {
+    const ins = [v(1, 0, 1), { id: 2, t: 10, kind: 'error' }, v(3, 20, 2), { id: 4, t: 30, kind: 'done' }, v(5, 40, 3)];
+    expect(marbleRun('events', ins).outputs.map((e) => e.kind)).toEqual(['value', 'error', 'value', 'done']);
+  });
+
+  it('a listener only hears between listen and cancel', () => {
+    const ins = [v(1, 0, 1), v(2, 100, 2), v(3, 200, 3), v(4, 300, 4)];
+    expect(marbleHeard(ins, 100, 300).map((e) => e.v)).toEqual([2, 3]);
+  });
+
+  it('renders every variant', () => {
+    Object.keys(MB_VARIANTS).forEach((name) => {
+      const { unmount } = renderBlock(`marble ${name}`);
+      expect(screen.getByTestId('mb-source')).toBeTruthy();
+      unmount();
+    });
+  });
+
+  it('a second listen on a single-subscription stream fails; broadcast accepts it', () => {
+    renderBlock('marble broadcast');
+    fireEvent.click(screen.getByText('A escucha'));
+    fireEvent.click(screen.getByText('B escucha'));
+    expect(screen.getByTestId('mb-summary').textContent).toMatch(/Bad state/);
+    fireEvent.click(screen.getByText('Broadcast'));
+    fireEvent.click(screen.getByText('A escucha'));
+    act(() => { vi.advanceTimersByTime(1000); });
+    fireEvent.click(screen.getByText('B escucha'));
+    act(() => { vi.advanceTimersByTime(2000); });
+    expect(screen.getByTestId('mb-summary').textContent).not.toMatch(/Bad state/);
+    expect(screen.getByTestId('mb-b').querySelectorAll('.mb-value').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('mb-a').querySelectorAll('.mb-value').length)
+      .toBeGreaterThan(screen.getByTestId('mb-b').querySelectorAll('.mb-value').length);
+  });
+
+  it('debounce lets the word through only after typing stops', () => {
+    renderBlock('marble debounce');
+    fireEvent.click(screen.getByText('Escribir una palabra'));
+    act(() => { vi.advanceTimersByTime(1100); });
+    expect(screen.getByTestId('mb-out').querySelectorAll('.mb-value')).toHaveLength(0);
+    act(() => { vi.advanceTimersByTime(600); });
+    expect(screen.getByTestId('mb-out').textContent).toMatch(/hola/);
   });
 });

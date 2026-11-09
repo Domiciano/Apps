@@ -309,6 +309,13 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
     (pasos 5 a 7, pero `MessagesUpdated` aún reemplaza y la siguiente emisión borra las páginas) y *Parte 2 ·
     juntar por id* (con `_merge`). Verde azulado llegó por el Stream, ámbar por `Future` (`pageStart`,
     `pageOlder`, `pageIncoming`, `pageStage`, `pageCode`).
+  - `marble` (0097 «Conceptos de programación reactiva», `lessonI2conceptos.md`, 2026-11-09): diagramas de
+    canicas, sin código. Una variante por apartado (`marble speed|events|listen|map|filter|distinct|debounce|
+    throttle|broadcast`): la fuente arriba, el operador en medio y el resultado (o los oyentes) abajo, con el
+    tiempo corriendo hacia la línea «ahora». Reloj simulado de 50 ms con `setTimeout`, así que se prueba con
+    timers falsos. Lo descartado queda gris y tachado arriba. En `debounce`/`throttle` la fuente son teclas y el
+    resultado el texto; `broadcast` muestra el `Bad state` del segundo `listen` en un Stream de una sola
+    suscripción. Lógica pura en `marbleRun` y `marbleHeard`.
   - `conversation-open` (0096, 2026-11-09): el `openWith` de `SupabaseConversationDataSource` paso a paso. Un
     teléfono con la lista de usuarios (Ana `7c2e…`, Beto `1a9d…`, Caro `b45f…`; pestañas *Soy Ana/Beto/Caro*), el
     panel de variables (`contactId`, `me`, `pair`, `found`, `created`), una franja con el mensaje que viaja entre la

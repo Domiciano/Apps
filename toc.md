@@ -94,6 +94,7 @@
 [t] Dependency Injection
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonN1.md | Inyección de dependencias con GetIt | 0079
 [t] Realtime DB
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2conceptos.md | Conceptos de programación reactiva | 0097
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2.md | Programación reactiva y Streams | 0063
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2capas.md | El Stream viaja por las capas | 0094
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI1.md | Supabase Realtime | 0062

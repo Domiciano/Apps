@@ -3607,6 +3607,29 @@ const RT_CSS = `
 .fsim .rc-pub.rc-off{background:#FFEBEF}
 .fsim .rc-legend{font-size:12px;color:var(--fs-muted);display:flex;flex-wrap:wrap;gap:4px 14px}
 .fsim .rc-legend b{font-weight:700}
+.fsim .mb-controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;align-items:center}
+.fsim .mb-box{border:1px solid var(--fs-line);border-radius:12px;background:#fff;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.fsim .mb-lane{display:flex;align-items:center;gap:8px}
+.fsim .mb-label{flex:0 0 92px;font-size:12px;font-weight:600;color:#556074;text-align:right}
+.fsim .mb-track{position:relative;flex:1;height:40px;border-radius:8px;background:linear-gradient(#C4CBD8,#C4CBD8) 0 50%/100% 2px no-repeat;overflow:hidden}
+.fsim .mb-now{position:absolute;left:96%;top:2px;bottom:2px;border-left:2px dashed #A9B0C2}
+.fsim .mb-m{position:absolute;top:50%;transform:translate(-50%,-50%);min-width:28px;height:28px;padding:0 7px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font:700 12px 'JetBrains Mono',Menlo,Consolas,monospace;white-space:nowrap;
+  background:#E3F6F3;border:2px solid #0F8478;color:#0F8478}
+.fsim .mb-m.mb-error{background:#FFEBEF;border-color:#C2354F;color:#C2354F}
+.fsim .mb-m.mb-done{min-width:0;width:4px;height:30px;padding:0;border-radius:2px;background:#161A26;border:0}
+.fsim .mb-m.mb-drop{background:#F2F3F7;border-color:#C4CBD8;color:#A9B0C2;text-decoration:line-through}
+.fsim .mb-op{margin-left:100px;display:flex;justify-content:center}
+.fsim .mb-op span{font:700 12.5px 'JetBrains Mono',Menlo,Consolas,monospace;color:#7439B8;background:#F4EBFF;border:1.5px solid #C9A6EE;border-radius:8px;padding:4px 12px}
+.fsim .mb-op span::after{content:' ↓'}
+.fsim .mb-track.mb-tall{height:54px;background-position:0 70%}
+.fsim .mb-tall .mb-m{top:70%}
+.fsim .mb-mark{position:absolute;top:0;transform:translateX(-50%);font:700 10px 'JetBrains Mono',Menlo,Consolas,monospace;padding:1px 5px;border-radius:5px}
+.fsim .mb-mark.mb-on{color:#1F6FD1;background:#E6F0FC}
+.fsim .mb-mark.mb-off{color:#556074;background:#ECEEF3}
+.fsim .mb-mark.mb-bad{color:#C2354F;background:#FFEBEF}
+.fsim .mb-axis{margin-left:100px;display:flex;justify-content:space-between;font-size:11px;color:var(--fs-muted)}
+.fsim .mb-axis span:last-child{margin-right:2%}
 .fsim .cv-wrap{flex-wrap:wrap}
 .fsim .cv-wrap .fs-phone{height:310px}
 .fsim .cv-controls{display:flex;gap:10px;align-items:center}
@@ -5117,6 +5140,309 @@ const mountConversationOpen = (root) => {
   };
 };
 
+// ── marble: diagramas de canicas para los conceptos de programación reactiva ──
+
+export const MB_WINDOW = 8000;
+export const MB_WAIT = 600;
+const MB_TICK = 50;
+const MB_AUTO = { slow: [1500], fast: [300], irregular: [250, 1700, 400, 350, 2100, 600, 300, 1200] };
+
+export const MB_VARIANTS = Object.freeze({
+  speed: { op: null, intro: 'La fuente decide cuándo emite. Quien escucha recibe cada dato en el momento en que llega.' },
+  events: { op: null, intro: 'Emite datos, un error o el fin. Mira qué recibe quien escucha.' },
+  listen: { op: null, intro: 'La fuente emite sola. Pulsa Escuchar, espera y luego Cancelar.' },
+  map: { op: 'map(x · 2)', intro: 'Cada dato sale transformado: aquí, multiplicado por dos.' },
+  filter: { op: 'filter(par)', intro: 'Solo pasan los datos que cumplen la condición: aquí, los pares.' },
+  distinct: { op: 'distinct', intro: 'Un dato igual al anterior no vuelve a pasar.' },
+  debounce: { op: `debounce ${MB_WAIT} ms`, intro: 'Espera a que la fuente se calme y solo deja pasar el último dato.' },
+  throttle: { op: `throttle ${MB_WAIT} ms`, intro: 'Deja pasar un dato y descarta los que lleguen en los siguientes 600 ms.' },
+  broadcast: { op: null, intro: 'Dos oyentes quieren el mismo Stream. Prueba con una sola suscripción y con broadcast.' },
+});
+
+export const marbleRun = (variant, inputs, now = Infinity) => {
+  const outputs = [];
+  const dropped = new Set();
+  const values = inputs.filter((e) => e.kind === 'value');
+  if (variant === 'debounce') {
+    values.forEach((e, i) => {
+      const nextIn = values[i + 1];
+      if (nextIn && nextIn.t - e.t < MB_WAIT) dropped.add(e.id);
+      else if (now >= e.t + MB_WAIT) outputs.push({ ...e, t: e.t + MB_WAIT });
+    });
+    return { outputs, dropped };
+  }
+  if (variant === 'throttle') {
+    let openAt = -Infinity;
+    values.forEach((e) => {
+      if (e.t >= openAt) {
+        outputs.push({ ...e });
+        openAt = e.t + MB_WAIT;
+      } else dropped.add(e.id);
+    });
+    return { outputs, dropped };
+  }
+  let last;
+  let closed = false;
+  inputs.forEach((e) => {
+    if (closed) return;
+    if (e.kind === 'done') {
+      closed = true;
+      outputs.push({ ...e });
+      return;
+    }
+    if (e.kind === 'error') {
+      outputs.push({ ...e });
+      return;
+    }
+    if (variant === 'filter' && e.v % 2 !== 0) dropped.add(e.id);
+    else if (variant === 'distinct' && e.v === last) dropped.add(e.id);
+    else outputs.push({ ...e, v: variant === 'map' ? e.v * 2 : e.v });
+    last = e.v;
+  });
+  return { outputs, dropped };
+};
+
+export const marbleHeard = (inputs, from, to = Infinity) => inputs.filter((e) => e.t >= from && e.t < to);
+
+const MB_DISTINCT = [1, 1, 2, 2, 2, 3, 1, 1, 4, 4];
+const MB_WORDS = ['hola', 'chat', 'flutter'];
+
+const mountMarble = (root, args = []) => {
+  ensureRtStyle();
+  const variant = MB_VARIANTS[args[0]] ? args[0] : 'map';
+  const spec = MB_VARIANTS[variant];
+  const typing = variant === 'debounce' || variant === 'throttle';
+  const windowMs = typing ? 4500 : MB_WINDOW;
+  const container = card(root);
+  let now = 0;
+  let inputs = [];
+  let uid = 0;
+  let count = 0;
+  let timer = null;
+  let autoAt = null;
+  let autoIndex = 0;
+  let speed = 'slow';
+  let closed = false;
+  let word = 0;
+  let typed = '';
+  const pending = [];
+  const listeners = { a: { from: null, to: null, error: false }, b: { from: null, to: null, error: false } };
+  let broadcast = false;
+
+  const summary = el('div', { class: 'rt-summary', 'data-testid': 'mb-summary', 'aria-live': 'polite', text: spec.intro });
+  const say = (text, bad = false) => {
+    summary.textContent = text;
+    summary.classList.toggle('rt-bad', bad);
+    flash(summary);
+  };
+
+  const lane = (label, testid, tall = false) => {
+    const track = el('div', { class: `mb-track${tall ? ' mb-tall' : ''}`, 'data-testid': testid }, el('i', { class: 'mb-now' }));
+    return { node: el('div', { class: 'mb-lane' }, el('div', { class: 'mb-label', text: label }), track), track };
+  };
+
+  const auto = variant === 'speed' || variant === 'listen' || variant === 'broadcast';
+  const lanes = { source: lane('fuente', 'mb-source') };
+  if (variant === 'listen' || variant === 'broadcast') {
+    lanes.a = lane(variant === 'listen' ? 'oyente' : 'oyente A', 'mb-a', true);
+    if (variant === 'broadcast') lanes.b = lane('oyente B', 'mb-b', true);
+  } else {
+    lanes.out = lane(spec.op ? 'resultado' : 'quien escucha', 'mb-out');
+  }
+
+  const emit = (kind = 'value', v, key) => {
+    if (closed) return;
+    uid += 1;
+    let value = v;
+    if (value === undefined && kind === 'value') {
+      count += 1;
+      value = variant === 'distinct' ? MB_DISTINCT[(count - 1) % MB_DISTINCT.length] : count;
+    }
+    inputs.push({ id: uid, t: now, kind, v: value, key });
+    if (kind === 'done') closed = true;
+  };
+
+  const type = () => {
+    const target = MB_WORDS[word % MB_WORDS.length];
+    if (typed === target) {
+      typed = '';
+      word += 1;
+    }
+    const next = MB_WORDS[word % MB_WORDS.length];
+    typed = next.slice(0, typed.length + 1);
+    emit('value', typed, typed.slice(-1));
+  };
+
+  const marble = (e, extra = '', useKey = false) => {
+    const pct = 96 - ((now - e.t) / windowMs) * 96;
+    let text = e.kind === 'error' ? '✕' : e.kind === 'done' ? '' : String(useKey && e.key ? e.key : e.v);
+    if (e.kind === 'value' && text.length > 8) text = `${text.slice(0, 7)}…`;
+    return el('span', { class: `mb-m mb-${e.kind}${extra}`, style: `left:${pct}%`, title: e.kind === 'error' ? 'error' : e.kind === 'done' ? 'fin' : String(e.v), text });
+  };
+
+  const visible = (list) => list.filter((e) => now - e.t <= windowMs && e.t <= now);
+
+  const mark = (t, text, cls) => {
+    const pct = 96 - ((now - t) / windowMs) * 96;
+    return pct < 0 ? null : el('span', { class: `mb-mark ${cls}`, style: `left:${pct}%`, text });
+  };
+
+  const renderListener = (key) => {
+    const l = listeners[key];
+    const nodes = [];
+    if (l.error) nodes.push(mark(l.error, 'Bad state', 'mb-bad'));
+    if (l.from !== null) {
+      nodes.push(mark(l.from, 'listen', 'mb-on'));
+      if (l.to !== null) nodes.push(mark(l.to, 'cancel', 'mb-off'));
+      nodes.push(...visible(marbleHeard(inputs, l.from, l.to ?? Infinity)).map((e) => marble(e)));
+    }
+    lanes[key].track.replaceChildren(el('i', { class: 'mb-now' }), ...nodes.filter(Boolean));
+  };
+
+  const render = () => {
+    if (lanes.out) {
+      const { outputs, dropped } = marbleRun(variant, inputs, now);
+      lanes.source.track.replaceChildren(el('i', { class: 'mb-now' }),
+        ...visible(inputs).map((e) => marble(e, dropped.has(e.id) ? ' mb-drop' : '', true)));
+      lanes.out.track.replaceChildren(el('i', { class: 'mb-now' }), ...visible(outputs).map((e) => marble(e)));
+    } else {
+      lanes.source.track.replaceChildren(el('i', { class: 'mb-now' }), ...visible(inputs).map((e) => marble(e)));
+      renderListener('a');
+      if (lanes.b) renderListener('b');
+    }
+  };
+
+  const nextGap = () => {
+    if (variant !== 'speed') return 900;
+    const seq = MB_AUTO[speed];
+    autoIndex += 1;
+    return seq[autoIndex % seq.length];
+  };
+
+  const autoSwitch = switchControl('Automático', (on) => {
+    autoAt = on ? now : null;
+  });
+
+  const tick = () => {
+    now += MB_TICK;
+    while (pending.length && pending[0].at <= now) pending.shift().fn();
+    if (autoAt !== null && now >= autoAt) {
+      if (typing) type();
+      else emit();
+      autoAt = now + (typing ? 300 : nextGap());
+    }
+    render();
+    timer = setTimeout(tick, MB_TICK);
+  };
+
+  const listen = (key) => {
+    const l = listeners[key];
+    if (variant === 'broadcast' && !broadcast && key === 'b' && listeners.a.from !== null) {
+      l.error = now;
+      say('Bad state: Stream has already been listened to. Un Stream normal acepta un solo listen.', true);
+      return;
+    }
+    if (variant === 'broadcast' && !broadcast && key === 'a' && listeners.b.from !== null) {
+      l.error = now;
+      say('Bad state: Stream has already been listened to. Un Stream normal acepta un solo listen.', true);
+      return;
+    }
+    l.from = now;
+    l.to = null;
+    l.error = false;
+    say(variant === 'broadcast'
+      ? `${key === 'a' ? 'A' : 'B'} empezó a escuchar: recibe desde ahora, no lo que pasó antes.`
+      : 'listen: desde ahora el oyente recibe cada dato. Lo anterior no le llega.');
+  };
+
+  const cancel = (key) => {
+    const l = listeners[key];
+    if (l.from === null || l.to !== null) return;
+    l.to = now;
+    say('cancel: la fuente sigue emitiendo, pero al oyente ya no le llega nada. Si nunca cancelas, sigue escuchando aunque ya no lo necesites.');
+  };
+
+  const button = (text, fn, solid) => el('button', { class: `fs-btn${solid ? ' fs-solid' : ''}`, type: 'button', text, onclick: fn });
+  const controls = el('div', { class: 'fs-controls mb-controls' });
+
+  const reset = () => {
+    inputs = [];
+    pending.length = 0;
+    count = 0;
+    closed = false;
+    typed = '';
+    word = 0;
+    autoIndex = 0;
+    Object.values(listeners).forEach((l) => Object.assign(l, { from: null, to: null, error: false }));
+    if (variant === 'speed' || variant === 'listen' || variant === 'broadcast') autoAt = now + 300;
+    else {
+      autoAt = null;
+      autoSwitch.input.checked = false;
+    }
+    say(spec.intro);
+    render();
+  };
+
+  if (variant === 'speed') {
+    const pace = segmented([['slow', 'Lento'], ['fast', 'Rápido'], ['irregular', 'Irregular']], (key) => {
+      speed = key;
+      pace.select(key);
+      autoIndex = 0;
+      say(key === 'slow' ? 'Un dato cada segundo y medio.' : key === 'fast' ? 'Uno cada 300 ms: más rápido de lo que alguien podría leer.'
+        : 'A ratos rápido, a ratos lento: así llegan los mensajes de un chat real.');
+    });
+    pace.select('slow');
+    controls.append(pace.node);
+  } else if (variant === 'events') {
+    controls.append(button('Dato', () => {
+      emit();
+      say(closed ? 'El Stream ya terminó: no emite nada más.' : 'Llegó un dato.');
+    }, true), button('Error', () => {
+      emit('error');
+      say(closed ? 'El Stream ya terminó: no emite nada más.' : 'Un error llega por onError, pero el Stream sigue abierto: puede seguir emitiendo.', true);
+    }), button('Fin', () => {
+      const was = closed;
+      emit('done');
+      say(was ? 'El Stream ya terminó.' : 'Fin: el Stream se cerró. Ya no llega nada más, ni datos ni errores.');
+    }));
+  } else if (variant === 'listen') {
+    controls.append(button('Escuchar', () => listen('a'), true), button('Cancelar', () => cancel('a')));
+  } else if (variant === 'broadcast') {
+    const mode = segmented([['single', 'Una suscripción'], ['broadcast', 'Broadcast']], (key) => {
+      broadcast = key === 'broadcast';
+      mode.select(key);
+      reset();
+      say(broadcast ? 'Broadcast: admite varios oyentes. Cada uno recibe desde que empezó a escuchar.'
+        : 'Una sola suscripción: el primer listen se queda con el Stream.');
+    });
+    mode.select('single');
+    controls.append(mode.node, button('A escucha', () => listen('a'), true), button('B escucha', () => listen('b'), true));
+  } else if (variant === 'debounce' || variant === 'throttle') {
+    controls.append(button('Teclear', () => type(), true), button('Escribir una palabra', () => {
+      for (let i = 0; i < 4; i += 1) pending.push({ at: now + i * 300, fn: type });
+    }));
+  } else {
+    controls.append(button('Emitir', () => emit(), true), autoSwitch.node);
+  }
+  controls.append(button('Reiniciar', reset));
+
+  const rows = [lanes.source.node];
+  if (spec.op) rows.push(el('div', { class: 'mb-op' }, el('span', { text: spec.op })));
+  rows.push(...['out', 'a', 'b'].filter((k) => lanes[k]).map((k) => lanes[k].node));
+
+  container.append(el('div', { class: 'rt-full' },
+    controls,
+    el('div', { class: 'mb-box' }, ...rows, el('div', { class: 'mb-axis' }, el('span', { text: 'pasado' }), el('span', { text: 'ahora' }))),
+    summary));
+  if (auto) autoAt = 300;
+  render();
+  timer = setTimeout(tick, MB_TICK);
+  return () => {
+    clearTimeout(timer);
+    root.replaceChildren();
+  };
+};
+
 export const SIMS = Object.freeze({
   'state-counter': mountCounter,
   'hot-reload': (root, args = []) => mountCounter(root, ['reload', ...args]),
@@ -5133,6 +5459,7 @@ export const SIMS = Object.freeze({
   'realtime-chat': mountRealtimeChat,
   'chat-pagination': mountChatPagination,
   'conversation-open': mountConversationOpen,
+  marble: mountMarble,
 });
 
 export const parseSpec = (spec) => {
