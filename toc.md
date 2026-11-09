@@ -97,6 +97,7 @@
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2.md | Programación reactiva y Streams | 0063
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI2capas.md | El Stream viaja por las capas | 0094
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI1.md | Supabase Realtime | 0062
+[lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonI1conv.md | Conversaciones entre dos personas | 0096
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonH10.md | Laboratorio 8 · Chat en tiempo real | 0065
 [t] Google Maps
 [lesson:url] https://raw.githubusercontent.com/DomicianoRincon/FlutterApps/refs/heads/main/content/lessonL0.md | Clase: Introducción a Google Maps en Flutter | 0070

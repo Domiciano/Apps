@@ -179,9 +179,10 @@ se abren con una sola política `for all to authenticated` por bucket. El círcu
 de Clean de la 0093 usa la misma convención de anillos que el simulador `register-clean`. Reutiliza `table` y `legend` de `database_figuras.py`.
 `tools/di_figuras.py` trae las dos de «Inyección de dependencias con GetIt» (0079), que va justo después del
 Laboratorio 7 y migra un solo camino de ese laboratorio con `= sl()`.
-`tools/realtime_figuras.py` trae las ocho de la sección **Realtime DB**: «Programación reactiva y Streams»
+`tools/realtime_figuras.py` trae las diez de la sección **Realtime DB**: «Programación reactiva y Streams»
 (0063, `lessonI2.md`), «El Stream viaja por las capas» (0094, `lessonI2capas.md`), «Supabase Realtime» (0062,
-`lessonI1.md`) y «Laboratorio 8 · Chat en tiempo real» (0065, `lessonH10.md`). **Convención del curso**: a lo
+`lessonI1.md`), «Conversaciones entre dos personas» (0096, `lessonI1conv.md`: el modelo con `conversations` y las
+tablas con datos de ejemplo) y «Laboratorio 8 · Chat en tiempo real» (0065, `lessonH10.md`). **Convención del curso**: a lo
 largo de las capas el `Stream` se retorna y solo el Bloc hace `listen`; la función de `listen` lanza un evento
 (`MessagesUpdated`) en vez de emitir, y el Bloc cancela la suscripción en `close()`. El punto de partida del
 laboratorio es `Domiciano/262App5` (ramas `main` y `solution`): el Laboratorio 7 resuelto más la feature `chat`,
@@ -308,6 +309,12 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
     (pasos 5 a 7, pero `MessagesUpdated` aún reemplaza y la siguiente emisión borra las páginas) y *Parte 2 ·
     juntar por id* (con `_merge`). Verde azulado llegó por el Stream, ámbar por `Future` (`pageStart`,
     `pageOlder`, `pageIncoming`, `pageStage`, `pageCode`).
+  - `conversation-open` (0096, 2026-11-09): el `openWith` de `SupabaseConversationDataSource` paso a paso. Un
+    teléfono con la lista de usuarios (Ana `7c2e…`, Beto `1a9d…`, Caro `b45f…`; pestañas *Soy Ana/Beto/Caro*), el
+    panel de variables (`contactId`, `me`, `pair`, `found`, `created`), una franja con el mensaje que viaja entre la
+    app y Supabase y la tabla `conversations`. Si la pareja ya existe, `select` + `maybeSingle` la encuentra; si no,
+    `insert().select('id').single()` la crea y la fila aparece. Un salto por paso, la respuesta en el siguiente;
+    *Paso a paso* opcional (`convStart`, `convOpen`).
 - `flutterStateSims.js` ya **no es idéntico** al de Seminario: tiene además `register-layers`,
   `register-clean`, `query-builder`, `storage-cache`, los cuatro de Realtime DB y unas palabras más en el
   resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.

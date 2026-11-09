@@ -178,7 +178,7 @@ const DART_KEYWORDS = new Set(['class', 'extends', 'void', 'return', 'final', 'c
 const DART_TYPES = new Set(['int', 'String', 'List', 'Widget', 'State', 'StatefulWidget', 'StatelessWidget', 'BuildContext', 'Scaffold', 'Text', 'TextEditingController', 'Column', 'Song', 'SongCard', 'FloatingActionButton', 'TextField', 'MyHomePage', 'GreetingScreen', 'Future', 'AuthResponse', 'Supabase', 'Emitter', 'Exception', 'Navigator',
   'RegisterBloc', 'RegisterState', 'OnRegisterSubmittedEvent', 'RegisterLoadingState', 'RegisterSuccessState', 'RegisterErrorState',
   'BlocListener', 'BlocBuilder', 'Stream', 'StreamController', 'StreamSubscription', 'Completer', 'Message', 'ChatState', 'ChatBloc',
-  'ChatStarted', 'MessagesUpdated', 'MessageSent', 'Emitter']);
+  'ChatStarted', 'MessagesUpdated', 'MessageSent', 'Emitter', 'PostgrestException']);
 const DART_TOKEN = /('[^']*')|(@\w+)|(\b\d+\b)|(\b[A-Za-z_]\w*\b)/g;
 
 const escapeHtml = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -3607,6 +3607,25 @@ const RT_CSS = `
 .fsim .rc-pub.rc-off{background:#FFEBEF}
 .fsim .rc-legend{font-size:12px;color:var(--fs-muted);display:flex;flex-wrap:wrap;gap:4px 14px}
 .fsim .rc-legend b{font-weight:700}
+.fsim .cv-wrap{flex-wrap:wrap}
+.fsim .cv-wrap .fs-phone{height:310px}
+.fsim .cv-controls{display:flex;gap:10px;align-items:center}
+.fsim .cv-list{display:flex;flex-direction:column;gap:2px;margin:-14px -14px 0}
+.fsim .cv-contact{display:flex;gap:10px;align-items:center;border:0;border-bottom:1px solid var(--fs-line);background:#fff;padding:10px 12px;
+  text-align:left;font:500 14px Roboto,Arial,sans-serif;color:var(--fs-ink);cursor:pointer}
+.fsim .cv-contact:hover{background:#F6F0FF}.fsim .cv-contact:disabled{cursor:default;opacity:.6}
+.fsim .cv-contact small{display:block;font:11px 'JetBrains Mono',Menlo,Consolas,monospace;color:var(--fs-muted)}
+.fsim .cv-avatar{width:32px;height:32px;border-radius:50%;background:#3ECF8E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto}
+.fsim .cv-wire{font:12px 'JetBrains Mono',Menlo,Consolas,monospace;padding:8px 10px;border-radius:10px;border:1.5px dashed var(--fs-line);color:var(--fs-muted);overflow-wrap:anywhere}
+.fsim .cv-wire.cv-up{border:1.5px solid #F0C572;background:#FFF3DC;color:#A96C05}
+.fsim .cv-wire.cv-down{border:1.5px solid #86D3CA;background:#E3F6F3;color:#0F8478}
+.fsim .cv-table{border:1.5px solid #F0C572;border-radius:12px;background:#fff;overflow:hidden}
+.fsim .cv-table h4{margin:0;padding:8px 12px;background:#FFF3DC;font:700 13px 'JetBrains Mono',Menlo,Consolas,monospace;color:#A96C05}
+.fsim .cv-row{display:grid;grid-template-columns:1fr 1.4fr 1.4fr;gap:6px;padding:6px 12px;font:12px 'JetBrains Mono',Menlo,Consolas,monospace;border-top:1px solid var(--fs-line)}
+.fsim .cv-row small{color:var(--fs-muted);font-family:Roboto,Arial,sans-serif}
+.fsim .cv-head{font-weight:700;color:#556074}
+.fsim .cv-row.cv-hit{background:#E3F6F3;box-shadow:inset 3px 0 0 #0F8478}
+.fsim .cv-row.cv-new{animation:fsimFlash 1.2s ease-out}
 .fsim .pg-wrap{flex-wrap:wrap}
 .fsim .pg-side{flex:1 1 380px}
 .fsim .pg-caption{font-size:13.5px;color:#454C61;background:#F4EBFF;border-radius:10px;padding:8px 12px}
@@ -4897,6 +4916,207 @@ const mountChatPagination = (root) => {
   };
 };
 
+// ── conversation-open: buscar la conversación de una pareja o crearla ──
+
+export const CONV_USERS = Object.freeze({
+  ana: { id: '7c2e…', name: 'Ana' },
+  beto: { id: '1a9d…', name: 'Beto' },
+  caro: { id: 'b45f…', name: 'Caro' },
+});
+const CONV_POOL = ['e81b…', '5d0a…', '2b77…', 'c6e1…', '48a2…', 'f3d9…'];
+const convName = (id) => Object.values(CONV_USERS).find((u) => u.id === id)?.name || '?';
+
+export const convStart = () => ({ rows: [{ id: '93fc…', u1: '1a9d…', u2: 'b45f…' }], pool: [...CONV_POOL] });
+
+const CONV_CODE = `Future<String> openWith(String contactId) async {
+  final me = _client.auth.currentUser!.id;
+  final pair = [me, contactId]..sort();
+  try {
+    final found = await _client
+        .from(table)
+        .select('id')
+        .eq('user1_id', pair[0])
+        .eq('user2_id', pair[1])
+        .maybeSingle();
+    if (found != null) return found['id'] as String;
+    final created = await _client
+        .from(table)
+        .insert({'user1_id': pair[0], 'user2_id': pair[1]})
+        .select('id')
+        .single();
+    return created['id'] as String;
+  } on PostgrestException catch (e) {
+    throw Exception(e.message);
+  }
+}`;
+
+export const convOpen = (s, meKey, contactKey) => {
+  const me = CONV_USERS[meKey].id;
+  const contactId = CONV_USERS[contactKey].id;
+  const pair = [me, contactId].sort();
+  const pairText = `['${pair[0]}', '${pair[1]}']`;
+  const self = me === contactId;
+  const vars = {};
+  const steps = [];
+  const push = (step) => steps.push({ vars: { ...vars }, hop: null, hit: null, added: null, ...step });
+
+  vars.contactId = `'${contactId}'`;
+  push({ lines: [0], text: `${CONV_USERS[meKey].name} toca a ${self ? 'sí misma' : CONV_USERS[contactKey].name} en la lista. OpenConversationUseCase llama openWith con el id del contacto.` });
+  vars.me = `'${me}'`;
+  push({ lines: [1], text: `me es el id de quien inició sesión: ${CONV_USERS[meKey].name}.` });
+  vars.pair = pairText;
+  push({
+    lines: [2],
+    text: self
+      ? 'Los dos ids son el mismo: la pareja es el id repetido.'
+      : `sort deja el menor primero. ${pair[0] === me ? `${CONV_USERS[meKey].name} queda primero` : `${convName(pair[0])} queda primero aunque abrió ${CONV_USERS[meKey].name}`}: así las dos personas arman la misma pareja.`,
+  });
+  push({
+    lines: [4, 5, 6, 7, 8, 9],
+    hop: { dir: 'up', text: `select id where user1_id = ${pair[0]} and user2_id = ${pair[1]}` },
+    text: 'Primero busca: un select con los dos ids. maybeSingle acepta que no haya ninguna fila.',
+  });
+  const row = s.rows.find((r) => r.u1 === pair[0] && r.u2 === pair[1]);
+  if (row) {
+    vars.found = `{id: '${row.id}'}`;
+    push({ lines: [4, 9], hop: { dir: 'down', text: `{id: ${row.id}}` }, hit: row.id, text: 'La pareja ya tiene su fila: Supabase la devuelve.' });
+    vars.returns = `'${row.id}'`;
+    push({ lines: [10], hit: row.id, done: true, text: `found no es null: retorna ${row.id} y no crea nada. El chat se abre con los mensajes que ya tenían.` });
+    return { next: { ...s, last: { kind: 'found', id: row.id } }, steps };
+  }
+  vars.found = 'null';
+  push({ lines: [4, 9], hop: { dir: 'down', text: 'null' }, text: 'Ninguna fila tiene esa pareja: maybeSingle devuelve null en vez de lanzar un error.' });
+  push({ lines: [10], text: 'found es null, así que no retorna: sigue a crearla.' });
+  push({
+    lines: [11, 12, 13, 14, 15],
+    hop: { dir: 'up', text: `insert {user1_id: ${pair[0]}, user2_id: ${pair[1]}}` },
+    text: 'insert con la pareja en el mismo orden. .select(\'id\') pide que el insert devuelva la fila creada.',
+  });
+  const [id, ...pool] = s.pool;
+  const rows = [...s.rows, { id, u1: pair[0], u2: pair[1] }];
+  vars.created = `{id: '${id}'}`;
+  push({ lines: [11, 15], hop: { dir: 'down', text: `{id: ${id}}` }, added: id, hit: id, text: `Postgres crea la fila y le pone id con gen_random_uuid(): ${id}.` });
+  vars.returns = `'${id}'`;
+  push({ lines: [16], hit: id, done: true, text: `Retorna ${id}. La próxima vez que cualquiera de los dos abra este chat, el select la encuentra.` });
+  return { next: { ...s, rows, pool, last: { kind: 'created', id } }, steps };
+};
+
+const CONV_STEP_MS = 1500;
+const CONV_VARS = [['contactId', 'contactId'], ['me', 'me'], ['pair', 'pair'], ['found', 'found'], ['created', 'created'], ['returns', 'retorna']];
+
+const mountConversationOpen = (root) => {
+  ensureRtStyle();
+  const container = card(root);
+  let state = convStart();
+  let meKey = 'ana';
+  let queue = [];
+  let running = false;
+  let timers = [];
+  let pendingRows = null;
+
+  const caption = el('div', { class: 'fs-caption', 'data-testid': 'cv-caption', 'aria-live': 'polite' });
+  const code = codePanel('supabase_conversation_data_source.dart');
+  const vars = statePanel('Variables de openWith');
+  const wire = el('div', { class: 'cv-wire', 'data-testid': 'cv-wire' });
+  const tbody = el('div', { class: 'cv-rows', 'data-testid': 'cv-table' });
+  const table = el('div', { class: 'cv-table' },
+    el('h4', { text: 'conversations' }),
+    el('div', { class: 'cv-row cv-head' }, el('span', { text: 'id' }), el('span', { text: 'user1_id' }), el('span', { text: 'user2_id' })),
+    tbody);
+  const screen = phone('Chats');
+  const list = el('div', { class: 'cv-list' });
+  screen.body.replaceChildren(list);
+  const stepMode = switchControl('Paso a paso', () => {});
+  const next = el('button', { class: 'fs-btn fs-solid', type: 'button', text: 'Siguiente paso', onclick: () => advance() });
+  const who = segmented(Object.entries(CONV_USERS).map(([k, u]) => [k, `Soy ${u.name}`]), (k) => {
+    if (running) return;
+    meKey = k;
+    renderList();
+  });
+  const reset = el('button', { class: 'fs-btn', type: 'button', text: 'Reiniciar', onclick: () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    queue = [];
+    running = false;
+    state = convStart();
+    pendingRows = null;
+    show(null);
+    renderList();
+  } });
+
+  const renderRows = (hit, added) => {
+    tbody.replaceChildren(...state.rows.map((r) => el('div', {
+      class: `cv-row${r.id === hit ? ' cv-hit' : ''}${r.id === added ? ' cv-new' : ''}`,
+    }, el('span', { text: r.id }), el('span', {}, r.u1, el('small', { text: ` ${convName(r.u1)}` })),
+    el('span', {}, r.u2, el('small', { text: ` ${convName(r.u2)}` })))));
+  };
+
+  const renderList = () => {
+    who.select(meKey);
+    screen.setExtra(CONV_USERS[meKey].name);
+    list.replaceChildren(...Object.entries(CONV_USERS).map(([k, u]) => el('button', {
+      class: 'cv-contact', type: 'button', 'data-testid': `cv-contact-${k}`, disabled: running ? true : undefined, onclick: () => start(k),
+    }, el('span', { class: 'cv-avatar', text: u.name[0] }),
+    el('span', {}, k === meKey ? `${u.name} (tú)` : u.name, el('small', { text: u.id })))));
+    next.style.display = running && stepMode.input.checked ? '' : 'none';
+  };
+
+  const show = (step) => {
+    if (step && step.added && pendingRows) {
+      state = { ...state, rows: pendingRows };
+      pendingRows = null;
+    }
+    const values = step ? step.vars : {};
+    vars.set(CONV_VARS.filter(([k]) => values[k] !== undefined).map(([k, label]) => [label, values[k]]));
+    code.mark(...(step ? step.lines : []));
+    wire.className = `cv-wire${step && step.hop ? ` cv-${step.hop.dir}` : ''}`;
+    wire.textContent = step && step.hop ? `${step.hop.dir === 'up' ? 'App → Supabase' : 'Supabase → App'} · ${step.hop.text}` : 'App · Supabase';
+    renderRows(step ? step.hit : null, step ? step.added : null);
+    caption.textContent = step ? step.text : 'Elige quién eres y toca a alguien en la lista, también a ti.';
+  };
+
+  const advance = () => {
+    const step = queue.shift();
+    if (!step) return;
+    show(step);
+    if (!queue.length) {
+      running = false;
+      renderList();
+      return;
+    }
+    renderList();
+    if (!stepMode.input.checked) timers.push(setTimeout(advance, CONV_STEP_MS));
+  };
+
+  const start = (contactKey) => {
+    if (running) return;
+    const { next: after, steps } = convOpen(state, meKey, contactKey);
+    pendingRows = after.rows;
+    state = { ...after, rows: state.rows };
+    queue = steps;
+    running = true;
+    advance();
+  };
+
+  container.append(
+    el('div', { class: 'rt-full' },
+      el('div', { class: 'rt-bar' }, who.node, el('div', { class: 'fs-controls cv-controls' }, stepMode.node, reset)),
+      el('div', { class: 'fs-row2 cv-wrap' },
+        el('div', { class: 'fs-col' }, screen.frame),
+        el('div', { class: 'fs-side' }, vars.box, wire, table)),
+      el('div', { class: 'rt-bar' }, caption, next),
+      code.box)
+  );
+  code.setCode(CONV_CODE);
+  show(null);
+  renderList();
+  return () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    root.replaceChildren();
+  };
+};
+
 export const SIMS = Object.freeze({
   'state-counter': mountCounter,
   'hot-reload': (root, args = []) => mountCounter(root, ['reload', ...args]),
@@ -4912,6 +5132,7 @@ export const SIMS = Object.freeze({
   'stream-layers': mountStreamLayers,
   'realtime-chat': mountRealtimeChat,
   'chat-pagination': mountChatPagination,
+  'conversation-open': mountConversationOpen,
 });
 
 export const parseSpec = (spec) => {

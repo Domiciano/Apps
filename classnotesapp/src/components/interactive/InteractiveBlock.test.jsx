@@ -6,6 +6,7 @@ import {
   SIMS, parseSpec, runQuery, queryCode, cacheStart, cacheView, cacheUpload, cacheRestart, cacheWait, cacheUrl,
   fsScenario, fsAt, FS_TYPE_KEYS, FS_TOTAL, pipeStart, pipeAct, rtLayersScenario, chatStart, chatSend, chatReopen, chatPublish,
   pageStart, pageOlder, pageIncoming, pageStage,
+  convStart, convOpen,
 } from './flutterStateSims';
 
 const renderBlock = (spec) => render(<ThemeProvider><InteractiveBlock spec={spec} /></ThemeProvider>);
@@ -761,5 +762,48 @@ describe('chat-pagination', () => {
     act(() => { vi.advanceTimersByTime(500); });
     expect(screen.getByTestId('pg-list').textContent).toMatch(/m33 hola/);
     expect(document.querySelectorAll('.pg-page')).toHaveLength(5);
+  });
+});
+
+describe('conversation-open', () => {
+  it('creates the pair once and finds it from either side', () => {
+    let { next, steps } = convOpen(convStart(), 'ana', 'beto');
+    expect(next.rows).toHaveLength(2);
+    expect(next.rows[1]).toMatchObject({ u1: '1a9d…', u2: '7c2e…' });
+    expect(steps[steps.length - 1].done).toBe(true);
+    expect(steps.some((st) => st.added)).toBe(true);
+    const created = next.rows[1].id;
+    const again = convOpen(next, 'beto', 'ana');
+    expect(again.next.rows).toHaveLength(2);
+    expect(again.next.last).toEqual({ kind: 'found', id: created });
+    expect(again.steps.some((st) => st.added)).toBe(false);
+  });
+
+  it('a chat with yourself repeats your id', () => {
+    const { next } = convOpen(convStart(), 'caro', 'caro');
+    expect(next.rows[1]).toMatchObject({ u1: 'b45f…', u2: 'b45f…' });
+  });
+
+  it('every hop goes one way per step and answers come right after', () => {
+    const { steps } = convOpen(convStart(), 'ana', 'caro');
+    const hops = steps.filter((st) => st.hop).map((st) => st.hop.dir);
+    expect(hops).toEqual(['up', 'down', 'up', 'down']);
+    steps.forEach((st, i) => {
+      if (st.hop && st.hop.dir === 'down') expect(steps[i - 1].hop.dir).toBe('up');
+    });
+  });
+
+  it('plays the lookup and adds the row to the table', () => {
+    renderBlock('conversation-open');
+    expect(screen.getByTestId('cv-table').children).toHaveLength(1);
+    fireEvent.click(screen.getByTestId('cv-contact-beto'));
+    act(() => { vi.advanceTimersByTime(1500 * 10); });
+    expect(screen.getByTestId('cv-table').children).toHaveLength(2);
+    expect(screen.getByTestId('cv-caption').textContent).toMatch(/La próxima vez/);
+    fireEvent.click(screen.getByText('Soy Beto'));
+    fireEvent.click(screen.getByTestId('cv-contact-ana'));
+    act(() => { vi.advanceTimersByTime(1500 * 10); });
+    expect(screen.getByTestId('cv-table').children).toHaveLength(2);
+    expect(screen.getByTestId('cv-caption').textContent).toMatch(/no crea nada/);
   });
 });

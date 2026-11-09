@@ -19,9 +19,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from bloc_figuras import FAM, head, note, phone, tail  # noqa: E402
 from code_frame import frame  # noqa: E402
 from storage_figuras import badge, code_bar  # noqa: E402
+from database_figuras import table  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-LESSONS = ['lessonI2.md', 'lessonI2capas.md', 'lessonI1.md', 'lessonH10.md']
+LESSONS = ['lessonI2.md', 'lessonI2capas.md', 'lessonI1.md', 'lessonI1conv.md', 'lessonH10.md']
 FIGS = {}
 MINE = ('#1F9D68', '#FFFFFF')
 THEIRS = ('#FFFFFF', '#161A26')
@@ -248,6 +249,109 @@ def rt_publicacion():
 
 
 FIGS['rtPublicacion'] = rt_publicacion
+
+
+# ───────────────────────── 0096 · Conversaciones ─────────────────────────
+
+def rt_conv_modelo():
+    fid, h = 'rtConvModelo', 520
+    s = head(fid, h, 'El modelo de datos del chat', 'El modelo de datos del chat',
+             'Una conversación une a dos perfiles. Cada mensaje pertenece a una conversación.',
+             'Tres tablas. profiles con id, username y full_name. conversations con id, user1_id y user2_id, que referencian '
+             'a profiles, y created_at. messages con id, conversation_id, que referencia a conversations, sender_id, que '
+             'referencia a profiles, content, image_path y created_at. Una nota dice que la pareja user1_id, user2_id es única '
+             'y que user1_id es siempre el menor de los dos.',
+             colors=('amber', 'teal'))
+    y = 112
+    tp, cp = table(48, y, 230, 'indigo', 'profiles', [('id', '', 'PK', None), ('username', '', '', None),
+                                                      ('full_name', '', '', None)], vx=100)
+    tc, cc = table(360, y, 250, 'amber', 'conversations', [('id', '', 'PK', None), ('user1_id', '', 'FK', 'amber'),
+                                                          ('user2_id', '', 'FK', 'amber'), ('created_at', '', '', None)], vx=110)
+    tm, cm = table(682, y, 230, 'teal', 'messages', [('id', '', 'PK', None), ('conversation_id', '', 'FK', 'teal'),
+                                                     ('sender_id', '', 'FK', None), ('content', '', '', None),
+                                                     ('image_path', '', '', None), ('created_at', '', '', None)], vx=120)
+    s += tp + tc + tm
+    s += f'  <path class="ar-amber" d="M360,{cc[1]:.0f} H322 V{cp[0]:.0f} H282"/>\n'
+    s += f'  <path class="ar-amber" d="M360,{cc[2]:.0f} H322 V{cp[0]:.0f}"/>\n'
+    s += f'  <path class="ar-teal" d="M682,{cm[1]:.0f} H646 V{cc[0]:.0f} H614"/>\n'
+    bottom = y + 40 + 34 * 6
+    s += f'  <path class="link" d="M797,{bottom} V{bottom+24} H163 V{y+40+34*3+4}"/>\n'
+    s += caption(480, bottom + 14, 'messages.sender_id → profiles.id: quién lo escribió', '#556074', 11.5, weight=700)
+    s += '  ' + note(48, bottom + 48, 420, 'amber', 'unique (user1_id, user2_id)', [
+        'Entre dos personas hay una sola conversación.',
+        'user1_id es siempre el menor de los dos ids.'], mono_title=True)
+    s += '  ' + note(492, bottom + 48, 420, 'teal', 'conversation_id', [
+        'El stream y la paginación filtran por él:',
+        'cada chat solo ve sus mensajes.'], mono_title=True)
+    return s + '</svg>\n'
+
+
+FIGS['rtConvModelo'] = rt_conv_modelo
+
+CONV_TONES = {'e81b…': 'amber', '5d0a…': 'violet', '93fc…': 'teal'}
+
+
+def grid(x, y, name, color, cols, rows, tones=None):
+    """cols: (título, ancho). rows: listas de celdas. tones: tono por fila o None."""
+    soft, border, strong = FAM[color]
+    w = sum(c[1] for c in cols)
+    hh, sh, rh = 36, 28, 32
+    hgt = hh + sh + rh * len(rows)
+    o = f'  <rect x="{x}" y="{y}" width="{w}" height="{hgt}" rx="12" fill="#FFFFFF" stroke="{border}" stroke-width="2"/>\n'
+    o += (f'  <path d="M{x},{y+hh} V{y+12} A12,12 0 0 1 {x+12},{y} H{x+w-12} A12,12 0 0 1 {x+w},{y+12} V{y+hh} Z" '
+          f'fill="{soft}" stroke="{border}" stroke-width="2"/>\n')
+    o += f'  <text class="mono" x="{x+14}" y="{y+hh/2:.0f}" dy="0.35em" font-size="14" font-weight="700" fill="{strong}">{name}</text>\n'
+    cx = x
+    for title, cw in cols:
+        o += f'  <text class="mono" x="{cx+12}" y="{y+hh+sh/2:.0f}" dy="0.35em" font-size="11.5" font-weight="700" fill="#556074">{title}</text>\n'
+        cx += cw
+    o += f'  <path d="M{x+1},{y+hh+sh} H{x+w-1}" stroke="#D9DEE8" stroke-width="1.25"/>\n'
+    for i, row in enumerate(rows):
+        ry = y + hh + sh + rh * i
+        tone = tones[i] if tones else None
+        if tone:
+            ts, tb, _ = FAM[tone]
+            o += f'  <rect x="{x+5}" y="{ry+4}" width="{w-10}" height="{rh-8}" rx="6" fill="{ts}" stroke="{tb}" stroke-width="1.25"/>\n'
+        cx = x
+        for (title, cw), cell in zip(cols, row):
+            mono = 'class="mono" ' if cell[:1] != '«' else ''
+            o += f'  <text {mono}x="{cx+12}" y="{ry+rh/2:.0f}" dy="0.35em" font-size="12" fill="#161A26" data-fit="{cw-18}">{cell}</text>\n'
+            cx += cw
+    return o, hgt
+
+
+def rt_conv_ejemplo():
+    fid, h = 'rtConvEjemplo', 690
+    s = head(fid, h, 'Las tablas con datos', 'Las tablas con datos',
+             'Tres personas, tres conversaciones y sus mensajes. El color une cada mensaje con su conversación.',
+             'Tabla profiles con Ana (7c2e…), Beto (1a9d…) y Caro (b45f…). Tabla conversations con tres filas: e81b… entre '
+             '1a9d… y 7c2e…, que es Beto con Ana; 5d0a… entre 7c2e… y 7c2e…, Ana consigo misma; y 93fc… entre 1a9d… y b45f…, '
+             'Beto con Caro. Tabla messages con cinco filas, cada una con su conversation_id, su sender_id y su texto.')
+    tp, hp = grid(48, 112, 'profiles', 'indigo', [('id', 110), ('username', 130)],
+                  [['7c2e…', 'ana'], ['1a9d…', 'beto'], ['b45f…', 'caro']])
+    s += tp
+    conv = [['e81b…', '1a9d…', '7c2e…', '«Beto y Ana»'], ['5d0a…', '7c2e…', '7c2e…', '«Ana consigo»'],
+            ['93fc…', '1a9d…', 'b45f…', '«Beto y Caro»']]
+    tc, hc = grid(336, 112, 'conversations', 'amber', [('id', 110), ('user1_id', 130), ('user2_id', 130), ('', 206)],
+                  conv, [CONV_TONES[r[0]] for r in conv])
+    s += tc
+    msgs = [['e81b…', '7c2e…', 'hola Beto'], ['e81b…', '1a9d…', '¡hola Ana!'], ['5d0a…', '7c2e…', 'comprar pan'],
+            ['93fc…', 'b45f…', '¿vamos al lab?'], ['e81b…', '7c2e…', 'te espero a las 2']]
+    y2 = 112 + max(hp, hc) + 28
+    tm, hm = grid(48, y2, 'messages', 'teal', [('conversation_id', 200), ('sender_id', 170), ('content', 494)],
+                  msgs, [CONV_TONES[r[0]] for r in msgs])
+    s += tm
+    ny = y2 + hm + 22
+    s += '  ' + note(48, ny, 420, 'amber', 'Beto y Ana', [
+        '1a9d… es menor que 7c2e…: Beto queda en user1_id,',
+        'sin importar quién abrió el chat primero.'])
+    s += '  ' + note(492, ny, 420, 'violet', 'Ana consigo misma', [
+        'Los dos ids son el de Ana. La regla &lt;= lo permite:',
+        'es su chat de notas.'])
+    return s + tail(h, 'Los ids son uuid: aquí se muestran sus primeras cuatro letras.')
+
+
+FIGS['rtConvEjemplo'] = rt_conv_ejemplo
 
 
 # ───────────────────────── 0065 · Laboratorio 8 ─────────────────────────
