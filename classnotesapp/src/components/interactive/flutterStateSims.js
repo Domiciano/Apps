@@ -4053,7 +4053,9 @@ const mountFutureStream = (root, args = []) => {
   let scenario = fsScenario(mode, typeKey);
   let t = 0;
   let playing = false;
-  let timer = null;
+  let frameId = null;
+  let lastStamp = null;
+  let shownLine = null;
   let printed = 0;
   let parts = [];
 
@@ -4187,29 +4189,39 @@ const mountFutureStream = (root, args = []) => {
       part.chip.setAttribute('transform', `translate(${clampX},${cy})`);
     });
     const view = fsAt(scenario, t);
-    code.mark(view.line);
-    summary.textContent = view.say || (mode === 'future'
+    if (view.line !== shownLine) {
+      shownLine = view.line;
+      code.mark(view.line);
+    }
+    const say = view.say || (mode === 'future'
       ? 'Pulsa Reproducir: la app va a preguntar una vez y esperar la respuesta.'
       : 'Pulsa Reproducir: la app va a suscribirse y los datos llegarán cuando el servidor quiera.');
+    if (summary.textContent !== say) summary.textContent = say;
     while (printed < view.logs.length) {
       out.print(view.logs[printed].text, view.logs[printed].kind);
       printed += 1;
     }
-    clock.textContent = `t = ${fsSeconds(Math.min(t, scenario.duration))}`;
-    playButton.textContent = playing ? 'Pausar' : view.finished ? 'Repetir' : t > 0 ? 'Continuar' : 'Reproducir';
+    const time = `t = ${fsSeconds(Math.min(t, scenario.duration))}`;
+    if (clock.textContent !== time) clock.textContent = time;
+    const label = playing ? 'Pausar' : view.finished ? 'Repetir' : t > 0 ? 'Continuar' : 'Reproducir';
+    if (playButton.textContent !== label) playButton.textContent = label;
   };
 
   const stop = () => {
     playing = false;
-    if (timer) clearTimeout(timer);
-    timer = null;
+    if (frameId !== null) cancelRaf(frameId);
+    frameId = null;
+    lastStamp = null;
   };
 
-  const tick = () => {
-    t = Math.min(scenario.duration, t + 50);
+  const tick = (stamp) => {
+    const now = typeof stamp === 'number' ? stamp : Date.now();
+    const dt = lastStamp === null ? 0 : Math.min(Math.max(now - lastStamp, 0), 100);
+    lastStamp = now;
+    t = Math.min(scenario.duration, t + dt);
     if (t >= scenario.duration) stop();
     paint();
-    if (playing) timer = setTimeout(tick, 50);
+    if (playing) frameId = raf(tick);
   };
 
   const toggle = () => {
@@ -4225,7 +4237,7 @@ const mountFutureStream = (root, args = []) => {
     }
     playing = true;
     paint();
-    timer = setTimeout(tick, 50);
+    frameId = raf(tick);
   };
 
   const load = () => {
@@ -4240,6 +4252,7 @@ const mountFutureStream = (root, args = []) => {
     legend.textContent = scenario.spec.legend || '';
     legend.style.display = scenario.spec.legend ? '' : 'none';
     code.setCode(scenario.code);
+    shownLine = null;
     drawStatic();
     paint();
   };
