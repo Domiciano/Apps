@@ -5209,7 +5209,7 @@ export const marbleRun = (variant, inputs, now = Infinity) => {
 export const marbleHeard = (inputs, from, to = Infinity) => inputs.filter((e) => e.t >= from && e.t < to);
 
 const MB_DISTINCT = [1, 1, 2, 2, 2, 3, 1, 1, 4, 4];
-const MB_WORDS = ['hola', 'chat', 'flutter'];
+const MB_PHRASE = 'hola chat flutter ';
 export const MB_TRAVEL = 500;
 export const MB_HALF = 300;
 
@@ -5284,20 +5284,23 @@ const mountMarble = (root, args = []) => {
   };
 
   const type = () => {
-    const target = MB_WORDS[word % MB_WORDS.length];
-    if (typed === target) {
-      typed = '';
-      word += 1;
-    }
-    const next = MB_WORDS[word % MB_WORDS.length];
-    typed = next.slice(0, typed.length + 1);
-    emit('value', typed, typed.slice(-1));
+    const ch = MB_PHRASE[word % MB_PHRASE.length];
+    word += 1;
+    typed = (typed + ch).slice(-40);
+    emit('value', typed, ch === ' ' ? '␣' : ch);
+  };
+
+  const typeWord = () => {
+    let keys = 0;
+    while (MB_PHRASE[(word + keys) % MB_PHRASE.length] !== ' ') keys += 1;
+    for (let i = 0; i <= keys; i += 1) pending.push({ at: now + i * 300, fn: type });
   };
 
   const label = (e, useKey) => {
     if (e.kind === 'error') return '✕';
     if (e.kind === 'done') return '';
     const text = String(useKey && e.key ? e.key : e.v);
+    if (typing) return text.length > 10 ? `…${text.slice(-9)}` : text;
     return text.length > 8 ? `${text.slice(0, 7)}…` : text;
   };
 
@@ -5546,9 +5549,7 @@ const mountMarble = (root, args = []) => {
     syncToggle('a');
     syncToggle('b');
   } else if (typing) {
-    controls.append(button('Teclear', () => type(), true), button('Escribir una palabra', () => {
-      for (let i = 0; i < 4; i += 1) pending.push({ at: now + i * 300, fn: type });
-    }));
+    controls.append(button('Teclear', () => type(), true), button('Escribir una palabra', typeWord));
   } else {
     controls.append(button('Emitir', () => emit(), true), autoSwitch.node);
   }

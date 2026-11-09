@@ -902,7 +902,19 @@ describe('marble', () => {
     fireEvent.click(screen.getByText('Escribir una palabra'));
     act(() => { vi.advanceTimersByTime(1600); });
     expect(screen.getByTestId('mb-out').querySelectorAll('.mb-value')).toHaveLength(0);
-    act(() => { vi.advanceTimersByTime(400); });
+    act(() => { vi.advanceTimersByTime(700); });
     expect(screen.getByTestId('mb-out').textContent).toMatch(/hola/);
+  });
+
+  it('debounce keeps everything typed, not just the last word', () => {
+    renderBlock('marble debounce');
+    for (let i = 0; i < 12; i += 1) {
+      fireEvent.click(screen.getByText('Teclear'));
+      act(() => { vi.advanceTimersByTime(100); });
+    }
+    act(() => { vi.advanceTimersByTime(1200); });
+    const out = screen.getByTestId('mb-out').querySelectorAll('.mb-value');
+    expect(out).toHaveLength(1);
+    expect(out[0].textContent).toBe('…a chat fl');
   });
 });
