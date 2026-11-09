@@ -3608,23 +3608,27 @@ const RT_CSS = `
 .fsim .rc-legend{font-size:12px;color:var(--fs-muted);display:flex;flex-wrap:wrap;gap:4px 14px}
 .fsim .rc-legend b{font-weight:700}
 .fsim .mb-controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;align-items:center}
-.fsim .mb-box{border:1px solid var(--fs-line);border-radius:12px;background:#fff;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.fsim .mb-box{position:relative;border:1px solid var(--fs-line);border-radius:12px;background:#fff;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.fsim .mb-fly{position:absolute;inset:0;pointer-events:none}
+.fsim .mb-dot{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#0F8478;box-shadow:0 0 0 3px rgba(15,132,120,.18);will-change:transform,opacity}
+.fsim .mb-dot.mb-error{background:#C2354F;box-shadow:0 0 0 3px rgba(194,53,79,.18)}
+.fsim .mb-dot.mb-done{width:4px;height:16px;border-radius:2px;background:#161A26;box-shadow:none}
 .fsim .mb-lane{display:flex;align-items:center;gap:8px}
 .fsim .mb-label{flex:0 0 92px;font-size:12px;font-weight:600;color:#556074;text-align:right}
 .fsim .mb-track{position:relative;flex:1;height:40px;border-radius:8px;background:linear-gradient(#C4CBD8,#C4CBD8) 0 50%/100% 2px no-repeat;overflow:hidden}
 .fsim .mb-now{position:absolute;left:96%;top:2px;bottom:2px;border-left:2px dashed #A9B0C2}
-.fsim .mb-m{position:absolute;top:50%;transform:translate(-50%,-50%);min-width:28px;height:28px;padding:0 7px;border-radius:14px;
+.fsim .mb-m{position:absolute;left:0;top:50%;will-change:transform;min-width:28px;height:28px;padding:0 7px;border-radius:14px;
   display:flex;align-items:center;justify-content:center;font:700 12px 'JetBrains Mono',Menlo,Consolas,monospace;white-space:nowrap;
   background:#E3F6F3;border:2px solid #0F8478;color:#0F8478}
 .fsim .mb-m.mb-error{background:#FFEBEF;border-color:#C2354F;color:#C2354F}
 .fsim .mb-m.mb-done{min-width:0;width:4px;height:30px;padding:0;border-radius:2px;background:#161A26;border:0}
 .fsim .mb-m.mb-drop{background:#F2F3F7;border-color:#C4CBD8;color:#A9B0C2;text-decoration:line-through}
-.fsim .mb-op{margin-left:100px;display:flex;justify-content:center}
+.fsim .mb-op{margin-left:100px;display:flex;justify-content:flex-end}
 .fsim .mb-op span{font:700 12.5px 'JetBrains Mono',Menlo,Consolas,monospace;color:#7439B8;background:#F4EBFF;border:1.5px solid #C9A6EE;border-radius:8px;padding:4px 12px}
 .fsim .mb-op span::after{content:' ↓'}
 .fsim .mb-track.mb-tall{height:54px;background-position:0 70%}
 .fsim .mb-tall .mb-m{top:70%}
-.fsim .mb-mark{position:absolute;top:0;transform:translateX(-50%);font:700 10px 'JetBrains Mono',Menlo,Consolas,monospace;padding:1px 5px;border-radius:5px}
+.fsim .mb-mark{position:absolute;left:0;top:11px;will-change:transform;font:700 10px 'JetBrains Mono',Menlo,Consolas,monospace;padding:1px 5px;border-radius:5px}
 .fsim .mb-mark.mb-on{color:#1F6FD1;background:#E6F0FC}
 .fsim .mb-mark.mb-off{color:#556074;background:#ECEEF3}
 .fsim .mb-mark.mb-bad{color:#C2354F;background:#FFEBEF}
@@ -5206,6 +5210,13 @@ export const marbleHeard = (inputs, from, to = Infinity) => inputs.filter((e) =>
 
 const MB_DISTINCT = [1, 1, 2, 2, 2, 3, 1, 1, 4, 4];
 const MB_WORDS = ['hola', 'chat', 'flutter'];
+export const MB_TRAVEL = 500;
+export const MB_HALF = 300;
+
+export const marbleArrive = (variant, input, opTime) => {
+  if (MB_VARIANTS[variant].op) return Math.max(input.t + MB_HALF, opTime) + MB_HALF;
+  return input.t + MB_TRAVEL;
+};
 
 const mountMarble = (root, args = []) => {
   ensureRtStyle();
@@ -5218,7 +5229,8 @@ const mountMarble = (root, args = []) => {
   let inputs = [];
   let uid = 0;
   let count = 0;
-  let timer = null;
+  let frameId = null;
+  let lastStamp = null;
   let autoAt = null;
   let autoIndex = 0;
   let speed = 'slow';
@@ -5226,8 +5238,14 @@ const mountMarble = (root, args = []) => {
   let word = 0;
   let typed = '';
   const pending = [];
-  const listeners = { a: { from: null, to: null, error: false }, b: { from: null, to: null, error: false } };
+  const listeners = { a: { spans: [], error: false }, b: { spans: [], error: false } };
+  const toggles = {};
+  let everListened = false;
   let broadcast = false;
+  const listening = (key) => {
+    const spans = listeners[key].spans;
+    return spans.length > 0 && spans[spans.length - 1].to === null;
+  };
 
   const summary = el('div', { class: 'rt-summary', 'data-testid': 'mb-summary', 'aria-live': 'polite', text: spec.intro });
   const say = (text, bad = false) => {
@@ -5238,7 +5256,7 @@ const mountMarble = (root, args = []) => {
 
   const lane = (label, testid, tall = false) => {
     const track = el('div', { class: `mb-track${tall ? ' mb-tall' : ''}`, 'data-testid': testid }, el('i', { class: 'mb-now' }));
-    return { node: el('div', { class: 'mb-lane' }, el('div', { class: 'mb-label', text: label }), track), track };
+    return { node: el('div', { class: 'mb-lane' }, el('div', { class: 'mb-label', text: label }), track), track, nodes: new Map() };
   };
 
   const auto = variant === 'speed' || variant === 'listen' || variant === 'broadcast';
@@ -5249,6 +5267,9 @@ const mountMarble = (root, args = []) => {
   } else {
     lanes.out = lane(spec.op ? 'resultado' : 'quien escucha', 'mb-out');
   }
+  const opNode = spec.op ? el('div', { class: 'mb-op' }, el('span', { text: spec.op })) : null;
+  const fly = el('div', { class: 'mb-fly', 'aria-hidden': 'true' });
+  const flyNodes = new Map();
 
   const emit = (kind = 'value', v, key) => {
     if (closed) return;
@@ -5273,43 +5294,117 @@ const mountMarble = (root, args = []) => {
     emit('value', typed, typed.slice(-1));
   };
 
-  const marble = (e, extra = '', useKey = false) => {
-    const pct = 96 - ((now - e.t) / windowMs) * 96;
-    let text = e.kind === 'error' ? '✕' : e.kind === 'done' ? '' : String(useKey && e.key ? e.key : e.v);
-    if (e.kind === 'value' && text.length > 8) text = `${text.slice(0, 7)}…`;
-    return el('span', { class: `mb-m mb-${e.kind}${extra}`, style: `left:${pct}%`, title: e.kind === 'error' ? 'error' : e.kind === 'done' ? 'fin' : String(e.v), text });
+  const label = (e, useKey) => {
+    if (e.kind === 'error') return '✕';
+    if (e.kind === 'done') return '';
+    const text = String(useKey && e.key ? e.key : e.v);
+    return text.length > 8 ? `${text.slice(0, 7)}…` : text;
   };
 
-  const visible = (list) => list.filter((e) => now - e.t <= windowMs && e.t <= now);
-
-  const mark = (t, text, cls) => {
-    const pct = 96 - ((now - t) / windowMs) * 96;
-    return pct < 0 ? null : el('span', { class: `mb-mark ${cls}`, style: `left:${pct}%`, text });
+  const place = (target, items) => {
+    const width = target.track.clientWidth || 600;
+    const seen = new Set();
+    items.forEach((item) => {
+      const x = (0.96 - (now - item.t) / windowMs * 0.96) * width;
+      if (x < -60 || item.t > now) return;
+      seen.add(item.key);
+      let node = target.nodes.get(item.key);
+      if (!node) {
+        node = el('span');
+        target.nodes.set(item.key, node);
+        target.track.appendChild(node);
+      }
+      if (node.className !== item.cls) node.className = item.cls;
+      if (node.textContent !== item.text) node.textContent = item.text;
+      node.style.transform = `translate3d(${x.toFixed(1)}px,0,0) translate(-50%,-50%)`;
+    });
+    target.nodes.forEach((node, key) => {
+      if (!seen.has(key)) {
+        node.remove();
+        target.nodes.delete(key);
+      }
+    });
   };
 
-  const renderListener = (key) => {
-    const l = listeners[key];
-    const nodes = [];
-    if (l.error) nodes.push(mark(l.error, 'Bad state', 'mb-bad'));
-    if (l.from !== null) {
-      nodes.push(mark(l.from, 'listen', 'mb-on'));
-      if (l.to !== null) nodes.push(mark(l.to, 'cancel', 'mb-off'));
-      nodes.push(...visible(marbleHeard(inputs, l.from, l.to ?? Infinity)).map((e) => marble(e)));
-    }
-    lanes[key].track.replaceChildren(el('i', { class: 'mb-now' }), ...nodes.filter(Boolean));
-  };
+  const ball = (e, t, extra = '', useKey = false) => ({
+    key: `${e.id}${extra}`, t, text: label(e, useKey), cls: `mb-m mb-${e.kind}${extra ? ` mb-${extra}` : ''}`,
+  });
 
-  const render = () => {
+  const heardBy = (key) => listeners[key].spans.flatMap((sp) => marbleHeard(inputs, sp.from, sp.to ?? Infinity));
+
+  const flights = [];
+  const yOf = (node) => node.offsetTop + node.offsetHeight * (node.classList.contains('mb-tall') ? 0.7 : 0.5);
+
+  const draw = () => {
+    flights.length = 0;
     if (lanes.out) {
-      const { outputs, dropped } = marbleRun(variant, inputs, now);
-      lanes.source.track.replaceChildren(el('i', { class: 'mb-now' }),
-        ...visible(inputs).map((e) => marble(e, dropped.has(e.id) ? ' mb-drop' : '', true)));
-      lanes.out.track.replaceChildren(el('i', { class: 'mb-now' }), ...visible(outputs).map((e) => marble(e)));
+      const { outputs, dropped } = marbleRun(variant, inputs, Infinity);
+      const opAt = new Map(outputs.map((o) => [o.id, o.t]));
+      place(lanes.source, inputs.map((e) => ball(e, e.t, dropped.has(e.id) && now >= e.t + MB_HALF ? 'drop' : '', true)));
+      const shown = [];
+      inputs.forEach((e) => {
+        if (spec.op) {
+          if (now >= e.t && now < e.t + MB_HALF) flights.push({ e, from: 'source', to: 'op', p: (now - e.t) / MB_HALF, fade: dropped.has(e.id) });
+          if (!opAt.has(e.id)) return;
+          const opT = opAt.get(e.id);
+          if (variant === 'debounce' && now < opT) return;
+          const arrive = marbleArrive(variant, e, opT);
+          if (now >= arrive - MB_HALF && now < arrive) flights.push({ e, from: 'op', to: 'out', p: (now - (arrive - MB_HALF)) / MB_HALF });
+          const out = outputs.find((o) => o.id === e.id);
+          shown.push(ball(out, arrive));
+        } else {
+          if (!opAt.has(e.id)) return;
+          const arrive = marbleArrive(variant, e);
+          if (now >= e.t && now < arrive) flights.push({ e, from: 'source', to: 'out', p: (now - e.t) / MB_TRAVEL });
+          shown.push(ball(e, arrive));
+        }
+      });
+      place(lanes.out, shown);
     } else {
-      lanes.source.track.replaceChildren(el('i', { class: 'mb-now' }), ...visible(inputs).map((e) => marble(e)));
-      renderListener('a');
-      if (lanes.b) renderListener('b');
+      place(lanes.source, inputs.map((e) => ball(e, e.t)));
+      ['a', 'b'].filter((k) => lanes[k]).forEach((k) => {
+        const l = listeners[k];
+        const items = [];
+        if (l.error) items.push({ key: 'bad', t: l.error, text: 'Bad state', cls: 'mb-mark mb-bad' });
+        l.spans.forEach((sp) => {
+          items.push({ key: `on${sp.from}`, t: sp.from, text: 'listen', cls: 'mb-mark mb-on' });
+          if (sp.to !== null) items.push({ key: `off${sp.to}`, t: sp.to, text: 'cancel', cls: 'mb-mark mb-off' });
+        });
+        heardBy(k).forEach((e) => {
+          const arrive = marbleArrive(variant, e);
+          if (now >= e.t && now < arrive) flights.push({ e, from: 'source', to: k, p: (now - e.t) / MB_TRAVEL });
+          items.push(ball(e, arrive));
+        });
+        place(lanes[k], items);
+      });
     }
+    const box = fly.parentNode;
+    const seen = new Set();
+    if (box) {
+      const track = lanes.source.track;
+      const x = track.offsetLeft + track.clientWidth * 0.96;
+      const yFor = (name) => (name === 'op' ? opNode.offsetTop + opNode.offsetHeight / 2 : yOf(lanes[name].track));
+      flights.forEach((f) => {
+        const key = `${f.e.id}-${f.to}`;
+        seen.add(key);
+        let node = flyNodes.get(key);
+        if (!node) {
+          node = el('span', { class: `mb-dot mb-${f.e.kind}` });
+          flyNodes.set(key, node);
+          fly.appendChild(node);
+        }
+        const y0 = yFor(f.from);
+        const y = y0 + (yFor(f.to) - y0) * Math.min(1, f.p);
+        node.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) translate(-50%,-50%)`;
+        node.style.opacity = f.fade && f.p > 0.6 ? String(Math.max(0, (1 - f.p) / 0.4)) : '1';
+      });
+    }
+    flyNodes.forEach((node, key) => {
+      if (!seen.has(key)) {
+        node.remove();
+        flyNodes.delete(key);
+      }
+    });
   };
 
   const nextGap = () => {
@@ -5323,43 +5418,69 @@ const mountMarble = (root, args = []) => {
     autoAt = on ? now : null;
   });
 
-  const tick = () => {
-    now += MB_TICK;
-    while (pending.length && pending[0].at <= now) pending.shift().fn();
-    if (autoAt !== null && now >= autoAt) {
-      if (typing) type();
-      else emit();
-      autoAt = now + (typing ? 300 : nextGap());
+  const advanceBy = (dt) => {
+    const end = now + dt;
+    for (;;) {
+      const nextPending = pending.length ? pending[0].at : Infinity;
+      const nextAuto = autoAt === null ? Infinity : autoAt;
+      const at = Math.min(nextPending, nextAuto);
+      if (at > end) break;
+      now = Math.max(now, at);
+      if (at === nextPending) pending.shift().fn();
+      else {
+        if (typing) type();
+        else emit();
+        autoAt = now + (typing ? 300 : nextGap());
+      }
     }
-    render();
-    timer = setTimeout(tick, MB_TICK);
+    now = end;
+  };
+
+  const frame = (stamp) => {
+    const ts = typeof stamp === 'number' ? stamp : Date.now();
+    advanceBy(lastStamp === null ? 0 : Math.min(Math.max(ts - lastStamp, 0), 100));
+    lastStamp = ts;
+    draw();
+    frameId = raf(frame);
+  };
+
+  const name = (key) => (variant === 'broadcast' ? key.toUpperCase() : '');
+  const syncToggle = (key) => {
+    const node = toggles[key];
+    if (!node) return;
+    const on = listening(key);
+    node.textContent = variant === 'broadcast' ? `${name(key)} ${on ? 'cancela' : 'escucha'}` : on ? 'Cancelar' : 'Escuchar';
+    node.classList.toggle('fs-solid', !on);
+    node.setAttribute('aria-pressed', String(on));
   };
 
   const listen = (key) => {
     const l = listeners[key];
-    if (variant === 'broadcast' && !broadcast && key === 'b' && listeners.a.from !== null) {
+    if (variant === 'broadcast' && !broadcast && everListened) {
       l.error = now;
-      say('Bad state: Stream has already been listened to. Un Stream normal acepta un solo listen.', true);
+      say('Bad state: Stream has already been listened to. Un Stream normal acepta un solo listen, aunque el anterior ya haya cancelado.', true);
       return;
     }
-    if (variant === 'broadcast' && !broadcast && key === 'a' && listeners.b.from !== null) {
-      l.error = now;
-      say('Bad state: Stream has already been listened to. Un Stream normal acepta un solo listen.', true);
-      return;
-    }
-    l.from = now;
-    l.to = null;
+    everListened = true;
+    l.spans.push({ from: now, to: null });
     l.error = false;
     say(variant === 'broadcast'
-      ? `${key === 'a' ? 'A' : 'B'} empezó a escuchar: recibe desde ahora, no lo que pasó antes.`
+      ? `${name(key)} empezó a escuchar: recibe desde ahora, no lo que pasó antes.`
       : 'listen: desde ahora el oyente recibe cada dato. Lo anterior no le llega.');
   };
 
   const cancel = (key) => {
-    const l = listeners[key];
-    if (l.from === null || l.to !== null) return;
-    l.to = now;
-    say('cancel: la fuente sigue emitiendo, pero al oyente ya no le llega nada. Si nunca cancelas, sigue escuchando aunque ya no lo necesites.');
+    const spans = listeners[key].spans;
+    spans[spans.length - 1].to = now;
+    say(variant === 'broadcast'
+      ? `${name(key)} canceló: la fuente sigue emitiendo, pero a ${name(key)} ya no le llega nada.`
+      : 'cancel: la fuente sigue emitiendo, pero al oyente ya no le llega nada. Si nunca cancelas, sigue escuchando aunque ya no lo necesites.');
+  };
+
+  const toggle = (key) => {
+    if (listening(key)) cancel(key);
+    else listen(key);
+    syncToggle(key);
   };
 
   const button = (text, fn, solid) => el('button', { class: `fs-btn${solid ? ' fs-solid' : ''}`, type: 'button', text, onclick: fn });
@@ -5373,14 +5494,15 @@ const mountMarble = (root, args = []) => {
     typed = '';
     word = 0;
     autoIndex = 0;
-    Object.values(listeners).forEach((l) => Object.assign(l, { from: null, to: null, error: false }));
-    if (variant === 'speed' || variant === 'listen' || variant === 'broadcast') autoAt = now + 300;
+    Object.values(listeners).forEach((l) => Object.assign(l, { spans: [], error: false }));
+    everListened = false;
+    Object.keys(toggles).forEach(syncToggle);
+    if (auto) autoAt = now + 300;
     else {
       autoAt = null;
       autoSwitch.input.checked = false;
     }
     say(spec.intro);
-    render();
   };
 
   if (variant === 'speed') {
@@ -5396,7 +5518,7 @@ const mountMarble = (root, args = []) => {
   } else if (variant === 'events') {
     controls.append(button('Dato', () => {
       emit();
-      say(closed ? 'El Stream ya terminó: no emite nada más.' : 'Llegó un dato.');
+      say(closed ? 'El Stream ya terminó: no emite nada más.' : 'Sale un dato. Llega a quien escucha un momento después.');
     }, true), button('Error', () => {
       emit('error');
       say(closed ? 'El Stream ya terminó: no emite nada más.' : 'Un error llega por onError, pero el Stream sigue abierto: puede seguir emitiendo.', true);
@@ -5406,7 +5528,9 @@ const mountMarble = (root, args = []) => {
       say(was ? 'El Stream ya terminó.' : 'Fin: el Stream se cerró. Ya no llega nada más, ni datos ni errores.');
     }));
   } else if (variant === 'listen') {
-    controls.append(button('Escuchar', () => listen('a'), true), button('Cancelar', () => cancel('a')));
+    toggles.a = button('Escuchar', () => toggle('a'), true);
+    controls.append(toggles.a);
+    syncToggle('a');
   } else if (variant === 'broadcast') {
     const mode = segmented([['single', 'Una suscripción'], ['broadcast', 'Broadcast']], (key) => {
       broadcast = key === 'broadcast';
@@ -5416,8 +5540,12 @@ const mountMarble = (root, args = []) => {
         : 'Una sola suscripción: el primer listen se queda con el Stream.');
     });
     mode.select('single');
-    controls.append(mode.node, button('A escucha', () => listen('a'), true), button('B escucha', () => listen('b'), true));
-  } else if (variant === 'debounce' || variant === 'throttle') {
+    toggles.a = button('A escucha', () => toggle('a'), true);
+    toggles.b = button('B escucha', () => toggle('b'), true);
+    controls.append(mode.node, toggles.a, toggles.b);
+    syncToggle('a');
+    syncToggle('b');
+  } else if (typing) {
     controls.append(button('Teclear', () => type(), true), button('Escribir una palabra', () => {
       for (let i = 0; i < 4; i += 1) pending.push({ at: now + i * 300, fn: type });
     }));
@@ -5427,18 +5555,18 @@ const mountMarble = (root, args = []) => {
   controls.append(button('Reiniciar', reset));
 
   const rows = [lanes.source.node];
-  if (spec.op) rows.push(el('div', { class: 'mb-op' }, el('span', { text: spec.op })));
+  if (opNode) rows.push(opNode);
   rows.push(...['out', 'a', 'b'].filter((k) => lanes[k]).map((k) => lanes[k].node));
 
   container.append(el('div', { class: 'rt-full' },
     controls,
-    el('div', { class: 'mb-box' }, ...rows, el('div', { class: 'mb-axis' }, el('span', { text: 'pasado' }), el('span', { text: 'ahora' }))),
+    el('div', { class: 'mb-box' }, ...rows, el('div', { class: 'mb-axis' }, el('span', { text: 'pasado' }), el('span', { text: 'ahora' })), fly),
     summary));
   if (auto) autoAt = 300;
-  render();
-  timer = setTimeout(tick, MB_TICK);
+  draw();
+  frameId = raf(frame);
   return () => {
-    clearTimeout(timer);
+    cancelRaf(frameId);
     root.replaceChildren();
   };
 };

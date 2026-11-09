@@ -6,7 +6,7 @@ import {
   SIMS, parseSpec, runQuery, queryCode, cacheStart, cacheView, cacheUpload, cacheRestart, cacheWait, cacheUrl,
   fsScenario, fsAt, FS_TYPE_KEYS, FS_TOTAL, pipeStart, pipeAct, rtLayersScenario, chatStart, chatSend, chatReopen, chatPublish,
   pageStart, pageOlder, pageIncoming, pageStage,
-  convStart, convOpen, marbleRun, marbleHeard, MB_VARIANTS,
+  convStart, convOpen, marbleRun, marbleHeard, marbleArrive, MB_VARIANTS, MB_TRAVEL, MB_HALF,
 } from './flutterStateSims';
 
 const renderBlock = (spec) => render(<ThemeProvider><InteractiveBlock spec={spec} /></ThemeProvider>);
@@ -838,6 +838,22 @@ describe('marble', () => {
     expect(marbleRun('events', ins).outputs.map((e) => e.kind)).toEqual(['value', 'error', 'value', 'done']);
   });
 
+  it('data reaches the listener after travelling', () => {
+    const e = v(1, 1000, 3);
+    expect(marbleArrive('speed', e)).toBe(1000 + MB_TRAVEL);
+    expect(marbleArrive('map', e, 1000)).toBe(1000 + 2 * MB_HALF);
+    expect(marbleArrive('debounce', e, 1600)).toBe(1600 + MB_HALF);
+  });
+
+  it('nothing appears below until it arrives', () => {
+    renderBlock('marble map');
+    fireEvent.click(screen.getByText('Emitir'));
+    act(() => { vi.advanceTimersByTime(300); });
+    expect(screen.getByTestId('mb-out').querySelectorAll('.mb-value')).toHaveLength(0);
+    act(() => { vi.advanceTimersByTime(400); });
+    expect(screen.getByTestId('mb-out').textContent).toMatch(/2/);
+  });
+
   it('a listener only hears between listen and cancel', () => {
     const ins = [v(1, 0, 1), v(2, 100, 2), v(3, 200, 3), v(4, 300, 4)];
     expect(marbleHeard(ins, 100, 300).map((e) => e.v)).toEqual([2, 3]);
@@ -854,9 +870,11 @@ describe('marble', () => {
   it('a second listen on a single-subscription stream fails; broadcast accepts it', () => {
     renderBlock('marble broadcast');
     fireEvent.click(screen.getByText('A escucha'));
+    expect(screen.getByText('A cancela')).toBeTruthy();
     fireEvent.click(screen.getByText('B escucha'));
     expect(screen.getByTestId('mb-summary').textContent).toMatch(/Bad state/);
     fireEvent.click(screen.getByText('Broadcast'));
+    expect(screen.getByText('A escucha')).toBeTruthy();
     fireEvent.click(screen.getByText('A escucha'));
     act(() => { vi.advanceTimersByTime(1000); });
     fireEvent.click(screen.getByText('B escucha'));
@@ -867,12 +885,24 @@ describe('marble', () => {
       .toBeGreaterThan(screen.getByTestId('mb-b').querySelectorAll('.mb-value').length);
   });
 
+  it('the listen button toggles between listening and cancelling', () => {
+    renderBlock('marble listen');
+    fireEvent.click(screen.getByText('Escuchar'));
+    act(() => { vi.advanceTimersByTime(2000); });
+    fireEvent.click(screen.getByText('Cancelar'));
+    const heard = screen.getByTestId('mb-a').querySelectorAll('.mb-value').length;
+    expect(heard).toBeGreaterThan(0);
+    act(() => { vi.advanceTimersByTime(2000); });
+    expect(screen.getByTestId('mb-a').querySelectorAll('.mb-value').length).toBeLessThanOrEqual(heard + 1);
+    expect(screen.getByText('Escuchar')).toBeTruthy();
+  });
+
   it('debounce lets the word through only after typing stops', () => {
     renderBlock('marble debounce');
     fireEvent.click(screen.getByText('Escribir una palabra'));
-    act(() => { vi.advanceTimersByTime(1100); });
+    act(() => { vi.advanceTimersByTime(1600); });
     expect(screen.getByTestId('mb-out').querySelectorAll('.mb-value')).toHaveLength(0);
-    act(() => { vi.advanceTimersByTime(600); });
+    act(() => { vi.advanceTimersByTime(400); });
     expect(screen.getByTestId('mb-out').textContent).toMatch(/hola/);
   });
 });

@@ -312,8 +312,11 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
   - `marble` (0097 «Conceptos de programación reactiva», `lessonI2conceptos.md`, 2026-11-09): diagramas de
     canicas, sin código. Una variante por apartado (`marble speed|events|listen|map|filter|distinct|debounce|
     throttle|broadcast`): la fuente arriba, el operador en medio y el resultado (o los oyentes) abajo, con el
-    tiempo corriendo hacia la línea «ahora». Reloj simulado de 50 ms con `setTimeout`, así que se prueba con
-    timers falsos. Lo descartado queda gris y tachado arriba. En `debounce`/`throttle` la fuente son teclas y el
+    tiempo corriendo hacia la línea «ahora». Corre con `requestAnimationFrame` y el reloj real (los timers falsos de
+    vitest también controlan `requestAnimationFrame`), reutiliza los nodos y los mueve con `transform`. Cada dato
+    tarda en llegar: baja como un punto por la línea «ahora» (500 ms directo; 300 ms hasta el operador y 300 ms
+    hasta el resultado, `marbleArrive`). Escuchar y cancelar son un solo botón que alterna, y un oyente puede
+    escuchar y cancelar varias veces. Lo descartado queda gris y tachado arriba. En `debounce`/`throttle` la fuente son teclas y el
     resultado el texto; `broadcast` muestra el `Bad state` del segundo `listen` en un Stream de una sola
     suscripción. Lógica pura en `marbleRun` y `marbleHeard`.
   - `conversation-open` (0096, 2026-11-09): el `openWith` de `SupabaseConversationDataSource` paso a paso. Un
