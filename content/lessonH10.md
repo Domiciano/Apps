@@ -490,13 +490,17 @@ Abre el chat con las dos cuentas y escribe desde cada una. Cada mensaje aparece 
 
 El Stream cuida una **ventana en vivo** con los 15 más nuevos. Lo anterior no se escucha: se pide una vez, con un `Future`, y se guarda en el mismo `ChatState.messages`.
 
-Antes de escribir código, pruébalo. Llega arriba y luego haz que Ana envíe un mensaje, primero con *Parte 1 · reemplazar* y después con *Parte 2 · juntar por id*:
+Antes de escribir código, pruébalo en el teléfono. Sube hasta el tope del chat, escribe un mensaje o haz que Ana envíe uno. Las pestañas son lo que tiene tu `ChatBloc` en cada momento:
+
+- **Parte 1**: lo que ya tienes. Al llegar arriba, el Bloc recibe `OlderMessagesRequested` y solo lo imprime.
+- **Parte 2 · cargar anteriores**: con los pasos 5 a 7, llegar arriba trae 5 más por `Future`. Ahora escribe un mensaje.
+- **Parte 2 · juntar por id**: el último cambio del paso 7. Repite lo mismo.
 
 ```interactive
 chat-pagination
 ```
 
-Con el `_onMessagesUpdated` de la parte 1, cada emisión del Stream **reemplaza** la lista, y la página que trajo el `Future` desaparece. Hay que juntar.
+En la segunda pestaña, `_onMessagesUpdated` todavía **reemplaza** la lista: cuando llega un mensaje, la página que trajo el `Future` desaparece. Por eso el paso 7 también cambia `MessagesUpdated` para que junte.
 
 ## Paso 5 · fetchBefore
 

@@ -5,7 +5,7 @@ import InteractiveBlock from './InteractiveBlock';
 import {
   SIMS, parseSpec, runQuery, queryCode, cacheStart, cacheView, cacheUpload, cacheRestart, cacheWait, cacheUrl,
   fsScenario, fsAt, FS_TYPE_KEYS, FS_TOTAL, pipeStart, pipeAct, rtLayersScenario, chatStart, chatSend, chatReopen, chatPublish,
-  pageStart, pageOlder, pageIncoming, pageMode,
+  pageStart, pageOlder, pageIncoming, pageStage,
 } from './flutterStateSims';
 
 const renderBlock = (spec) => render(<ThemeProvider><InteractiveBlock spec={spec} /></ThemeProvider>);
@@ -717,21 +717,49 @@ describe('chat-pagination', () => {
     expect(s.hasMore).toBe(false);
   });
 
-  it('replacing on MessagesUpdated loses the pages; merging keeps them', () => {
-    const lost = pageIncoming(pageOlder(pageStart('replace')));
-    expect(lost.messages).toHaveLength(15);
-    expect(lost.last.lost).toBe(6);
-    const kept = pageIncoming(pageOlder(pageMode(pageStart('replace'), 'merge')));
-    expect(kept.messages).toHaveLength(21);
-    expect(kept.messages[kept.messages.length - 1].id).toBe(33);
+  it('in part 1 reaching the top only prints', () => {
+    const s = pageOlder(pageStart('p1'));
+    expect(s.messages).toHaveLength(15);
+    expect(s.last.kind).toBe('ignored');
   });
 
-  it('marks the page that came by Future and warns when it is lost', () => {
+  it('replacing on MessagesUpdated loses the pages; merging keeps them', () => {
+    const lost = pageIncoming(pageOlder(pageStart('older')));
+    expect(lost.messages).toHaveLength(15);
+    expect(lost.last.lost).toBe(6);
+    const kept = pageIncoming(pageOlder(pageStage(pageStart('older'), 'merge')), 'me', 'hola');
+    expect(kept.messages).toHaveLength(21);
+    expect(kept.messages[kept.messages.length - 1]).toMatchObject({ id: 33, from: 'me', text: 'hola' });
+  });
+
+  it('scrolling to the top loads a page by Future and a new message drops it', () => {
     renderBlock('chat-pagination');
-    fireEvent.click(screen.getByText('Llegar arriba'));
+    const scroller = screen.getByTestId('pg-scroll');
+    fireEvent.scroll(scroller);
+    expect(screen.getByTestId('pg-summary').textContent).toMatch(/solo lo imprime/);
+    fireEvent.click(screen.getByText('Parte 2 · cargar anteriores'));
+    fireEvent.scroll(scroller, { target: { scrollTop: 200 } });
+    fireEvent.scroll(scroller, { target: { scrollTop: 0 } });
+    expect(screen.getByText('cargando anteriores…')).toBeTruthy();
+    act(() => { vi.advanceTimersByTime(800); });
     expect(document.querySelectorAll('.pg-page')).toHaveLength(5);
     fireEvent.click(screen.getByText('Ana envía un mensaje'));
     expect(document.querySelectorAll('.pg-page')).toHaveLength(0);
     expect(screen.getByTestId('pg-summary').textContent).toMatch(/se perdieron 6/);
+  });
+
+  it('a typed message comes back through the Stream and merging keeps the pages', () => {
+    renderBlock('chat-pagination');
+    fireEvent.click(screen.getByText('Parte 2 · juntar por id'));
+    const scroller = screen.getByTestId('pg-scroll');
+    fireEvent.scroll(scroller, { target: { scrollTop: 0 } });
+    act(() => { vi.advanceTimersByTime(800); });
+    const input = screen.getByTestId('pg-input');
+    fireEvent.change(input, { target: { value: 'hola' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(screen.getByTestId('pg-summary').textContent).toMatch(/MessageSent/);
+    act(() => { vi.advanceTimersByTime(500); });
+    expect(screen.getByTestId('pg-list').textContent).toMatch(/m33 hola/);
+    expect(document.querySelectorAll('.pg-page')).toHaveLength(5);
   });
 });

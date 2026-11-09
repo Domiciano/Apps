@@ -3607,7 +3607,24 @@ const RT_CSS = `
 .fsim .rc-pub.rc-off{background:#FFEBEF}
 .fsim .rc-legend{font-size:12px;color:var(--fs-muted);display:flex;flex-wrap:wrap;gap:4px 14px}
 .fsim .rc-legend b{font-weight:700}
-.fsim .pg-list{display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1px solid var(--fs-line);border-radius:12px;background:#fff;min-height:44px}
+.fsim .pg-wrap{flex-wrap:wrap}
+.fsim .pg-side{flex:1 1 380px}
+.fsim .pg-caption{font-size:13.5px;color:#454C61;background:#F4EBFF;border-radius:10px;padding:8px 12px}
+.fsim .fs-controls.pg-controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+.fsim .pg-side > .fs-seg.fs-seg{align-self:flex-start;max-width:100%;flex-wrap:wrap}
+.fsim .pg-body{padding:8px 10px;background:#F7F8FA;display:flex;flex-direction:column;gap:4px}
+.fsim .pg-top{font-size:11px;color:var(--fs-muted);text-align:center;padding:4px 0 6px}
+.fsim .pg-top.pg-loading{color:#A96C05;font-weight:600;background:linear-gradient(90deg,#FFF3DC 0%,#FBE2B0 50%,#FFF3DC 100%);
+  background-size:200% 100%;border-radius:6px;animation:pgLoad 1s linear infinite}
+@keyframes pgLoad{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.fsim .pg-thread{display:flex;flex-direction:column;gap:4px}
+.fsim .pg-line{display:flex}.fsim .pg-line.pg-me{justify-content:flex-end}
+.fsim .pg-line .pg-m{max-width:80%;font-weight:400;overflow-wrap:anywhere}
+.fsim .pg-line .pg-m b{font-weight:700}
+.fsim .pg-composer{display:flex;gap:6px;padding:6px 8px;border-top:1px solid var(--fs-line);background:#fff}
+.fsim .pg-input{flex:1;min-width:0;border:1px solid var(--fs-line);border-radius:16px;padding:6px 10px;font:13px Roboto,Arial,sans-serif}
+.fsim .pg-send{border:0;background:var(--fs-accent);color:#fff;border-radius:50%;width:30px;height:30px;cursor:pointer}
+.fsim .pg-legend{justify-content:center}
 .fsim .pg-m{font:600 11.5px 'JetBrains Mono',Menlo,Consolas,monospace;border-radius:6px;padding:3px 6px;border:1.5px solid}
 .fsim .pg-live{background:#E3F6F3;border-color:#86D3CA;color:#0F8478}
 .fsim .pg-page{background:#FFF3DC;border-color:#F0C572;color:#A96C05}
@@ -4633,10 +4650,28 @@ const mountRealtimeChat = (root) => {
   };
 };
 
-// ── chat-pagination: la ventana en vivo y las páginas por Future ──
+// ── chat-pagination: la ventana en vivo y las páginas por Future, en un teléfono ──
 
 export const PG_LIVE = 15;
 export const PG_PAGE = 5;
+export const PG_STAGES = Object.freeze({
+  p1: {
+    tab: 'Parte 1',
+    caption: 'Lo que ya tienes al terminar la parte 1: el Stream trae los 15 más nuevos y _onOlderRequested solo imprime.',
+  },
+  older: {
+    tab: 'Parte 2 · cargar anteriores',
+    caption: 'Pasos 5 a 7: agregas fetchBefore, LoadOlderMessagesUseCase y el cuerpo de _onOlderRequested. MessagesUpdated todavía reemplaza.',
+  },
+  merge: {
+    tab: 'Parte 2 · juntar por id',
+    caption: 'Paso 7, el último cambio: MessagesUpdated junta con _merge en vez de reemplazar. Así queda el lab.',
+  },
+});
+
+const pgAuthor = (id) => (id % 3 === 0 ? 'me' : 'ana');
+
+const pgTable = (total) => Array.from({ length: total }, (_, i) => ({ id: i + 1, from: pgAuthor(i + 1), text: '' }));
 
 const pgMerge = (current, incoming) => {
   const byId = new Map(current.map((m) => [m.id, m]));
@@ -4644,26 +4679,27 @@ const pgMerge = (current, incoming) => {
   return [...byId.values()].sort((a, b) => a.id - b.id);
 };
 
-const pgWindow = (total) => Array.from({ length: Math.min(PG_LIVE, total) }, (_, i) => ({ id: total - PG_LIVE + 1 + i, src: 'live' }))
-  .filter((m) => m.id >= 1);
+const pgWindow = (table) => table.slice(-PG_LIVE).map((m) => ({ ...m, src: 'live' }));
 
-export const pageStart = (mode = 'replace', total = 32) => ({
-  mode, total, messages: pgWindow(total), hasMore: true, last: { kind: 'start' },
-});
+export const pageStart = (stage = 'p1', total = 32) => {
+  const table = pgTable(total);
+  return { stage, table, messages: pgWindow(table), hasMore: true, last: { kind: 'start' } };
+};
 
-export const pageIncoming = (s) => {
-  const total = s.total + 1;
-  const live = pgWindow(total);
+export const pageIncoming = (s, from = 'ana', text = '') => {
+  const id = s.table.length + 1;
+  const table = [...s.table, { id, from, text }];
+  const live = pgWindow(table);
   const before = s.messages.length;
-  const messages = s.mode === 'replace' ? live : pgMerge(s.messages, live);
-  return { ...s, total, messages, last: { kind: 'incoming', id: total, lost: Math.max(0, before + 1 - messages.length) } };
+  const messages = s.stage === 'merge' ? pgMerge(s.messages, live) : live;
+  return { ...s, table, messages, last: { kind: 'incoming', id, from, lost: Math.max(0, before + 1 - messages.length) } };
 };
 
 export const pageOlder = (s) => {
+  if (s.stage === 'p1') return { ...s, last: { kind: 'ignored' } };
   if (!s.hasMore || !s.messages.length) return { ...s, last: { kind: 'none' } };
   const oldest = s.messages[0].id;
-  const older = [];
-  for (let id = oldest - PG_PAGE; id < oldest; id += 1) if (id >= 1) older.push({ id, src: 'page' });
+  const older = s.table.filter((m) => m.id >= oldest - PG_PAGE && m.id < oldest).map((m) => ({ ...m, src: 'page' }));
   return {
     ...s,
     messages: pgMerge(s.messages, older),
@@ -4672,22 +4708,24 @@ export const pageOlder = (s) => {
   };
 };
 
-export const pageMode = (s, mode) => ({ ...s, mode, last: { kind: 'mode' } });
+export const pageStage = (s, stage) => ({ ...s, stage, last: { kind: 'stage' } });
 
 export const pageSummary = (s) => {
   const { last } = s;
-  if (last.kind === 'start') return 'El stream trajo los 15 más nuevos. Llega arriba para pedir los anteriores.';
-  if (last.kind === 'mode') return s.mode === 'replace' ? 'Así queda MessagesUpdated en la parte 1: reemplaza la lista.' : 'Así queda en la parte 2: junta por id lo que llega con lo que ya estaba.';
+  if (last.kind === 'start') return 'El Stream trajo los 15 más nuevos. Escribe un mensaje o sube hasta el tope del chat.';
+  if (last.kind === 'stage') return PG_STAGES[s.stage].caption;
+  if (last.kind === 'ignored') return 'Llegaste arriba y el Bloc recibió OlderMessagesRequested, pero en la parte 1 solo lo imprime: siguen siendo 15.';
   if (last.kind === 'none') return 'hasMore es false: la última página trajo menos de 5. No hay nada más atrás.';
   if (last.kind === 'older') return `fetchBefore(m${last.before}, limit: 5) trajo ${last.count} por Future y se juntaron en el mismo estado.`;
+  const who = last.from === 'me' ? `Tu mensaje m${last.id} volvió` : `Llegó m${last.id}`;
   if (last.lost) {
     const lost = last.lost === 1 ? 'se perdió 1 mensaje que estaba' : `se perdieron ${last.lost} mensajes que estaban`;
-    return `Llegó m${last.id} por el stream y reemplazó la lista: ${lost} en pantalla.`;
+    return `${who} por el Stream y MessagesUpdated reemplazó la lista: ${lost} en pantalla.`;
   }
-  return `Llegó m${last.id} por el stream. Se juntó por id con lo que había: no se perdió nada.`;
+  return `${who} por el Stream y MessagesUpdated lo juntó con lo que había.`;
 };
 
-const PG_CODE = {
+const PG_UPDATED = {
   replace: `void _onMessagesUpdated(MessagesUpdated event, emit) {
   emit(state.copyWith(messages: event.messages));
 }`,
@@ -4698,65 +4736,165 @@ const PG_CODE = {
 }`,
 };
 
-const PG_OLDER = `
-Future<void> _onOlderRequested(event, emit) async {
+const PG_OLDER = {
+  p1: `Future<void> _onOlderRequested(event, emit) async {
+  debugPrint('ChatBloc recibió $event');
+}`,
+  full: `Future<void> _onOlderRequested(event, emit) async {
   final oldest = state.messages.last.createdAt;
   final older = await _loadOlder(oldest, limit: 5);
   emit(state.copyWith(
     messages: _merge(state.messages, older),
     hasMore: older.length == 5,
   ));
-}`;
+}`,
+};
+
+export const pageCode = (stage) => {
+  const updated = PG_UPDATED[stage === 'merge' ? 'merge' : 'replace'];
+  const older = PG_OLDER[stage === 'p1' ? 'p1' : 'full'];
+  const n = updated.split('\n').length;
+  const range = (from, count) => Array.from({ length: count }, (_, i) => from + i);
+  return {
+    source: `${updated}\n\n${older}`,
+    updated: range(0, n),
+    older: range(n + 1, older.split('\n').length),
+  };
+};
+
+const PG_LOAD_MS = 700;
+const PG_SEND_MS = 450;
 
 const mountChatPagination = (root) => {
   ensureRtStyle();
   const container = card(root);
-  let state = pageStart('replace');
+  let state = pageStart('p1');
+  let loading = false;
+  let atTop = false;
+  const timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
   const summary = el('div', { class: 'rt-summary', 'data-testid': 'pg-summary', 'aria-live': 'polite' });
-  const list = el('div', { class: 'pg-list', 'data-testid': 'pg-list' });
+  const caption = el('div', { class: 'pg-caption', 'data-testid': 'pg-caption' });
   const stats = el('div', { class: 'pg-stats' });
   const code = codePanel('chat_bloc.dart');
-  const mode = segmented([['replace', 'Parte 1 · reemplazar'], ['merge', 'Parte 2 · juntar por id']], (key) => apply(pageMode(state, key)));
-  const button = (text, fn, solid) => el('button', { class: `fs-btn${solid ? ' fs-solid' : ''}`, type: 'button', text, onclick: () => apply(fn(state)) });
+  const stage = segmented(Object.entries(PG_STAGES).map(([key, v]) => [key, v.tab]), (key) => {
+    apply(pageStage(state, key));
+    code.mark(...(key === 'merge' ? pageCode(key).updated : key === 'older' ? pageCode(key).older : []));
+  });
+
+  const screen = phone('Chat');
+  const list = el('div', { class: 'pg-thread', 'data-testid': 'pg-list' });
+  const top = el('div', { class: 'pg-top' });
+  screen.body.classList.add('pg-body');
+  screen.body.setAttribute('data-testid', 'pg-scroll');
+  screen.body.replaceChildren(top, list);
+  const input = el('input', { class: 'pg-input', type: 'text', placeholder: 'Escribe un mensaje', 'aria-label': 'Mensaje', 'data-testid': 'pg-input' });
+  const sendButton = el('button', { class: 'pg-send', type: 'button', 'aria-label': 'Enviar', text: '➤' });
+  screen.frame.appendChild(el('div', { class: 'pg-composer' }, input, sendButton));
+
+  const toBottom = () => { screen.body.scrollTop = screen.body.scrollHeight; };
+
+  const renderTop = () => {
+    let text = 'sube para cargar los anteriores';
+    if (state.stage === 'p1') text = 'solo los 15 que trae el Stream';
+    if (!state.hasMore) text = 'inicio del chat';
+    top.className = `pg-top${loading ? ' pg-loading' : ''}`;
+    top.textContent = loading ? 'cargando anteriores…' : text;
+  };
 
   const apply = (next) => {
     state = next;
-    mode.select(state.mode);
+    stage.select(state.stage);
+    caption.textContent = PG_STAGES[state.stage].caption;
     const fresh = state.last.kind === 'incoming' ? state.last.id : null;
-    list.replaceChildren(...state.messages.map((m) => el('span', {
-      class: `pg-m pg-${m.src}${m.id === fresh ? ' pg-new' : ''}`, text: `m${m.id}`,
-    })));
+    list.replaceChildren(...state.messages.map((m) => el('div', { class: `pg-line pg-${m.from}` },
+      el('span', { class: `pg-m pg-${m.src}${m.id === fresh ? ' pg-new' : ''}` },
+        el('b', { text: `m${m.id}` }), m.text ? ` ${m.text}` : null))));
+    renderTop();
+    screen.setExtra(`${state.messages.length} en el estado`);
     stats.replaceChildren(
-      el('span', {}, 'en la tabla: ', el('b', { text: String(state.total) })),
+      el('span', {}, 'en la tabla: ', el('b', { text: String(state.table.length) })),
       el('span', {}, 'en el estado: ', el('b', { text: String(state.messages.length) })),
       el('span', {}, 'hasMore: ', el('b', { text: String(state.hasMore) })));
-    code.setCode(PG_CODE[state.mode] + '\n' + PG_OLDER);
-    const base = PG_CODE[state.mode].split('\n').length + 1;
-    const paging = state.last.kind === 'older' || state.last.kind === 'none';
-    code.mark(...(paging ? [base + 1, base + 2, base + 3, base + 4, base + 5] : state.mode === 'merge' ? [1, 2, 3] : [1]));
+    const lines = pageCode(state.stage);
+    code.setCode(lines.source);
+    const kind = state.last.kind;
+    code.mark(...(kind === 'incoming' ? lines.updated : ['older', 'none', 'ignored'].includes(kind) ? lines.older : []));
     summary.textContent = pageSummary(state);
-    summary.classList.toggle('rt-bad', state.last.kind === 'incoming' && state.last.lost > 0);
+    summary.classList.toggle('rt-bad', kind === 'incoming' && state.last.lost > 0);
     flash(summary);
   };
 
+  const arrive = (from, text) => {
+    apply(pageIncoming(state, from, text));
+    toBottom();
+  };
+
+  const send = () => {
+    const text = input.value.trim().slice(0, 40);
+    if (!text) return;
+    input.value = '';
+    summary.textContent = `MessageSent("${text}"): el Bloc solo lo inserta. Va a volver por el Stream.`;
+    summary.classList.remove('rt-bad');
+    later(() => arrive('me', text), PG_SEND_MS);
+  };
+  sendButton.addEventListener('click', send);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+
+  const requestOlder = () => {
+    if (state.stage === 'p1' || !state.hasMore) {
+      apply(pageOlder(state));
+      return;
+    }
+    loading = true;
+    renderTop();
+    code.mark(...pageCode(state.stage).older);
+    summary.textContent = 'OlderMessagesRequested: el Bloc espera el Future de fetchBefore…';
+    summary.classList.remove('rt-bad');
+    later(() => {
+      loading = false;
+      const body = screen.body;
+      const height = body.scrollHeight;
+      const offset = body.scrollTop;
+      apply(pageOlder(state));
+      body.scrollTop = body.scrollHeight - height + offset;
+    }, PG_LOAD_MS);
+  };
+
+  screen.body.addEventListener('scroll', () => {
+    const near = screen.body.scrollTop <= 4;
+    if (near && !atTop && !loading) requestOlder();
+    atTop = near;
+  });
+
   container.append(
-    el('div', { class: 'rt-full' },
-      el('div', { class: 'rt-bar' }, mode.node,
-        el('div', { class: 'fs-controls' },
-          button('Llegar arriba', pageOlder, true),
-          button('Ana envía un mensaje', pageIncoming),
-          el('button', { class: 'fs-btn', type: 'button', text: 'Reiniciar', onclick: () => apply(pageStart(state.mode)) }))),
-      el('div', { class: 'rc-legend' },
-        el('span', {}, el('b', { text: 'verde azulado', style: 'color:#0F8478' }), ' llegó por el Stream'),
-        el('span', {}, el('b', { text: 'ámbar', style: 'color:#A96C05' }), ' llegó por Future, al llegar arriba'),
-        el('span', { text: 'el más viejo a la izquierda' })),
-      list,
-      stats,
-      summary,
-      code.box)
+    el('div', { class: 'fs-row2 pg-wrap' },
+      el('div', { class: 'fs-col' }, screen.frame,
+        el('div', { class: 'rc-legend pg-legend' },
+          el('span', {}, el('b', { text: 'verde azulado', style: 'color:#0F8478' }), ' por el Stream'),
+          el('span', {}, el('b', { text: 'ámbar', style: 'color:#A96C05' }), ' por Future'))),
+      el('div', { class: 'fs-side pg-side' },
+        stage.node,
+        caption,
+        el('div', { class: 'fs-controls pg-controls' },
+          el('button', { class: 'fs-btn', type: 'button', text: 'Ana envía un mensaje', onclick: () => arrive('ana', '') }),
+          el('button', { class: 'fs-btn', type: 'button', text: 'Reiniciar', onclick: () => {
+            timers.splice(0).forEach(clearTimeout);
+            loading = false;
+            apply(pageStart(state.stage));
+            toBottom();
+          } })),
+        stats,
+        summary,
+        code.box))
   );
   apply(state);
-  return () => root.replaceChildren();
+  toBottom();
+  return () => {
+    timers.splice(0).forEach(clearTimeout);
+    root.replaceChildren();
+  };
 };
 
 export const SIMS = Object.freeze({

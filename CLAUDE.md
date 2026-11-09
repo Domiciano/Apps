@@ -295,9 +295,13 @@ completas están en el `CLAUDE.md` de ese repo, sección «Diagramas interactivo
     baja la cancelación. Cumple un salto por paso y continuidad dentro de cada fila (`rtLayersScenario`).
   - `realtime-chat` (0062): dos teléfonos (tú y Ana), la tabla `messages` y el interruptor de la publicación.
     Sin publicación, el insert entra pero nadie se entera hasta *Reabrir* (`chatSend`, `chatReopen`, `chatPublish`).
-  - `chat-pagination` (0065, parte 2): la ventana en vivo de 15 y las páginas de 5 por `Future`. En modo
-    *reemplazar* (el `MessagesUpdated` de la parte 1) la siguiente emisión borra las páginas; en *juntar por id*
-    se quedan (`pageStart`, `pageOlder`, `pageIncoming`, `pageMode`).
+  - `chat-pagination` (0065, parte 2; rehecho el 2026-11-09): un teléfono con el chat (los bloques `m18`, `m19`…,
+    los tuyos a la derecha), donde el estudiante escribe un mensaje o sube hasta el tope para pedir los anteriores
+    (barra *cargando anteriores…* mientras espera el `Future`). A la derecha, tres pestañas con lo que tiene el
+    `ChatBloc` en cada momento: *Parte 1* (`_onOlderRequested` solo imprime), *Parte 2 · cargar anteriores*
+    (pasos 5 a 7, pero `MessagesUpdated` aún reemplaza y la siguiente emisión borra las páginas) y *Parte 2 ·
+    juntar por id* (con `_merge`). Verde azulado llegó por el Stream, ámbar por `Future` (`pageStart`,
+    `pageOlder`, `pageIncoming`, `pageStage`, `pageCode`).
 - `flutterStateSims.js` ya **no es idéntico** al de Seminario: tiene además `register-layers`,
   `register-clean`, `query-builder`, `storage-cache`, los cuatro de Realtime DB y unas palabras más en el
   resaltado de Dart. Al sincronizar entre repos, conservar ese bloque.
