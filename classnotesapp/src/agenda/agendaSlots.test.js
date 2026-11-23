@@ -17,8 +17,8 @@ import {
 describe('buildSlots', () => {
   const slots = buildSlots();
 
-  it('parte las ventanas configuradas en 28 franjas de 30 minutos', () => {
-    expect(slots).toHaveLength(28);
+  it('parte las ventanas configuradas en 32 franjas de 30 minutos', () => {
+    expect(slots).toHaveLength(32);
     expect(slots[0]).toMatchObject({ id: '2026-11-25_14-00', start: '14:00', end: '14:30' });
     expect(slots.at(-1)).toMatchObject({ id: '2026-12-01_15-30', start: '15:30', end: '16:00' });
   });
