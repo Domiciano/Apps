@@ -47,8 +47,13 @@ import {
 } from './agendaSlots';
 import { courseFromFileName, parseGroupsMarkdown } from './groupsParser';
 import BookingDialog from './BookingDialog';
+import PresentationCalendar from './PresentationCalendar';
 
 const SLOTS = buildSlots();
+const SLOT_DATES = [...new Set(SLOTS.map((s) => s.date))];
+const dayAnchor = (date) => `agenda-dia-${date}`;
+const scrollToDay = (date) =>
+  document.getElementById(dayAnchor(date))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 // Rellenos sólidos con texto oscuro: se leen igual sobre el tema claro y el oscuro.
 const MODALITY_CHIP = {
@@ -430,8 +435,14 @@ const AgendaPage = () => {
 
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 340px' }, gap: 3, alignItems: 'start' }}>
               <Box sx={{ display: 'grid', gap: 2.5 }}>
+                <PresentationCalendar dates={SLOT_DATES} theme={theme} card={card} onPickDay={scrollToDay} />
                 {days.map((day) => (
-                  <Paper key={day.date} elevation={0} sx={{ ...card, overflow: 'hidden' }}>
+                  <Paper
+                    key={day.date}
+                    id={dayAnchor(day.date)}
+                    elevation={0}
+                    sx={{ ...card, overflow: 'hidden', scrollMarginTop: 88 }}
+                  >
                     <Box sx={{ px: 2, py: 1.5, background: alpha(theme.accent, 0.1) }}>
                       <Typography sx={{ fontWeight: 700 }}>{day.label}</Typography>
                     </Box>

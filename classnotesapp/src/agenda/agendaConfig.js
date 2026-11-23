@@ -40,6 +40,13 @@ export const AGENDA_WINDOWS = [
   { date: '2026-12-01', start: '14:00', end: '16:00' },
 ];
 
+// Semanas del semestre que se marcan en el calendario (número grande a la
+// izquierda). `start` es el lunes; la marca cubre de lunes a viernes.
+export const AGENDA_WEEKS = [
+  { number: 17, start: '2026-11-23' },
+  { number: 18, start: '2026-11-30' },
+];
+
 export const MODALITIES = [
   { id: 'presencial', label: 'Presencial' },
   { id: 'virtual', label: 'Virtual' },
