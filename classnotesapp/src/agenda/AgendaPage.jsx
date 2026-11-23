@@ -228,6 +228,17 @@ const AgendaPage = () => {
     color: theme.textPrimary,
   };
 
+  // En escritorio la columna lateral queda fija y cada lista tiene su propio scroll.
+  const sidePanel = {
+    ...card,
+    display: 'flex',
+    flexDirection: 'column',
+    flex: { md: '1 1 0' },
+    minHeight: { md: 0 },
+    overflow: 'hidden',
+  };
+  const sideList = { px: 2, pb: 1.5, overflowY: { md: 'auto' }, minHeight: 0 };
+
   const renderCell = (cell) => {
     const { slot, status, booking, past, closed } = cell;
     const bookable = !past && (!closed || isTeacher);
@@ -435,11 +446,21 @@ const AgendaPage = () => {
                 ))}
               </Box>
 
-              <Box sx={{ display: 'grid', gap: 2.5, position: { md: 'sticky' }, top: { md: 88 } }}>
-                <Paper elevation={0} sx={{ ...card, p: 2 }}>
-                  <Typography sx={{ fontWeight: 700, mb: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2.5,
+                  position: { md: 'sticky' },
+                  top: { md: 88 },
+                  height: { md: 'calc(100vh - 112px)' },
+                }}
+              >
+                <Paper elevation={0} sx={sidePanel}>
+                  <Typography sx={{ fontWeight: 700, px: 2, pt: 2, pb: 1 }}>
                     Equipos sin fecha ({withoutDate.length})
                   </Typography>
+                  <Box sx={sideList}>
                   {groups && withoutDate.length === 0 && (
                     <Typography sx={{ color: theme.success, fontSize: '0.9rem' }}>
                       Todos los equipos ya tienen fecha.
@@ -453,12 +474,14 @@ const AgendaPage = () => {
                       </Typography>
                     </Box>
                   ))}
+                  </Box>
                 </Paper>
 
-                <Paper elevation={0} sx={{ ...card, p: 2 }}>
-                  <Typography sx={{ fontWeight: 700, mb: 1 }}>
+                <Paper elevation={0} sx={sidePanel}>
+                  <Typography sx={{ fontWeight: 700, px: 2, pt: 2, pb: 1 }}>
                     Equipos con fecha ({withDate.length})
                   </Typography>
+                  <Box sx={sideList}>
                   {withDate.map(({ group, booking }) => {
                     const slot = SLOTS.find((s) => s.id === booking.slotId);
                     return (
@@ -473,6 +496,7 @@ const AgendaPage = () => {
                       </Box>
                     );
                   })}
+                  </Box>
                 </Paper>
               </Box>
             </Box>
