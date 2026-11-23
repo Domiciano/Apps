@@ -11,6 +11,7 @@ import { useCurrentLesson } from '@/ai/CurrentLessonContext';
 import { buildCourseOutline } from '@/ai/buildContext';
 import AppBarGlobal from '@/components/AppBarGlobal';
 import AdminPage from '@/admin/AdminPage';
+import AgendaPage from '@/agenda/AgendaPage';
 
 function App() {
   const [sections, setSections] = useState([]);
@@ -71,6 +72,9 @@ function App() {
   // contenido no cargue — justo cuando el profesor necesita mirar los datos.
   if (location.pathname.replace(/\/+$/, '') === '/admin') {
     return <AdminPage />;
+  }
+  if (location.pathname.replace(/\/+$/, '') === '/agenda') {
+    return <AgendaPage />;
   }
 
   if (loading) {

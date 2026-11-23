@@ -8,6 +8,10 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import MenuIcon from '@mui/icons-material/Menu';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
+import { useNavigate } from 'react-router-dom';
 import { useThemeMode } from '@/theme/ThemeContext';
 import AccountMenu from '@/auth/AccountMenu';
 import techlogo from '@/assets/techlogo.svg';
@@ -20,6 +24,7 @@ const AppBarGlobal = ({ onOpenMobileToc, onOpenMobileNav }) => {
   const { mode, toggleTheme, theme } = useThemeMode();
   const { track } = useAnalytics();
   const muiTheme = useMuiTheme();
+  const navigate = useNavigate();
 
   // El evento se emite desde aquí y no desde ThemeContext porque el proveedor de
   // tema envuelve al de auth, y sin uid no hay a quién atribuir el evento.
@@ -67,6 +72,22 @@ const AppBarGlobal = ({ onOpenMobileToc, onOpenMobileNav }) => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Tooltip title="Agenda de presentaciones">
+            {isMobile ? (
+              <IconButton onClick={() => navigate('/agenda')} color="inherit" aria-label="Agenda de presentaciones">
+                <EventAvailableIcon sx={{ color: theme.accent }} />
+              </IconButton>
+            ) : (
+              <Button
+                onClick={() => navigate('/agenda')}
+                color="inherit"
+                startIcon={<EventAvailableIcon sx={{ color: theme.accent }} />}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                Agenda
+              </Button>
+            )}
+          </Tooltip>
           <IconButton onClick={handleToggleTheme} color="inherit" aria-label="Alternar modo claro/oscuro">
             {mode === 'dark' ? <LightModeIcon sx={{ color: theme.accent }} /> : <DarkModeIcon sx={{ color: theme.accent }} />}
           </IconButton>
