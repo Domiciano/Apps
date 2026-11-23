@@ -228,16 +228,10 @@ const AgendaPage = () => {
     color: theme.textPrimary,
   };
 
-  // En escritorio la columna lateral queda fija y cada lista tiene su propio scroll.
-  const sidePanel = {
-    ...card,
-    display: 'flex',
-    flexDirection: 'column',
-    flex: { md: '1 1 0' },
-    minHeight: { md: 0 },
-    overflow: 'hidden',
-  };
-  const sideList = { px: 2, pb: 1.5, overflowY: { md: 'auto' }, minHeight: 0 };
+  // Las dos tarjetas de equipos van a su altura natural; en escritorio la columna
+  // entera queda fija y se desplaza con un solo scroll, sin barra visible.
+  const sidePanel = { ...card, flexShrink: 0 };
+  const sideList = { px: 2, pb: 1.5 };
 
   const renderCell = (cell) => {
     const { slot, status, booking, past, closed } = cell;
@@ -453,7 +447,10 @@ const AgendaPage = () => {
                   gap: 2.5,
                   position: { md: 'sticky' },
                   top: { md: 88 },
-                  height: { md: 'calc(100vh - 112px)' },
+                  maxHeight: { md: 'calc(100vh - 112px)' },
+                  overflowY: { md: 'auto' },
+                  scrollbarWidth: 'none',
+                  '&::-webkit-scrollbar': { display: 'none' },
                 }}
               >
                 <Paper elevation={0} sx={sidePanel}>
