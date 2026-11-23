@@ -105,13 +105,24 @@ const BookingDialog = ({
               label="¿Qué grupo son?"
               value={groupId}
               onChange={(e) => { setGroupId(e.target.value); setBookerName(''); }}
+              renderValue={(id) => groupOptions.find((o) => o.group.id === id)?.group.name ?? ''}
             >
               {groupOptions.map((o) => (
-                <MenuItem key={o.group.id} value={o.group.id} disabled={!canPick(o)}>
-                  {o.group.name}
-                  {lockedOut(o) && ' · ya reservaste para otro grupo'}
-                  {!lockedOut(o) && o.booking && !canPick(o) && ' · ya tiene fecha'}
-                  {o.booking && canPick(o) && ' · cambiar su fecha'}
+                <MenuItem
+                  key={o.group.id}
+                  value={o.group.id}
+                  disabled={!canPick(o)}
+                  sx={{ display: 'block', whiteSpace: 'normal', py: 1 }}
+                >
+                  <Typography component="div" sx={{ fontSize: '0.95rem', fontWeight: 600 }}>
+                    {o.group.name}
+                    {lockedOut(o) && ' · ya reservaste para otro grupo'}
+                    {!lockedOut(o) && o.booking && !canPick(o) && ' · ya tiene fecha'}
+                    {o.booking && canPick(o) && ' · cambiar su fecha'}
+                  </Typography>
+                  <Typography component="div" sx={{ fontSize: '0.78rem', opacity: 0.7, mt: 0.25 }}>
+                    {o.group.members.join(' · ')}
+                  </Typography>
                 </MenuItem>
               ))}
             </Select>
