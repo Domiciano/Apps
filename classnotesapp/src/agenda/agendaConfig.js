@@ -39,6 +39,7 @@ export const AGENDA_WINDOWS = [
   { date: '2026-11-30', start: '09:00', end: '12:00' },
   { date: '2026-11-30', start: '14:00', end: '18:00' },
   { date: '2026-12-01', start: '14:00', end: '16:00' },
+  { date: '2026-12-02', start: '14:00', end: '16:00' },
 ];
 
 // Semanas del semestre que se marcan en el calendario (número grande a la
